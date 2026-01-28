@@ -30,8 +30,20 @@ export default function DispatchPage() {
     const [pickup, setPickup] = useState("");
     const [dateFilter, setDateFilter] = useState("TODAY"); // TODAY, TOMORROW, ALL
 
+    const [bookingDate, setBookingDate] = useState(new Date().toISOString().split('T')[0]);
+    const [bookingTime, setBookingTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+
+    // Autocomplete State
+    const [pickupSuggestions, setPickupSuggestions] = useState<{ label: string, value: string }[]>([]);
+    const [showPickupSuggestions, setShowPickupSuggestions] = useState(false);
+    const [dropoffSuggestions, setDropoffSuggestions] = useState<{ label: string, value: string }[]>([]);
+    const [showDropoffSuggestions, setShowDropoffSuggestions] = useState(false);
+
     const handleSaveJob = async () => {
         try {
+            // Combine Date & Time
+            const pickupDateTime = new Date(`${bookingDate}T${bookingTime}`);
+
             const res = await fetch("/api/jobs", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -42,37 +54,68 @@ export default function DispatchPage() {
                     dropoffAddress: dropoff,
                     fare: estPrice?.price.toString(),
                     paymentType: matchedCustomer?.isAccount ? "ACCOUNT" : "CASH",
-                    customerId: matchedCustomer?.id
+                    customerId: matchedCustomer?.id,
+                    pickupTime: pickupDateTime.toISOString()
                 })
             });
             if (res.ok) {
-                // Clear form
+                // Clear form but keep date/time current?
                 setPhone("");
                 setName("");
                 setPickup("");
                 setDropoff("");
                 setMatchedCustomer(null);
                 setEstPrice(null);
+                const now = new Date(); // Reset time to now for next job
+                setBookingTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+                alert("Job Saved Successfully!");
+            } else {
+                alert("Failed to save job. Please check fields.");
             }
         } catch (e) {
             console.error("Failed to save job", e);
+            alert("Error saving job.");
         }
     };
+
+    // Autocomplete Logic
+    useEffect(() => {
+        if (pickup.length < 3) return;
+        const timer = setTimeout(async () => {
+            const res = await fetch(`/api/external/autocomplete?q=${encodeURIComponent(pickup)}`);
+            const data = await res.json();
+            if (data.results) setPickupSuggestions(data.results);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [pickup]);
+
+    useEffect(() => {
+        if (dropoff.length < 3) return;
+        const timer = setTimeout(async () => {
+            const res = await fetch(`/api/external/autocomplete?q=${encodeURIComponent(dropoff)}`);
+            const data = await res.json();
+            if (data.results) setDropoffSuggestions(data.results);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [dropoff]);
 
     useEffect(() => {
         if (!dropoff || !pickup) return;
 
         const fetchPrice = async () => {
             try {
+                // Combine Date & Time for accurate surcharge calculation
+                const pickupDateTime = new Date(`${bookingDate}T${bookingTime}`).toISOString();
+
                 const res = await fetch("/api/pricing/calculate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         pickup,
                         dropoff,
-                        distance: 5.0, // Mock distance for now as we don't have a real Geocoder yet
+                        // Removed hardcoded distance to force backend geocoding
                         vehicleType: "Saloon",
-                        date: new Date().toISOString()
+                        date: pickupDateTime
                     })
                 });
 
@@ -80,7 +123,7 @@ export default function DispatchPage() {
                     const data = await res.json();
                     setEstPrice({
                         price: data.price,
-                        rule: data.isFixed ? `Fixed: ${data.breakdown[0].name}` : 'Metered Fare'
+                        rule: data.isFixed ? `Fixed: ${(data.breakdown[0] as any).name}` : 'Metered Fare'
                     });
                 }
             } catch (error) {
@@ -90,7 +133,7 @@ export default function DispatchPage() {
 
         const timeout = setTimeout(fetchPrice, 800); // Debounce
         return () => clearTimeout(timeout);
-    }, [pickup, dropoff]);
+    }, [pickup, dropoff, bookingDate, bookingTime]);
 
     const handlePhoneLookup = async (phone: string) => {
         if (phone.length > 5) {
@@ -198,61 +241,126 @@ export default function DispatchPage() {
                 {/* LEFT: JOB ENTRY FORM (Approx 30%) */}
                 <div className="md:col-span-4 flex flex-col gap-2 order-2 md:order-1">
                     <Card className="flex-1 p-2 shadow-sm border-zinc-300 overflow-y-auto">
-                        {/* Header row */}
+                        {/* Date & Time Row */}
                         <div className="mb-2 flex gap-1">
-                            <Input className="h-8 bg-yellow-50 font-bold" placeholder="TODAY" readOnly />
-                            <Input className="h-8 bg-yellow-100 font-bold text-center w-24" value="SUN 25th" readOnly />
-                            <Input className="h-8 w-16" placeholder="NOW" />
+                            <Input
+                                type="date"
+                                className="h-8 bg-yellow-50 font-bold"
+                                value={bookingDate}
+                                onChange={(e) => setBookingDate(e.target.value)}
+                            />
+                            <Input
+                                type="time"
+                                className="h-8 w-24 bg-yellow-50 font-bold"
+                                value={bookingTime}
+                                onChange={(e) => setBookingTime(e.target.value)}
+                            />
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs"
+                                onClick={() => {
+                                    const now = new Date();
+                                    setBookingDate(now.toISOString().split('T')[0]);
+                                    setBookingTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+                                }}
+                            >
+                                NOW
+                            </Button>
                         </div>
 
-                        {/* Form Fields */}
                         <div className="space-y-1 text-xs font-bold text-zinc-600">
+                            {/* Phone Row */}
                             <div className="flex items-center gap-2">
                                 <label className="w-10">PH:</label>
                                 <Input
                                     className="h-9 flex-1 border-zinc-400 bg-white"
-                                    placeholder="PHONE [DOUBLE F4]"
+                                    placeholder="PHONE"
                                     onChange={(e) => {
                                         setPhone(e.target.value);
                                         handlePhoneLookup(e.target.value);
                                     }}
                                     value={phone}
                                 />
-                                <Input className="h-9 w-24 border-zinc-400 bg-white" placeholder="PRIORITY" />
+                                <Input className="h-9 w-24 border-zinc-400 bg-white" placeholder="PRTY" />
                             </div>
 
                             <div className="py-1"></div>
 
-                            <div className="flex items-center gap-2">
+                            {/* Pickup Row with Autocomplete */}
+                            <div className="flex items-center gap-2 relative">
                                 <label className="w-10">ADDR:</label>
                                 <div className="flex-1 relative">
                                     <Input
                                         className="h-9 w-full border-zinc-400 bg-white"
-                                        placeholder="STREET [F2]"
+                                        placeholder="PICKUP ADDRESS"
                                         value={pickup || matchedCustomer?.history?.[0]?.address || ""}
-                                        onChange={(e) => setPickup(e.target.value)}
+                                        onChange={(e) => {
+                                            setPickup(e.target.value);
+                                            setShowPickupSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowPickupSuggestions(true)}
+                                        onBlur={() => setTimeout(() => setShowPickupSuggestions(false), 200)}
                                     />
-                                    {matchedCustomer && (
+                                    {showPickupSuggestions && pickupSuggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 w-full bg-white border shadow-lg z-[1000] max-h-40 overflow-auto rounded-b text-xs">
+                                            {pickupSuggestions.map((suggestion, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="p-2 hover:bg-zinc-100 cursor-pointer border-b"
+                                                    onClick={() => {
+                                                        setPickup(suggestion.value);
+                                                        setShowPickupSuggestions(false);
+                                                    }}
+                                                >
+                                                    {suggestion.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {matchedCustomer && !pickup && (
                                         <div className="absolute top-10 left-0 w-full bg-white border shadow-lg z-50 rounded p-1">
                                             <div className="text-[10px] bg-yellow-100 p-1 mb-1 font-bold flex justify-between">
-                                                <span>CUSTOMER ({matchedCustomer.name})</span>
-                                                {matchedCustomer.isAccount && matchedCustomer.account && (
-                                                    <Badge variant="destructive" className="h-4 text-[9px] px-1">ACCOUNT {matchedCustomer.account.code}</Badge>
-                                                )}
+                                                <span>CUSTOMER FOUND</span>
                                             </div>
                                         </div>
                                     )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+
+                            {/* Dropoff Row with Autocomplete */}
+                            <div className="flex items-center gap-2 relative">
                                 <label className="w-10">DEST:</label>
-                                <Input
-                                    className="h-9 flex-1 border-zinc-400 bg-white"
-                                    placeholder="[DOUBLE F2]"
-                                    value={dropoff}
-                                    onChange={(e) => setDropoff(e.target.value)}
-                                />
-                                <Button variant="outline" size="sm" className="h-9 px-2 text-xs">VIA [F10]</Button>
+                                <div className="flex-1 relative">
+                                    <Input
+                                        className="h-9 flex-1 border-zinc-400 bg-white"
+                                        placeholder="DESTINATION"
+                                        value={dropoff}
+                                        onChange={(e) => {
+                                            setDropoff(e.target.value);
+                                            setShowDropoffSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowDropoffSuggestions(true)}
+                                        onBlur={() => setTimeout(() => setShowDropoffSuggestions(false), 200)}
+                                    />
+                                    {showDropoffSuggestions && dropoffSuggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 w-full bg-white border shadow-lg z-[1000] max-h-40 overflow-auto rounded-b text-xs">
+                                            {dropoffSuggestions.map((suggestion, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="p-2 hover:bg-zinc-100 cursor-pointer border-b"
+                                                    onClick={() => {
+                                                        setDropoff(suggestion.value);
+                                                        setShowDropoffSuggestions(false);
+                                                    }}
+                                                >
+                                                    {suggestion.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <Button variant="outline" size="sm" className="h-9 px-2 text-xs">VIA</Button>
                             </div>
 
                             <div className="py-1"></div>
@@ -261,7 +369,7 @@ export default function DispatchPage() {
                                 <label className="w-10">NAME:</label>
                                 <Input
                                     className="h-9 flex-1 border-zinc-400 bg-white"
-                                    placeholder="NAME [F4]"
+                                    placeholder="PASSENGER NAME"
                                     value={name || matchedCustomer?.name || ""}
                                     onChange={(e) => setName(e.target.value)}
                                 />
@@ -274,16 +382,16 @@ export default function DispatchPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <label className="w-10">ACC:</label>
-                                <Input className="h-9 flex-1 border-zinc-400 bg-white" placeholder="ACC" />
+                                <Input className="h-9 flex-1 border-zinc-400 bg-white" placeholder="ACCOUNT CODE" />
                                 <Input className="h-9 w-32 border-zinc-400 bg-white" placeholder="PIN" />
                             </div>
 
                             <div className="flex items-center gap-2 pt-2">
-                                <label className="w-10">PPL:</label>
-                                <Input className="h-9 w-16 border-zinc-400 bg-zinc-50" placeholder="#PPL" />
-                                <Input className="h-9 w-16 border-zinc-400 bg-zinc-50" placeholder="#TAXI" />
-                                <Input className="h-9 w-16 border-zinc-400 bg-zinc-50" placeholder="VT" />
-                                <Input className="h-9 flex-1 border-zinc-400 bg-white" placeholder="LEAD [ALT+L]" />
+                                <label className="w-10">OPT:</label>
+                                <Input className="h-9 w-16 border-zinc-400 bg-zinc-50" placeholder="PAX" />
+                                <Input className="h-9 w-16 border-zinc-400 bg-zinc-50" placeholder="TAXI" />
+                                <Input className="h-9 w-16 border-zinc-400 bg-zinc-50" placeholder="TYPE" />
+                                <Input className="h-9 flex-1 border-zinc-400 bg-white" placeholder="LEAD TIME" />
                             </div>
                         </div>
 
