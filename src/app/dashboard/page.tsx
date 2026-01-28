@@ -86,7 +86,7 @@ export default function DispatchPage() {
                 const err = await res.json();
                 if (err.error === 'Unauthorized' || err.error === 'Session Stale') {
                     alert("Session expired (Auth). Redirecting to login...");
-                    window.location.href = "/api/auth/signout";
+                    window.location.href = "/api/auth/logout";
                     return;
                 }
                 alert(`Failed to save job: ${err.details || err.error || 'Unknown Error'}`);
