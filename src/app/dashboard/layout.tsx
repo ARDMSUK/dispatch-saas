@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { User, Settings, Shield, Bell, MessageSquare, Phone } from "lucide-react";
 
 import { auth } from "@/auth";
+import SignOutButton from "@/components/auth/SignOutButton";
 
 export default async function DashboardLayout({
     children,
@@ -24,12 +25,7 @@ export default async function DashboardLayout({
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-zinc-400">Logged in as: <span className="text-white font-bold">{userName}</span></span>
-                    <form action={async () => {
-                        "use server";
-                        await import("@/auth").then(m => m.signOut({ redirectTo: "/login" }));
-                    }}>
-                        <Button variant="destructive" size="sm" className="h-7 text-xs px-2">Sign Out</Button>
-                    </form>
+                    <SignOutButton />
                 </div>
             </header>
 
