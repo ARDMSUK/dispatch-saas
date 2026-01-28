@@ -132,8 +132,12 @@ export async function POST(request: Request) {
         })
 
         return NextResponse.json(job)
-    } catch (error) {
-        console.error('Error creating job:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    } catch (error: any) {
+        console.error('Error creating job:', error);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
+        }, { status: 500 })
     }
 }
