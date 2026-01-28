@@ -132,6 +132,11 @@ export default function DispatchPage() {
                     fetch("/api/drivers")
                 ]);
 
+                if (jobsRes.status === 401 || driversRes.status === 401) {
+                    window.location.href = "/api/auth/signout";
+                    return;
+                }
+
                 if (!jobsRes.ok || !driversRes.ok) {
                     console.error("Failed to fetch data", jobsRes.status, driversRes.status);
                     return;
