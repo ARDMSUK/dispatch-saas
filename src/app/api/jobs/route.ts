@@ -110,6 +110,10 @@ export async function POST(request: Request) {
             }
         }
 
+        if (Number.isNaN(fare)) {
+            fare = 0;
+        }
+
         const job = await prisma.job.create({
             data: {
                 pickupAddress: body.pickupAddress || 'Unknown',
