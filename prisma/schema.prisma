@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  apiKey    String   @unique @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  customers Customer[]
+  drivers   Driver[]
+  vehicles  Vehicle[]
+  jobs      Job[]
+  accounts  Account[]
+  pricingRules PricingRule[]
+  fixedPrices  FixedPrice[]
+  surcharges   Surcharge[]
+  zones        Zone[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed
+  name      String?
+  role      String   @default("DISPATCHER") // ADMIN, DISPATCHER
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  phone     String
+  name      String?
+  email     String?
+  notes     String?
+  
+  // Account Status
+  isAccount     Boolean @default(false)
+  accountId     String?
+  account       Account? @relation(fields: [accountId], references: [id]) // Use proper relation
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  jobs      Job[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, phone]) // Unique phone per tenant
+}
+
+model Account {
+  id          String   @id @default(cuid())
+  code        String   // e.g. ACC-001
+  name        String   // e.g. "Corp Inc."
+  email       String?
+  phone       String?
+  address     String?
+  
+  isActive    Boolean  @default(true)
+  notes       String?
+
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  
+  customers   Customer[]
+  jobs        Job[]     // Jobs booked to this account
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([tenantId, code])
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  callsign  String   // e.g. "101"
+  name      String
+  phone     String
+  email     String?
+  badgeNumber String?
+  licenseExpiry DateTime?
+  pin       String?  // Login PIN
+  
+  status    String   @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
+  location  String?  // JSON string for now: {lat, lng}
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  jobs      Job[]
+  vehicles  Vehicle[] // Vehicles assigned to this driver
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, callsign])
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  reg       String   // License Plate
+  make      String
+  model     String
+  color     String?
+  type      String   @default("Saloon") // Saloon, Estate, MPV, Exec
+  expiryDate DateTime? // MOT/Licence Expiry
+
+  driverId  String?
+  driver    Driver?  @relation(fields: [driverId], references: [id]) // Primary driver assignment
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Job {
+  id        Int      @id @default(autoincrement())
+
+
+  // Route
+  pickupAddress  String
+  dropoffAddress String
+  pickupLat      Float?
+  pickupLng      Float?
+  dropoffLat     Float?
+  dropoffLng     Float?
+
+  // Timing
+  pickupTime     DateTime
+  bookedAt       DateTime @default(now())
+
+  // Details
+  passengerName  String
+  passengerPhone String
+  passengers     Int      @default(1)
+  vehicleType    String   @default("Saloon")
+  flightNumber   String?
+  
+  notes          String?
+
+  // Financials
+  fare           Float?   // Quoted/Final Fare
+  paymentType    String   @default("CASH") // CASH, CARD, ACCOUNT
+  isFixedPrice   Boolean  @default(false)
+
+  // Status
+  status         String   @default("PENDING") 
+  // PENDING, UNASSIGNED, DISPATCHED, EN_ROUTE, POB, COMPLETED, CANCELLED
+
+  // Relations
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  driverId   String?
+  driver     Driver?   @relation(fields: [driverId], references: [id])
+  
+  updatedAt DateTime @updatedAt
+
+  accountId  String?
+  account    Account?  @relation(fields: [accountId], references: [id])
+}
+
+model PricingRule {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "Standard Tariff", "Executive Tariff"
+  vehicleType String   @default("Saloon")
+  
+  baseRate    Float    @default(3.00) // Flag fall
+  perMile     Float    @default(2.00) // Rate per mile
+  minFare     Float    @default(5.00)
+  
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  
+  @@unique([tenantId, vehicleType])
+}
+
+model Zone {
+  id          String   @id @default(cuid())
+  name        String
+  color       String   @default("#3b82f6") // Blue
+  coordinates String   // JSON string: [[lat,lng], [lat,lng], ...]
+
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  // Relations for Pricing
+  pickupFixedPrices  FixedPrice[] @relation("PickupZone")
+  dropoffFixedPrices FixedPrice[] @relation("DropoffZone")
+}
+
+model FixedPrice {
+  id          String   @id @default(cuid())
+  name        String?  // e.g. "Heathrow T5"
+  
+  pickup      String?  // Partial match
+  dropoff     String?  // Partial match
+  
+  // Zone Linking (Optional)
+  pickupZoneId  String?
+  pickupZone    Zone?   @relation("PickupZone", fields: [pickupZoneId], references: [id])
+  
+  dropoffZoneId String?
+  dropoffZone   Zone?   @relation("DropoffZone", fields: [dropoffZoneId], references: [id])
+  
+  price       Float
+  vehicleType String   @default("Saloon")
+
+  isReverse   Boolean  @default(true) // Also apply for Dropoff -> Pickup
+
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Surcharge {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "Christmas Day", "Night Rate"
+  
+  type        String   @default("PERCENT") // PERCENT, FLAT
+  value       Float    // e.g. 50 (for 50%) or 10.00 (flat add)
+  
+  // Triggers
+  startDate   DateTime? // For specific dates
+  endDate     DateTime? 
+  
+  startTime   String?   // "22:00"
+  endTime     String?   // "06:00"
+  
+  daysOfWeek  String?   // "0,6" for Sun,Sat
+  
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}
