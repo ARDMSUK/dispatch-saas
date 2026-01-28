@@ -79,7 +79,7 @@ export default function DispatchPage() {
                 alert("✅ JOB SAVED SUCCESSFULLY!");
             } else {
                 const err = await res.json();
-                alert(`Failed to save job: ${err.error || 'Unknown Error'}`);
+                alert(`Failed to save job: ${err.details || err.error || 'Unknown Error'}`);
             }
         } catch (e) {
             console.error("Failed to save job", e);

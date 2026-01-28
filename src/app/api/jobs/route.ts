@@ -110,8 +110,10 @@ export async function POST(request: Request) {
             }
         }
 
-        if (Number.isNaN(fare)) {
-            fare = 0;
+        // Verify Tenant Exists to prevent foreign key constraint failures if session is stale
+        const tenantExists = await prisma.tenant.findUnique({ where: { id: tenantId } });
+        if (!tenantExists) {
+            return NextResponse.json({ error: 'Session Stale', details: 'Your session belongs to a deleted tenant. Please Sign Out and Login again.' }, { status: 401 });
         }
 
         const job = await prisma.job.create({
@@ -123,6 +125,7 @@ export async function POST(request: Request) {
                 pickupTime: finalPickupTime,
 
                 fare: fare || 0,
+                paymentType: body.paymentType || 'CASH', // Added paymentType
                 isFixedPrice: isFixedPrice,
                 status: body.status || 'PENDING',
                 flightNumber: body.flightNumber,
