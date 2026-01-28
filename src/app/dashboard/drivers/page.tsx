@@ -31,10 +31,18 @@ export default function DriversPage() {
     const fetchDrivers = async () => {
         try {
             const res = await fetch("/api/drivers");
+            if (!res.ok) throw new Error("Failed to fetch drivers");
+
             const data = await res.json();
-            setDrivers(data);
+            if (Array.isArray(data)) {
+                setDrivers(data);
+            } else {
+                console.error("Invalid drivers data:", data);
+                setDrivers([]);
+            }
         } catch (error) {
             console.error("Failed to fetch drivers", error);
+            setDrivers([]);
         } finally {
             setLoading(false);
         }

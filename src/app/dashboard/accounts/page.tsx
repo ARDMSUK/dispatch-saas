@@ -32,10 +32,18 @@ export default function AccountsPage() {
     const fetchAccounts = async () => {
         try {
             const res = await fetch("/api/accounts");
+            if (!res.ok) throw new Error("Failed to fetch accounts");
+
             const data = await res.json();
-            setAccounts(data);
+            if (Array.isArray(data)) {
+                setAccounts(data);
+            } else {
+                console.error("Invalid accounts data:", data);
+                setAccounts([]);
+            }
         } catch (error) {
             console.error("Failed to fetch accounts", error);
+            setAccounts([]);
         } finally {
             setLoading(false);
         }

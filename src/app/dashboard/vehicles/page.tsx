@@ -30,10 +30,18 @@ export default function VehiclesPage() {
     const fetchVehicles = async () => {
         try {
             const res = await fetch("/api/vehicles");
+            if (!res.ok) throw new Error("Failed to fetch vehicles");
+
             const data = await res.json();
-            setVehicles(data);
+            if (Array.isArray(data)) {
+                setVehicles(data);
+            } else {
+                console.error("Invalid vehicles data:", data);
+                setVehicles([]);
+            }
         } catch (error) {
             console.error("Failed to fetch vehicles", error);
+            setVehicles([]);
         } finally {
             setLoading(false);
         }
@@ -218,7 +226,7 @@ export default function VehiclesPage() {
                                         </TableCell>
                                         <TableCell className="text-sm">
                                             {/* @ts-expect-error: Driver relation might be missing in Type for now */}
-                                            {vehicle.driver ? vehicle.driver.callsign : '-'}
+                                            {vehicle.driver?.callsign || '-'}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
