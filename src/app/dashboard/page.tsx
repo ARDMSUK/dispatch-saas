@@ -176,7 +176,7 @@ export default function DispatchPage() {
                 ]);
 
                 if (jobsRes.status === 401 || driversRes.status === 401) {
-                    window.location.href = "/api/auth/signout";
+                    window.location.href = "/login";
                     return;
                 }
 
