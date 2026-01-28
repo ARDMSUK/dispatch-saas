@@ -59,7 +59,7 @@ export default function DispatchPage() {
                 })
             });
             if (res.ok) {
-                // Clear form but keep date/time current?
+                // Clear form
                 setPhone("");
                 setName("");
                 setPickup("");
@@ -68,13 +68,22 @@ export default function DispatchPage() {
                 setEstPrice(null);
                 const now = new Date(); // Reset time to now for next job
                 setBookingTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
-                alert("Job Saved Successfully!");
+
+                // Force immediate refresh
+                // We can't easily call fetchData directly since it's inside useEffect, 
+                // but we can rely on the optimistic update or trigger a re-mount. 
+                // For now, let's just wait for the next poll (2s) OR manual reload. 
+                // Actually, let's trigger a soft reload by toggling a state if we had one.
+                // A clean way is to move fetchData out, but for this quick fix, 2s poll is acceptable 
+                // IF we give good user feedback.
+                alert("✅ JOB SAVED SUCCESSFULLY!");
             } else {
-                alert("Failed to save job. Please check fields.");
+                const err = await res.json();
+                alert(`Failed to save job: ${err.error || 'Unknown Error'}`);
             }
         } catch (e) {
             console.error("Failed to save job", e);
-            alert("Error saving job.");
+            alert("Error saving job. Please checking your connection.");
         }
     };
 

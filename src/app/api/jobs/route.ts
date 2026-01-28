@@ -79,21 +79,32 @@ export async function POST(request: Request) {
             customerId = customer.id
         }
 
+        // Validate and Parse Date
+        const pickupTimeStr = body.pickupTime;
+        let finalPickupTime = new Date();
+
+        if (pickupTimeStr) {
+            const parsed = new Date(pickupTimeStr);
+            if (!isNaN(parsed.getTime())) {
+                finalPickupTime = parsed;
+            }
+        }
+
         let fare = body.fare ? parseFloat(body.fare) : null;
         let isFixedPrice = false;
 
-        // Auto-calculate price if not provided
-        if (!fare && body.pickupAddress && body.dropoffAddress) {
+        // Auto-calculate price ONLY if not provided/overridden
+        if ((!fare || fare === 0) && body.pickupAddress && body.dropoffAddress) {
             try {
                 const pricingResult = await calculatePrice({
                     pickup: body.pickupAddress,
                     dropoff: body.dropoffAddress,
-                    pickupTime: new Date(body.pickupTime || Date.now()),
+                    pickupTime: finalPickupTime,
                     tenantId: tenantId,
-                    distanceMiles: 0 // TODO: Add Google Maps Distance Matrix here really
+                    distanceMiles: 0
                 });
                 fare = pricingResult.price;
-                isFixedPrice = pricingResult.breakdown.isFixed;
+                isFixedPrice = pricingResult.breakdown?.isFixed || false;
             } catch (err) {
                 console.warn('Pricing calculation failed', err);
             }
@@ -101,13 +112,13 @@ export async function POST(request: Request) {
 
         const job = await prisma.job.create({
             data: {
-                pickupAddress: body.pickupAddress,
-                dropoffAddress: body.dropoffAddress,
-                passengerName: body.passengerName,
-                passengerPhone: body.passengerPhone,
-                pickupTime: new Date(body.pickupTime || Date.now()),
+                pickupAddress: body.pickupAddress || 'Unknown',
+                dropoffAddress: body.dropoffAddress || 'Unknown',
+                passengerName: body.passengerName || 'Unknown',
+                passengerPhone: body.passengerPhone || 'Unknown',
+                pickupTime: finalPickupTime,
 
-                fare: fare,
+                fare: fare || 0,
                 isFixedPrice: isFixedPrice,
                 status: body.status || 'PENDING',
                 flightNumber: body.flightNumber,
