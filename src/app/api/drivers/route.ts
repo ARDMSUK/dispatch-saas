@@ -8,9 +8,9 @@ const CreateDriverSchema = z.object({
     name: z.string().min(1),
     callsign: z.string().min(1),
     phone: z.string().min(1),
-    email: z.string().email().optional(),
+    email: z.string().optional().or(z.literal('')),
     badgeNumber: z.string().optional(),
-    licenseExpiry: z.string().datetime().optional(), // ISO string
+    licenseExpiry: z.string().optional().or(z.literal('')), // Accept empty string or ISO
     pin: z.string().optional(),
 });
 
