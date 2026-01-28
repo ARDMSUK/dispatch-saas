@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { logout } from "@/actions/auth";
 
 export default function SignOutButton() {
     return (
@@ -9,7 +8,7 @@ export default function SignOutButton() {
             variant="destructive"
             size="sm"
             className="h-7 text-xs px-2"
-            onClick={() => logout()}
+            onClick={() => window.location.href = "/api/auth/logout"}
         >
             Sign Out
         </Button>

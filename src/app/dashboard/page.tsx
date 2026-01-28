@@ -199,7 +199,7 @@ export default function DispatchPage() {
                     // Since middleware might loop, we really want to clear cookies.
                     // But we can't easily call server action from here without user interaction.
                     // Best bet: window.location.href = "/api/auth/signout" (builtin)
-                    window.location.href = "/api/auth/signout";
+                    window.location.href = "/api/auth/logout";
                     return;
                 }
 
