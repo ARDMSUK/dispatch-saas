@@ -78,6 +78,11 @@ export default function DispatchPage() {
                 // IF we give good user feedback.
                 alert("✅ JOB SAVED SUCCESSFULLY!");
             } else {
+                if (res.status === 401) {
+                    alert("Session expired. Redirecting to login...");
+                    window.location.href = "/api/auth/signout";
+                    return;
+                }
                 const err = await res.json();
                 alert(`Failed to save job: ${err.details || err.error || 'Unknown Error'}`);
             }
@@ -185,7 +190,11 @@ export default function DispatchPage() {
                 ]);
 
                 if (jobsRes.status === 401 || driversRes.status === 401) {
-                    window.location.href = "/login";
+                    // Force a hard reload to trigger the middleware/auth flow or just redirect to login
+                    // Since middleware might loop, we really want to clear cookies.
+                    // But we can't easily call server action from here without user interaction.
+                    // Best bet: window.location.href = "/api/auth/signout" (builtin)
+                    window.location.href = "/api/auth/signout";
                     return;
                 }
 
