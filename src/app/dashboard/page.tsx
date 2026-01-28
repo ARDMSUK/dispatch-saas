@@ -132,20 +132,34 @@ export default function DispatchPage() {
                     fetch("/api/drivers")
                 ]);
 
+                if (!jobsRes.ok || !driversRes.ok) {
+                    console.error("Failed to fetch data", jobsRes.status, driversRes.status);
+                    return;
+                }
+
                 const jobsData = await jobsRes.json();
                 const driversData = await driversRes.json();
 
-                setJobs(jobsData);
-                setJobs(jobsData);
-                // Parse driver location JSON string
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const parsedDrivers = driversData.map((d: any) => ({
-                    ...d,
-                    location: d.location ? JSON.parse(d.location) : null
-                }));
-                setDrivers(parsedDrivers);
+                if (Array.isArray(jobsData)) {
+                    setJobs(jobsData);
+                } else {
+                    console.error("Invalid jobs data:", jobsData);
+                    setJobs([]);
+                }
+
+                if (Array.isArray(driversData)) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const parsedDrivers = driversData.map((d: any) => ({
+                        ...d,
+                        location: d.location && typeof d.location === 'string' ? JSON.parse(d.location) : d.location
+                    }));
+                    setDrivers(parsedDrivers);
+                } else {
+                    console.error("Invalid drivers data:", driversData);
+                    setDrivers([]);
+                }
             } catch (e) {
-                console.error(e);
+                console.error("Dashboard fetch error:", e);
             }
         };
 
