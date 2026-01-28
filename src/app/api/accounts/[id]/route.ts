@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const UpdateAccountSchema = z.object({
     code: z.string().min(1).optional(),
     name: z.string().min(1).optional(),
