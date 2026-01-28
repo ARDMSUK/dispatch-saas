@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             }
         } else {
             const session = await auth();
-            if (session) {
+            if (session?.user?.tenantId) {
                 tenantId = session.user.tenantId;
             }
         }
