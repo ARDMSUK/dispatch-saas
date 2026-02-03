@@ -11,16 +11,17 @@ const CreateZoneSchema = z.object({
     coordinates: z.string(), // Validated as JSON on usage
 });
 
+import { auth } from '@/auth';
+
 export async function GET() {
     try {
-        const tenant = await prisma.tenant.findUnique({
-            where: { slug: 'demo-cabs' }
-        });
-
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         const zones = await prisma.zone.findMany({
-            where: { tenantId: tenant.id },
+            where: { tenantId: session.user.tenantId },
             orderBy: { name: 'asc' }
         });
 
@@ -33,6 +34,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const validation = CreateZoneSchema.safeParse(body);
 
@@ -40,14 +46,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
         }
 
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
-
         const { name, color, coordinates } = validation.data;
 
         const zone = await prisma.zone.create({
             data: {
-                tenantId: tenant.id,
+                tenantId: session.user.tenantId,
                 name,
                 color,
                 coordinates

@@ -1,7 +1,7 @@
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +20,11 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { id } = await params;
         const body = await request.json();
         const validation = UpdateVehicleSchema.safeParse(body);
@@ -28,10 +33,16 @@ export async function PATCH(
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
         }
 
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
-
         const { reg, make, model, color, type, expiryDate, driverId } = validation.data;
+
+        // Ensure the vehicle belongs to the tenant
+        const existingVehicle = await prisma.vehicle.findUnique({
+            where: { id, tenantId: session.user.tenantId }
+        });
+
+        if (!existingVehicle) {
+            return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
+        }
 
         const updatedVehicle = await prisma.vehicle.update({
             where: { id },

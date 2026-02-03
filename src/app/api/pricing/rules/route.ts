@@ -1,79 +1,72 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
+import { auth } from '@/auth';
 
-const UpdatePricingRuleSchema = z.object({
-    vehicleType: z.string().min(1),
-    baseRate: z.number().min(0),
-    perMile: z.number().min(0),
-    minFare: z.number().min(0),
-});
+export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        const tenant = await prisma.tenant.findUnique({
-            where: { slug: 'demo-cabs' }
-        });
-
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         const rules = await prisma.pricingRule.findMany({
-            where: {
-                tenantId: tenant.id
-            },
-            orderBy: {
-                vehicleType: 'asc'
-            }
+            where: { tenantId: session.user.tenantId },
+            orderBy: { vehicleType: 'asc' }
         });
 
         return NextResponse.json(rules);
     } catch (error) {
-        console.error('Error fetching pricing rules:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error("GET /api/pricing/rules error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
     try {
-        const body = await request.json();
-        const validation = UpdatePricingRuleSchema.safeParse(body);
-
-        if (!validation.success) {
-            return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const body = await req.json();
+        const { vehicleType, baseRate, perMile, minFare } = body;
 
-        const { vehicleType, baseRate, perMile, minFare } = validation.data;
+        if (!vehicleType) {
+            return NextResponse.json({ error: "Vehicle Type required" }, { status: 400 });
+        }
 
-        // Upsert rule for this vehicle type
+        // Upsert based on Tenant + VehicleType
         const rule = await prisma.pricingRule.upsert({
             where: {
                 tenantId_vehicleType: {
-                    tenantId: tenant.id,
-                    vehicleType
+                    tenantId: session.user.tenantId,
+                    vehicleType: vehicleType
                 }
             },
             update: {
-                baseRate,
-                perMile,
-                minFare
+                baseRate: body.baseRate,
+                perMile: body.perMile,
+                minFare: body.minFare,
+                waitingFreq: body.waitingFreq
             },
             create: {
-                tenantId: tenant.id,
-                name: `${vehicleType} Tariff`,
-                vehicleType,
-                baseRate,
-                perMile,
-                minFare
+                tenantId: session.user.tenantId,
+                name: `${body.vehicleType} Tariff`,
+                vehicleType: body.vehicleType,
+                baseRate: body.baseRate,
+                perMile: body.perMile,
+                minFare: body.minFare,
+                waitingFreq: body.waitingFreq
             }
         });
 
         return NextResponse.json(rule);
+
     } catch (error) {
-        console.error('Error saving pricing rule:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error("POST /api/pricing/rules error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

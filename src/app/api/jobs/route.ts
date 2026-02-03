@@ -1,146 +1,291 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { calculatePrice } from '@/lib/pricing'
-import { auth } from '@/auth'
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { calculatePrice } from '@/lib/pricing';
+import { auth } from "@/auth";
+import { EmailService } from '@/lib/email-service';
+import { DispatchEngine } from '@/lib/dispatch-engine';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/jobs
 export async function GET(req: Request) {
     try {
-        const session = await auth()
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        const tenantId = session.user.tenantId;
+
+        const { searchParams } = new URL(req.url);
+        const status = searchParams.get('status'); // Optional filter
+
+        try {
+            // Run Smart Dispatch Engine
+            // This will respect the autoDispatch flag inside
+            await DispatchEngine.runDispatchLoop(tenantId);
+        } catch (e) {
+            console.error("Auto-dispatch check failed", e);
+        }
+        // ---------------------------
 
         const jobs = await prisma.job.findMany({
             where: {
-                tenantId: session.user.tenantId
+                tenantId,
+                ...(status ? { status: status.toUpperCase() } : {})
             },
             include: {
                 customer: true,
                 driver: true,
+                preAssignedDriver: true
             },
-            orderBy: {
-                bookedAt: 'desc'
-            }
-        })
+            orderBy: { pickupTime: 'desc' },
+            take: 50
+        });
 
-        return NextResponse.json(jobs)
+        // Map to frontend shape
+        const mappedJobs = jobs.map(j => ({
+            id: j.id,
+            pickupAddress: j.pickupAddress,
+            dropoffAddress: j.dropoffAddress,
+            passengerName: j.passengerName || j.customer?.name || "Unknown",
+            passengerPhone: j.passengerPhone || j.customer?.phone || "Unknown",
+            pickupTime: j.pickupTime.toISOString(),
+            fare: j.fare,
+            status: j.status,
+            paymentType: j.paymentType,
+            driver: j.driver ? {
+                id: j.driver.id,
+                name: j.driver.name,
+                callsign: j.driver.callsign,
+                phone: j.driver.phone
+            } : null,
+            preAssignedDriver: j.preAssignedDriver ? {
+                id: j.preAssignedDriver.id,
+                name: j.preAssignedDriver.name,
+                callsign: j.preAssignedDriver.callsign
+            } : null,
+            passengers: j.passengers,
+            luggage: j.luggage,
+            vehicleType: j.vehicleType,
+            notes: j.notes,
+            flightNumber: j.flightNumber,
+            returnBooking: j.isReturn,
+            source: 'WEB'
+        }));
+
+        return NextResponse.json(mappedJobs);
     } catch (error) {
-        console.error('Error fetching jobs:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        console.error('Error fetching jobs:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 
 // POST /api/jobs
 export async function POST(request: Request) {
     try {
-        const body = await request.json()
-        const apiKey = request.headers.get('x-api-key');
-
-        let tenantId: string | null = null;
-
-        if (apiKey) {
-            const tenant = await prisma.tenant.findUnique({
-                where: { apiKey: apiKey }
-            });
-            if (tenant) {
-                tenantId = tenant.id;
-            } else {
-                return NextResponse.json({ error: 'Invalid API Key' }, { status: 401 });
-            }
-        } else {
-            const session = await auth();
-            if (session?.user?.tenantId) {
-                tenantId = session.user.tenantId;
-            }
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        const tenantId = session.user.tenantId;
+        const body = await request.json();
 
-        if (!tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-        // If phone is provided, find or create customer
-        let customerId = body.customerId
+        // 1. Find or Create Customer
+        let customerId: string | undefined = body.customerId;
+
         if (!customerId && body.passengerPhone) {
-            const customer = await prisma.customer.upsert({
+            // Check if exists
+            const existingCust = await prisma.customer.findFirst({
                 where: {
-                    tenantId_phone: {
-                        tenantId: tenantId,
-                        phone: body.passengerPhone
-                    }
-                },
-                update: {
-                    name: body.passengerName
-                },
-                create: {
-                    phone: body.passengerPhone,
-                    name: body.passengerName,
-                    tenantId: tenantId
+                    tenantId,
+                    phone: body.passengerPhone
                 }
-            })
-            customerId = customer.id
-        }
+            });
 
-        // Validate and Parse Date
-        const pickupTimeStr = body.pickupTime;
-        let finalPickupTime = new Date();
-
-        if (pickupTimeStr) {
-            const parsed = new Date(pickupTimeStr);
-            if (!isNaN(parsed.getTime())) {
-                finalPickupTime = parsed;
-            }
-        }
-
-        let fare = body.fare ? parseFloat(body.fare) : null;
-        let isFixedPrice = false;
-
-        // Auto-calculate price ONLY if not provided/overridden
-        if ((!fare || fare === 0) && body.pickupAddress && body.dropoffAddress) {
-            try {
-                const pricingResult = await calculatePrice({
-                    pickup: body.pickupAddress,
-                    dropoff: body.dropoffAddress,
-                    pickupTime: finalPickupTime,
-                    tenantId: tenantId,
-                    distanceMiles: 0
+            if (existingCust) {
+                customerId = existingCust.id;
+            } else {
+                const newCust = await prisma.customer.create({
+                    data: {
+                        tenantId,
+                        phone: body.passengerPhone,
+                        name: body.passengerName || "Unknown",
+                        email: body.passengerEmail || null,
+                    }
                 });
-                fare = pricingResult.price;
-                isFixedPrice = pricingResult.breakdown?.isFixed || false;
-            } catch (err) {
-                console.warn('Pricing calculation failed', err);
+                customerId = newCust.id;
             }
         }
 
-        // Verify Tenant Exists to prevent foreign key constraint failures if session is stale
-        const tenantExists = await prisma.tenant.findUnique({ where: { id: tenantId } });
-        if (!tenantExists) {
-            return NextResponse.json({ error: 'Session Stale', details: 'Your session belongs to a deleted tenant. Please Sign Out and Login again.' }, { status: 401 });
-        }
+        // 2. Pricing & Timing
+        let fare = body.fare ? parseFloat(body.fare) : null;
+        let finalPickupTime = body.pickupTime ? new Date(body.pickupTime) : new Date();
 
-        const job = await prisma.job.create({
-            data: {
-                pickupAddress: body.pickupAddress || 'Unknown',
-                dropoffAddress: body.dropoffAddress || 'Unknown',
-                passengerName: body.passengerName || 'Unknown',
-                passengerPhone: body.passengerPhone || 'Unknown',
+        if ((!fare || fare === 0) && body.pickupAddress && body.dropoffAddress) {
+            const pricingResult = await calculatePrice({
+                pickup: body.pickupAddress,
+                dropoff: body.dropoffAddress,
                 pickupTime: finalPickupTime,
+                companyId: tenantId,
+                pickupLat: body.pickupLat,
+                pickupLng: body.pickupLng,
+                dropoffLat: body.dropoffLat,
+                dropoffLng: body.dropoffLng
+            });
+            fare = pricingResult.price;
+            console.log('[API/jobs] Server calculated fare:', fare);
+        }
 
-                fare: fare || 0,
-                paymentType: body.paymentType || 'CASH', // Added paymentType
-                isFixedPrice: isFixedPrice,
-                status: body.status || 'PENDING',
-                flightNumber: body.flightNumber,
-                tenantId: tenantId,
-                customerId: customerId
+        // 3. Prepare Common Job Data
+        const commonJobData = {
+            tenantId,
+            customerId,
+            passengerName: body.passengerName || "Unknown",
+            passengerPhone: body.passengerPhone || "Unknown",
+            passengers: body.passengers ? parseInt(body.passengers) : 1,
+            luggage: body.luggage ? parseInt(body.luggage) : 0,
+            vehicleType: body.vehicleType || 'Saloon',
+            flightNumber: body.flightNumber || null,
+            vias: body.vias || undefined, // JSON
+            paymentType: body.paymentType || 'CASH',
+            notes: body.notes || null,
+            isFixedPrice: false,
+            status: 'PENDING',
+            // Coordinates
+            pickupLat: body.pickupLat || null,
+            pickupLng: body.pickupLng || null,
+            dropoffLat: body.dropoffLat || null,
+            dropoffLng: body.dropoffLng || null
+        };
+
+        // 5. Build Job Data List (Handle Recurrence)
+        const jobsToCreate = [];
+        const recurrenceGroupId = body.isRecurring ? crypto.randomUUID() : null;
+
+        if (body.isRecurring && body.recurrenceRule && body.recurrenceEnd) {
+            const endDate = new Date(body.recurrenceEnd);
+            let currentDate = new Date(finalPickupTime);
+            const limitDate = new Date();
+            limitDate.setDate(limitDate.getDate() + 28); // Max 4 weeks ahead for now
+
+            // Safety clamp
+            const actualEndDate = endDate > limitDate ? limitDate : endDate;
+
+            // Loop day by day
+            let safetyCounter = 0;
+            while (currentDate <= actualEndDate && safetyCounter < 50) {
+                let shouldCreate = false;
+                const dayOfWeek = currentDate.getDay(); // 0=Sun, 1=Mon...
+
+                if (body.recurrenceRule === 'DAILY') {
+                    shouldCreate = true;
+                } else if (body.recurrenceRule === 'WEEKLY') {
+                    // Only if day of week matches original
+                    if (currentDate.getDay() === finalPickupTime.getDay()) shouldCreate = true;
+                } else if (body.recurrenceRule === 'MON-FRI') {
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5) shouldCreate = true;
+                } else if (body.recurrenceRule === 'MON,WED,FRI') {
+                    if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) shouldCreate = true;
+                }
+
+                // If it's the first one, we always create it (it matches start date)
+                // Actually, let's just use the loop logic. 
+                // Ensure the first job (start date) is included
+                if (currentDate.getTime() === finalPickupTime.getTime()) shouldCreate = true;
+
+                if (shouldCreate) {
+                    jobsToCreate.push({
+                        ...commonJobData,
+                        pickupAddress: body.pickupAddress,
+                        dropoffAddress: body.dropoffAddress,
+                        pickupTime: new Date(currentDate),
+                        fare: fare, // Assuming fixed price/estimate stays same
+                        isReturn: false,
+                        isRecurring: true,
+                        recurrenceRule: body.recurrenceRule,
+                        recurrenceGroupId: recurrenceGroupId,
+                        recurrenceEnd: new Date(body.recurrenceEnd),
+                        // Wait & Return Fields
+                        waitingTime: body.isWaitAndReturn ? (body.waitingTime || 0) : 0,
+                        waitingCost: 0 // Calculated later or ignored for now
+                    });
+                }
+
+                // Advance 1 day
+                currentDate.setDate(currentDate.getDate() + 1);
+                safetyCounter++;
             }
-        })
 
-        return NextResponse.json(job)
-    } catch (error: any) {
+        } else {
+            // Single Job
+            jobsToCreate.push({
+                ...commonJobData,
+                pickupAddress: body.pickupAddress,
+                dropoffAddress: body.dropoffAddress,
+                pickupTime: finalPickupTime,
+                fare: fare,
+                isReturn: false,
+                // Wait & Return Fields
+                waitingTime: body.isWaitAndReturn ? (body.waitingTime || 0) : 0,
+                waitingCost: 0
+            });
+        }
+
+        // 6. Execute Creations
+        let firstJob = null;
+        let createdCount = 0;
+
+
+        for (const jobData of jobsToCreate) {
+            const job = await prisma.job.create({ data: jobData });
+            if (!firstJob) firstJob = job;
+            createdCount++;
+        }
+
+        const newJob = firstJob; // For backward compatibility with return logic
+
+        // 7. Create Return Job if requested (Only for Single Job scenarios)
+        let returnJob = null;
+        if (!body.isRecurring && body.returnBooking && body.returnDate) {
+            // Calculate Return Fare
+            let returnFare = fare;
+
+            // Return Time
+            const returnTime = new Date(body.returnDate);
+
+            returnJob = await prisma.job.create({
+                data: {
+                    ...commonJobData,
+                    pickupAddress: body.dropoffAddress, // Swap
+                    dropoffAddress: body.pickupAddress, // Swap
+                    pickupTime: returnTime,
+                    fare: returnFare,
+                    isReturn: true,
+                    parentJobId: newJob!.id
+                }
+            });
+        }
+
+        // 6. Send Confirmation Email (Async, don't block response)
+        const jobWithDetails = { ...newJob, passengerEmail: body.passengerEmail };
+        EmailService.sendBookingConfirmation(jobWithDetails).catch(e => console.error("Failed to send confirmation email", e));
+
+        if (returnJob) {
+            const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
+            EmailService.sendBookingConfirmation(returnJobWithDetails).catch(e => console.error("Failed to send return confirmation email", e));
+        }
+
+        // 7. Trigger Auto-Dispatch (Async)
+        DispatchEngine.runDispatchLoop(tenantId).catch(err => console.error("Post-creation dispatch failed", err));
+
+        return NextResponse.json({ job: newJob, returnJob }, { status: 201 });
+
+    } catch (error) {
         console.error('Error creating job:', error);
         return NextResponse.json({
             error: 'Internal Server Error',
-            details: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined
-        }, { status: 500 })
+            details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 });
     }
 }

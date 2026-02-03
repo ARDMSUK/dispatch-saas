@@ -12,6 +12,7 @@ import { Plus, Search, Car, Pencil, Trash2 } from "lucide-react";
 
 export default function VehiclesPage() {
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [drivers, setDrivers] = useState<any[]>([]); // simplified type for now
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -24,35 +25,47 @@ export default function VehiclesPage() {
         model: "",
         type: "Saloon",
         color: "",
-        expiryDate: ""
+        expiryDate: "",
+        driverId: "unassigned" // "unassigned" or UUID
     });
 
-    const fetchVehicles = async () => {
+    const fetchData = async () => {
         try {
-            const res = await fetch("/api/vehicles");
-            if (!res.ok) throw new Error("Failed to fetch vehicles");
+            const [vehiclesRes, driversRes] = await Promise.all([
+                fetch("/api/vehicles"),
+                fetch("/api/drivers")
+            ]);
 
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                setVehicles(data);
-            } else {
-                console.error("Invalid vehicles data:", data);
-                setVehicles([]);
+            if (vehiclesRes.ok) {
+                const data = await vehiclesRes.json();
+                setVehicles(Array.isArray(data) ? data : []);
+            }
+
+            if (driversRes.ok) {
+                const data = await driversRes.json();
+                setDrivers(Array.isArray(data) ? data : []);
             }
         } catch (error) {
-            console.error("Failed to fetch vehicles", error);
-            setVehicles([]);
+            console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchVehicles();
+        fetchData();
     }, []);
 
     const resetForm = () => {
-        setFormData({ reg: "", make: "", model: "", type: "Saloon", color: "", expiryDate: "" });
+        setFormData({
+            reg: "",
+            make: "",
+            model: "",
+            type: "Saloon",
+            color: "",
+            expiryDate: "",
+            driverId: "unassigned"
+        });
         setEditingId(null);
     };
 
@@ -66,16 +79,21 @@ export default function VehiclesPage() {
             const url = editingId ? `/api/vehicles/${editingId}` : "/api/vehicles";
             const method = editingId ? "PATCH" : "POST";
 
+            const payload = {
+                ...formData,
+                driverId: formData.driverId === "unassigned" ? null : formData.driverId
+            };
+
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
 
             if (res.ok) {
                 setIsDialogOpen(false);
                 resetForm();
-                fetchVehicles();
+                fetchData();
             } else {
                 const error = await res.json();
                 alert(`Failed to ${editingId ? 'update' : 'create'} vehicle: ${error.message || error.error}`);
@@ -93,7 +111,9 @@ export default function VehiclesPage() {
             model: vehicle.model,
             type: vehicle.type,
             color: vehicle.color || "",
-            expiryDate: vehicle.expiryDate || ""
+            expiryDate: vehicle.expiryDate || "",
+            // @ts-expect-error: driverId might be missing in type definition if not updated
+            driverId: vehicle.driverId || "unassigned"
         });
         setIsDialogOpen(true);
     };
@@ -104,7 +124,7 @@ export default function VehiclesPage() {
         try {
             const res = await fetch(`/api/vehicles/${id}`, { method: "DELETE" });
             if (res.ok) {
-                fetchVehicles();
+                fetchData();
             } else {
                 alert("Failed to delete vehicle");
             }
@@ -118,34 +138,45 @@ export default function VehiclesPage() {
         v.make.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const getVehicleBadgeStyle = (type: string) => {
+        if (type === 'Estate') return 'border-blue-500 text-blue-500';
+        if (type === 'Executive') return 'border-emerald-500 text-emerald-500';
+        if (type.includes('MPV')) return 'border-purple-500 text-purple-500';
+        if (type === 'Minibus' || type === 'Coach') return 'border-amber-500 text-amber-500';
+        return 'border-zinc-500 text-zinc-500';
+    };
+
     return (
-        <div className="h-full flex flex-col p-4 bg-zinc-50 gap-4">
+        <div className="h-full flex flex-col p-4 bg-zinc-950 gap-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-zinc-800">Vehicle Management</h1>
+                <h1 className="text-2xl font-bold text-white">Vehicle Management</h1>
                 <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                     <DialogTrigger asChild>
-                        <Button className="bg-zinc-800 hover:bg-zinc-700">
+                        <Button className="bg-white text-black hover:bg-zinc-200">
                             <Plus className="mr-2 h-4 w-4" /> Add Vehicle
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="bg-zinc-900 border-white/10 text-white">
                         <DialogHeader>
-                            <DialogTitle>{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
+                            <DialogTitle className="text-white">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <Input
                                 placeholder="Registration (License Plate)"
+                                className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
                                 value={formData.reg}
                                 onChange={e => setFormData({ ...formData, reg: e.target.value })}
                             />
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     placeholder="Make (e.g. Toyota)"
+                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
                                     value={formData.make}
                                     onChange={e => setFormData({ ...formData, make: e.target.value })}
                                 />
                                 <Input
                                     placeholder="Model (e.g. Prius)"
+                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
                                     value={formData.model}
                                     onChange={e => setFormData({ ...formData, model: e.target.value })}
                                 />
@@ -153,25 +184,53 @@ export default function VehiclesPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     placeholder="Color"
+                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
                                     value={formData.color}
                                     onChange={e => setFormData({ ...formData, color: e.target.value })}
                                 />
-                                <Input
-                                    placeholder="Type (Saloon, MPV...)"
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
                                     value={formData.type}
                                     onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                />
+                                >
+                                    <option value="Saloon">Saloon</option>
+                                    <option value="Estate">Estate</option>
+                                    <option value="Executive">Executive</option>
+                                    <option value="MPV">MPV</option>
+                                    <option value="MPV+">MPV+</option>
+                                    <option value="Minibus">Minibus</option>
+                                    <option value="Coach">Coach</option>
+                                </select>
                             </div>
+
+                            {/* Driver Assignment */}
+                            <div className="space-y-1">
+                                <label className="text-xs text-zinc-500 ml-1">Assigned Driver</label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                    value={formData.driverId}
+                                    onChange={e => setFormData({ ...formData, driverId: e.target.value })}
+                                >
+                                    <option value="unassigned">-- Unassigned --</option>
+                                    {drivers.map(driver => (
+                                        <option key={driver.id} value={driver.id}>
+                                            {driver.callsign} - {driver.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="space-y-1">
                                 <Input
                                     type="date"
+                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500 block w-full"
                                     placeholder="MOT/License Expiry"
                                     value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
                                     onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
                                 />
                                 <span className="text-[10px] text-zinc-500 ml-1">MOT/License Expiry</span>
                             </div>
-                            <Button onClick={handleSave} className="w-full bg-zinc-800">
+                            <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-600">
                                 {editingId ? 'Update Vehicle' : 'Create Vehicle'}
                             </Button>
                         </div>
@@ -181,59 +240,65 @@ export default function VehiclesPage() {
 
             <div className="flex gap-2 mb-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-400" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-500" />
                     <Input
                         placeholder="Search vehicles..."
-                        className="pl-8 bg-white"
+                        className="pl-8 bg-zinc-900/50 border-white/10 text-white placeholder:text-zinc-500"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <Card className="flex-1 overflow-hidden">
+            <Card className="flex-1 overflow-hidden bg-zinc-900/20 border-white/10">
                 <div className="overflow-auto max-h-full">
                     <Table>
-                        <TableHeader className="bg-zinc-100 sticky top-0">
-                            <TableRow>
-                                <TableHead className="w-[100px]">Registration</TableHead>
-                                <TableHead>Make/Model</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Color</TableHead>
-                                <TableHead>Expiry</TableHead>
-                                <TableHead>Driver</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                        <TableHeader className="bg-zinc-900/50 sticky top-0">
+                            <TableRow className="hover:bg-transparent border-white/5">
+                                <TableHead className="w-[100px] text-zinc-400">Registration</TableHead>
+                                <TableHead className="text-zinc-400">Make/Model</TableHead>
+                                <TableHead className="text-zinc-400">Type</TableHead>
+                                <TableHead className="text-zinc-400">Color</TableHead>
+                                <TableHead className="text-zinc-400">Expiry</TableHead>
+                                <TableHead className="text-zinc-400">Driver</TableHead>
+                                <TableHead className="text-right text-zinc-400">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8">Loading vehicles...</TableCell>
+                                <TableRow className="hover:bg-transparent border-white/5">
+                                    <TableCell colSpan={7} className="text-center py-8 text-zinc-500">Loading vehicles...</TableCell>
                                 </TableRow>
                             ) : filteredVehicles.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-zinc-400">No vehicles found</TableCell>
+                                <TableRow className="hover:bg-transparent border-white/5">
+                                    <TableCell colSpan={7} className="text-center py-8 text-zinc-500">No vehicles found</TableCell>
                                 </TableRow>
                             ) : (
                                 filteredVehicles.map((vehicle) => (
-                                    <TableRow key={vehicle.id} className="hover:bg-zinc-50 group">
-                                        <TableCell className="font-bold font-mono text-lg">{vehicle.reg}</TableCell>
-                                        <TableCell className="font-medium">{vehicle.make} {vehicle.model}</TableCell>
-                                        <TableCell><Badge variant="outline">{vehicle.type}</Badge></TableCell>
-                                        <TableCell>{vehicle.color}</TableCell>
-                                        <TableCell className="text-xs">
+                                    <TableRow key={vehicle.id} className="hover:bg-white/5 border-white/5 group transition-colors">
+                                        <TableCell className="font-bold font-mono text-lg text-zinc-200">{vehicle.reg}</TableCell>
+                                        <TableCell className="font-medium text-zinc-300">{vehicle.make} {vehicle.model}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className={getVehicleBadgeStyle(vehicle.type)}>{vehicle.type}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-zinc-400">{vehicle.color}</TableCell>
+                                        <TableCell className="text-xs text-zinc-500">
                                             {vehicle.expiryDate ? new Date(vehicle.expiryDate).toLocaleDateString() : '-'}
                                         </TableCell>
-                                        <TableCell className="text-sm">
+                                        <TableCell className="text-sm text-zinc-400">
                                             {/* @ts-expect-error: Driver relation might be missing in Type for now */}
-                                            {vehicle.driver?.callsign || '-'}
+                                            {vehicle.driver?.callsign ? (
+                                                <Badge variant="secondary" className="bg-zinc-800 text-zinc-300 border-zinc-700">
+                                                    {vehicle.driver.callsign}
+                                                </Badge>
+                                            ) : <span className="text-zinc-700">-</span>}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900" onClick={() => handleEdit(vehicle)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => handleEdit(vehicle)}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(vehicle.id)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(vehicle.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>

@@ -1,25 +1,19 @@
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/utils/supabase/middleware'
 
-import { auth } from "@/auth";
-
-export default auth((req) => {
-    const isLoggedIn = !!req.auth;
-    const isOnDashboard = req.nextUrl.pathname.startsWith("/dashboard");
-    const isOnLogin = req.nextUrl.pathname.startsWith("/login");
-
-    if (isOnDashboard) {
-        if (isLoggedIn) return; // Allow access
-        return Response.redirect(new URL("/login", req.nextUrl)); // Redirect to login
-    }
-
-    if (isOnLogin) {
-        if (isLoggedIn) {
-            return Response.redirect(new URL("/dashboard", req.nextUrl)); // Redirect to dashboard if already logged in
-        }
-        return; // Allow access to login page
-    }
-});
+export async function middleware(request: NextRequest) {
+    return await updateSession(request)
+}
 
 export const config = {
-    // Matcher ignoring internal paths and static files
-    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-};
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * Feel free to modify this pattern to include more paths.
+         */
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
+}

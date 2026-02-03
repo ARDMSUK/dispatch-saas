@@ -3,11 +3,13 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["public", "auth"]
 }
 
 model Tenant {
@@ -17,6 +19,17 @@ model Tenant {
   apiKey    String   @unique @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Contact & Location
+  email     String?
+  phone     String?
+  address   String?
+  lat       Float?
+  lng       Float?
+
+  // Configuration
+  useZonePricing Boolean @default(false)
+  autoDispatch   Boolean @default(false)
 
   users     User[]
   customers Customer[]
@@ -28,6 +41,9 @@ model Tenant {
   fixedPrices  FixedPrice[]
   surcharges   Surcharge[]
   zones        Zone[]
+
+  @@map("companies")
+  @@schema("public")
 }
 
 model User {
@@ -42,6 +58,9 @@ model User {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
+  @@schema("public")
 }
 
 model Customer {
@@ -64,6 +83,8 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, phone]) // Unique phone per tenant
+  @@map("customers")
+  @@schema("public")
 }
 
 model Account {
@@ -87,6 +108,8 @@ model Account {
   updatedAt   DateTime @updatedAt
   
   @@unique([tenantId, code])
+  @@map("accounts")
+  @@schema("public")
 }
 
 model Driver {
@@ -105,12 +128,15 @@ model Driver {
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   jobs      Job[]
+  preAssignedJobs Job[] @relation("PreAssignedDriver")
   vehicles  Vehicle[] // Vehicles assigned to this driver
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, callsign])
+  @@map("drivers")
+  @@schema("public")
 }
 
 model Vehicle {
@@ -130,6 +156,9 @@ model Vehicle {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("vehicles")
+  @@schema("public")
 }
 
 model Job {
@@ -143,15 +172,24 @@ model Job {
   pickupLng      Float?
   dropoffLat     Float?
   dropoffLng     Float?
+  
+  vias           Json?    // Array of {address, lat, lng} 
 
   // Timing
   pickupTime     DateTime
   bookedAt       DateTime @default(now())
+  
+  // Return Journey Linking
+  isReturn       Boolean  @default(false)
+  parentJobId    Int?     @unique // If this is a return job, link to original
+  parentJob      Job?     @relation("ReturnJob", fields: [parentJobId], references: [id])
+  returnJob      Job?     @relation("ReturnJob")
 
   // Details
   passengerName  String
   passengerPhone String
   passengers     Int      @default(1)
+  luggage        Int      @default(0)
   vehicleType    String   @default("Saloon")
   flightNumber   String?
   
@@ -161,6 +199,16 @@ model Job {
   fare           Float?   // Quoted/Final Fare
   paymentType    String   @default("CASH") // CASH, CARD, ACCOUNT
   isFixedPrice   Boolean  @default(false)
+  
+  // Wait & Return Details
+  waitingTime    Int      @default(0) // Minutes
+  waitingCost    Float    @default(0.00)
+
+  // Recurrance
+  isRecurring       Boolean  @default(false)
+  recurrenceRule    String?  // e.g. "DAILY", "WEEKLY", "MON,WED,FRI"
+  recurrenceGroupId String?  // ID to group all created jobs
+  recurrenceEnd     DateTime?
 
   // Status
   status         String   @default("PENDING") 
@@ -175,11 +223,17 @@ model Job {
 
   driverId   String?
   driver     Driver?   @relation(fields: [driverId], references: [id])
+
+  preAssignedDriverId String?
+  preAssignedDriver   Driver?   @relation("PreAssignedDriver", fields: [preAssignedDriverId], references: [id])
   
   updatedAt DateTime @updatedAt
 
   accountId  String?
   account    Account?  @relation(fields: [accountId], references: [id])
+
+  @@map("bookings")
+  @@schema("public")
 }
 
 model PricingRule {
@@ -190,11 +244,14 @@ model PricingRule {
   baseRate    Float    @default(3.00) // Flag fall
   perMile     Float    @default(2.00) // Rate per mile
   minFare     Float    @default(5.00)
+  waitingFreq Float    @default(0.00) // Cost per minute of waiting (Wait & Return)
   
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
   
   @@unique([tenantId, vehicleType])
+  @@map("pricing_rules")
+  @@schema("public")
 }
 
 model Zone {
@@ -209,6 +266,9 @@ model Zone {
   // Relations for Pricing
   pickupFixedPrices  FixedPrice[] @relation("PickupZone")
   dropoffFixedPrices FixedPrice[] @relation("DropoffZone")
+
+  @@map("zones")
+  @@schema("public")
 }
 
 model FixedPrice {
@@ -232,6 +292,9 @@ model FixedPrice {
 
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("fixed_prices")
+  @@schema("public")
 }
 
 model Surcharge {
@@ -252,4 +315,7 @@ model Surcharge {
   
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("surcharges")
+  @@schema("public")
 }

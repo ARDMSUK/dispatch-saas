@@ -7,8 +7,14 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { Driver } from "@/lib/types";
-import { Plus, Search, Car, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Search, Car, Pencil, Trash2, X, MoreHorizontal, Power, CheckCircle, Clock } from "lucide-react";
 
 export default function DriversPage() {
     const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -121,16 +127,19 @@ export default function DriversPage() {
     );
 
     return (
-        <div className="h-full flex flex-col p-4 bg-zinc-50 gap-4">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-zinc-800">Fleet Management</h1>
+        <div className="h-full flex flex-col p-4 bg-black/95 gap-4 text-zinc-100">
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-white tracking-tight">Fleet Management</h1>
+                    <p className="text-zinc-500 text-sm">Manage your drivers and their availability.</p>
+                </div>
                 <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                     <DialogTrigger asChild>
-                        <Button className="bg-zinc-800 hover:bg-zinc-700">
+                        <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold">
                             <Plus className="mr-2 h-4 w-4" /> Add Driver
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="bg-zinc-900 border-white/10 text-white">
                         <DialogHeader>
                             <DialogTitle>{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
                         </DialogHeader>
@@ -140,11 +149,13 @@ export default function DriversPage() {
                                     placeholder="Callsign (e.g. 101)"
                                     value={formData.callsign}
                                     onChange={e => setFormData({ ...formData, callsign: e.target.value })}
+                                    className="bg-zinc-950 border-white/10"
                                 />
                                 <Input
                                     placeholder="Full Name"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    className="bg-zinc-950 border-white/10"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -152,11 +163,13 @@ export default function DriversPage() {
                                     placeholder="Phone Number"
                                     value={formData.phone}
                                     onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                    className="bg-zinc-950 border-white/10"
                                 />
                                 <Input
                                     placeholder="Email Address (Optional)"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                    className="bg-zinc-950 border-white/10"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -164,6 +177,7 @@ export default function DriversPage() {
                                     placeholder="Badge Number"
                                     value={formData.badgeNumber}
                                     onChange={e => setFormData({ ...formData, badgeNumber: e.target.value })}
+                                    className="bg-zinc-950 border-white/10"
                                 />
                                 <div className="space-y-1">
                                     <Input
@@ -171,16 +185,17 @@ export default function DriversPage() {
                                         placeholder="License Expiry"
                                         value={formData.licenseExpiry ? formData.licenseExpiry.split('T')[0] : ''}
                                         onChange={e => setFormData({ ...formData, licenseExpiry: new Date(e.target.value).toISOString() })}
+                                        className="bg-zinc-950 border-white/10"
                                     />
-                                    <span className="text-[10px] text-zinc-500 ml-1">License Expiry</span>
                                 </div>
                             </div>
                             <Input
                                 placeholder="Login PIN (4 digits)"
                                 value={formData.pin}
                                 onChange={e => setFormData({ ...formData, pin: e.target.value })}
+                                className="bg-zinc-950 border-white/10"
                             />
-                            <Button onClick={handleSave} className="w-full bg-zinc-800">
+                            <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-400">
                                 {editingId ? 'Update Driver' : 'Create Driver'}
                             </Button>
                         </div>
@@ -188,87 +203,131 @@ export default function DriversPage() {
                 </Dialog>
             </div>
 
-            <div className="flex gap-2 mb-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-400" />
+            <div className="flex gap-2">
+                <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-500" />
                     <Input
                         placeholder="Search drivers..."
-                        className="pl-8 bg-white"
+                        className="pl-8 bg-zinc-900 border-white/10 text-white placeholder:text-zinc-600"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <Card className="flex-1 overflow-hidden">
-                <div className="overflow-auto max-h-full">
-                    <Table>
-                        <TableHeader className="bg-zinc-100 sticky top-0">
+            <div className="rounded-md border border-white/10 overflow-hidden bg-zinc-900/50">
+                <Table>
+                    <TableHeader className="bg-zinc-900 border-b border-white/10">
+                        <TableRow className="hover:bg-zinc-900 border-white/10">
+                            <TableHead className="w-[100px] text-zinc-400">Callsign</TableHead>
+                            <TableHead className="text-zinc-400">Name</TableHead>
+                            <TableHead className="text-zinc-400">Status</TableHead>
+                            <TableHead className="text-zinc-400">Contact</TableHead>
+                            <TableHead className="text-zinc-400">Vehicle</TableHead>
+                            <TableHead className="text-zinc-400">Badge</TableHead>
+                            <TableHead className="text-zinc-400">Expiry</TableHead>
+                            <TableHead className="text-right text-zinc-400">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? (
                             <TableRow>
-                                <TableHead className="w-[80px]">Callsign</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Contact</TableHead>
-                                <TableHead>Vehicle</TableHead>
-                                <TableHead>Badge</TableHead>
-                                <TableHead>Expiry</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableCell colSpan={8} className="text-center py-12 text-zinc-500">Loading fleet data...</TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8">Loading drivers...</TableCell>
-                                </TableRow>
-                            ) : filteredDrivers.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8 text-zinc-400">No drivers found</TableCell>
-                                </TableRow>
-                            ) : (
-                                filteredDrivers.map((driver) => (
-                                    <TableRow key={driver.id} className="hover:bg-zinc-50 group">
-                                        <TableCell className="font-bold font-mono text-lg">{driver.callsign}</TableCell>
-                                        <TableCell className="font-medium">{driver.name}</TableCell>
-                                        <TableCell>
-                                            <Badge className={
-                                                driver.status === 'FREE' ? 'bg-green-500' :
-                                                    driver.status === 'BUSY' ? 'bg-orange-500' :
-                                                        driver.status === 'POB' ? 'bg-blue-500' :
-                                                            'bg-zinc-400'
-                                            }>
-                                                {driver.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-sm">{driver.phone}</TableCell>
-                                        <TableCell>
-                                            {driver.vehicle ? (
-                                                <div className="flex items-center gap-1 text-sm">
-                                                    <Car className="h-3 w-3" />
-                                                    <span>{driver.vehicle.reg} ({driver.vehicle.make})</span>
-                                                </div>
-                                            ) : <span className="text-zinc-400 text-xs italic">No Vehicle</span>}
-                                        </TableCell>
-                                        <TableCell className="text-sm font-mono">{driver.badgeNumber || '-'}</TableCell>
-                                        <TableCell className="text-xs">
-                                            {driver.licenseExpiry ? new Date(driver.licenseExpiry).toLocaleDateString() : '-'}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900" onClick={() => handleEdit(driver)}>
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(driver.id)}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                        ) : filteredDrivers.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={8} className="text-center py-12 text-zinc-500">No drivers found matches.</TableCell>
+                            </TableRow>
+                        ) : (
+                            filteredDrivers.map((driver) => (
+                                <TableRow key={driver.id} className="hover:bg-white/5 border-white/5 group transition-colors">
+                                    <TableCell className="font-bold font-mono text-lg text-amber-500">{driver.callsign}</TableCell>
+                                    <TableCell className="font-medium text-white">{driver.name}</TableCell>
+                                    <TableCell>
+                                        <DriverStatusCell driver={driver} onUpdate={fetchDrivers} />
+                                    </TableCell>
+                                    <TableCell className="text-sm text-zinc-300">{driver.phone}</TableCell>
+                                    <TableCell>
+                                        {driver.vehicles?.[0] ? (
+                                            <div className="flex items-center gap-2 text-sm text-indigo-300">
+                                                <Car className="h-3 w-3" />
+                                                <span>{driver.vehicles[0].reg} <span className="text-zinc-500">({driver.vehicles[0].make})</span></span>
                                             </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-            </Card>
+                                        ) : <span className="text-zinc-600 text-xs italic">Unassigned</span>}
+                                    </TableCell>
+                                    <TableCell className="text-sm font-mono text-zinc-400">{driver.badgeNumber || '-'}</TableCell>
+                                    <TableCell className="text-xs text-zinc-400">
+                                        {driver.licenseExpiry ? new Date(driver.licenseExpiry).toLocaleDateString() : '-'}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-white/10" onClick={() => handleEdit(driver)}>
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10" onClick={() => handleDelete(driver.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
+    );
+}
+
+function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () => void }) {
+    const [loading, setLoading] = useState(false);
+
+    const updateStatus = async (newStatus: string) => {
+        setLoading(true);
+        try {
+            await fetch(`/api/drivers/${driver.id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            onUpdate();
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getBadgeStyle = (status: string) => {
+        switch (status) {
+            case 'FREE': return 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20';
+            case 'BUSY': return 'bg-amber-500/20 text-amber-500 border-amber-500/20';
+            case 'POB': return 'bg-blue-500/20 text-blue-500 border-blue-500/20';
+            case 'OFF_DUTY': return 'bg-zinc-800 text-zinc-500 border-zinc-700';
+            default: return 'bg-zinc-800 text-zinc-500';
+        }
+    };
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 p-0 hover:bg-transparent">
+                    <Badge className={`cursor-pointer transition-opacity ${getBadgeStyle(driver.status)} border`}>
+                        {loading ? '...' : driver.status}
+                    </Badge>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-zinc-900 border-white/10 text-white">
+                <DropdownMenuItem onClick={() => updateStatus('FREE')} className="text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-400">
+                    <CheckCircle className="mr-2 h-4 w-4" /> Set FREE
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateStatus('BUSY')} className="text-amber-500 focus:bg-amber-500/10 focus:text-amber-400">
+                    <Clock className="mr-2 h-4 w-4" /> Set BUSY
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateStatus('OFF_DUTY')} className="text-zinc-500 focus:bg-zinc-800 focus:text-zinc-400">
+                    <Power className="mr-2 h-4 w-4" /> Set OFF DUTY
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

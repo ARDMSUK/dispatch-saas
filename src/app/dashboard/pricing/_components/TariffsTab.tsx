@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { toast } from "sonner";
+
 export default function TariffsTab() {
     const [loading, setLoading] = useState(false);
     const [vehicleType, setVehicleType] = useState("Saloon");
@@ -16,7 +18,8 @@ export default function TariffsTab() {
     const [data, setData] = useState({
         baseRate: 3.00,
         perMile: 2.00,
-        minFare: 5.00
+        minFare: 5.00,
+        waitingFreq: 0.25 // Default 25p/min
     });
 
     const [rules, setRules] = useState<any[]>([]);
@@ -32,6 +35,7 @@ export default function TariffsTab() {
             }
         } catch (error) {
             console.error("Failed to fetch rules", error);
+            toast.error("Failed to load tariffs");
         } finally {
             setLoading(false);
         }
@@ -43,11 +47,12 @@ export default function TariffsTab() {
             setData({
                 baseRate: rule.baseRate,
                 perMile: rule.perMile,
-                minFare: rule.minFare
+                minFare: rule.minFare,
+                waitingFreq: rule.waitingFreq || 0.00
             });
         } else {
             // Defaults
-            setData({ baseRate: 3.00, perMile: 2.00, minFare: 5.00 });
+            setData({ baseRate: 3.00, perMile: 2.00, minFare: 5.00, waitingFreq: 0.25 });
         }
     };
 
@@ -73,34 +78,37 @@ export default function TariffsTab() {
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                alert("Tariff updated successfully!");
+                toast.success(`${vehicleType} tariff updated`);
                 fetchRules(); // Refresh list
             } else {
-                alert("Failed to save tariff");
+                toast.error("Failed to save tariff");
             }
         } catch (error) {
             console.error("Error saving rule", error);
+            toast.error("Error saving tariff");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Card className="mt-4">
+        <Card className="mt-4 bg-zinc-900 border-white/10">
             <CardContent className="pt-6">
                 <div className="grid gap-6 max-w-xl">
                     <div className="space-y-2">
-                        <Label>Vehicle Type</Label>
+                        <Label className="text-zinc-400">Vehicle Type</Label>
                         <Select value={vehicleType} onValueChange={handleTypeChange}>
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-zinc-950 border-white/10 text-white">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Saloon">Saloon (Standard)</SelectItem>
+                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                <SelectItem value="Saloon">Saloon</SelectItem>
                                 <SelectItem value="Estate">Estate</SelectItem>
-                                <SelectItem value="MPV">MPV (6 Seater)</SelectItem>
-                                <SelectItem value="Exec">Executive</SelectItem>
-                                <SelectItem value="Van">Van / Transporter</SelectItem>
+                                <SelectItem value="Executive">Executive</SelectItem>
+                                <SelectItem value="MPV">MPV</SelectItem>
+                                <SelectItem value="MPV+">MPV+</SelectItem>
+                                <SelectItem value="Minibus">Minibus</SelectItem>
+                                <SelectItem value="Coach">Coach</SelectItem>
                             </SelectContent>
                         </Select>
                         <p className="text-xs text-zinc-500">Configure rates for this specific vehicle type.</p>
@@ -108,19 +116,21 @@ export default function TariffsTab() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Base Rate (Flag Fall) (£)</Label>
+                            <Label className="text-zinc-400">Base Rate (Flag Fall) (£)</Label>
                             <Input
                                 type="number"
                                 step="0.10"
+                                className="bg-zinc-950 border-white/10 text-white placeholder:text-zinc-600"
                                 value={data.baseRate}
                                 onChange={e => setData({ ...data, baseRate: parseFloat(e.target.value) })}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Rate Per Mile (£)</Label>
+                            <Label className="text-zinc-400">Rate Per Mile (£)</Label>
                             <Input
                                 type="number"
                                 step="0.10"
+                                className="bg-zinc-950 border-white/10 text-white placeholder:text-zinc-600"
                                 value={data.perMile}
                                 onChange={e => setData({ ...data, perMile: parseFloat(e.target.value) })}
                             />
@@ -128,16 +138,28 @@ export default function TariffsTab() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Minimum Fare (£)</Label>
+                        <Label className="text-zinc-400">Minimum Fare (£)</Label>
                         <Input
                             type="number"
                             step="0.50"
+                            className="bg-zinc-950 border-white/10 text-white placeholder:text-zinc-600"
                             value={data.minFare}
                             onChange={e => setData({ ...data, minFare: parseFloat(e.target.value) })}
                         />
                     </div>
 
-                    <Button onClick={handleSave} disabled={loading} className="bg-zinc-800 hover:bg-zinc-700">
+                    <div className="space-y-2">
+                        <Label className="text-zinc-400">Waiting Time Rate (£ per min)</Label>
+                        <Input
+                            type="number"
+                            step="0.10"
+                            className="bg-zinc-950 border-white/10 text-white placeholder:text-zinc-600"
+                            value={data.waitingFreq || 0}
+                            onChange={e => setData({ ...data, waitingFreq: parseFloat(e.target.value) })}
+                        />
+                    </div>
+
+                    <Button onClick={handleSave} disabled={loading} className="bg-amber-500 text-black hover:bg-amber-600">
                         {loading ? 'Saving...' : 'Save Tariff Settings'}
                     </Button>
                 </div>

@@ -41,8 +41,8 @@ export default function LoginPage() {
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "",
-            password: "",
+            email: "digitaldmgency@gmail.com",
+            password: "password123", // Pre-filled for development
         },
     });
 
@@ -131,8 +131,8 @@ export default function LoginPage() {
 
             {/* Quick Helper for Demo */}
             <div className="absolute bottom-4 left-4 text-zinc-600 text-xs font-mono">
-                <p>Demo Login:</p>
-                <p>user: demo@example.com</p>
+                <p>Dev Login:</p>
+                <p>user: digitaldmgency@gmail.com</p>
                 <p>pass: password123</p>
             </div>
         </div>

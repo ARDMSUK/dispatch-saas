@@ -30,8 +30,17 @@ export default function ZonesPage() {
     const fetchZones = async () => {
         try {
             const res = await fetch("/api/zones");
-            const data = await res.json();
-            setZones(data);
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setZones(data);
+                } else {
+                    console.error("API returned non-array data:", data);
+                    setZones([]);
+                }
+            } else {
+                console.error("Failed to fetch zones:", res.statusText);
+            }
         } catch (error) {
             console.error("Failed to fetch zones", error);
         } finally {
@@ -148,7 +157,7 @@ export default function ZonesPage() {
                                 <div key={zone.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-zinc-50">
                                     <div className="flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: zone.color }}></div>
-                                        <span className="font-medium text-sm">{zone.name}</span>
+                                        <span className="font-medium text-sm text-zinc-900">{zone.name}</span>
                                     </div>
                                     <Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-400 hover:text-red-500">
                                         <Trash2 className="h-3 w-3" />

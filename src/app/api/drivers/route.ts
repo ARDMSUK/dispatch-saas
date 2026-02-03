@@ -1,94 +1,73 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-
-export const dynamic = 'force-dynamic';
-import { z } from 'zod';
-
-const CreateDriverSchema = z.object({
-    name: z.string().min(1),
-    callsign: z.string().min(1),
-    phone: z.string().min(1),
-    email: z.string().optional().or(z.literal('')),
-    badgeNumber: z.string().optional(),
-    licenseExpiry: z.string().optional().or(z.literal('')), // Accept empty string or ISO
-    pin: z.string().optional(),
-});
-
 import { auth } from '@/auth';
 
 export async function GET() {
     try {
         const session = await auth();
-        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        const tenantId = session.user.tenantId;
-
-        // Removed manual tenant lookup. Using session tenantId.
-        const tenant = { id: tenantId };
-
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         const drivers = await prisma.driver.findMany({
-            where: {
-                tenantId: tenant.id
-            },
+            where: { tenantId: session.user.tenantId },
             include: {
-                vehicles: true
+                vehicles: true // Include assigned vehicles
             },
-            orderBy: {
-                callsign: 'asc'
-            }
+            orderBy: { createdAt: 'desc' }
         });
 
         return NextResponse.json(drivers);
     } catch (error) {
-        console.error('Error fetching drivers:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error("GET /api/drivers error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
     try {
         const session = await auth();
-        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        const tenantId = session.user.tenantId;
-
-        const body = await request.json();
-        const validation = CreateDriverSchema.safeParse(body);
-
-        if (!validation.success) {
-            return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const tenant = { id: tenantId };
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const body = await req.json();
+        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin } = body;
 
-        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin } = validation.data;
+        if (!name || !callsign || !phone) {
+            return NextResponse.json({ error: "Missing required fields (Name, Callsign, Phone)" }, { status: 400 });
+        }
 
-        // Check callsign uniqueness
+        // Check for duplicate callsign
         const existing = await prisma.driver.findFirst({
-            where: { tenantId: tenant.id, callsign }
+            where: {
+                tenantId: session.user.tenantId,
+                callsign: callsign
+            }
         });
 
         if (existing) {
-            return NextResponse.json({ error: 'Callsign already exists' }, { status: 409 });
+            return NextResponse.json({ error: `Driver with callsign ${callsign} already exists.` }, { status: 409 });
         }
 
-        const newDriver = await prisma.driver.create({
+        const driver = await prisma.driver.create({
             data: {
-                tenantId: tenant.id,
                 name,
                 callsign,
                 phone,
                 email,
                 badgeNumber,
-                licenseExpiry,
-                pin
+                licenseExpiry: licenseExpiry ? new Date(licenseExpiry) : null,
+                pin,
+                tenantId: session.user.tenantId,
+                status: 'OFF_DUTY',
             }
         });
 
-        return NextResponse.json(newDriver, { status: 201 });
+        return NextResponse.json(driver);
+
     } catch (error) {
-        console.error('Error creating driver:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error("POST /api/drivers error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

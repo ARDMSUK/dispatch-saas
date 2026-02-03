@@ -12,10 +12,23 @@ const UpdateJobSchema = z.object({
         "EN_ROUTE",
         "POB",
         "COMPLETED",
-        "CANCELLED"
+        "CANCELLED",
+        "NO_SHOW"
     ]).optional(),
-    driverId: z.string().optional(),
+    driverId: z.string().optional().nullable(),
     fare: z.number().optional(),
+    pickupAddress: z.string().optional(),
+    dropoffAddress: z.string().optional(),
+    pickupTime: z.string().optional(),
+    passengerName: z.string().optional(),
+    passengerPhone: z.string().optional(),
+    vehicleType: z.string().optional(),
+    notes: z.string().optional().nullable(),
+    paymentType: z.enum(["CASH", "CARD", "ACCOUNT"]).optional(),
+    passengers: z.number().optional(),
+    luggage: z.number().optional(),
+    flightNumber: z.string().optional().nullable(),
+    preAssignedDriverId: z.string().optional().nullable(),
 });
 
 export async function PATCH(
@@ -42,8 +55,20 @@ export async function PATCH(
             where: { id: jobId },
             data: {
                 ...(status && { status }),
-                ...(driverId && { driverId }),
+                ...(driverId !== undefined && { driverId }), // Allow null
                 ...(fare && { fare }),
+                ...(validation.data.pickupAddress && { pickupAddress: validation.data.pickupAddress }),
+                ...(validation.data.dropoffAddress && { dropoffAddress: validation.data.dropoffAddress }),
+                ...(validation.data.pickupTime && { pickupTime: validation.data.pickupTime }),
+                ...(validation.data.passengerName && { passengerName: validation.data.passengerName }),
+                ...(validation.data.passengerPhone && { passengerPhone: validation.data.passengerPhone }),
+                ...(validation.data.vehicleType && { vehicleType: validation.data.vehicleType }),
+                ...(validation.data.notes !== undefined && { notes: validation.data.notes }),
+                ...(validation.data.paymentType && { paymentType: validation.data.paymentType }),
+                ...(validation.data.passengers && { passengers: validation.data.passengers }),
+                ...(validation.data.luggage !== undefined && { luggage: validation.data.luggage }),
+                ...(validation.data.flightNumber !== undefined && { flightNumber: validation.data.flightNumber }),
+                ...(validation.data.preAssignedDriverId !== undefined && { preAssignedDriverId: validation.data.preAssignedDriverId }),
             },
             include: {
                 driver: true

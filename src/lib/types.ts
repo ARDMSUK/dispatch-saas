@@ -36,7 +36,7 @@ export interface Driver {
     pin?: string;
     status: "OFF_DUTY" | "FREE" | "BUSY" | "POB";
     location?: string; // JSON
-    vehicle?: Vehicle; // Current or assigned vehicle
+    vehicles?: Vehicle[]; // Assigned vehicles (plural)
 }
 
 export interface Account {
@@ -104,7 +104,8 @@ export const JOB_STATUSES = [
     "EN_ROUTE",
     "POB",
     "COMPLETED",
-    "CANCELLED"
+    "CANCELLED",
+    "NO_SHOW"
 ] as const;
 
 export type JobStatus = typeof JOB_STATUSES[number];

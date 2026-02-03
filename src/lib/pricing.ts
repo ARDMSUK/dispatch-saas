@@ -1,12 +1,20 @@
 import { prisma } from '@/lib/prisma';
+import { isPointInPolygon } from '@/lib/geoutils';
 
-interface PricingRequest {
+interface CalculatePriceParams {
     pickup: string;
     dropoff: string;
+    vias?: { address: string }[];
     distanceMiles?: number;
+    pickupTime: Date;
     vehicleType?: string;
-    pickupTime?: Date;
-    tenantId: string;
+    companyId?: string; // Optional tenant context
+    waitingTime?: number; // Minutes
+    isWaitAndReturn?: boolean;
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
 }
 
 interface PriceResult {
@@ -20,121 +28,174 @@ interface PriceResult {
     };
 }
 
-export async function calculatePrice(req: PricingRequest): Promise<PriceResult> {
-    const { pickup, dropoff, distanceMiles = 0, vehicleType = 'Saloon', pickupTime = new Date(), tenantId } = req;
+export async function calculatePrice(req: CalculatePriceParams): Promise<PriceResult> {
+    const { pickup, dropoff, vias = [], distanceMiles = 0, vehicleType = 'Saloon', pickupTime = new Date(), companyId, pickupLat, pickupLng, dropoffLat, dropoffLng } = req;
 
-    // 1. Check for Fixed Price (Exact Match logic for now, could be improved with zones)
-    // We'll search for rules where pickup/dropoff roughly match the string
-    // In a real app, this would use Zone IDs. For now, simple partial string match or exact match.
-
-    // Optimisation: Fetch all fixed prices for tenant and filter in memory (dataset is small for MVP)
-    const fixedPrices = await prisma.fixedPrice.findMany({
-        where: {
-            tenantId,
-            vehicleType
-        }
-    });
-
-    const matchedFixed = fixedPrices.find(fp => {
-        // Simple case-insensitive inclusion match
-        const pMatch = fp.pickup && pickup.toLowerCase().includes(fp.pickup.toLowerCase());
-        const dMatch = fp.dropoff && dropoff.toLowerCase().includes(fp.dropoff.toLowerCase());
-
-        if (pMatch && dMatch) return true;
-
-        if (fp.isReverse) {
-            const pRev = fp.pickup && dropoff.toLowerCase().includes(fp.pickup.toLowerCase());
-            const dRev = fp.dropoff && pickup.toLowerCase().includes(fp.dropoff.toLowerCase());
-            if (pRev && dRev) return true;
-        }
-        return false;
-    });
-
-    if (matchedFixed) {
-        return {
-            price: matchedFixed.price,
-            breakdown: {
-                base: matchedFixed.price,
-                mileage: 0,
-                surcharges: [],
-                isFixed: true,
-                ruleId: matchedFixed.id
-            }
-        };
+    // 0. Check Tenant Configuration
+    let useZonePricing = false;
+    if (companyId) {
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: companyId },
+            select: { useZonePricing: true }
+        });
+        if (tenant?.useZonePricing) useZonePricing = true;
     }
 
-    // 2. Meter Pricing
-    // Fetch base rates
-    const pricingRule = await prisma.pricingRule.findUnique({
-        where: {
-            tenantId_vehicleType: {
-                tenantId,
-                vehicleType
+    // 0.1 Zone Detection (If enabled)
+    let pickupZoneId: string | null = null;
+    let dropoffZoneId: string | null = null;
+
+    if (useZonePricing && companyId && pickupLat && pickupLng && dropoffLat && dropoffLng) {
+        console.log(`[Pricing] Checking zones for tenant ${companyId}`);
+        const zones = await prisma.zone.findMany({
+            where: { tenantId: companyId }
+        });
+
+        // Find Pickup Zone
+        for (const zone of zones) {
+            try {
+                const coords = JSON.parse(zone.coordinates) as [number, number][];
+                if (isPointInPolygon([pickupLat, pickupLng], coords)) {
+                    pickupZoneId = zone.id;
+                    console.log(`[Pricing] Pickup detected in zone: ${zone.name}`);
+                    break;
+                }
+            } catch (e) {
+                console.error(`Error parsing zone coords ${zone.name}`, e);
             }
         }
-    }) || { baseRate: 3.00, perMile: 2.00, minFare: 5.00 }; // Defaults
 
-    let total = pricingRule.baseRate + (distanceMiles * pricingRule.perMile);
-
-    // Enforce Minimum Fare
-    if (total < pricingRule.minFare) {
-        total = pricingRule.minFare;
+        // Find Dropoff Zone
+        for (const zone of zones) {
+            try {
+                const coords = JSON.parse(zone.coordinates) as [number, number][];
+                if (isPointInPolygon([dropoffLat, dropoffLng], coords)) {
+                    dropoffZoneId = zone.id;
+                    console.log(`[Pricing] Dropoff detected in zone: ${zone.name}`);
+                    break;
+                }
+            } catch (e) { }
+        }
     }
 
-    const breakdown = {
-        base: pricingRule.baseRate,
-        mileage: distanceMiles * pricingRule.perMile,
-        surcharges: [] as { name: string; amount: number }[],
-        isFixed: false
+    // 1. Fixed Price Check
+    if (pickup && dropoff) {
+        try {
+            const fixedPrices = await prisma.fixedPrice.findMany({
+                where: {
+                    AND: [
+                        companyId ? { tenantId: companyId } : {},
+                        {
+                            OR: [
+                                // Case A: Exact String Match (Legacy)
+                                {
+                                    pickup: { contains: pickup, mode: 'insensitive' },
+                                    dropoff: { contains: dropoff, mode: 'insensitive' }
+                                },
+                                // Case B: Zone Match (Point in Poly)
+                                (pickupZoneId && dropoffZoneId) ? {
+                                    pickupZoneId: pickupZoneId,
+                                    dropoffZoneId: dropoffZoneId
+                                } : {}
+                            ]
+                        }
+                    ]
+                }
+            });
+
+            if (fixedPrices.length > 0) {
+                const match = fixedPrices[0];
+                // Prisma Decimal to number
+                const price = Number(match.price);
+                return {
+                    price: price,
+                    breakdown: {
+                        base: price,
+                        mileage: 0,
+                        surcharges: [],
+                        isFixed: true,
+                        ruleId: match.id
+                    }
+                };
+            }
+        } catch (e) {
+            console.error("Error querying fixed prices", e);
+        }
+    }
+
+    // 2. Pricing Rules
+    let rule = null;
+    try {
+        rule = await prisma.pricingRule.findFirst({
+            where: {
+                vehicleType: vehicleType,
+                ...(companyId ? { tenantId: companyId } : {})
+            }
+        });
+    } catch (e) {
+        console.error("Error querying pricing rules", e);
+    }
+
+    const effectiveRule = rule || {
+        // Fallback Default
+        id: 'default',
+        baseRate: 3.00,
+        perMile: 2.00,
+        minFare: 5.00,
+        vehicleType: 'Saloon',
+        waitingFreq: 0.00
     };
 
-    // 3. Surcharges
-    const surcharges = await prisma.surcharge.findMany({
-        where: { tenantId }
-    });
+    // 3. Calculate
+    const base = effectiveRule.baseRate ?? 3.00;
+    const rate = effectiveRule.perMile ?? 2.00;
+    const min = effectiveRule.minFare ?? 5.00;
 
-    // Check triggers
-    const timeStr = pickupTime.toTimeString().slice(0, 5); // "HH:MM"
-    const dayOfWeek = pickupTime.getDay().toString(); // "0" to "6"
+    // 4. Calculate Base Price
+    let total = base + (distanceMiles * rate);
 
-    for (const s of surcharges) {
-        let applies = false;
+    // --- Wait & Return Logic ---
+    if (req.isWaitAndReturn) {
+        // Round Trip Distance
+        const roundTripDistance = distanceMiles * 2;
+        // Recalculate base price for round trip (using base + mileage)
+        total = base + (roundTripDistance * rate);
 
-        // Date Range
-        if (s.startDate && s.endDate) {
-            if (pickupTime >= s.startDate && pickupTime <= s.endDate) applies = true;
+        // Add Waiting Time Cost
+        if (req.waitingTime && req.waitingTime > 0) {
+            const waitCost = req.waitingTime * (effectiveRule.waitingFreq || 0);
+            total += waitCost;
         }
+    }
+    // ---------------------------
 
-        // Time Range (Daily)
-        if (s.startTime && s.endTime) {
-            // Handle overnight range e.g. 22:00 to 06:00
-            if (s.endTime < s.startTime) {
-                if (timeStr >= s.startTime || timeStr <= s.endTime) applies = true;
-            } else {
-                if (timeStr >= s.startTime && timeStr <= s.endTime) applies = true;
-            }
-        }
+    // Fallback Multiplier if no DB rule found
+    if (effectiveRule.id === 'default') {
+        if (vehicleType === 'Estate' || vehicleType === 'Executive') total *= 1.2;
+        if (vehicleType.includes('MPV') || vehicleType.includes('8-seater')) total *= 1.5;
+    }
 
-        // Days of Week
-        if (s.daysOfWeek && s.daysOfWeek.includes(dayOfWeek)) {
-            applies = true;
-        }
+    // Min Charge
+    if (total < min) total = min;
 
-        // If applies, add cost
-        if (applies) {
-            let extra = 0;
-            if (s.type === 'PERCENT') {
-                extra = total * (s.value / 100);
-            } else {
-                extra = s.value;
-            }
-            total += extra;
-            breakdown.surcharges.push({ name: s.name, amount: extra });
-        }
+    // 4. Surcharges
+    const surcharges = [];
+
+    // Stop Surcharges
+    if (vias.length > 0) {
+        const stopCharge = vias.length * 5.00;
+        total += stopCharge;
+        surcharges.push({ name: `${vias.length} x Stops`, amount: stopCharge });
     }
 
     return {
         price: parseFloat(total.toFixed(2)),
-        breakdown
+        breakdown: {
+            base: base,
+            mileage: distanceMiles * rate,
+            surcharges: surcharges,
+            isFixed: false,
+            ruleId: effectiveRule.id
+        }
     };
 }
