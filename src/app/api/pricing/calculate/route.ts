@@ -29,14 +29,23 @@ export async function POST(request: Request) {
     try {
         const supabase = await createClient();
         const session = await auth();
-        // @ts-ignore
-        const companyId = session?.user?.tenantId; // Undefined if not logged in (public dispatch later?)
 
         const body = await request.json();
         const validation = CalculateSchema.safeParse(body);
 
         if (!validation.success) {
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
+        }
+
+        // Determine Tenant
+        let companyId = session?.user?.tenantId;
+
+        // If public (no session), try to find tenant from slug (or default to zercabs for MVP)
+        if (!companyId) {
+            // In real app, maybe pass tenantSlug in body?
+            const publicSlug = 'zercabs';
+            const tenant = await prisma.tenant.findUnique({ where: { slug: publicSlug } });
+            if (tenant) companyId = tenant.id;
         }
 
         const { pickup, dropoff, vias, date: dateStr, vehicleType, distance } = validation.data;

@@ -177,7 +177,7 @@ export class DispatchEngine {
         await prisma.job.update({
             where: { id: job.id },
             data: {
-                status: 'ASSIGNED',
+                status: 'DISPATCHED',
                 driverId: driver.id
             }
         });

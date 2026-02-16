@@ -17,21 +17,33 @@ export async function GET(req: Request) {
                 }
             },
             include: {
-                customer: {
-                    select: { name: true, phone: true }
-                }
+                customer: true,
+                driver: true
             },
             orderBy: {
                 pickupTime: 'asc'
             }
         });
 
-        // Also fetch upcoming PENDING jobs if assigned (Pre-assigned)
-        // Or if status is specifically ASSIGNED
-        // We might want to show COMPLETED jobs for today as history? 
-        // For MVP let's send active jobs.
+        const mappedJobs = jobs.map(j => ({
+            id: j.id,
+            pickupAddress: j.pickupAddress,
+            dropoffAddress: j.dropoffAddress,
+            passengerName: j.passengerName || j.customer?.name || "Unknown",
+            passengerPhone: j.passengerPhone || j.customer?.phone || "Unknown",
+            pickupTime: j.pickupTime.toISOString(),
+            fare: j.fare,
+            status: j.status,
+            paymentType: j.paymentType,
+            passengers: j.passengers,
+            luggage: j.luggage,
+            notes: j.notes,
+            vehicleType: j.vehicleType,
+            flightNumber: j.flightNumber,
+            isReturn: j.isReturn
+        }));
 
-        return NextResponse.json(jobs);
+        return NextResponse.json(mappedJobs);
 
     } catch (error) {
         console.error("Driver Jobs Error:", error);
