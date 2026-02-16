@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { PricingRule } from "@/lib/types";
 import { toast } from "sonner";
 
 export default function TariffsTab() {
@@ -22,7 +23,7 @@ export default function TariffsTab() {
         waitingFreq: 0.25 // Default 25p/min
     });
 
-    const [rules, setRules] = useState<any[]>([]);
+    const [rules, setRules] = useState<PricingRule[]>([]);
 
     const fetchRules = async () => {
         setLoading(true);
@@ -41,7 +42,7 @@ export default function TariffsTab() {
         }
     };
 
-    const updateFormFromRules = (currentRules: any[], type: string) => {
+    const updateFormFromRules = (currentRules: PricingRule[], type: string) => {
         const rule = currentRules.find((r: any) => r.vehicleType === type);
         if (rule) {
             setData({

@@ -12,6 +12,7 @@ export const BookingSchema = z.object({
     tenantId: z.string().min(1), // Who this booking is for
 });
 
+
 export type BookingRequest = z.infer<typeof BookingSchema>;
 
 export interface Vehicle {
@@ -21,8 +22,9 @@ export interface Vehicle {
     model: string;
     color?: string;
     type: string;
-    expiryDate?: string;
-    driverId?: string;
+    expiryDate?: string; // ISO String from API
+    driverId?: string | null;
+    driver?: Driver | null;
 }
 
 export interface Driver {
@@ -30,35 +32,36 @@ export interface Driver {
     callsign: string;
     name: string;
     phone: string;
-    email?: string;
-    badgeNumber?: string;
-    licenseExpiry?: string;
-    pin?: string;
-    status: "OFF_DUTY" | "FREE" | "BUSY" | "POB";
-    location?: string; // JSON
-    vehicles?: Vehicle[]; // Assigned vehicles (plural)
+    email?: string | null;
+    badgeNumber?: string | null;
+    licenseExpiry?: string | null; // ISO String
+    pin?: string | null;
+    status: "OFF_DUTY" | "FREE" | "BUSY" | "POB" | string;
+    location?: string | null; // JSON
+    vehicles?: Vehicle[];
+    tenantId: string;
 }
 
 export interface Account {
     id: string;
     code: string;
     name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
     isActive: boolean;
-    notes?: string;
+    notes?: string | null;
 }
 
 export interface Customer {
     id: string;
-    name: string;
+    name: string | null;
     phone: string;
-    email?: string;
-    notes?: string;
+    email?: string | null;
+    notes?: string | null;
     isAccount: boolean;
-    accountId?: string;
-    account?: Account;
+    accountId?: string | null;
+    account?: Account | null;
     history?: {
         address: string;
         count: number;
@@ -73,15 +76,17 @@ export interface PricingRule {
     baseRate: number;
     perMile: number;
     minFare: number;
+    waitingFreq: number;
 }
 
 export interface FixedPrice {
     id: string;
-    name?: string;
-    pickup?: string;
-    dropoff?: string;
+    name?: string | null;
+    pickup?: string | null;
+    dropoff?: string | null;
     price: number;
     vehicleType: string;
+    isReverse: boolean;
 }
 
 export interface Surcharge {
@@ -89,11 +94,11 @@ export interface Surcharge {
     name: string;
     type: "PERCENT" | "FLAT";
     value: number;
-    startDate?: string;
-    endDate?: string;
-    startTime?: string;
-    endTime?: string;
-    daysOfWeek?: string;
+    startDate?: string | null;
+    endDate?: string | null;
+    startTime?: string | null; // "HH:MM"
+    endTime?: string | null;
+    daysOfWeek?: string | null;
 }
 
 // Job Status Definitions
@@ -108,18 +113,34 @@ export const JOB_STATUSES = [
     "NO_SHOW"
 ] as const;
 
-export type JobStatus = typeof JOB_STATUSES[number];
+export type JobStatus = typeof JOB_STATUSES[number] | string;
 
-export interface Job extends BookingRequest {
-    id: string;
+export interface Job {
+    id: number; // Prisma uses Int for Job ID
+    pickupAddress: string;
+    dropoffAddress: string;
+    pickupTime: string; // ISO
+    passengerName: string;
+    passengerPhone: string;
+    passengers: number;
+    luggage: number;
+    vehicleType: string;
     status: JobStatus;
-    createdAt: string;
-    source: "WEB" | "PHONE";
-    driverId?: string; // Assigned Driver
-    driver?: Driver; // Expanded driver
-    fare?: number; // Normalized to fare
-    paymentType: "CASH" | "ACCOUNT";
+    notes?: string | null;
+    flightNumber?: string | null;
+
+    // Financials
+    fare?: number | null;
+    paymentType: "CASH" | "ACCOUNT" | "CARD" | string;
     isFixedPrice: boolean;
-    accountId?: string;
-    account?: Account;
+    waitingTime: number;
+    waitingCost: number;
+
+    // Relationships
+    driverId?: string | null;
+    driver?: Driver | null;
+    accountId?: string | null;
+    account?: Account | null;
+    customer?: Customer | null;
 }
+

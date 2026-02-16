@@ -9,9 +9,10 @@ import { Plus, Search, ArrowRightLeft, Trash2, ArrowLeftRight } from "lucide-rea
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FixedPrice } from "@/lib/types";
 
 export default function FixedPricesTab() {
-    const [prices, setPrices] = useState<any[]>([]);
+    const [prices, setPrices] = useState<FixedPrice[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
+import { auth } from '@/auth';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -51,29 +54,47 @@ export async function PATCH(
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400 });
         }
 
+        const updateData = {
+            ...(status && { status }),
+            ...(driverId !== undefined && { driverId }), // Allow null
+            ...(fare && { fare }),
+            ...(validation.data.pickupAddress && { pickupAddress: validation.data.pickupAddress }),
+            ...(validation.data.dropoffAddress && { dropoffAddress: validation.data.dropoffAddress }),
+            ...(validation.data.pickupTime && { pickupTime: validation.data.pickupTime }),
+            ...(validation.data.passengerName && { passengerName: validation.data.passengerName }),
+            ...(validation.data.passengerPhone && { passengerPhone: validation.data.passengerPhone }),
+            ...(validation.data.vehicleType && { vehicleType: validation.data.vehicleType }),
+            ...(validation.data.notes !== undefined && { notes: validation.data.notes }),
+            ...(validation.data.paymentType && { paymentType: validation.data.paymentType }),
+            ...(validation.data.passengers && { passengers: validation.data.passengers }),
+            ...(validation.data.luggage !== undefined && { luggage: validation.data.luggage }),
+            ...(validation.data.flightNumber !== undefined && { flightNumber: validation.data.flightNumber }),
+            ...(validation.data.preAssignedDriverId !== undefined && { preAssignedDriverId: validation.data.preAssignedDriverId }),
+        };
+
         const updatedJob = await prisma.job.update({
             where: { id: jobId },
-            data: {
-                ...(status && { status }),
-                ...(driverId !== undefined && { driverId }), // Allow null
-                ...(fare && { fare }),
-                ...(validation.data.pickupAddress && { pickupAddress: validation.data.pickupAddress }),
-                ...(validation.data.dropoffAddress && { dropoffAddress: validation.data.dropoffAddress }),
-                ...(validation.data.pickupTime && { pickupTime: validation.data.pickupTime }),
-                ...(validation.data.passengerName && { passengerName: validation.data.passengerName }),
-                ...(validation.data.passengerPhone && { passengerPhone: validation.data.passengerPhone }),
-                ...(validation.data.vehicleType && { vehicleType: validation.data.vehicleType }),
-                ...(validation.data.notes !== undefined && { notes: validation.data.notes }),
-                ...(validation.data.paymentType && { paymentType: validation.data.paymentType }),
-                ...(validation.data.passengers && { passengers: validation.data.passengers }),
-                ...(validation.data.luggage !== undefined && { luggage: validation.data.luggage }),
-                ...(validation.data.flightNumber !== undefined && { flightNumber: validation.data.flightNumber }),
-                ...(validation.data.preAssignedDriverId !== undefined && { preAssignedDriverId: validation.data.preAssignedDriverId }),
-            },
+            data: updateData,
             include: {
-                driver: true
+                driver: true,
+                customer: true
             }
         });
+
+        // --- Notifications ---
+        // 1. Driver Assigned (Dispatched)
+        if (status === 'DISPATCHED' && updatedJob.driverId) {
+            console.log(`[API] Job ${jobId} Dispatched. Sending Notification...`);
+            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            SmsService.sendDriverAssigned(updatedJob, updatedJob.driver).catch(e => console.error(e));
+        }
+
+        // 2. Job Completed (Receipt)
+        if (status === 'COMPLETED') {
+            console.log(`[API] Job ${jobId} Completed. Sending Receipt...`);
+            EmailService.sendJobReceipt(updatedJob).catch(e => console.error(e));
+        }
+        // ---------------------
 
         return NextResponse.json(updatedJob);
     } catch (error) {

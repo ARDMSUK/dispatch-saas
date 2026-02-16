@@ -9,19 +9,24 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const { searchParams } = new URL(req.url);
+        const type = searchParams.get('type'); // 'active' (default) or 'history'
+
+        const statusFilter = type === 'history'
+            ? { in: ['COMPLETED', 'CANCELLED', 'NO_SHOW'] }
+            : { in: ['ASSIGNED', 'DISPATCHED', 'EN_ROUTE', 'POB'] };
+
         const jobs = await prisma.job.findMany({
             where: {
                 driverId: driver.driverId,
-                status: {
-                    in: ['ASSIGNED', 'DISPATCHED', 'EN_ROUTE', 'POB'] // Active statuses
-                }
+                status: statusFilter
             },
             include: {
                 customer: true,
                 driver: true
             },
             orderBy: {
-                pickupTime: 'asc'
+                pickupTime: type === 'history' ? 'desc' : 'asc'
             }
         });
 

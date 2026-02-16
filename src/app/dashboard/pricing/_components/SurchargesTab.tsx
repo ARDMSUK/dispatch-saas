@@ -9,9 +9,10 @@ import { Plus, Clock, CalendarDays, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Surcharge } from "@/lib/types";
 
 export default function SurchargesTab() {
-    const [surcharges, setSurcharges] = useState<any[]>([]);
+    const [surcharges, setSurcharges] = useState<Surcharge[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -222,7 +223,7 @@ export default function SurchargesTab() {
                                             )}
                                             {(s.startDate || s.endDate) && (
                                                 <div className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />
-                                                    {new Date(s.startDate).toLocaleDateString()} - {new Date(s.endDate).toLocaleDateString()}
+                                                    {s.startDate ? new Date(s.startDate).toLocaleDateString() : 'Start'} - {s.endDate ? new Date(s.endDate).toLocaleDateString() : 'End'}
                                                 </div>
                                             )}
                                             {s.daysOfWeek && (

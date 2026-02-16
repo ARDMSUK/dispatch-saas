@@ -14,6 +14,7 @@ import {
 } from 'date-fns';
 import { EditBookingDialog } from './edit-booking-dialog';
 import { DesignateDriverDialog } from './designate-driver-dialog';
+import { DispatchDriverDialog } from './dispatch-driver-dialog';
 
 interface Job {
     id: number;
@@ -74,6 +75,10 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     // Designate State
     const [designateJob, setDesignateJob] = useState<Job | null>(null);
     const [designateOpen, setDesignateOpen] = useState(false);
+
+    // Dispatch State (Immediate)
+    const [dispatchJob, setDispatchJob] = useState<Job | null>(null);
+    const [dispatchOpen, setDispatchOpen] = useState(false);
 
     useEffect(() => {
         fetchJobs(); // Initial load
@@ -362,7 +367,22 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                                 handleManualDispatch(job);
                                             }}
                                         >
-                                            <Send className="mr-2 h-3.5 w-3.5 text-purple-400" /> Dispatch Now
+                                            <Send className="mr-2 h-3.5 w-3.5 text-purple-400" /> Dispatch to {job.preAssignedDriver.callsign}
+                                        </Button>
+                                    )}
+
+                                    {/* Manual Dispatch (No Pre-assign) */}
+                                    {(job.status === 'PENDING' || job.status === 'UNASSIGNED') && (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start h-8 text-xs font-normal"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDispatchJob(job);
+                                                setDispatchOpen(true);
+                                            }}
+                                        >
+                                            <Car className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Dispatch / Assign
                                         </Button>
                                     )}
 
@@ -555,6 +575,16 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 onSuccess={() => {
                     fetchJobs();
                     setDesignateJob(null);
+                }}
+            />
+
+            <DispatchDriverDialog
+                job={dispatchJob}
+                open={dispatchOpen}
+                onOpenChange={setDispatchOpen}
+                onSuccess={() => {
+                    fetchJobs();
+                    setDispatchJob(null);
                 }}
             />
         </div>

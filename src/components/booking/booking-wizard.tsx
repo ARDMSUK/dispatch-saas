@@ -11,6 +11,7 @@ import { StepSummary } from './step-summary';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PaymentModal } from './payment-modal';
 
 export type BookingData = {
     // Step 1: Location & Time
@@ -64,6 +65,8 @@ export function BookingWizard() {
     const [step, setStep] = useState(1);
     const [data, setData] = useState<BookingData>(INITIAL_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [pendingBookingId, setPendingBookingId] = useState<number | null>(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     const updateData = (updates: Partial<BookingData>) => {
         setData(prev => ({ ...prev, ...updates }));
@@ -104,12 +107,17 @@ export function BookingWizard() {
             if (!res.ok) throw new Error("Booking failed");
 
             const result = await res.json();
-            toast.success("Booking Confirmed!", {
-                description: `Reference: ${result.ref}. Check your email.`
-            });
 
-            // Redirect to Tracking Page
-            router.push(`/track/${result.jobId}`);
+            if (data.paymentType === 'CARD') {
+                setPendingBookingId(result.jobId);
+                setShowPaymentModal(true);
+                // Don't redirect yet
+            } else {
+                toast.success("Booking Confirmed!", {
+                    description: `Reference: ${result.ref}. Check your email.`
+                });
+                router.push(`/track/${result.jobId}`);
+            }
             // Optional: Reset data if needed, but we are navigating away.
             // setData(INITIAL_DATA);
 
@@ -188,6 +196,25 @@ export function BookingWizard() {
                     </motion.div>
                 </AnimatePresence>
             </div>
-        </div>
+
+            {
+                showPaymentModal && pendingBookingId && (
+                    <PaymentModal
+                        amount={data.price || 0}
+                        bookingId={pendingBookingId}
+                        onSuccess={(pid) => {
+                            setShowPaymentModal(false);
+                            toast.success("Payment Received!", { description: "Thank you." });
+                            router.push(`/track/${pendingBookingId}`);
+                        }}
+                        onCancel={() => {
+                            setShowPaymentModal(false);
+                            toast.info("Payment Skipped", { description: "You can pay the driver later." });
+                            router.push(`/track/${pendingBookingId}`);
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 }

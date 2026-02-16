@@ -112,7 +112,6 @@ export default function VehiclesPage() {
             type: vehicle.type,
             color: vehicle.color || "",
             expiryDate: vehicle.expiryDate || "",
-            // @ts-expect-error: driverId might be missing in type definition if not updated
             driverId: vehicle.driverId || "unassigned"
         });
         setIsDialogOpen(true);
@@ -286,7 +285,6 @@ export default function VehiclesPage() {
                                             {vehicle.expiryDate ? new Date(vehicle.expiryDate).toLocaleDateString() : '-'}
                                         </TableCell>
                                         <TableCell className="text-sm text-zinc-400">
-                                            {/* @ts-expect-error: Driver relation might be missing in Type for now */}
                                             {vehicle.driver?.callsign ? (
                                                 <Badge variant="secondary" className="bg-zinc-800 text-zinc-300 border-zinc-700">
                                                     {vehicle.driver.callsign}

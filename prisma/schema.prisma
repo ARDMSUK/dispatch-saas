@@ -198,6 +198,9 @@ model Job {
   // Financials
   fare           Float?   // Quoted/Final Fare
   paymentType    String   @default("CASH") // CASH, CARD, ACCOUNT
+  paymentStatus  String   @default("UNPAID") // UNPAID, AUTHORIZED, PAID, REFUNDED
+  stripePaymentIntentId String?
+  stripeClientSecret    String?
   isFixedPrice   Boolean  @default(false)
   
   // Wait & Return Details

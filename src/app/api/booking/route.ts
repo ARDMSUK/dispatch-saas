@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculatePrice } from '@/lib/pricing';
 import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
 import { DispatchEngine } from '@/lib/dispatch-engine';
 
 // POST /api/booking (Public)
@@ -151,10 +152,12 @@ export async function POST(req: Request) {
 
         const jobWithCustomer = { ...job, customer: { email: body.passengerEmail } };
         EmailService.sendBookingConfirmation(jobWithCustomer as any).catch(e => console.error("Email failed", e));
+        SmsService.sendBookingConfirmation(job).catch(e => console.error("SMS failed", e));
 
         if (returnJob) {
             const returnJobWithCustomer = { ...returnJob, customer: { email: body.passengerEmail } };
             EmailService.sendBookingConfirmation(returnJobWithCustomer as any).catch(e => console.error("Return Email failed", e));
+            SmsService.sendBookingConfirmation(returnJob).catch(e => console.error("Return SMS failed", e));
         }
 
         DispatchEngine.runDispatchLoop(tenantId).catch(e => console.error("Dispatch loop failed", e));
