@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { StepLocation } from './step-location';
 import { StepVehicle } from './step-vehicle';
@@ -59,6 +60,7 @@ const INITIAL_DATA: BookingData = {
 };
 
 export function BookingWizard() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [data, setData] = useState<BookingData>(INITIAL_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,10 +108,10 @@ export function BookingWizard() {
                 description: `Reference: ${result.ref}. Check your email.`
             });
 
-            // Reset or Redirect to Track
-            // For MVP just show success or reset
-            setStep(1);
-            setData(INITIAL_DATA);
+            // Redirect to Tracking Page
+            router.push(`/track/${result.jobId}`);
+            // Optional: Reset data if needed, but we are navigating away.
+            // setData(INITIAL_DATA);
 
         } catch (error) {
             toast.error("Booking Error", { description: "Please try again or call us." });
