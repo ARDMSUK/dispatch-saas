@@ -18,8 +18,19 @@ export async function GET(req: Request) {
 
         const jobs = await prisma.job.findMany({
             where: {
-                driverId: driver.driverId,
-                status: statusFilter
+                OR: [
+                    // Case 1: Active assignments (DISPATCHED, etc)
+                    {
+                        driverId: driver.driverId,
+                        status: statusFilter
+                    },
+                    // Case 2: Pre-assigned future bookings (even if PENDING)
+                    // Only include if we are looking for 'active' (future) jobs, not history
+                    ...(type !== 'history' ? [{
+                        preAssignedDriverId: driver.driverId,
+                        status: { in: ['PENDING', 'UNASSIGNED'] } // Pre-assigned usually sit here until dispatch
+                    }] : [])
+                ]
             },
             include: {
                 customer: true,
