@@ -136,7 +136,15 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
             </div>
 
             <Button
-                onClick={onNext}
+                onClick={() => {
+                    // Ensure price is saved before moving next
+                    // If user didn't click the card, price might be null in parent, but we have it locally
+                    const currentPrice = prices[data.vehicleType];
+                    if (currentPrice) {
+                        onUpdate({ price: currentPrice });
+                    }
+                    onNext();
+                }}
                 className="w-full h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-xl"
             >
                 Confirm {data.vehicleType}
