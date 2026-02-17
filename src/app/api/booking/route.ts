@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
         // 0. Tenant Resolution
         // Allow dynamic slug from frontend, fallback to default for testing
-        const tenantSlug = body.tenantSlug || 'key_0dmos8';
+        const tenantSlug = body.tenantSlug || 'demo-taxis';
         console.log(`[Booking] Resolving tenant slug: ${tenantSlug}`);
 
         const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
