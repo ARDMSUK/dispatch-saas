@@ -6,7 +6,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator } from 'lucide-react';
+import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { signOut } from "next-auth/react";
 
 export function DashboardShell({ children, userName, tenantSlug }: { children: React.ReactNode, userName: string, tenantSlug: string }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -68,9 +77,27 @@ export function DashboardShell({ children, userName, tenantSlug }: { children: R
                                 <span className="text-[10px] font-bold text-emerald-400 tracking-wider">SYSTEM ONLINE</span>
                             </div>
                         </div>
-                        <div className="h-8 w-8 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center">
-                            <span className="text-xs font-bold">{userName.charAt(0)}</span>
-                        </div>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center p-0 hover:bg-zinc-700">
+                                    <span className="text-xs font-bold">{userName.charAt(0)}</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 bg-zinc-900 border-white/10 text-white" align="end" forceMount>
+                                <DropdownMenuLabel className="font-normal">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-medium leading-none">{userName}</p>
+                                        <p className="text-xs leading-none text-zinc-400">{tenantSlug}</p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator className="bg-white/10" />
+                                <DropdownMenuItem onClick={() => signOut()} className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>Log out</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </header>
 
@@ -82,3 +109,4 @@ export function DashboardShell({ children, userName, tenantSlug }: { children: R
         </div>
     );
 }
+
