@@ -429,11 +429,33 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-amber-500" /></div>
                             <span className="text-sm text-zinc-100 font-medium leading-tight line-clamp-2">{job.dropoffAddress}</span>
                         </div>
-                        {/* Reminder Line */}
-                        {hasReminder && (
-                            <div className="flex items-start gap-2 mt-2 pt-2 border-t border-white/5">
-                                <AlertCircle className="h-3 w-3 text-red-400 mt-0.5" />
-                                <span className="text-xs text-red-300 font-bold">{job.notes?.split('\n')[0].replace('[', '').replace(']', '')}</span>
+                        {/* Notes / Reminders */}
+                        {job.notes && (
+                            <div className="mt-2 pt-2 border-t border-white/5 space-y-1">
+                                {(() => {
+                                    // Parse Notes: Check for [Header]
+                                    const match = job.notes.match(/^\[(.*?)\](?:\n|$)([\s\S]*)/);
+                                    if (match) {
+                                        const [_, header, __, body] = match;
+                                        return (
+                                            <>
+                                                <div className="flex items-start gap-2">
+                                                    <AlertCircle className="h-3 w-3 text-red-400 mt-0.5 shrink-0" />
+                                                    <span className="text-xs text-red-300 font-bold">{header}</span>
+                                                </div>
+                                                {body && <p className="text-xs text-zinc-400 pl-5 whitespace-pre-wrap">{body}</p>}
+                                            </>
+                                        );
+                                    } else {
+                                        // Plain notes
+                                        return (
+                                            <div className="flex items-start gap-2">
+                                                <div className="mt-0.5"><Edit className="h-3 w-3 text-zinc-500" /></div>
+                                                <p className="text-xs text-zinc-400 whitespace-pre-wrap">{job.notes}</p>
+                                            </div>
+                                        );
+                                    }
+                                })()}
                             </div>
                         )}
                     </div>
