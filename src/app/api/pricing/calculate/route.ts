@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         // If public (no session), try to find tenant from slug (or default to zercabs for MVP)
         if (!companyId) {
             // In real app, maybe pass tenantSlug in body?
-            const publicSlug = 'zercabs';
+            const publicSlug = 'demo-taxis';
             const tenant = await prisma.tenant.findUnique({ where: { slug: publicSlug } });
             if (tenant) companyId = tenant.id;
         }
