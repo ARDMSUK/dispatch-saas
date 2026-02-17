@@ -1,7 +1,7 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { calculatePrice } from '@/lib/pricing';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
