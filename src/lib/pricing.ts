@@ -34,6 +34,37 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     let { pickup, dropoff, vias = [], distanceMiles = 0, vehicleType = 'Saloon', pickupTime = new Date(), companyId, pickupLat, pickupLng, dropoffLat, dropoffLng } = req;
 
     // 0. Auto-calculate distance if missing
+    // FALLBACK: If coords are missing but we have addresses, try to geocode server-side
+    if ((!pickupLat || !dropoffLat) && pickup && dropoff) {
+        console.log("[Pricing] Missing coords, attempting server-side geocoding...");
+        try {
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+            if (apiKey) {
+                // Geocode Pickup
+                if (!pickupLat || !pickupLng) {
+                    const pRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(pickup)}&key=${apiKey}`);
+                    const pData = await pRes.json();
+                    if (pData.results?.[0]?.geometry?.location) {
+                        pickupLat = pData.results[0].geometry.location.lat;
+                        pickupLng = pData.results[0].geometry.location.lng;
+                    }
+                }
+
+                // Geocode Dropoff
+                if (!dropoffLat || !dropoffLng) {
+                    const dRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(dropoff)}&key=${apiKey}`);
+                    const dData = await dRes.json();
+                    if (dData.results?.[0]?.geometry?.location) {
+                        dropoffLat = dData.results[0].geometry.location.lat;
+                        dropoffLng = dData.results[0].geometry.location.lng;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("[Pricing] Server-side geocoding failed:", e);
+        }
+    }
+
     if ((!distanceMiles || distanceMiles === 0) && pickupLat && pickupLng && dropoffLat && dropoffLng) {
         distanceMiles = calculateDistance(pickupLat, pickupLng, dropoffLat, dropoffLng);
         console.log(`[Pricing] Calculated distance from coords: ${distanceMiles.toFixed(2)} miles`);

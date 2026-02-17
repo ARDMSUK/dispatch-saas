@@ -59,32 +59,7 @@ export async function POST(request: Request) {
         let { pickup, dropoff, vias, date: dateStr, vehicleType, distance, pickupLat, pickupLng, dropoffLat, dropoffLng } = validation.data;
         const jobDate = dateStr ? new Date(dateStr) : new Date();
 
-        // FALLBACK: If distance/coords are missing, try to geocode server-side
-        if ((!distance || distance === 0) && (!pickupLat || !dropoffLat)) {
-            console.log("Missing coords/distance, attempting server-side geocoding...");
-            try {
-                const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-                if (apiKey) {
-                    // Geocode Pickup
-                    const pRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(pickup)}&key=${apiKey}`);
-                    const pData = await pRes.json();
-                    if (pData.results?.[0]?.geometry?.location) {
-                        pickupLat = pData.results[0].geometry.location.lat;
-                        pickupLng = pData.results[0].geometry.location.lng;
-                    }
 
-                    // Geocode Dropoff
-                    const dRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(dropoff)}&key=${apiKey}`);
-                    const dData = await dRes.json();
-                    if (dData.results?.[0]?.geometry?.location) {
-                        dropoffLat = dData.results[0].geometry.location.lat;
-                        dropoffLng = dData.results[0].geometry.location.lng;
-                    }
-                }
-            } catch (e) {
-                console.error("Server-side geocoding failed:", e);
-            }
-        }
 
         const result = await calculatePrice({
             pickup,
