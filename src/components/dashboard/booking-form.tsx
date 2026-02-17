@@ -44,6 +44,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [selectedAccountId, setSelectedAccountId] = useState('');
     const [instructions, setInstructions] = useState('');
     const [reminders, setReminders] = useState('');
+    const [debugData, setDebugData] = useState<any>(null); // DEBUG STATE
 
     useEffect(() => {
         if (paymentType === 'ACCOUNT') {
@@ -180,7 +181,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             }
         }
 
-        const [debugData, setDebugData] = useState<any>(null); // DEBUG STATE
+
 
         try {
             const payload = {
