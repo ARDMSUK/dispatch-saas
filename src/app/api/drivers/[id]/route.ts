@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +29,11 @@ export async function PATCH(
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
         }
 
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const tenantId = session.user.tenantId;
 
         // Check if driver exists
         const existingDriver = await prisma.driver.findUnique({
@@ -45,7 +49,7 @@ export async function PATCH(
         // specific check for callsign uniqueness if it's being updated
         if (callsign && callsign !== existingDriver.callsign) {
             const duplicate = await prisma.driver.findFirst({
-                where: { tenantId: tenant.id, callsign }
+                where: { tenantId: tenantId, callsign }
             });
             if (duplicate) {
                 return NextResponse.json({ error: 'Callsign already exists' }, { status: 409 });
@@ -78,9 +82,17 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        // const tenantId = session.user.tenantId; // Not strictly needed for delete if ID is unique, but good for ownership check?
+        // Actually driver IDs are CUIDs so unique globaly, but we should verify ownership.
 
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const existingDriver = await prisma.driver.findUnique({ where: { id } });
+        if (!existingDriver || existingDriver.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Driver not found or access denied' }, { status: 404 });
+        }
 
         // Optional: Check for active jobs or dependencies before delete
         // For now, we allow delete.

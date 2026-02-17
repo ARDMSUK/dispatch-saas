@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +29,11 @@ export async function PATCH(
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
         }
 
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const tenantId = session.user.tenantId;
 
         const { code, name, email, phone, address, notes, isActive } = validation.data;
 
@@ -38,7 +42,7 @@ export async function PATCH(
             const existing = await prisma.account.findUnique({
                 where: {
                     tenantId_code: {
-                        tenantId: tenant.id,
+                        tenantId: tenantId,
                         code
                     }
                 }
@@ -75,6 +79,17 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
+
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Verify ownership
+        const existing = await prisma.account.findUnique({ where: { id } });
+        if (!existing || existing.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Account not found' }, { status: 404 });
+        }
 
         await prisma.account.delete({
             where: { id }

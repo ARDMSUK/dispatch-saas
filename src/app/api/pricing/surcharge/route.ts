@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { auth } from '@/auth';
 
 const CreateSurchargeSchema = z.object({
     name: z.string().min(1),
@@ -22,14 +23,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
         }
 
-        const tenant = await prisma.tenant.findUnique({ where: { slug: 'demo-cabs' } });
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const tenantId = session.user.tenantId;
 
         const { name, type, value, startDate, endDate, startTime, endTime, daysOfWeek } = validation.data;
 
         const surcharge = await prisma.surcharge.create({
             data: {
-                tenantId: tenant.id,
+                tenantId: tenantId,
                 name,
                 type,
                 value,

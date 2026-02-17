@@ -1,18 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { auth } from '@/auth';
+
 export async function GET() {
     try {
-        const tenant = await prisma.tenant.findUnique({
-            where: { slug: 'demo-cabs' }
-        });
-
-        if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const tenantId = session.user.tenantId;
 
         const [rules, fixedPrices, surcharges] = await Promise.all([
-            prisma.pricingRule.findMany({ where: { tenantId: tenant.id } }),
-            prisma.fixedPrice.findMany({ where: { tenantId: tenant.id } }),
-            prisma.surcharge.findMany({ where: { tenantId: tenant.id } })
+            prisma.pricingRule.findMany({ where: { tenantId } }),
+            prisma.fixedPrice.findMany({ where: { tenantId } }),
+            prisma.surcharge.findMany({ where: { tenantId } })
         ]);
 
         return NextResponse.json({
