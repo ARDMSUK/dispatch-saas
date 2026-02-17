@@ -57,6 +57,20 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
                         })
                     });
                     const resData = await res.json();
+
+                    // Capture Debug from first vehicle
+                    if (v.id === 'Saloon') {
+                        setDebugData({
+                            payload: { pickup: data.pickup, dropoff: data.dropoff, coords: { p: data.pickupCoords, d: data.dropoffCoords } },
+                            response: resData
+                        });
+                    }
+
+                    if (resData.error) {
+                        // Only toast once per batch
+                        if (v.id === 'Saloon') console.error("Pricing Error:", resData.error);
+                    }
+
                     if (resData.price) {
                         formatting[v.id] = resData.price;
                     }
@@ -83,6 +97,9 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
         // Let's call onNext immediately for smoother flow? 
         // No, user might want to read description.
     };
+
+    // DEBUG STATE
+    const [debugData, setDebugData] = useState<any>(null);
 
     return (
         <div className="space-y-6 h-full flex flex-col">
@@ -123,12 +140,22 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
 
                             {isSelected && (
                                 <div className="absolute top-1/2 right-4 -translate-y-1/2">
-                                    {/* Checkmark or similar could go here */}
+                                    <Check className="h-5 w-5 text-amber-500" />
                                 </div>
                             )}
                         </div>
                     );
                 })}
+
+                {/* DEBUG PANEL */}
+                {debugData && (
+                    <details className="mt-4 p-2 bg-black/50 border border-white/10 rounded text-[10px] font-mono text-zinc-400 overflow-hidden">
+                        <summary className="cursor-pointer hover:text-white">Debug Info (Click to Expand)</summary>
+                        <pre className="whitespace-pre-wrap mt-2 overflow-x-auto">
+                            {JSON.stringify(debugData, null, 2)}
+                        </pre>
+                    </details>
+                )}
             </div>
 
             <Button
