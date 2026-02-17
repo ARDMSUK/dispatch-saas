@@ -73,13 +73,12 @@ export async function POST(request: Request) {
             debug: { message: 'Supabase Pricing Engine', usedDistance: distance }
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error calculating price:', error);
-        // Fallback to simple default if everything fails
         return NextResponse.json({
             price: 15.00,
             breakdown: { base: 15.00, isFixed: false },
-            error: 'Calculation failed, using fallback'
+            error: `Calculation failed: ${error?.message || error}`
         });
     }
 }
