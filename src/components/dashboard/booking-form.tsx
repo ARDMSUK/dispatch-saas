@@ -194,6 +194,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 }),
             });
             const data = await res.json();
+
+            if (data.error) {
+                console.error("Pricing API Error:", data.error, data.details);
+                toast.error("Pricing Calculation Failed", {
+                    description: typeof data.error === 'string' ? data.error : "Unknown error",
+                    duration: 5000
+                });
+            }
+
             if (data.price) setQuotedPrice(data.price);
         } catch (e) {
             console.error("Pricing failed", e);
