@@ -19,7 +19,7 @@ const CalculateSchema = z.object({
     vehicleType: z.string().default('Saloon'),
     waitingTime: z.number().min(0).optional(),
     isWaitAndReturn: z.boolean().optional()
-});
+}).passthrough();
 
 import { auth } from "@/auth";
 
@@ -30,11 +30,21 @@ export async function POST(request: Request) {
         const supabase = await createClient();
         const session = await auth();
 
+        if (!session) {
+            console.error('Authentication session not found for pricing calculation.'); // Log session check failure
+        }
+
         const body = await request.json();
         const validation = CalculateSchema.safeParse(body);
 
         if (!validation.success) {
-            return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
+            console.error("Validation failed", validation.error);
+            return NextResponse.json({
+                price: 15.00,
+                breakdown: { base: 15.00, isFixed: false },
+                error: 'Invalid data',
+                details: validation.error
+            }, { status: 200 }); // Return 200 so frontend shows the price/error
         }
 
         // Determine Tenant
