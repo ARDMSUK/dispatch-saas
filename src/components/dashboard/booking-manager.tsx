@@ -434,9 +434,10 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <div className="mt-2 pt-2 border-t border-white/5 space-y-1">
                                 {(() => {
                                     // Parse Notes: Check for [Header]
-                                    const match = job.notes.match(/^\[(.*?)\](?:\n|$)([\s\S]*)/);
+                                    // Make regex more flexible: allow optional whitespace after ] before capturing body
+                                    const match = job.notes.match(/^\[(.*?)\]\s*([\s\S]*)/);
                                     if (match) {
-                                        const [_, header, __, body] = match;
+                                        const [_, header, body] = match;
                                         return (
                                             <>
                                                 <div className="flex items-start gap-2">
