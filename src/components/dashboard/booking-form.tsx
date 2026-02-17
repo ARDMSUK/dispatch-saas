@@ -875,15 +875,6 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
                 </Button>
 
-                {debugData && (
-                    <details className="mt-4 p-2 bg-black/50 border border-white/10 rounded text-[10px] font-mono text-zinc-400 overflow-hidden">
-                        <summary className="cursor-pointer hover:text-white">Debug Info (Click to Expand)</summary>
-                        <pre className="whitespace-pre-wrap mt-2 overflow-x-auto">
-                            {JSON.stringify(debugData, null, 2)}
-                        </pre>
-                    </details>
-                )}
-
             </div>
         </div>
     );
