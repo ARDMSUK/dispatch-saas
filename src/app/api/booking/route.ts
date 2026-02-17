@@ -11,13 +11,16 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        // Hardcoded for MVP: 'zercabs'
-        // In a real multi-tenant public app, we'd infer this from the domain or a hidden field.
-        const tenantSlug = 'zercabs';
+        // 0. Tenant Resolution
+        // Allow dynamic slug from frontend, fallback to default for testing
+        const tenantSlug = body.tenantSlug || 'key_0dmos8';
+        console.log(`[Booking] Resolving tenant slug: ${tenantSlug}`);
+
         const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
 
         if (!tenant) {
-            return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+            console.error(`[Booking] Tenant not found: ${tenantSlug}`);
+            return NextResponse.json({ error: "Service unavailable (Invalid Tenant)" }, { status: 404 });
         }
 
         const tenantId = tenant.id;

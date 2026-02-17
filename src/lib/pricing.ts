@@ -28,8 +28,16 @@ interface PriceResult {
     };
 }
 
+import { calculateDistance } from '@/lib/geoutils';
+
 export async function calculatePrice(req: CalculatePriceParams): Promise<PriceResult> {
-    const { pickup, dropoff, vias = [], distanceMiles = 0, vehicleType = 'Saloon', pickupTime = new Date(), companyId, pickupLat, pickupLng, dropoffLat, dropoffLng } = req;
+    let { pickup, dropoff, vias = [], distanceMiles = 0, vehicleType = 'Saloon', pickupTime = new Date(), companyId, pickupLat, pickupLng, dropoffLat, dropoffLng } = req;
+
+    // 0. Auto-calculate distance if missing
+    if ((!distanceMiles || distanceMiles === 0) && pickupLat && pickupLng && dropoffLat && dropoffLng) {
+        distanceMiles = calculateDistance(pickupLat, pickupLng, dropoffLat, dropoffLng);
+        console.log(`[Pricing] Calculated distance from coords: ${distanceMiles.toFixed(2)} miles`);
+    }
 
     // 0. Check Tenant Configuration
     let useZonePricing = false;

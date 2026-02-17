@@ -49,7 +49,7 @@ export default function DriverLoginPage() {
             // The seed data in `setup_driver_data.ts` used 'zercabs', but `seed.ts` used 'demo-cabs'.
             // Let's assume 'zercabs' based on setup_driver_data.ts
 
-            const tenantSlug = 'zercabs';
+            const tenantSlug = 'key_0dmos8';
 
             const res = await fetch('/api/driver/auth/login', {
                 method: 'POST',

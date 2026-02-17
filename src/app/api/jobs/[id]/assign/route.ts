@@ -17,7 +17,20 @@ export async function PATCH(
         const jobId = parseInt(id);
         const { driverId } = await req.json();
 
-        // Transaction: Update Job + Update Driver Status
+        // 1. Validate Driver Status
+        const driver = await prisma.driver.findUnique({
+            where: { id: driverId }
+        });
+
+        if (!driver) {
+            return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
+        }
+
+        if (driver.status === 'BUSY') {
+            return NextResponse.json({ error: 'Driver is currently BUSY' }, { status: 400 });
+        }
+
+        // 2. Transaction: Update Job + Update Driver Status
         const [updatedJob] = await prisma.$transaction([
             prisma.job.update({
                 where: { id: jobId },
