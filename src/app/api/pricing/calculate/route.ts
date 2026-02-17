@@ -26,6 +26,13 @@ import { auth } from "@/auth";
 
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+
+        if (!session) {
+            console.error('Authentication session not found for pricing calculation.'); // Log session check failure
+        }
+
+        const body = await request.json();
         const validation = CalculateSchema.safeParse(body);
 
         if (!validation.success) {
