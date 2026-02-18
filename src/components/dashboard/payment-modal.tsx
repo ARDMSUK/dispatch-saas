@@ -122,13 +122,20 @@ export function PaymentModal({ open, onOpenChange, amount, currency = 'gbp', onP
                     if (data.clientSecret) {
                         setClientSecret(data.clientSecret);
                     } else {
-                        toast.error("Failed to initialize payment");
+                        console.error("Payment init failed:", data.error);
+                        toast.error("Payment Initialization Failed", {
+                            description: data.error || "Unknown server error",
+                            duration: 5000
+                        });
                         onOpenChange(false);
                     }
                 })
                 .catch(err => {
-                    console.error(err);
-                    toast.error("Payment initialization error");
+                    console.error("Payment init fetch error:", err);
+                    toast.error("Network Error", {
+                        description: "Failed to reach payment server. Please check your connection.",
+                        duration: 5000
+                    });
                     onOpenChange(false);
                 });
         }
