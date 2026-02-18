@@ -151,17 +151,28 @@ export async function POST(req: Request) {
         }
 
         // 5. Notifications & Dispatch
-        // We do NOT await these to keep UI fast
+        // We MUST await these in Vercel Serverless, otherwise the function terminates before network calls complete.
+        // We use Promise.allSettled to ensure one failure doesn't block the response.
 
         const jobWithCustomer = { ...job, customer: { email: body.passengerEmail } };
-        EmailService.sendBookingConfirmation(jobWithCustomer as any).catch(e => console.error("Email failed", e));
-        SmsService.sendBookingConfirmation(job).catch(e => console.error("SMS failed", e));
+        const notificationPromises = [
+            EmailService.sendBookingConfirmation(jobWithCustomer as any),
+            SmsService.sendBookingConfirmation(job)
+        ];
 
         if (returnJob) {
             const returnJobWithCustomer = { ...returnJob, customer: { email: body.passengerEmail } };
-            EmailService.sendBookingConfirmation(returnJobWithCustomer as any).catch(e => console.error("Return Email failed", e));
-            SmsService.sendBookingConfirmation(returnJob).catch(e => console.error("Return SMS failed", e));
+            notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithCustomer as any));
+            notificationPromises.push(SmsService.sendBookingConfirmation(returnJob));
         }
+
+        await Promise.allSettled(notificationPromises).then((results) => {
+            results.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    console.error(`Notification ${index} failed:`, result.reason);
+                }
+            });
+        });
 
         DispatchEngine.runDispatchLoop(tenantId).catch(e => console.error("Dispatch loop failed", e));
 

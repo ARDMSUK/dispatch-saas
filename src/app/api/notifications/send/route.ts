@@ -31,6 +31,7 @@ export async function POST(req: Request) {
         let result;
 
         if (type === 'CONFIRMATION') {
+            console.log(`[Notification] Sending CONFIRMATION for Booking #${bookingIdInt}`);
             result = await EmailService.sendBookingConfirmation(booking);
         } else if (type === 'DRIVER_ASSIGNED' && driverId) {
             const driver = await prisma.driver.findUnique({
@@ -38,10 +39,19 @@ export async function POST(req: Request) {
                 include: { vehicles: true }
             });
             if (driver) {
+                console.log(`[Notification] Sending DRIVER_ASSIGNED for Booking #${bookingIdInt} to Driver ${driver.callsign}`);
                 result = await EmailService.sendDriverAssigned(booking, driver);
+            } else {
+                console.error(`[Notification] Driver ${driverId} not found`);
+                return NextResponse.json({ error: "Driver not found" }, { status: 404 });
             }
         } else if (type === 'JOB_COMPLETED') {
+            console.log(`[Notification] Sending JOB_COMPLETED for Booking #${bookingIdInt}`);
             result = await EmailService.sendJobReceipt(booking);
+        }
+
+        if (result && !result.success) {
+            console.error(`[Notification] Service Error:`, result.error);
         }
 
 
