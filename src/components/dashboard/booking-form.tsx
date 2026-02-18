@@ -5,6 +5,7 @@ import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone } from '
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { LocationInput } from './location-input';
+import { PaymentModal } from './payment-modal';
 
 type BookingFormProps = {
     onJobCreated: () => void;
@@ -227,7 +228,29 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
 
 
-    const handleCreateJob = async () => {
+    // Payment Integration
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    // Initial check: If CARD is selected, we intercept the flow
+    const handlePreSubmit = () => {
+        if (!pickup || !dropoff) {
+            toast.error("Please select a route first");
+            return;
+        }
+
+        if (paymentType === 'CARD') {
+            if (!quotedPrice || quotedPrice <= 0) {
+                toast.error("Price not calculated yet");
+                return;
+            }
+            setShowPaymentModal(true);
+        } else {
+            handleCreateJob();
+        }
+    };
+
+    // Fix: Separate the event handler from the logic
+    const handleCreateJob = async (paymentIntentId?: string) => {
         try {
             // Compose Notes
             let combinedNotes = instructions;
@@ -259,6 +282,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 accountId: paymentType === 'ACCOUNT' ? selectedAccountId : null,
                 notes: combinedNotes,
                 fare: quotedPrice,
+                // Payment
+                stripePaymentIntentId: paymentIntentId || null,
+                paymentStatus: paymentIntentId ? 'AUTHORIZED' : (paymentType === 'ACCOUNT' ? 'UNPAID' : 'UNPAID'),
                 // Wait & Return
                 waitingTime: isWaitAndReturn ? waitingTime : 0,
                 isWaitAndReturn,
@@ -869,13 +895,31 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                 <Button
                     className="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold h-12 text-md shadow-[0_0_20px_rgba(251,191,36,0.3)] border-0 mt-4"
-                    onClick={handleCreateJob}
+                    onClick={handlePreSubmit}
                     disabled={!pickup || !dropoff || !passengerName}
                 >
                     {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
                 </Button>
 
             </div>
+            {/* Payment Modal */}
+            <PaymentModal
+                open={showPaymentModal}
+                onOpenChange={setShowPaymentModal}
+                amount={quotedPrice || 0}
+                onPaymentSuccess={(pid) => {
+                    setShowPaymentModal(false);
+                    handleCreateJob(pid);
+                }}
+                onPaymentError={() => {
+                    // Toast already handled in modal usually, but we can double up
+                }}
+                bookingDetails={{
+                    passengerEmail,
+                    tenantId: 'demo-taxis' // Should be dynamic
+                }}
+            />
         </div>
     );
 }
+
