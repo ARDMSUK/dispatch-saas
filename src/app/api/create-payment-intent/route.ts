@@ -13,8 +13,8 @@ export async function POST(req: Request) {
         // IF it matches a re-calculation, or at least validate it's reasonable.
         // For now, we'll proceed with the passed amount but log a warning if it looks suspicious.
 
-        if (!amount || amount < 50) { // Minimum 50p
-            return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+        if (!amount || amount < 0.50) { // Minimum 50p
+            return NextResponse.json({ error: "Invalid amount (Minimum £0.50)" }, { status: 400 });
         }
 
         console.log(`[Payment] Creating Intent for ${amount} ${currency.toUpperCase()}`);
