@@ -33,6 +33,11 @@ export function DashboardShell({ children, userName, tenantSlug, userRole }: { c
         );
     };
 
+    const handleLogout = async () => {
+        await signOut({ redirect: false });
+        window.location.href = '/login';
+    };
+
     return (
         <div className="flex h-screen w-full bg-zinc-950 text-white overflow-hidden font-sans">
             {/* COLLAPSIBLE SIDEBAR (Sheet on Mobile, hidden by default on Desktop unless toggled? User said "click button to open") */}
@@ -63,7 +68,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole }: { c
 
                         <div className="my-2 border-t border-white/5"></div>
                         <button
-                            onClick={() => signOut()}
+                            onClick={handleLogout}
                             className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-red-400 hover:text-red-300 hover:bg-white/5 w-full text-left"
                         >
                             <LogOut className="h-4 w-4" />
@@ -109,7 +114,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole }: { c
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-white/10" />
-                                <DropdownMenuItem onClick={() => signOut()} className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer">
+                                <DropdownMenuItem onClick={handleLogout} className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer">
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>Log out</span>
                                 </DropdownMenuItem>
