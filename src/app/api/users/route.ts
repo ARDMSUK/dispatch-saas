@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
+import { sendEmail, getWelcomeEmail } from '@/lib/email';
 
 // GET /api/users
 export async function GET() {
@@ -79,6 +80,14 @@ export async function POST(req: Request) {
                 role: true,
                 createdAt: true
             }
+        });
+
+        // Send Welcome Email
+        const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
+        await sendEmail({
+            to: email,
+            subject: "Welcome to Dispatch SaaS",
+            html: getWelcomeEmail(name, loginUrl, email, password) // Note: Sending raw password (only on creation)
         });
 
         return NextResponse.json(user, { status: 201 });
