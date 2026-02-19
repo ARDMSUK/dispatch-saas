@@ -31,6 +31,16 @@ model Tenant {
   useZonePricing Boolean @default(false)
   autoDispatch   Boolean @default(false)
 
+  // Integrations (Encrypted/Stored secure in prod, text for now)
+  stripeSecretKey      String?
+  stripePublishableKey String?
+  
+  twilioAccountSid     String?
+  twilioAuthToken      String?
+  twilioFromNumber     String?
+  
+  resendApiKey         String?
+
   users     User[]
   customers Customer[]
   drivers   Driver[]
@@ -51,7 +61,7 @@ model User {
   email     String   @unique
   password  String   // Hashed
   name      String?
-  role      String   @default("DISPATCHER") // ADMIN, DISPATCHER
+  role      String   @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])

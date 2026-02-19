@@ -1,21 +1,24 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface EmailParams {
     to: string;
     subject: string;
     html: string;
+    apiKey?: string | null;
 }
 
-export async function sendEmail({ to, subject, html }: EmailParams) {
-    if (!process.env.RESEND_API_KEY) {
-        console.warn('RESEND_API_KEY is not set. Email not sent.');
+export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
+    // Priority: Passed API Key > Global Env
+    const key = apiKey || process.env.RESEND_API_KEY;
+
+    if (!key) {
+        console.warn('RESEND_API_KEY is not set (and no tenant key provided). Email not sent.');
         console.log(`[Mock Email] To: ${to}, Subject: ${subject}, Content: ${html.substring(0, 100)}...`);
         return { success: true, mock: true };
     }
 
     try {
+        const resend = new Resend(key);
         const data = await resend.emails.send({
             from: 'Dispatch SaaS <onboarding@resend.dev>', // Update this with your verified domain
             to,

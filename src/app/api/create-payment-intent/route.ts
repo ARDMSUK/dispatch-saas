@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
+import { prisma } from '@/lib/prisma';
 // import { calculatePrice } from '@/lib/pricing'; // Not used in MVP for now
 
 export async function POST(req: Request) {
@@ -17,7 +18,26 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid amount (Minimum £0.50)" }, { status: 400 });
         }
 
-        console.log(`[Payment] Creating Intent for ${amount} ${currency.toUpperCase()}`);
+        // Fetch Tenant Config
+        const tenantId = bookingDetails?.tenantId;
+        if (!tenantId) {
+            return NextResponse.json({ error: "Tenant ID required" }, { status: 400 });
+        }
+
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: tenantId }
+        });
+
+        // Use Tenant Key or Fallback to System Key (if env var set)
+        const apiKey = tenant?.stripeSecretKey || process.env.STRIPE_SECRET_KEY;
+
+        if (!apiKey) {
+            return NextResponse.json({ error: "Payment configuration missing for this tenant" }, { status: 500 });
+        }
+
+        const stripe = getStripe(apiKey);
+
+        console.log(`[Payment] Creating Intent for ${amount} ${currency.toUpperCase()} (Tenant: ${tenant?.name || 'System'})`);
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(amount * 100), // Convert to pennies/cents
@@ -26,7 +46,7 @@ export async function POST(req: Request) {
                 enabled: true,
             },
             metadata: {
-                tenantId: bookingDetails?.tenantId || 'unknown',
+                tenantId: tenantId,
                 customerEmail: bookingDetails?.passengerEmail || 'unknown',
             }
         });

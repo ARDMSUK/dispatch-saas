@@ -48,13 +48,22 @@ export const SmsService = {
         return { success: true, skipped: true };
     },
 
-    async sendSms(to: string, body: string) {
-        if (client && TWILIO_PHONE_NUMBER) {
+    async sendSms(to: string, body: string, config?: { accountSid?: string, authToken?: string, fromNumber?: string } | null) {
+
+        // Priority: Passed Config > Global Env
+        const accountSid = config?.accountSid || process.env.TWILIO_ACCOUNT_SID;
+        const authToken = config?.authToken || process.env.TWILIO_AUTH_TOKEN;
+        const fromNumber = config?.fromNumber || process.env.TWILIO_PHONE_NUMBER;
+
+        if (accountSid && authToken && fromNumber) {
             try {
-                console.log(`[SmsService] Sending real SMS to ${to}...`);
-                const message = await client.messages.create({
+                // Initialize client dynamically
+                const dynamicClient = twilio(accountSid, authToken);
+
+                console.log(`[SmsService] Sending real SMS to ${to} via ${fromNumber}...`);
+                const message = await dynamicClient.messages.create({
                     body: body,
-                    from: TWILIO_PHONE_NUMBER,
+                    from: fromNumber,
                     to: to
                 });
                 return { success: true, sid: message.sid };
@@ -67,6 +76,7 @@ export const SmsService = {
             console.log("==================================================");
             console.log(`[MOCK SMS] To: ${to}`);
             console.log(`[MOCK SMS] Message: ${body}`);
+            console.log(`[MOCK SMS] Config Missing: SID=${!!accountSid}, Auth=${!!authToken}, From=${!!fromNumber}`);
             console.log("==================================================");
             return { success: true, method: 'MOCK' };
         }
