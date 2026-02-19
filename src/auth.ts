@@ -51,6 +51,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async session({ session, token }: any) {
+            if (token && session.user) {
+                session.user.id = token.id;
+                session.user.role = token.role;
+                session.user.tenantId = token.impersonatedTenantId || token.tenantId; // Prefer impersonated
+                session.user.tenantSlug = token.impersonatedTenantSlug || token.tenantSlug;
+
+                // Flag to show we are impersonating
+                if (token.impersonatedTenantId) {
+                    session.user.isImpersonating = true;
+                    session.user.originalTenantId = token.tenantId;
+                }
+            }
+            return session;
+        },
         async jwt({ token, user, trigger, session }: any) {
             if (user) {
                 token.id = user.id;
@@ -58,17 +73,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.tenantId = user.tenantId;
                 token.tenantSlug = user.tenantSlug;
             }
-            return token;
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async session({ session, token }: any) {
-            if (token && session.user) {
-                session.user.id = token.id;
-                session.user.role = token.role;
-                session.user.tenantId = token.tenantId;
-                session.user.tenantSlug = token.tenantSlug;
+
+            // Handle Impersonation Update
+            if (trigger === "update" && session?.impersonateTenantId) {
+                // Verify safety: Only SUPER_ADMIN can do this
+                if (token.role === 'SUPER_ADMIN') {
+                    token.impersonatedTenantId = session.impersonateTenantId;
+                    token.impersonatedTenantSlug = session.impersonateTenantSlug;
+                }
             }
-            return session;
+            // Stop Impersonation
+            if (trigger === "update" && session?.stopImpersonation) {
+                delete token.impersonatedTenantId;
+                delete token.impersonatedTenantSlug;
+            }
+
+            return token;
         },
     },
     pages: {

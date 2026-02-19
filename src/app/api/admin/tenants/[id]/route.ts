@@ -20,6 +20,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
         return NextResponse.json(tenant);
     } catch (error) {
+        console.error("[ADMIN_TENANT_GET_ERROR]", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
