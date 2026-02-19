@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { SmsService } from '@/lib/sms-service';
 import { auth } from "@/auth";
 
 export async function PATCH(
@@ -37,13 +38,23 @@ export async function PATCH(
                 data: {
                     driverId,
                     status: 'DISPATCHED'
-                }
+                },
+                include: { customer: true }
             }),
             prisma.driver.update({
                 where: { id: driverId },
                 data: { status: 'BUSY' }
             })
         ]);
+
+        // Notifications
+        // 1. Notify Driver
+        SmsService.sendJobOfferToDriver(updatedJob, driver).catch(e => console.error("Failed to SMS Driver", e));
+
+        // 2. Notify Passenger (Driver Assigned)
+        if (updatedJob.passengerPhone) {
+            SmsService.sendDriverAssigned(updatedJob, driver).catch(e => console.error("Failed to SMS Passenger", e));
+        }
 
         return NextResponse.json(updatedJob);
     } catch (error) {

@@ -31,6 +31,17 @@ export const SmsService = {
         return this.sendSms(booking.passengerPhone, message);
     },
 
+    async sendJobOfferToDriver(booking: any, driver: any) {
+        if (!driver.phone) return;
+
+        const date = new Date(booking.pickupTime).toLocaleString([], {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        const message = `Thames Lines: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress}\nTo: ${booking.dropoffAddress}\nLog in to view details.`;
+        return this.sendSms(driver.phone, message);
+    },
+
     async sendJobReceipt(booking: any) {
         // Receipts are better via Email, but a short text works too
         // Skipping SMS receipt to save cost/spam unless requested

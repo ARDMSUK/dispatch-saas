@@ -86,7 +86,10 @@ export async function PATCH(
         if (status === 'DISPATCHED' && updatedJob.driverId) {
             console.log(`[API] Job ${jobId} Dispatched. Sending Notification...`);
             EmailService.sendDriverAssigned(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            // Notify Passenger
             SmsService.sendDriverAssigned(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            // Notify Driver
+            SmsService.sendJobOfferToDriver(updatedJob, updatedJob.driver).catch(e => console.error(e));
         }
 
         // 2. Job Completed (Receipt)
