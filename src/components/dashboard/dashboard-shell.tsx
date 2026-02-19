@@ -15,11 +15,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
-export function DashboardShell({ children, userName, tenantSlug, userRole }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string }) {
+export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
+    const { update } = useSession();
 
     const isAdmin = userRole === 'ADMIN';
 
@@ -81,6 +82,21 @@ export function DashboardShell({ children, userName, tenantSlug, userRole }: { c
 
             {/* MAIN AREA */}
             <div className="flex-1 flex flex-col">
+                {isImpersonating && (
+                    <div className="bg-amber-500 text-black px-4 py-1 text-xs font-bold text-center flex items-center justify-center gap-2">
+                        <span>VIEWING AS {tenantSlug.toUpperCase()}</span>
+                        <Button
+                            variant="link"
+                            className="h-auto p-0 text-black underline hover:no-underline"
+                            onClick={async () => {
+                                await update({ stopImpersonation: true });
+                                window.location.href = "/admin/tenants";
+                            }}
+                        >
+                            EXIT VIEW
+                        </Button>
+                    </div>
+                )}
                 {/* GLOBAL HEADER */}
                 <header className="h-14 border-b border-white/10 flex items-center justify-between px-4 bg-zinc-900/50 backdrop-blur-md z-50 shrink-0">
                     <div className="flex items-center gap-4">

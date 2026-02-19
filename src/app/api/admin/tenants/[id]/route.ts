@@ -3,15 +3,16 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
 // GET /api/admin/tenants/[id]
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (session?.user?.role !== 'SUPER_ADMIN') {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         const tenant = await prisma.tenant.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!tenant) {
@@ -26,8 +27,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // PUT /api/admin/tenants/[id]
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (session?.user?.role !== 'SUPER_ADMIN') {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -42,7 +44,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         } = body;
 
         const updatedTenant = await prisma.tenant.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 name, email, phone, address,
                 stripeSecretKey, stripePublishableKey,

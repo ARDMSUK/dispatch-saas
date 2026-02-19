@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +6,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ChevronLeft, Save, Building2, Key, Trash2 } from "lucide-react";
 
-export default function TenantConfigPage({ params }: { params: { id: string } }) {
+export default function TenantConfigPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -16,7 +15,7 @@ export default function TenantConfigPage({ params }: { params: { id: string } })
 
     // Fetch Tenant Data
     useEffect(() => {
-        fetch(`/api/admin/tenants/${params.id}`)
+        fetch(`/api/admin/tenants/${id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
@@ -30,7 +29,7 @@ export default function TenantConfigPage({ params }: { params: { id: string } })
                 toast.error("Failed to load tenant");
                 setLoading(false);
             });
-    }, [params.id]);
+    }, [id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTenant({ ...tenant, [e.target.name]: e.target.value });
@@ -39,7 +38,7 @@ export default function TenantConfigPage({ params }: { params: { id: string } })
     const handleSave = async () => {
         setSaving(true);
         try {
-            const res = await fetch(`/api/admin/tenants/${params.id}`, {
+            const res = await fetch(`/api/admin/tenants/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(tenant),

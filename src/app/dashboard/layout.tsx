@@ -19,8 +19,10 @@ export default async function DashboardLayout({
 
     const role = session?.user?.role || "DISPATCHER";
 
+    const isImpersonating = session?.user?.isImpersonating || false;
+
     return (
-        <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role}>
+        <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role} isImpersonating={isImpersonating}>
             <GoogleMapsLoader>
                 {children}
             </GoogleMapsLoader>
