@@ -67,12 +67,16 @@ export default async function TenantsPage() {
                                 </div>
                             </div>
                             <div className="pt-4 border-t border-zinc-800 flex justify-end gap-2">
-                                <Button variant="ghost" size="sm" className="h-8 text-xs hover:bg-zinc-800">
-                                    Configure
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-8 text-xs border-zinc-700 hover:bg-zinc-800">
-                                    View Dashboard
-                                </Button>
+                                <Link href={`/admin/tenants/${tenant.id}`}>
+                                    <Button variant="ghost" size="sm" className="h-8 text-xs hover:bg-zinc-800">
+                                        Configure
+                                    </Button>
+                                </Link>
+                                <Link href="/dashboard">
+                                    <Button variant="outline" size="sm" className="h-8 text-xs border-zinc-700 hover:bg-zinc-800">
+                                        View Dashboard
+                                    </Button>
+                                </Link>
                             </div>
                         </CardContent>
                     </Card>
