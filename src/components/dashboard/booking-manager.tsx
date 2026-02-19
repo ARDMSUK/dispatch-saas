@@ -157,12 +157,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         }
 
         try {
-            // We set status to DISPATCHED and formally assign the driverId from the preAssigned driver
-            const res = await fetch(`/api/jobs/${job.id}`, {
+            // Use the dedicated assign endpoint to ensure Driver status is updated to BUSY
+            const res = await fetch(`/api/jobs/${job.id}/assign`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    status: 'DISPATCHED',
                     driverId: job.preAssignedDriver.id
                 })
             });
@@ -170,12 +169,13 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
             if (res.ok) {
                 toast.success(`Job dispatched to ${job.preAssignedDriver.callsign}`);
 
-                // Trigger Driver Assigned Email
+                // Trigger Driver Assigned Email/SMS
                 handleSendNotification('DRIVER_ASSIGNED', job.id, job.preAssignedDriver.id);
 
                 fetchJobs();
             } else {
-                toast.error("Failed to dispatch job");
+                const errorData = await res.json();
+                toast.error(errorData.error || "Failed to dispatch job");
             }
         } catch (error) {
             console.error(error);
