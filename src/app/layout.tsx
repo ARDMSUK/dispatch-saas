@@ -18,18 +18,25 @@ export const metadata: Metadata = {
   description: "Premium Dispatch Platform",
 };
 
-export default function RootLayout({
+import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en" className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
         suppressHydrationWarning
       >
-        {children}
+        <SessionProvider session={session}>
+          {children}
+        </SessionProvider>
         <Toaster position="top-right" theme="dark" richColors />
       </body>
     </html>

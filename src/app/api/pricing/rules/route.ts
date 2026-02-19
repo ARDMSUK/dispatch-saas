@@ -31,6 +31,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        if (session.user.role !== 'ADMIN') {
+            return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
+        }
+
         const body = await req.json();
         const { vehicleType, baseRate, perMile, minFare } = body;
 

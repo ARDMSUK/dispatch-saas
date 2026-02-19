@@ -17,9 +17,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
 
-export function DashboardShell({ children, userName, tenantSlug }: { children: React.ReactNode, userName: string, tenantSlug: string }) {
+export function DashboardShell({ children, userName, tenantSlug, userRole }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
+
+    const isAdmin = userRole === 'ADMIN';
 
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
@@ -46,12 +48,27 @@ export function DashboardShell({ children, userName, tenantSlug }: { children: R
                         <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
                         <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
                         <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
+
+                        {isAdmin && (
+                            <>
+                                <div className="my-2 border-t border-white/5"></div>
+                                <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />
+                                <NavItem href="/dashboard/zones" icon={Map} label="Zones" />
+                                <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />
+                                <div className="my-2 border-t border-white/5"></div>
+                                <div className="my-2 border-t border-white/5"></div>
+                                <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+                            </>
+                        )}
+
                         <div className="my-2 border-t border-white/5"></div>
-                        <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />
-                        <NavItem href="/dashboard/zones" icon={Map} label="Zones" />
-                        <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />
-                        <div className="my-2 border-t border-white/5"></div>
-                        <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+                        <button
+                            onClick={() => signOut()}
+                            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-red-400 hover:text-red-300 hover:bg-white/5 w-full text-left"
+                        >
+                            <LogOut className="h-4 w-4" />
+                            <span className="text-sm font-medium">Log Out</span>
+                        </button>
                     </div>
                 </SheetContent>
             </Sheet>

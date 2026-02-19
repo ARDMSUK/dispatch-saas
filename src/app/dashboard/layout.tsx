@@ -11,8 +11,10 @@ export default async function DashboardLayout({
     const userName = session?.user?.name || "Operator";
     const tenantSlug = session?.user?.tenantSlug || "DEV";
 
+    const role = session?.user?.role || "DISPATCHER";
+
     return (
-        <DashboardShell userName={userName} tenantSlug={tenantSlug}>
+        <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role}>
             <GoogleMapsLoader>
                 {children}
             </GoogleMapsLoader>

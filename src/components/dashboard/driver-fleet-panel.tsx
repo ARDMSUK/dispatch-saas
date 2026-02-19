@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Car, Phone } from 'lucide-react';
 import { AddDriverDialog, AddVehicleDialog } from '@/components/dashboard/fleet-dialogs';
 
+import { useSession } from 'next-auth/react';
+
 interface DriverFleetPanelProps {
     drivers: any[];
     vehicles: any[];
@@ -17,6 +19,8 @@ interface DriverFleetPanelProps {
 
 export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selectedJobId }: DriverFleetPanelProps) {
     const [activeTab, setActiveTab] = useState('DRIVERS');
+    const { data: session } = useSession();
+    const isAdmin = session?.user?.role === 'ADMIN';
 
     // Fetching is now handled by parent
 
@@ -25,10 +29,12 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
             <div className="px-4 py-3 border-b border-white/5 flex justify-between items-center bg-zinc-950/50">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Fleet Management</span>
                 <div className="flex gap-1">
-                    {activeTab === 'DRIVERS' ? (
-                        <AddDriverDialog onDriverAdded={onRefresh} />
-                    ) : (
-                        <AddVehicleDialog onVehicleAdded={onRefresh} />
+                    {isAdmin && (
+                        activeTab === 'DRIVERS' ? (
+                            <AddDriverDialog onDriverAdded={onRefresh} />
+                        ) : (
+                            <AddVehicleDialog onVehicleAdded={onRefresh} />
+                        )
                     )}
                 </div>
             </div>
