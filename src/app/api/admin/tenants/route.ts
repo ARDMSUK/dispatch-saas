@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
+import { sendEmail, getWelcomeEmail } from '@/lib/email';
 
 // POST /api/admin/tenants
 export async function POST(req: Request) {
@@ -67,6 +68,16 @@ export async function POST(req: Request) {
             });
 
             return { tenant, user };
+        });
+
+        // Send Welcome Email
+        const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
+        // Use the tenant's Resend key if provided, otherwise fallback to system
+        await sendEmail({
+            to: adminEmail,
+            subject: "Welcome to Dispatch SaaS - Your Tenant is Ready",
+            html: getWelcomeEmail(adminName, loginUrl, adminEmail, adminPassword),
+            apiKey: resendApiKey
         });
 
         return NextResponse.json({ success: true, tenant: result.tenant }, { status: 201 });
