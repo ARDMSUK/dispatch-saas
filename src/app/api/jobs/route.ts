@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { calculatePrice } from '@/lib/pricing';
 import { auth } from "@/auth";
 import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
 import { DispatchEngine } from '@/lib/dispatch-engine';
 
 export const dynamic = 'force-dynamic';
@@ -270,11 +271,26 @@ export async function POST(request: Request) {
 
         // 6. Send Confirmation Email (Async, don't block response)
         const jobWithDetails = { ...newJob, passengerEmail: body.passengerEmail };
-        EmailService.sendBookingConfirmation(jobWithDetails).catch(e => console.error("Failed to send confirmation email", e));
+
+        // Notifications: Email & SMS
+        const notificationPromises = [
+            EmailService.sendBookingConfirmation(jobWithDetails as any).catch(e => console.error("Failed to send email", e))
+        ];
+
+        if (body.passengerPhone) {
+            notificationPromises.push(
+                SmsService.sendBookingConfirmation(newJob as any).catch(e => console.error("Failed to send SMS", e))
+            );
+        }
+
+        Promise.allSettled(notificationPromises);
 
         if (returnJob) {
             const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
-            EmailService.sendBookingConfirmation(returnJobWithDetails).catch(e => console.error("Failed to send return confirmation email", e));
+            EmailService.sendBookingConfirmation(returnJobWithDetails as any).catch(e => console.error("Failed to send return email", e));
+            if (body.passengerPhone) {
+                SmsService.sendBookingConfirmation(returnJob as any).catch(e => console.error("Failed to send return SMS", e));
+            }
         }
 
         // 7. Trigger Auto-Dispatch (Async)

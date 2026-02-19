@@ -319,6 +319,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 ACC
                             </Badge>
                         )}
+                        {(job.paymentStatus === 'AUTHORIZED' || job.paymentStatus === 'PAID') && (
+                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-mono text-[10px] flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> PAID
+                            </Badge>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2">
