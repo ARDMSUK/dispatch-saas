@@ -168,7 +168,7 @@ export default function DashboardPage() {
         if (!map || drivers.length === 0) return;
 
         const bounds = new google.maps.LatLngBounds();
-        let hasValidLoc = false;
+        let hasDriverLoc = false;
 
         drivers.forEach(d => {
             if (d.location) {
@@ -176,21 +176,21 @@ export default function DashboardPage() {
                     const pos = JSON.parse(d.location);
                     if (pos.lat && pos.lng) {
                         bounds.extend(pos);
-                        hasValidLoc = true;
+                        hasDriverLoc = true;
                     }
                 } catch (e) { }
             }
         });
 
-        // Also include tenant location if available
-        if (user?.tenant?.lat && user?.tenant?.lng) {
-            bounds.extend({ lat: user.tenant.lat, lng: user.tenant.lng });
-            hasValidLoc = true;
-        }
-
-        if (hasValidLoc) {
+        // Only fit bounds if we actually have drivers to show.
+        // If we only have the tenant location, we prefer to respect the default zoom/center 
+        // rather than zooming in aggressively on a single point.
+        if (hasDriverLoc) {
+            // Include tenant location for context (so meaningful relative position is shown)
+            if (user?.tenant?.lat && user?.tenant?.lng) {
+                bounds.extend({ lat: user.tenant.lat, lng: user.tenant.lng });
+            }
             map.fitBounds(bounds);
-            // Optional: Adjust zoom if only 1 point?
         }
     }, [map, drivers, user]);
 
