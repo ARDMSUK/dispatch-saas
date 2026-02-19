@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
 import { sendEmail, getWelcomeEmail } from '@/lib/email';
+import { sendEmail, getWelcomeEmail } from '@/lib/email';
 
 // GET /api/users
 export async function GET() {
