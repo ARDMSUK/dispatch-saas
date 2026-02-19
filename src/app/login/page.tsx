@@ -103,7 +103,10 @@ export default function LoginPage() {
                             {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Password</label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium">Password</label>
+                                <a href="/forgot-password" className="text-xs text-yellow-500 hover:text-yellow-400">Forgot password?</a>
+                            </div>
                             <Input
                                 type="password"
                                 {...register("password")}
