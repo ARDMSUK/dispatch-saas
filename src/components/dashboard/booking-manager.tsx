@@ -43,7 +43,7 @@ interface Job {
     companyName?: string;
     accountRef?: string;
     pricePaid?: number;
-    paymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
+    paymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL' | 'AUTHORIZED' | 'REFUNDED';
     commission?: number;
     driverPayment?: number;
     driverPaymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
