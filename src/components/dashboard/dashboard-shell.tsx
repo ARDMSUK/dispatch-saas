@@ -63,6 +63,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole }: { c
                                 <div className="my-2 border-t border-white/5"></div>
                                 <div className="my-2 border-t border-white/5"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+                                <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
                             </>
                         )}
 
