@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Driver } from "@/lib/types";
 import { Plus, Search, Car, Pencil, Trash2, X, MoreHorizontal, Power, CheckCircle, Clock } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function DriversPage() {
     const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -126,6 +127,9 @@ export default function DriversPage() {
         d.callsign.includes(searchTerm)
     );
 
+    const { data: session } = useSession();
+    const isAdmin = session?.user?.role === 'ADMIN';
+
     return (
         <div className="h-full flex flex-col p-4 bg-black/95 gap-4 text-zinc-100">
             <div className="flex justify-between items-center border-b border-white/10 pb-4">
@@ -133,74 +137,76 @@ export default function DriversPage() {
                     <h1 className="text-2xl font-bold text-white tracking-tight">Fleet Management</h1>
                     <p className="text-zinc-500 text-sm">Manage your drivers and their availability.</p>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-                    <DialogTrigger asChild>
-                        <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold">
-                            <Plus className="mr-2 h-4 w-4" /> Add Driver
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-zinc-900 border-white/10 text-white">
-                        <DialogHeader>
-                            <DialogTitle>{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    placeholder="Callsign (e.g. 101)"
-                                    value={formData.callsign}
-                                    onChange={e => setFormData({ ...formData, callsign: e.target.value })}
-                                    className="bg-zinc-950 border-white/10"
-                                />
-                                <Input
-                                    placeholder="Full Name"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    className="bg-zinc-950 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    placeholder="Phone Number"
-                                    value={formData.phone}
-                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                    className="bg-zinc-950 border-white/10"
-                                />
-                                <Input
-                                    placeholder="Email Address (Optional)"
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    className="bg-zinc-950 border-white/10"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    placeholder="Badge Number"
-                                    value={formData.badgeNumber}
-                                    onChange={e => setFormData({ ...formData, badgeNumber: e.target.value })}
-                                    className="bg-zinc-950 border-white/10"
-                                />
-                                <div className="space-y-1">
+                {isAdmin && (
+                    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
+                        <DialogTrigger asChild>
+                            <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold">
+                                <Plus className="mr-2 h-4 w-4" /> Add Driver
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-zinc-900 border-white/10 text-white">
+                            <DialogHeader>
+                                <DialogTitle>{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-2 gap-4">
                                     <Input
-                                        type="date"
-                                        placeholder="License Expiry"
-                                        value={formData.licenseExpiry ? formData.licenseExpiry.split('T')[0] : ''}
-                                        onChange={e => setFormData({ ...formData, licenseExpiry: new Date(e.target.value).toISOString() })}
+                                        placeholder="Callsign (e.g. 101)"
+                                        value={formData.callsign}
+                                        onChange={e => setFormData({ ...formData, callsign: e.target.value })}
+                                        className="bg-zinc-950 border-white/10"
+                                    />
+                                    <Input
+                                        placeholder="Full Name"
+                                        value={formData.name}
+                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         className="bg-zinc-950 border-white/10"
                                     />
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        placeholder="Phone Number"
+                                        value={formData.phone}
+                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                        className="bg-zinc-950 border-white/10"
+                                    />
+                                    <Input
+                                        placeholder="Email Address (Optional)"
+                                        value={formData.email}
+                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                        className="bg-zinc-950 border-white/10"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        placeholder="Badge Number"
+                                        value={formData.badgeNumber}
+                                        onChange={e => setFormData({ ...formData, badgeNumber: e.target.value })}
+                                        className="bg-zinc-950 border-white/10"
+                                    />
+                                    <div className="space-y-1">
+                                        <Input
+                                            type="date"
+                                            placeholder="License Expiry"
+                                            value={formData.licenseExpiry ? formData.licenseExpiry.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, licenseExpiry: new Date(e.target.value).toISOString() })}
+                                            className="bg-zinc-950 border-white/10"
+                                        />
+                                    </div>
+                                </div>
+                                <Input
+                                    placeholder="Login PIN (4 digits)"
+                                    value={formData.pin}
+                                    onChange={e => setFormData({ ...formData, pin: e.target.value })}
+                                    className="bg-zinc-950 border-white/10"
+                                />
+                                <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-400">
+                                    {editingId ? 'Update Driver' : 'Create Driver'}
+                                </Button>
                             </div>
-                            <Input
-                                placeholder="Login PIN (4 digits)"
-                                value={formData.pin}
-                                onChange={e => setFormData({ ...formData, pin: e.target.value })}
-                                className="bg-zinc-950 border-white/10"
-                            />
-                            <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-400">
-                                {editingId ? 'Update Driver' : 'Create Driver'}
-                            </Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
 
             <div className="flex gap-2">
@@ -226,17 +232,17 @@ export default function DriversPage() {
                             <TableHead className="text-zinc-400">Vehicle</TableHead>
                             <TableHead className="text-zinc-400">Badge</TableHead>
                             <TableHead className="text-zinc-400">Expiry</TableHead>
-                            <TableHead className="text-right text-zinc-400">Actions</TableHead>
+                            {isAdmin && <TableHead className="text-right text-zinc-400">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={8} className="text-center py-12 text-zinc-500">Loading fleet data...</TableCell>
+                                <TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-12 text-zinc-500">Loading fleet data...</TableCell>
                             </TableRow>
                         ) : filteredDrivers.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={8} className="text-center py-12 text-zinc-500">No drivers found matches.</TableCell>
+                                <TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-12 text-zinc-500">No drivers found matches.</TableCell>
                             </TableRow>
                         ) : (
                             filteredDrivers.map((driver) => (
@@ -259,16 +265,18 @@ export default function DriversPage() {
                                     <TableCell className="text-xs text-zinc-400">
                                         {driver.licenseExpiry ? new Date(driver.licenseExpiry).toLocaleDateString() : '-'}
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-white/10" onClick={() => handleEdit(driver)}>
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10" onClick={() => handleDelete(driver.id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
+                                    {isAdmin && (
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-white/10" onClick={() => handleEdit(driver)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10" onClick={() => handleDelete(driver.id)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))
                         )}

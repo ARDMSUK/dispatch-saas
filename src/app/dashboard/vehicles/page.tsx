@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Vehicle } from "@/lib/types";
 import { Plus, Search, Car, Pencil, Trash2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function VehiclesPage() {
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -145,96 +146,101 @@ export default function VehiclesPage() {
         return 'border-zinc-500 text-zinc-500';
     };
 
+    const { data: session } = useSession();
+    const isAdmin = session?.user?.role === 'ADMIN';
+
     return (
         <div className="h-full flex flex-col p-4 bg-zinc-950 gap-4">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-white">Vehicle Management</h1>
-                <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-                    <DialogTrigger asChild>
-                        <Button className="bg-white text-black hover:bg-zinc-200">
-                            <Plus className="mr-2 h-4 w-4" /> Add Vehicle
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-zinc-900 border-white/10 text-white">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <Input
-                                placeholder="Registration (License Plate)"
-                                className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
-                                value={formData.reg}
-                                onChange={e => setFormData({ ...formData, reg: e.target.value })}
-                            />
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    placeholder="Make (e.g. Toyota)"
-                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
-                                    value={formData.make}
-                                    onChange={e => setFormData({ ...formData, make: e.target.value })}
-                                />
-                                <Input
-                                    placeholder="Model (e.g. Prius)"
-                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
-                                    value={formData.model}
-                                    onChange={e => setFormData({ ...formData, model: e.target.value })}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    placeholder="Color"
-                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
-                                    value={formData.color}
-                                    onChange={e => setFormData({ ...formData, color: e.target.value })}
-                                />
-                                <select
-                                    className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
-                                    value={formData.type}
-                                    onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                >
-                                    <option value="Saloon">Saloon</option>
-                                    <option value="Estate">Estate</option>
-                                    <option value="Executive">Executive</option>
-                                    <option value="MPV">MPV</option>
-                                    <option value="MPV+">MPV+</option>
-                                    <option value="Minibus">Minibus</option>
-                                    <option value="Coach">Coach</option>
-                                </select>
-                            </div>
-
-                            {/* Driver Assignment */}
-                            <div className="space-y-1">
-                                <label className="text-xs text-zinc-500 ml-1">Assigned Driver</label>
-                                <select
-                                    className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
-                                    value={formData.driverId}
-                                    onChange={e => setFormData({ ...formData, driverId: e.target.value })}
-                                >
-                                    <option value="unassigned">-- Unassigned --</option>
-                                    {drivers.map(driver => (
-                                        <option key={driver.id} value={driver.id}>
-                                            {driver.callsign} - {driver.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="space-y-1">
-                                <Input
-                                    type="date"
-                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500 block w-full"
-                                    placeholder="MOT/License Expiry"
-                                    value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
-                                    onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
-                                />
-                                <span className="text-[10px] text-zinc-500 ml-1">MOT/License Expiry</span>
-                            </div>
-                            <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-600">
-                                {editingId ? 'Update Vehicle' : 'Create Vehicle'}
+                {isAdmin && (
+                    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
+                        <DialogTrigger asChild>
+                            <Button className="bg-white text-black hover:bg-zinc-200">
+                                <Plus className="mr-2 h-4 w-4" /> Add Vehicle
                             </Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                        </DialogTrigger>
+                        <DialogContent className="bg-zinc-900 border-white/10 text-white">
+                            <DialogHeader>
+                                <DialogTitle className="text-white">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <Input
+                                    placeholder="Registration (License Plate)"
+                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                    value={formData.reg}
+                                    onChange={e => setFormData({ ...formData, reg: e.target.value })}
+                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        placeholder="Make (e.g. Toyota)"
+                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                        value={formData.make}
+                                        onChange={e => setFormData({ ...formData, make: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Model (e.g. Prius)"
+                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                        value={formData.model}
+                                        onChange={e => setFormData({ ...formData, model: e.target.value })}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        placeholder="Color"
+                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                        value={formData.color}
+                                        onChange={e => setFormData({ ...formData, color: e.target.value })}
+                                    />
+                                    <select
+                                        className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                        value={formData.type}
+                                        onChange={e => setFormData({ ...formData, type: e.target.value })}
+                                    >
+                                        <option value="Saloon">Saloon</option>
+                                        <option value="Estate">Estate</option>
+                                        <option value="Executive">Executive</option>
+                                        <option value="MPV">MPV</option>
+                                        <option value="MPV+">MPV+</option>
+                                        <option value="Minibus">Minibus</option>
+                                        <option value="Coach">Coach</option>
+                                    </select>
+                                </div>
+
+                                {/* Driver Assignment */}
+                                <div className="space-y-1">
+                                    <label className="text-xs text-zinc-500 ml-1">Assigned Driver</label>
+                                    <select
+                                        className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                        value={formData.driverId}
+                                        onChange={e => setFormData({ ...formData, driverId: e.target.value })}
+                                    >
+                                        <option value="unassigned">-- Unassigned --</option>
+                                        {drivers.map(driver => (
+                                            <option key={driver.id} value={driver.id}>
+                                                {driver.callsign} - {driver.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <Input
+                                        type="date"
+                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500 block w-full"
+                                        placeholder="MOT/License Expiry"
+                                        value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
+                                        onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
+                                    />
+                                    <span className="text-[10px] text-zinc-500 ml-1">MOT/License Expiry</span>
+                                </div>
+                                <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-600">
+                                    {editingId ? 'Update Vehicle' : 'Create Vehicle'}
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
 
             <div className="flex gap-2 mb-4">
@@ -260,17 +266,17 @@ export default function VehiclesPage() {
                                 <TableHead className="text-zinc-400">Color</TableHead>
                                 <TableHead className="text-zinc-400">Expiry</TableHead>
                                 <TableHead className="text-zinc-400">Driver</TableHead>
-                                <TableHead className="text-right text-zinc-400">Actions</TableHead>
+                                {isAdmin && <TableHead className="text-right text-zinc-400">Actions</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow className="hover:bg-transparent border-white/5">
-                                    <TableCell colSpan={7} className="text-center py-8 text-zinc-500">Loading vehicles...</TableCell>
+                                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-zinc-500">Loading vehicles...</TableCell>
                                 </TableRow>
                             ) : filteredVehicles.length === 0 ? (
                                 <TableRow className="hover:bg-transparent border-white/5">
-                                    <TableCell colSpan={7} className="text-center py-8 text-zinc-500">No vehicles found</TableCell>
+                                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-zinc-500">No vehicles found</TableCell>
                                 </TableRow>
                             ) : (
                                 filteredVehicles.map((vehicle) => (
@@ -291,16 +297,18 @@ export default function VehiclesPage() {
                                                 </Badge>
                                             ) : <span className="text-zinc-700">-</span>}
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => handleEdit(vehicle)}>
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(vehicle.id)}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
+                                        {isAdmin && (
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => handleEdit(vehicle)}>
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(vehicle.id)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        )}
                                     </TableRow>
                                 ))
                             )}
