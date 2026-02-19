@@ -102,6 +102,27 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                             onChange={(e) => onUpdate({ notes: e.target.value })}
                         />
                     </div>
+
+                    {/* Payment Method */}
+                    <div className="pt-2">
+                        <label className="text-xs text-zinc-500 font-bold mb-2 block uppercase">Payment Method</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div
+                                onClick={() => onUpdate({ paymentType: 'CASH' })}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-center gap-2 ${data.paymentType === 'CASH' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-black/40 border-white/10 text-zinc-400 hover:bg-white/5'}`}
+                            >
+                                <span className="font-bold">CASH</span>
+                                <span className="text-xs opacity-70">(Pay Driver)</span>
+                            </div>
+                            <div
+                                onClick={() => onUpdate({ paymentType: 'CARD' })}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-center gap-2 ${data.paymentType === 'CARD' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-black/40 border-white/10 text-zinc-400 hover:bg-white/5'}`}
+                            >
+                                <span className="font-bold">CARD</span>
+                                <span className="text-xs opacity-70">(Pre-pay)</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
