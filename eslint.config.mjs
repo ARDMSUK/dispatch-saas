@@ -20,6 +20,7 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-require-imports": "off",
       "react/no-unescaped-entities": "off",
       "react-hooks/rules-of-hooks": "off",
       "@next/next/no-img-element": "off",

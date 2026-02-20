@@ -31,7 +31,8 @@ interface PriceResult {
 import { calculateDistance } from '@/lib/geoutils';
 
 export async function calculatePrice(req: CalculatePriceParams): Promise<PriceResult> {
-    let { pickup, dropoff, vias = [], distanceMiles = 0, vehicleType = 'Saloon', pickupTime = new Date(), companyId, pickupLat, pickupLng, dropoffLat, dropoffLng } = req;
+    const { pickup, dropoff, vias = [], vehicleType = 'Saloon', pickupTime = new Date(), companyId, isWaitAndReturn, waitingTime } = req;
+    let { distanceMiles = 0, pickupLat, pickupLng, dropoffLat, dropoffLng } = req;
 
     // 0. Auto-calculate distance if missing
     // FALLBACK: If coords are missing but we have addresses, try to geocode server-side

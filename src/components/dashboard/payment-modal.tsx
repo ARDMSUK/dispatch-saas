@@ -112,6 +112,7 @@ export function PaymentModal({ open, onOpenChange, amount, currency = 'gbp', onP
     // Create PaymentIntent on open
     useEffect(() => {
         if (open && amount > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setClientSecret(null); // Reset state to prevent stale payment intents
             fetch('/api/create-payment-intent', {
                 method: 'POST',
