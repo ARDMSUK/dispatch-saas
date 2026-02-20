@@ -32,7 +32,7 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (session.user.role !== 'ADMIN') {
+        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
             return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
         }
 
