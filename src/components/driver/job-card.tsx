@@ -14,7 +14,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
         </div>
     );
 
-    const isOffer = job.status === 'DISPATCHED'; // "Offer" state for driver
+    const isOffer = job.status === 'DISPATCHED' || job.status === 'PENDING'; // "Offer" state for driver
     const isInProgress = ['EN_ROUTE', 'ARRIVED', 'POB'].includes(job.status);
     const isHistory = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(job.status);
 
