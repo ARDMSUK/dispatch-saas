@@ -72,7 +72,7 @@ export const EmailService = {
                     throw new Error("Resend client not initialized");
                 }
                 const data = await resend.emails.send({
-                    from: `${companyName} <onboarding@resend.dev>`, // Update this with your verified domain
+                    from: `Dispatch <onboarding@resend.dev>`, // Resend restricts dynamic names on the sandbox domain
                     to: [to],
                     subject: subject,
                     html: html,
