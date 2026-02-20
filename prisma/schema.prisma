@@ -41,6 +41,23 @@ model Tenant {
   
   resendApiKey         String?
 
+  // Notification Templates (Super Admin ONLY)
+  smsTemplateConfirmation     String? @db.Text
+  smsTemplateDriverAssigned   String? @db.Text
+  smsTemplateDriverArrived    String? @db.Text
+
+  emailSubjectConfirmation    String? @db.Text
+  emailBodyConfirmation       String? @db.Text
+  
+  emailSubjectDriverAssigned  String? @db.Text
+  emailBodyDriverAssigned     String? @db.Text
+  
+  emailSubjectDriverArrived   String? @db.Text
+  emailBodyDriverArrived      String? @db.Text
+  
+  emailSubjectReceipt         String? @db.Text
+  emailBodyReceipt            String? @db.Text
+
   users     User[]
   customers Customer[]
   drivers   Driver[]

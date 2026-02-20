@@ -89,17 +89,17 @@ export async function PATCH(
         // 1. Driver Assigned (Dispatched)
         if (status === 'DISPATCHED' && updatedJob.driverId) {
             console.log(`[API] Job ${jobId} Dispatched. Sending Notification...`);
-            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
             // Notify Passenger
             SmsService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
             // Notify Driver
-            SmsService.sendJobOfferToDriver(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            SmsService.sendJobOfferToDriver(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
         }
 
         // 1.5 Driver Arrived
         if (status === 'ARRIVED' && updatedJob.driverId) {
             console.log(`[API] Job ${jobId} Arrived. Sending Notification...`);
-            EmailService.sendDriverArrived(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            EmailService.sendDriverArrived(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
             // Notify Passenger
             SmsService.sendDriverArrived(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
         }
@@ -107,7 +107,7 @@ export async function PATCH(
         // 2. Job Completed (Receipt)
         if (status === 'COMPLETED') {
             console.log(`[API] Job ${jobId} Completed. Sending Receipt...`);
-            EmailService.sendJobReceipt(updatedJob).catch(e => console.error(e));
+            EmailService.sendJobReceipt(updatedJob, tenantSettings).catch(e => console.error(e));
         }
         // ---------------------
 

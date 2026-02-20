@@ -38,7 +38,8 @@ export const SmsService = {
             const date = new Date(booking.pickupTime).toLocaleString([], {
                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
             });
-            message = `Thames Lines: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress}`;
+            const company = orgSettings?.name || 'Dispatch';
+            message = `${company}: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress}`;
         }
 
         return this.sendSms(booking.passengerPhone, message);
@@ -53,7 +54,8 @@ export const SmsService = {
         } else {
             const vehicle = driver.vehicles?.[0];
             const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
-            message = `Thames Lines: Driver Assigned.\n${driver.name} is on the way in ${vehicleDesc}.\nCall: ${driver.phone}`;
+            const company = orgSettings?.name || 'Dispatch';
+            message = `${company}: Driver Assigned.\n${driver.name} is on the way in ${vehicleDesc}.\nCall: ${driver.phone}`;
         }
 
         return this.sendSms(booking.passengerPhone, message);
@@ -68,20 +70,22 @@ export const SmsService = {
         } else {
             const vehicle = driver.vehicles?.[0];
             const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
-            message = `Thames Lines: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
+            const company = orgSettings?.name || 'Dispatch';
+            message = `${company}: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
         }
 
         return this.sendSms(booking.passengerPhone, message);
     },
 
-    async sendJobOfferToDriver(booking: any, driver: any) {
+    async sendJobOfferToDriver(booking: any, driver: any, orgSettings?: any) {
         if (!driver.phone) return;
 
         const date = new Date(booking.pickupTime).toLocaleString([], {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
-        const message = `Thames Lines: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress}\nTo: ${booking.dropoffAddress}\nLog in to view details.`;
+        const company = orgSettings?.name || 'Dispatch';
+        const message = `${company}: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress}\nTo: ${booking.dropoffAddress}\nLog in to view details.`;
         return this.sendSms(driver.phone, message);
     },
 

@@ -296,7 +296,7 @@ export default function SettingsPage() {
                         <Textarea
                             value={smsTemplateConfirmation}
                             onChange={(e) => setSmsTemplateConfirmation(e.target.value)}
-                            placeholder="Thames Lines: Booking #{booking_id} Confirmed.\nPickup: {pickup_time}\nFrom: {pickup_address}"
+                            placeholder="Company: Booking #{booking_id} Confirmed.\nPickup: {pickup_time}\nFrom: {pickup_address}"
                             className="bg-black/50 border-white/10 mt-1"
                         />
                     </div>
@@ -306,7 +306,7 @@ export default function SettingsPage() {
                         <Textarea
                             value={smsTemplateDriverAssigned}
                             onChange={(e) => setSmsTemplateDriverAssigned(e.target.value)}
-                            placeholder="Thames Lines: Driver Assigned.\n{driver_name} is on the way in {vehicle_details}.\nCall: {driver_phone}"
+                            placeholder="Company: Driver Assigned.\n{driver_name} is on the way in {vehicle_details}.\nCall: {driver_phone}"
                             className="bg-black/50 border-white/10 mt-1"
                         />
                     </div>
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                         <Textarea
                             value={smsTemplateDriverArrived}
                             onChange={(e) => setSmsTemplateDriverArrived(e.target.value)}
-                            placeholder="Thames Lines: Driver Arrived.\n{driver_name} is waiting outside in {vehicle_details}.\nCall: {driver_phone}"
+                            placeholder="Company: Driver Arrived.\n{driver_name} is waiting outside in {vehicle_details}.\nCall: {driver_phone}"
                             className="bg-black/50 border-white/10 mt-1"
                         />
                     </div>

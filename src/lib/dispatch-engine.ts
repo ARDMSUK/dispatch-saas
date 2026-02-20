@@ -193,8 +193,9 @@ export class DispatchEngine {
         });
 
         // 3. Send Notifications
+        const tenantSettings = await prisma.tenant.findUnique({ where: { id: job.tenantId } });
         // Email Customer
-        await EmailService.sendDriverAssigned(job, driver);
+        await EmailService.sendDriverAssigned(job, driver, tenantSettings);
 
         // Notify Driver (Push/SMS)? 
         // For now, console log.

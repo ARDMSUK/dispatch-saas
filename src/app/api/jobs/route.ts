@@ -272,14 +272,16 @@ export async function POST(request: Request) {
         // 6. Send Confirmation Email (Async, don't block response)
         const jobWithDetails = { ...newJob, passengerEmail: body.passengerEmail };
 
+        const tenantSettings = await prisma.tenant.findUnique({ where: { id: tenantId } });
+
         // Notifications: Email & SMS
         const notificationPromises = [
-            EmailService.sendBookingConfirmation(jobWithDetails as any).catch(e => console.error("Failed to send email", e))
+            EmailService.sendBookingConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send email", e))
         ];
 
         if (body.passengerPhone) {
             notificationPromises.push(
-                SmsService.sendBookingConfirmation(newJob as any).catch(e => console.error("Failed to send SMS", e))
+                SmsService.sendBookingConfirmation(newJob as any, tenantSettings).catch(e => console.error("Failed to send SMS", e))
             );
         }
 
@@ -287,9 +289,9 @@ export async function POST(request: Request) {
 
         if (returnJob) {
             const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
-            EmailService.sendBookingConfirmation(returnJobWithDetails as any).catch(e => console.error("Failed to send return email", e));
+            EmailService.sendBookingConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return email", e));
             if (body.passengerPhone) {
-                SmsService.sendBookingConfirmation(returnJob as any).catch(e => console.error("Failed to send return SMS", e));
+                SmsService.sendBookingConfirmation(returnJob as any, tenantSettings).catch(e => console.error("Failed to send return SMS", e));
             }
         }
 

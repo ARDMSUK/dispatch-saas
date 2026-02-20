@@ -1,10 +1,10 @@
 
 export const EmailTemplates = {
-  bookingConfirmation: (booking: any) => `
+  bookingConfirmation: (booking: any, companyName: string = 'Our Service') => `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Booking Confirmed: #${booking.id.toString().padStart(6, '0')}</h2>
       <p>Dear ${booking.passengerName},</p>
-      <p>Thank you for booking with Thames Lines. Your booking has been received and confirmed.</p>
+      <p>Thank you for booking with ${companyName}. Your booking has been received and confirmed.</p>
       
       <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
         <p><strong>Pickup:</strong> ${booking.pickupAddress}</p>
@@ -18,7 +18,7 @@ export const EmailTemplates = {
     </div>
   `,
 
-  driverAssigned: (booking: any, driver: any) => {
+  driverAssigned: (booking: any, driver: any, companyName: string = 'Our Service') => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
     return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -36,7 +36,7 @@ export const EmailTemplates = {
   `
   },
 
-  driverArrived: (booking: any, driver: any) => {
+  driverArrived: (booking: any, driver: any, companyName: string = 'Our Service') => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
     return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -54,11 +54,11 @@ export const EmailTemplates = {
   `
   },
 
-  jobReceipt: (booking: any) => `
+  jobReceipt: (booking: any, companyName: string = 'Our Service') => `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Receipt: Journey Completed</h2>
       <p>Dear ${booking.passengerName},</p>
-      <p>Thank you for riding with Thames Lines. We hope you had a pleasant journey.</p>
+      <p>Thank you for riding with ${companyName}. We hope you had a pleasant journey.</p>
       
       <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
         <p><strong>Booking Ref:</strong> #${booking.id.toString().padStart(6, '0')}</p>

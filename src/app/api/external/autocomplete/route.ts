@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
         const data = await res.json();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const results = data.map((item: any) => ({
             label: item.display_name,
             value: item.display_name,

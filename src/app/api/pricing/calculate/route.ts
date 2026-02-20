@@ -56,7 +56,7 @@ export async function POST(request: Request) {
             if (tenant) companyId = tenant.id;
         }
 
-        let { pickup, dropoff, vias, date: dateStr, vehicleType, distance, pickupLat, pickupLng, dropoffLat, dropoffLng } = validation.data;
+        const { pickup, dropoff, vias, date: dateStr, vehicleType, distance, pickupLat, pickupLng, dropoffLat, dropoffLng } = validation.data;
         const jobDate = dateStr ? new Date(dateStr) : new Date();
 
 

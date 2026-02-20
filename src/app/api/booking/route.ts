@@ -159,13 +159,13 @@ export async function POST(req: Request) {
 
         const jobWithCustomer = { ...job, customer: { email: body.passengerEmail } };
         const notificationPromises = [
-            EmailService.sendBookingConfirmation(jobWithCustomer as any),
+            EmailService.sendBookingConfirmation(jobWithCustomer as any, tenantSettings),
             SmsService.sendBookingConfirmation(job, tenantSettings)
         ];
 
         if (returnJob) {
             const returnJobWithCustomer = { ...returnJob, customer: { email: body.passengerEmail } };
-            notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithCustomer as any));
+            notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithCustomer as any, tenantSettings));
             notificationPromises.push(SmsService.sendBookingConfirmation(returnJob, tenantSettings));
         }
 
