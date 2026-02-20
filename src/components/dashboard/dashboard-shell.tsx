@@ -62,9 +62,16 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                                 <NavItem href="/dashboard/zones" icon={Map} label="Zones" />
                                 <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />
                                 <div className="my-2 border-t border-white/5"></div>
-                                <div className="my-2 border-t border-white/5"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
                                 <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
+                            </>
+                        )}
+
+                        {userRole === 'SUPER_ADMIN' && (
+                            <>
+                                <div className="my-2 border-t border-white/5"></div>
+                                <div className="px-3 py-1 text-xs font-bold text-zinc-500 uppercase tracking-wider">Super Admin</div>
+                                <NavItem href="/admin/tenants" icon={Building2} label="Multi-Tenant Config" />
                             </>
                         )}
 
