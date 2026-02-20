@@ -154,16 +154,19 @@ export async function POST(req: Request) {
         // We MUST await these in Vercel Serverless, otherwise the function terminates before network calls complete.
         // We use Promise.allSettled to ensure one failure doesn't block the response.
 
+        // Fetch Tenant Settings to apply custom templates
+        const tenantSettings = await prisma.tenant.findUnique({ where: { id: tenantId } });
+
         const jobWithCustomer = { ...job, customer: { email: body.passengerEmail } };
         const notificationPromises = [
             EmailService.sendBookingConfirmation(jobWithCustomer as any),
-            SmsService.sendBookingConfirmation(job)
+            SmsService.sendBookingConfirmation(job, tenantSettings)
         ];
 
         if (returnJob) {
             const returnJobWithCustomer = { ...returnJob, customer: { email: body.passengerEmail } };
             notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithCustomer as any));
-            notificationPromises.push(SmsService.sendBookingConfirmation(returnJob));
+            notificationPromises.push(SmsService.sendBookingConfirmation(returnJob, tenantSettings));
         }
 
         await Promise.allSettled(notificationPromises).then((results) => {

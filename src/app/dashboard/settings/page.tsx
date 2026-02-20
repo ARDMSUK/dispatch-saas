@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
@@ -25,6 +26,11 @@ export default function SettingsPage() {
     // Configuration State
     const [useZonePricing, setUseZonePricing] = useState(false);
     const [autoDispatch, setAutoDispatch] = useState(false);
+
+    // SMS Templates State
+    const [smsTemplateConfirmation, setSmsTemplateConfirmation] = useState('');
+    const [smsTemplateDriverAssigned, setSmsTemplateDriverAssigned] = useState('');
+    const [smsTemplateDriverArrived, setSmsTemplateDriverArrived] = useState('');
 
     // Initial Data
     const [slug, setSlug] = useState('');
@@ -70,6 +76,11 @@ export default function SettingsPage() {
 
                 setUseZonePricing(data.useZonePricing ?? false);
                 setAutoDispatch(data.autoDispatch ?? false);
+
+                // Load templates
+                setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
+                setSmsTemplateDriverAssigned(data.smsTemplateDriverAssigned || '');
+                setSmsTemplateDriverArrived(data.smsTemplateDriverArrived || '');
             }
         } catch (error) {
             console.error(error);
@@ -114,7 +125,10 @@ export default function SettingsPage() {
                     lat,
                     lng,
                     useZonePricing,
-                    autoDispatch
+                    autoDispatch,
+                    smsTemplateConfirmation,
+                    smsTemplateDriverAssigned,
+                    smsTemplateDriverArrived
                 })
             });
 
@@ -264,6 +278,51 @@ export default function SettingsPage() {
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Communication Templates */}
+            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
+                    💬 Communication Templates
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-zinc-400 mb-4">
+                        Variables available: {'{booking_id}, {pickup_time}, {pickup_address}, {dropoff_address}, {driver_name}, {driver_phone}, {vehicle_details}'}
+                    </p>
+
+                    <div>
+                        <Label className="text-zinc-400">Booking Confirmation SMS</Label>
+                        <Textarea
+                            value={smsTemplateConfirmation}
+                            onChange={(e) => setSmsTemplateConfirmation(e.target.value)}
+                            placeholder="Thames Lines: Booking #{booking_id} Confirmed.\nPickup: {pickup_time}\nFrom: {pickup_address}"
+                            className="bg-black/50 border-white/10 mt-1"
+                        />
+                    </div>
+
+                    <div>
+                        <Label className="text-zinc-400">Driver Assigned SMS</Label>
+                        <Textarea
+                            value={smsTemplateDriverAssigned}
+                            onChange={(e) => setSmsTemplateDriverAssigned(e.target.value)}
+                            placeholder="Thames Lines: Driver Assigned.\n{driver_name} is on the way in {vehicle_details}.\nCall: {driver_phone}"
+                            className="bg-black/50 border-white/10 mt-1"
+                        />
+                    </div>
+
+                    <div>
+                        <Label className="text-zinc-400">Driver Arrived SMS</Label>
+                        <Textarea
+                            value={smsTemplateDriverArrived}
+                            onChange={(e) => setSmsTemplateDriverArrived(e.target.value)}
+                            placeholder="Thames Lines: Driver Arrived.\n{driver_name} is waiting outside in {vehicle_details}.\nCall: {driver_phone}"
+                            className="bg-black/50 border-white/10 mt-1"
+                        />
+                    </div>
+                    <p className="text-xs text-zinc-500 mt-2">
+                        Leave blank to use the default system messages.
+                    </p>
                 </div>
             </div>
 

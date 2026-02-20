@@ -10,34 +10,67 @@ const client = (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN)
     : null;
 
 export const SmsService = {
-    async sendBookingConfirmation(booking: any) {
-        if (!booking.passengerPhone) return;
+    parseTemplate(template: string, booking: any, driver?: any) {
+        const vehicle = driver?.vehicles?.[0];
+        const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
 
         const date = new Date(booking.pickupTime).toLocaleString([], {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
-        const message = `Thames Lines: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress}`;
+        return template
+            .replace(/{booking_id}/g, booking.id || '')
+            .replace(/{pickup_time}/g, date)
+            .replace(/{pickup_address}/g, booking.pickupAddress || '')
+            .replace(/{dropoff_address}/g, booking.dropoffAddress || '')
+            .replace(/{driver_name}/g, driver?.name || '')
+            .replace(/{driver_phone}/g, driver?.phone || '')
+            .replace(/{vehicle_details}/g, vehicleDesc);
+    },
+
+    async sendBookingConfirmation(booking: any, orgSettings?: any) {
+        if (!booking.passengerPhone) return;
+
+        let message = '';
+        if (orgSettings?.smsTemplateConfirmation) {
+            message = this.parseTemplate(orgSettings.smsTemplateConfirmation, booking);
+        } else {
+            const date = new Date(booking.pickupTime).toLocaleString([], {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            message = `Thames Lines: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress}`;
+        }
+
         return this.sendSms(booking.passengerPhone, message);
     },
 
-    async sendDriverAssigned(booking: any, driver: any) {
+    async sendDriverAssigned(booking: any, driver: any, orgSettings?: any) {
         if (!booking.passengerPhone) return;
 
-        const vehicle = driver.vehicles?.[0];
-        const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+        let message = '';
+        if (orgSettings?.smsTemplateDriverAssigned) {
+            message = this.parseTemplate(orgSettings.smsTemplateDriverAssigned, booking, driver);
+        } else {
+            const vehicle = driver.vehicles?.[0];
+            const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+            message = `Thames Lines: Driver Assigned.\n${driver.name} is on the way in ${vehicleDesc}.\nCall: ${driver.phone}`;
+        }
 
-        const message = `Thames Lines: Driver Assigned.\n${driver.name} is on the way in ${vehicleDesc}.\nCall: ${driver.phone}`;
         return this.sendSms(booking.passengerPhone, message);
     },
 
-    async sendDriverArrived(booking: any, driver: any) {
+    async sendDriverArrived(booking: any, driver: any, orgSettings?: any) {
         if (!booking.passengerPhone) return;
 
-        const vehicle = driver.vehicles?.[0];
-        const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+        let message = '';
+        if (orgSettings?.smsTemplateDriverArrived) {
+            message = this.parseTemplate(orgSettings.smsTemplateDriverArrived, booking, driver);
+        } else {
+            const vehicle = driver.vehicles?.[0];
+            const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+            message = `Thames Lines: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
+        }
 
-        const message = `Thames Lines: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
         return this.sendSms(booking.passengerPhone, message);
     },
 

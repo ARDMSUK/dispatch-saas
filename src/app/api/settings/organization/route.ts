@@ -41,18 +41,34 @@ export async function PATCH(req: Request) {
 
         // Validation: Ensure required fields if needed, but schema allows optional
 
+        const updateData: any = {
+            name,
+            email,
+            phone,
+            address,
+            lat,
+            lng,
+            useZonePricing: body.useZonePricing,
+            autoDispatch: body.autoDispatch
+        };
+
+        if ((session.user.role as string) === 'SUPER_ADMIN') {
+            if (body.smsTemplateDriverArrived !== undefined) updateData.smsTemplateDriverArrived = body.smsTemplateDriverArrived;
+            if (body.smsTemplateConfirmation !== undefined) updateData.smsTemplateConfirmation = body.smsTemplateConfirmation;
+            if (body.smsTemplateDriverAssigned !== undefined) updateData.smsTemplateDriverAssigned = body.smsTemplateDriverAssigned;
+            if (body.emailSubjectConfirmation !== undefined) updateData.emailSubjectConfirmation = body.emailSubjectConfirmation;
+            if (body.emailBodyConfirmation !== undefined) updateData.emailBodyConfirmation = body.emailBodyConfirmation;
+            if (body.emailSubjectDriverAssigned !== undefined) updateData.emailSubjectDriverAssigned = body.emailSubjectDriverAssigned;
+            if (body.emailBodyDriverAssigned !== undefined) updateData.emailBodyDriverAssigned = body.emailBodyDriverAssigned;
+            if (body.emailSubjectDriverArrived !== undefined) updateData.emailSubjectDriverArrived = body.emailSubjectDriverArrived;
+            if (body.emailBodyDriverArrived !== undefined) updateData.emailBodyDriverArrived = body.emailBodyDriverArrived;
+            if (body.emailSubjectReceipt !== undefined) updateData.emailSubjectReceipt = body.emailSubjectReceipt;
+            if (body.emailBodyReceipt !== undefined) updateData.emailBodyReceipt = body.emailBodyReceipt;
+        }
+
         const updatedTenant = await prisma.tenant.update({
             where: { id: session.user.tenantId },
-            data: {
-                name,
-                email,
-                phone,
-                address,
-                lat,
-                lng,
-                useZonePricing: body.useZonePricing,
-                autoDispatch: body.autoDispatch
-            }
+            data: updateData
         });
 
         return NextResponse.json(updatedTenant);
