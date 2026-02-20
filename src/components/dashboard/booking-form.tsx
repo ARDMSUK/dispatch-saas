@@ -878,14 +878,22 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         {isCalculating ? (
                             <span className="text-amber-400 text-xs animate-pulse">Calculating...</span>
                         ) : (
-                            <div className="text-right">
-                                <span className="text-2xl font-mono text-white block">
-                                    £{quotedPrice ? quotedPrice.toFixed(2) : '0.00'}
-                                </span>
-                                <span className="block text-[10px] text-zinc-500">
+                            <div className="flex flex-col items-end">
+                                <div className="flex items-center justify-end group" title="Click to manually override fare">
+                                    <span className="text-2xl font-mono text-white">£</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="w-24 bg-transparent border-b border-dashed border-white/30 hover:border-amber-400 focus:border-amber-400 focus:border-solid text-2xl font-mono text-white text-right focus:outline-none transition-all ml-1 py-0 px-0"
+                                        value={quotedPrice !== null ? quotedPrice : ''}
+                                        onChange={(e) => setQuotedPrice(e.target.value ? parseFloat(e.target.value) : null)}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <span className="block text-[10px] text-zinc-500 mt-1">
                                     {debugData?.payload?.distance ? `${debugData.payload.distance.toFixed(1)} miles` : '0.0 miles'}
                                 </span>
-                                {isReturn && quotedPrice && (
+                                {isReturn && quotedPrice !== null && (
                                     <span className="text-[10px] text-zinc-500 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
                                 )}
                             </div>
