@@ -16,7 +16,7 @@ interface UserType {
     id: string;
     name: string;
     email: string;
-    role: "ADMIN" | "DISPATCHER";
+    role: "ADMIN" | "DISPATCHER" | "SUPER_ADMIN";
     createdAt: string;
 }
 
@@ -37,7 +37,7 @@ export default function TeamPage() {
     });
 
     useEffect(() => {
-        if (session?.user?.role !== 'ADMIN') {
+        if (session?.user && !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role as string)) {
             // Redirect or show access denied?
             // The API protects data anyway, but let's be nice.
             // router.push('/dashboard'); 
@@ -170,7 +170,7 @@ export default function TeamPage() {
                                     <option value="ADMIN">Admin (Manager)</option>
                                 </select>
                                 <p className="text-xs text-zinc-500">
-                                    {formData.role === 'ADMIN'
+                                    {['ADMIN', 'SUPER_ADMIN'].includes(formData.role)
                                         ? "Full access to settings, pricing, and team management."
                                         : "Can create bookings and view drivers/vehicles only."}
                                 </p>
@@ -207,9 +207,9 @@ export default function TeamPage() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline" className={user.role === 'ADMIN' ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-zinc-500'}>
-                                        {user.role === 'ADMIN' ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
-                                        {user.role}
+                                    <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-zinc-500'}>
+                                        {['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
+                                        {user.role === 'SUPER_ADMIN' ? 'Admin' : (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-sm text-zinc-500">

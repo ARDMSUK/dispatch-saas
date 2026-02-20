@@ -20,7 +20,7 @@ interface DriverFleetPanelProps {
 export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selectedJobId }: DriverFleetPanelProps) {
     const [activeTab, setActiveTab] = useState('DRIVERS');
     const { data: session } = useSession();
-    const isAdmin = session?.user?.role === 'ADMIN';
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     // Fetching is now handled by parent
 

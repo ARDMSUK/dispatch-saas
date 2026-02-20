@@ -147,7 +147,7 @@ export default function VehiclesPage() {
     };
 
     const { data: session } = useSession();
-    const isAdmin = session?.user?.role === 'ADMIN';
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     return (
         <div className="h-full flex flex-col p-4 bg-zinc-950 gap-4">

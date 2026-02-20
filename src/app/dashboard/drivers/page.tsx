@@ -128,7 +128,7 @@ export default function DriversPage() {
     );
 
     const { data: session } = useSession();
-    const isAdmin = session?.user?.role === 'ADMIN';
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     return (
         <div className="h-full flex flex-col p-4 bg-black/95 gap-4 text-zinc-100">

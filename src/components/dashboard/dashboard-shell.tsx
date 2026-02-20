@@ -22,7 +22,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const pathname = usePathname();
     const { update } = useSession();
 
-    const isAdmin = userRole === 'ADMIN';
+    const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(userRole as string);
 
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
