@@ -15,7 +15,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
     );
 
     const isOffer = job.status === 'DISPATCHED'; // "Offer" state for driver
-    const isInProgress = ['EN_ROUTE', 'POB'].includes(job.status);
+    const isInProgress = ['EN_ROUTE', 'ARRIVED', 'POB'].includes(job.status);
     const isHistory = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(job.status);
 
     return (
@@ -139,7 +139,12 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                     ) : (
                         <div className="grid grid-cols-1 gap-3">
                             {job.status === 'EN_ROUTE' && (
-                                <Button className="w-full h-14 text-lg font-bold bg-pink-600 hover:bg-pink-500 text-white" onClick={() => onStatusUpdate(job.id, 'POB')}>
+                                <Button className="w-full h-14 text-lg font-bold bg-pink-600 hover:bg-pink-500 text-white" onClick={() => onStatusUpdate(job.id, 'ARRIVED')}>
+                                    ARRIVED
+                                </Button>
+                            )}
+                            {job.status === 'ARRIVED' && (
+                                <Button className="w-full h-14 text-lg font-bold bg-purple-600 hover:bg-purple-500 text-white" onClick={() => onStatusUpdate(job.id, 'POB')}>
                                     PASSENGER ON BOARD
                                 </Button>
                             )}

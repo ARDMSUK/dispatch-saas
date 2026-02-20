@@ -31,6 +31,16 @@ export const SmsService = {
         return this.sendSms(booking.passengerPhone, message);
     },
 
+    async sendDriverArrived(booking: any, driver: any) {
+        if (!booking.passengerPhone) return;
+
+        const vehicle = driver.vehicles?.[0];
+        const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+
+        const message = `Thames Lines: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
+        return this.sendSms(booking.passengerPhone, message);
+    },
+
     async sendJobOfferToDriver(booking: any, driver: any) {
         if (!driver.phone) return;
 

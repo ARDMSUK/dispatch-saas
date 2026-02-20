@@ -91,6 +91,7 @@ function TrackingContent() {
             case 'PENDING': return 'bg-yellow-500/20 text-yellow-500';
             case 'ASSIGNED': return 'bg-blue-500/20 text-blue-500';
             case 'EN_ROUTE': return 'bg-purple-500/20 text-purple-500';
+            case 'ARRIVED': return 'bg-fuchsia-500/20 text-fuchsia-400';
             case 'POB': return 'bg-green-500/20 text-green-500';
             case 'COMPLETED': return 'bg-emerald-500/20 text-emerald-500';
             case 'CANCELLED': return 'bg-red-500/20 text-red-500';
@@ -103,6 +104,7 @@ function TrackingContent() {
             case 'PENDING': return 'Finding your driver...';
             case 'ASSIGNED': return 'Driver Assigned';
             case 'EN_ROUTE': return 'Driver on the way';
+            case 'ARRIVED': return 'Driver arrives at pickup';
             case 'POB': return 'Journey in progress';
             case 'COMPLETED': return 'Arrived';
             case 'CANCELLED': return 'Booking Cancelled';

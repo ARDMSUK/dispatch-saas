@@ -107,6 +107,7 @@ export const JOB_STATUSES = [
     "UNASSIGNED",
     "DISPATCHED",
     "EN_ROUTE",
+    "ARRIVED",
     "POB",
     "COMPLETED",
     "CANCELLED",

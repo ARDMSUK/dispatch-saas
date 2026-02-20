@@ -36,6 +36,24 @@ export const EmailTemplates = {
   `
   },
 
+  driverArrived: (booking: any, driver: any) => {
+    const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
+    return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Driver Arrived</h2>
+      <p>Your driver has arrived and is waiting outside for you!</p>
+      
+      <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Driver:</strong> ${driver.name}</p>
+        <p><strong>Vehicle:</strong> ${vehicle.model} (${vehicle.reg})</p>
+        <p><strong>Phone:</strong> ${driver.phone}</p>
+      </div>
+
+      <p>Please make your way out to the vehicle.</p>
+    </div>
+  `
+  },
+
   jobReceipt: (booking: any) => `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Receipt: Journey Completed</h2>

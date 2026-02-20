@@ -33,6 +33,19 @@ export const EmailService = {
         return this.sendEmail(to, subject, html);
     },
 
+    async sendDriverArrived(booking: any, driver: any) {
+        const subject = `Driver Arrived - ${driver.name} is waiting outside`;
+        const html = EmailTemplates.driverArrived(booking, driver);
+        const to = booking.customer?.email || booking.passengerEmail || booking.email;
+
+        if (!to) {
+            console.warn(`[EmailService] No email address found for booking #${booking.id}`);
+            return { success: false, error: 'No email address found' };
+        }
+
+        return this.sendEmail(to, subject, html);
+    },
+
     async sendJobReceipt(booking: any) {
         const subject = `Receipt for Your Journey #${booking.id.toString().padStart(6, '0')}`;
         const html = EmailTemplates.jobReceipt(booking);

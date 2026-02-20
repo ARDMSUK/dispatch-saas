@@ -24,7 +24,7 @@ interface Job {
     passengerPhone: string;
     pickupTime: string;
     vehicleType: string;
-    status: 'PENDING' | 'UNASSIGNED' | 'DISPATCHED' | 'EN_ROUTE' | 'POB' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+    status: 'PENDING' | 'UNASSIGNED' | 'DISPATCHED' | 'EN_ROUTE' | 'ARRIVED' | 'POB' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
     fare: number;
     returnBooking?: boolean;
     notes?: string;
@@ -190,6 +190,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
             case 'UNASSIGNED': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+            case 'ARRIVED': return 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20';
             case 'POB': return 'bg-pink-500/10 text-pink-500 border-pink-500/20';
             case 'COMPLETED': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
             case 'CANCELLED': return 'bg-red-500/10 text-red-500 border-red-500/20';
@@ -222,7 +223,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 });
 
             case 'DISPATCHED':
-                return jobs.filter(j => ['DISPATCHED', 'EN_ROUTE'].includes(j.status));
+                return jobs.filter(j => ['DISPATCHED', 'EN_ROUTE', 'ARRIVED'].includes(j.status));
             case 'POB':
                 return jobs.filter(j => j.status === 'POB');
             case 'COMPLETED':
@@ -309,7 +310,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 RETURN
                             </Badge>
                         )}
-                        {job.preAssignedDriver && job.status !== 'DISPATCHED' && job.status !== 'EN_ROUTE' && job.status !== 'POB' && job.status !== 'COMPLETED' && (
+                        {job.preAssignedDriver && job.status !== 'DISPATCHED' && job.status !== 'EN_ROUTE' && job.status !== 'ARRIVED' && job.status !== 'POB' && job.status !== 'COMPLETED' && (
                             <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 font-mono text-[10px]">
                                 RES: {job.preAssignedDriver.callsign}
                             </Badge>
@@ -398,6 +399,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         </Button>
                                     )}
                                     {job.status === 'EN_ROUTE' && (
+                                        <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'ARRIVED'); }}>
+                                            <MapPin className="mr-2 h-3.5 w-3.5 text-fuchsia-500" /> Mark Arrived
+                                        </Button>
+                                    )}
+                                    {job.status === 'ARRIVED' && (
                                         <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'POB'); }}>
                                             <User className="mr-2 h-3.5 w-3.5 text-pink-500" /> Mark POB
                                         </Button>

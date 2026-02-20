@@ -13,6 +13,7 @@ const UpdateJobSchema = z.object({
         "UNASSIGNED",
         "DISPATCHED",
         "EN_ROUTE",
+        "ARRIVED",
         "POB",
         "COMPLETED",
         "CANCELLED",
@@ -90,6 +91,14 @@ export async function PATCH(
             SmsService.sendDriverAssigned(updatedJob, updatedJob.driver).catch(e => console.error(e));
             // Notify Driver
             SmsService.sendJobOfferToDriver(updatedJob, updatedJob.driver).catch(e => console.error(e));
+        }
+
+        // 1.5 Driver Arrived
+        if (status === 'ARRIVED' && updatedJob.driverId) {
+            console.log(`[API] Job ${jobId} Arrived. Sending Notification...`);
+            EmailService.sendDriverArrived(updatedJob, updatedJob.driver).catch(e => console.error(e));
+            // Notify Passenger
+            SmsService.sendDriverArrived(updatedJob, updatedJob.driver).catch(e => console.error(e));
         }
 
         // 2. Job Completed (Receipt)
