@@ -18,6 +18,7 @@ export async function POST(req: Request) {
         const {
             companyName, companySlug, companyEmail,
             adminName, adminEmail, adminPassword,
+            address, lat, lng,
             stripeSecretKey, stripePublishableKey,
             twilioAccountSid, twilioAuthToken, twilioFromNumber,
             resendApiKey
@@ -46,6 +47,9 @@ export async function POST(req: Request) {
                     name: companyName,
                     slug: companySlug,
                     email: companyEmail,
+                    address,
+                    lat,
+                    lng,
                     stripeSecretKey,
                     stripePublishableKey,
                     twilioAccountSid,

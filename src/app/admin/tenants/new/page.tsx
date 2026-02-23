@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ChevronRight, ChevronLeft, Building2, User, Key, Check } from "lucide-react";
+import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 
 export default function NewTenantPage() {
     const router = useRouter();
@@ -18,6 +19,9 @@ export default function NewTenantPage() {
         companyName: "",
         companySlug: "",
         companyEmail: "",
+        address: "",
+        lat: 0,
+        lng: 0,
 
         // Step 2: Admin
         adminName: "",
@@ -43,6 +47,31 @@ export default function NewTenantPage() {
                 ...prev,
                 companySlug: value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
             }));
+        }
+    };
+
+    // Google Maps Hooks
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+        libraries: ["places"]
+    });
+
+    const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+    const onLoad = (autoC: google.maps.places.Autocomplete) => setAutocomplete(autoC);
+
+    const onPlaceChanged = () => {
+        if (autocomplete) {
+            const place = autocomplete.getPlace();
+            if (place.geometry?.location) {
+                setFormData(prev => ({
+                    ...prev,
+                    address: place.formatted_address || place.name || "",
+                    lat: place.geometry!.location!.lat(),
+                    lng: place.geometry!.location!.lng(),
+                }));
+            }
         }
     };
 
@@ -106,9 +135,27 @@ export default function NewTenantPage() {
                                     <Input name="companySlug" value={formData.companySlug} onChange={handleChange} placeholder="acme-taxis" className="bg-zinc-950 border-zinc-800" />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Contact Email</label>
-                                <Input name="companyEmail" value={formData.companyEmail} onChange={handleChange} placeholder="contact@acme.com" className="bg-zinc-950 border-zinc-800" />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Contact Email</label>
+                                    <Input name="companyEmail" value={formData.companyEmail} onChange={handleChange} placeholder="contact@acme.com" className="bg-zinc-950 border-zinc-800" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Base Address</label>
+                                    {isLoaded ? (
+                                        <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                                            <Input
+                                                name="address"
+                                                placeholder="Search base location..."
+                                                value={formData.address}
+                                                onChange={handleChange}
+                                                className="bg-zinc-950 border-zinc-800"
+                                            />
+                                        </Autocomplete>
+                                    ) : (
+                                        <Input disabled placeholder="Loading maps..." className="bg-zinc-950 border-zinc-800" />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
