@@ -60,6 +60,29 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
         }
     };
 
+    const handleDelete = async () => {
+        if (!window.confirm(`Are you sure you want to delete the tenant "${tenant?.name}"? Building data (Jobs, Drivers, Vehicles, Users, pricing) will be permanently lost and cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/admin/tenants/${id}`, {
+                method: "DELETE",
+            });
+
+            if (res.ok) {
+                toast.success("Tenant deleted successfully");
+                router.push("/admin/tenants");
+                router.refresh();
+            } else {
+                const error = await res.json();
+                toast.error(error.error || "Failed to delete tenant");
+            }
+        } catch (error) {
+            toast.error("Error deleting tenant");
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-zinc-500">Loading...</div>;
     if (!tenant) return <div className="p-8 text-center text-red-500">Tenant not found</div>;
 
@@ -160,7 +183,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="flex justify-between items-center pt-6 pb-20">
-                <Button variant="destructive" className="bg-red-900/50 hover:bg-red-900 text-red-200">
+                <Button variant="destructive" onClick={handleDelete} className="bg-red-900/50 hover:bg-red-900 text-red-200">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Tenant
                 </Button>
