@@ -20,7 +20,7 @@ export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
     try {
         const resend = new Resend(key);
         const data = await resend.emails.send({
-            from: 'Dispatch SaaS <onboarding@resend.dev>', // Update this with your verified domain
+            from: 'Dispatch SaaS <no-reply@taximarketingservices.co.uk>',
             to,
             subject,
             html,
