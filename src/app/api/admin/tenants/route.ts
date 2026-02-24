@@ -75,7 +75,9 @@ export async function POST(req: Request) {
         });
 
         // Send Welcome Email
-        const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
+        const host = req.headers.get('host') || 'localhost:3000';
+        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const loginUrl = `${protocol}://${host}/login`;
         // Use the tenant's Resend key if provided, otherwise fallback to system
         const emailResult = await sendEmail({
             to: adminEmail,

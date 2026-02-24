@@ -34,7 +34,9 @@ export async function POST(req: Request) {
         });
 
         // Send Email
-        const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+        const host = req.headers.get('host') || 'localhost:3000';
+        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const resetLink = `${protocol}://${host}/auth/reset-password?token=${resetToken}`;
         await sendEmail({
             to: email,
             subject: "Reset your password",
