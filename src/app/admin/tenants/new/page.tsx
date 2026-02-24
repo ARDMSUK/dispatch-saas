@@ -85,7 +85,13 @@ export default function NewTenantPage() {
             });
 
             if (res.ok) {
-                toast.success("Tenant created successfully!");
+                const data = await res.json();
+                if (data.warning) {
+                    // Show a long warning if the email failed (e.g., sandbox restrictions)
+                    toast.warning("Tenant created, but " + data.warning, { duration: 10000 });
+                } else {
+                    toast.success("Tenant created successfully!");
+                }
                 router.push("/admin/tenants");
                 router.refresh();
             } else {

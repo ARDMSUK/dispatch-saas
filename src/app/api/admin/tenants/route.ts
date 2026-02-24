@@ -77,12 +77,21 @@ export async function POST(req: Request) {
         // Send Welcome Email
         const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
         // Use the tenant's Resend key if provided, otherwise fallback to system
-        await sendEmail({
+        const emailResult = await sendEmail({
             to: adminEmail,
             subject: "Welcome to Dispatch SaaS - Your Tenant is Ready",
             html: getWelcomeEmail(adminName, loginUrl, adminEmail, adminPassword),
             apiKey: resendApiKey
         });
+
+        if (!emailResult.success) {
+            console.warn("[Tenant Route] Onboarding email failed to send to", adminEmail, emailResult.error);
+            return NextResponse.json({
+                success: true,
+                tenant: result.tenant,
+                warning: "Tenant created, but the onboarding email could not be sent. If using the Resend Sandbox, ensure the email address is verified."
+            }, { status: 201 });
+        }
 
         return NextResponse.json({ success: true, tenant: result.tenant }, { status: 201 });
 

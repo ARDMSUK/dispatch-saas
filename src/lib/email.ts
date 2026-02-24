@@ -25,6 +25,12 @@ export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
             subject,
             html,
         });
+
+        if (data.error) {
+            console.error('Resend API Error:', data.error);
+            return { success: false, error: data.error };
+        }
+
         return { success: true, data };
     } catch (error) {
         console.error('Failed to send email:', error);
