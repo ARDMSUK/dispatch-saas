@@ -163,10 +163,20 @@ export async function POST(req: Request) {
             SmsService.sendBookingConfirmation(job, tenantSettings)
         ];
 
+        // NEW: Payment Confirmation
+        if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+            notificationPromises.push(EmailService.sendPaymentConfirmation(jobWithCustomer as any, tenantSettings));
+        }
+
         if (returnJob) {
             const returnJobWithCustomer = { ...returnJob, customer: { email: body.passengerEmail } };
             notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithCustomer as any, tenantSettings));
             notificationPromises.push(SmsService.sendBookingConfirmation(returnJob, tenantSettings));
+
+            // NEW: Payment Confirmation for Return Job
+            if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+                notificationPromises.push(EmailService.sendPaymentConfirmation(returnJobWithCustomer as any, tenantSettings));
+            }
         }
 
         await Promise.allSettled(notificationPromises).then((results) => {

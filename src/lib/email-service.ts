@@ -21,6 +21,20 @@ export const EmailService = {
         return this.sendEmail(to, subject, html, companyName);
     },
 
+    async sendPaymentConfirmation(booking: any, orgSettings?: any) {
+        const companyName = orgSettings?.name || 'Our Service';
+        const subject = `Payment Receipt - Booking #${booking.id.toString().padStart(6, '0')}`;
+        const html = EmailTemplates.paymentConfirmation(booking, companyName);
+        const to = booking.customer?.email || booking.passengerEmail || booking.email;
+
+        if (!to) {
+            console.warn(`[EmailService] No email address found for booking #${booking.id}`);
+            return { success: false, error: 'No email address found' };
+        }
+
+        return this.sendEmail(to, subject, html, companyName);
+    },
+
     async sendDriverAssigned(booking: any, driver: any, orgSettings?: any) {
         const companyName = orgSettings?.name || 'Our Service';
         const subject = `Driver Assigned - ${driver.name} is on the way`;

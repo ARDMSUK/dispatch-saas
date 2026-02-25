@@ -279,6 +279,13 @@ export async function POST(request: Request) {
             EmailService.sendBookingConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send email", e))
         ];
 
+        // NEW: Payment Confirmation
+        if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+            notificationPromises.push(
+                EmailService.sendPaymentConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send payment receipt", e))
+            );
+        }
+
         if (body.passengerPhone) {
             notificationPromises.push(
                 SmsService.sendBookingConfirmation(newJob as any, tenantSettings).catch(e => console.error("Failed to send SMS", e))
@@ -289,11 +296,22 @@ export async function POST(request: Request) {
 
         if (returnJob) {
             const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
-            EmailService.sendBookingConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return email", e));
+            notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return email", e)));
+
+            // NEW: Payment Confirmation for Return Job
+            if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+                notificationPromises.push(
+                    EmailService.sendPaymentConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return payment receipt", e))
+                );
+            }
+
             if (body.passengerPhone) {
-                SmsService.sendBookingConfirmation(returnJob as any, tenantSettings).catch(e => console.error("Failed to send return SMS", e));
+                notificationPromises.push(SmsService.sendBookingConfirmation(returnJob as any, tenantSettings).catch(e => console.error("Failed to send return SMS", e)));
             }
         }
+
+        // Wait for all notifications (don't block response on failures)
+        await Promise.allSettled(notificationPromises);
 
         // 7. Trigger Auto-Dispatch (Async)
         DispatchEngine.runDispatchLoop(tenantId).catch(err => console.error("Post-creation dispatch failed", err));

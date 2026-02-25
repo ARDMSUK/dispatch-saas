@@ -18,6 +18,22 @@ export const EmailTemplates = {
     </div>
   `,
 
+  paymentConfirmation: (booking: any, companyName: string = 'Our Service') => `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Payment Receipt: #${booking.id.toString().padStart(6, '0')}</h2>
+      <p>Dear ${booking.passengerName},</p>
+      <p>Thank you for your secure card payment. This email confirms we have received your payment for the upcoming journey with ${companyName}.</p>
+      
+      <div style="background: #f4f4f5; border-left: 4px solid #10b981; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Amount Paid:</strong> £${booking.fare ? booking.fare.toFixed(2) : '0.00'}</p>
+        <p><strong>Booking Ref:</strong> #${booking.id.toString().padStart(6, '0')}</p>
+        <p><strong>Date:</strong> ${new Date(booking.pickupTime).toLocaleString()}</p>
+      </div>
+
+      <p>We look forward to seeing you soon.</p>
+    </div>
+  `,
+
   driverAssigned: (booking: any, driver: any, companyName: string = 'Our Service') => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
     return `
