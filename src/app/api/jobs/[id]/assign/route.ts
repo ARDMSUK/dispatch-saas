@@ -20,7 +20,8 @@ export async function PATCH(
 
         // 1. Validate Driver Status
         const driver = await prisma.driver.findUnique({
-            where: { id: driverId }
+            where: { id: driverId },
+            include: { vehicles: true }
         });
 
         if (!driver) {
@@ -47,13 +48,15 @@ export async function PATCH(
             })
         ]);
 
+        const tenantSettings = await prisma.tenant.findUnique({ where: { id: session.user.tenantId } });
+
         // Notifications
         // 1. Notify Driver
-        SmsService.sendJobOfferToDriver(updatedJob, driver).catch(e => console.error("Failed to SMS Driver", e));
+        SmsService.sendJobOfferToDriver(updatedJob, driver, tenantSettings).catch(e => console.error("Failed to SMS Driver", e));
 
         // 2. Notify Passenger (Driver Assigned)
         if (updatedJob.passengerPhone) {
-            SmsService.sendDriverAssigned(updatedJob, driver).catch(e => console.error("Failed to SMS Passenger", e));
+            SmsService.sendDriverAssigned(updatedJob, driver, tenantSettings).catch(e => console.error("Failed to SMS Passenger", e));
         }
 
         return NextResponse.json(updatedJob);

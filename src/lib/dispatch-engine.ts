@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
 import { Driver, Job } from '@prisma/client';
 import { calculateDistance, isPointInPolygon } from '@/lib/geoutils';
 
@@ -70,7 +71,8 @@ export class DispatchEngine {
             where: {
                 tenantId: tenantId,
                 status: 'FREE',
-            }
+            },
+            include: { vehicles: true }
         });
 
         // 4. Match Logic
@@ -194,11 +196,14 @@ export class DispatchEngine {
 
         // 3. Send Notifications
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: job.tenantId } });
-        // Email Customer
-        await EmailService.sendDriverAssigned(job, driver, tenantSettings);
 
-        // Notify Driver (Push/SMS)? 
-        // For now, console log.
+        // Email Customer
+        await EmailService.sendDriverAssigned(job, driver, tenantSettings).catch(e => console.error("Email err:", e));
+
+        // SMS Customer and Driver
+        await SmsService.sendDriverAssigned(job, driver, tenantSettings).catch(e => console.error("SMS pass err:", e));
+        await SmsService.sendJobOfferToDriver(job, driver, tenantSettings).catch(e => console.error("SMS drvr err:", e));
+
         console.log(`[DispatchEngine] Notification sent for Job ${job.id}`);
     }
 }

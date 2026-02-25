@@ -77,7 +77,9 @@ export async function PATCH(
             where: { id: jobId },
             data: updateData,
             include: {
-                driver: true,
+                driver: {
+                    include: { vehicles: true }
+                },
                 customer: true
             }
         });
