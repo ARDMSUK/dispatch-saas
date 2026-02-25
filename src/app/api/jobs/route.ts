@@ -292,7 +292,7 @@ export async function POST(request: Request) {
             );
         }
 
-        Promise.allSettled(notificationPromises);
+
 
         if (returnJob) {
             const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
