@@ -42,6 +42,14 @@ export async function POST(
             data: { status }
         });
 
+        // Automatically free the driver if the job is finished
+        if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(status)) {
+            await prisma.driver.update({
+                where: { id: driver.driverId },
+                data: { status: 'FREE' }
+            });
+        }
+
         // If location provided, we could update driver location too
         if (lat && lng) {
             await prisma.driver.update({
