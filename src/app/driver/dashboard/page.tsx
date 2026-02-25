@@ -126,7 +126,7 @@ export default function DriverDashboard() {
 
             if (res.ok) {
                 toast.success("Status Updated");
-                if (newStatus === 'COMPLETED') {
+                if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(newStatus)) {
                     setActiveJob(null); // Clear job logic
                 }
                 fetchActiveJob(driver.id); // Refresh real data

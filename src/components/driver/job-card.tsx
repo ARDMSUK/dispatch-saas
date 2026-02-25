@@ -139,14 +139,29 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                     ) : (
                         <div className="grid grid-cols-1 gap-3">
                             {job.status === 'EN_ROUTE' && (
-                                <Button className="w-full h-14 text-lg font-bold bg-pink-600 hover:bg-pink-500 text-white" onClick={() => onStatusUpdate(job.id, 'ARRIVED')}>
-                                    ARRIVED
-                                </Button>
+                                <>
+                                    <Button className="w-full h-14 text-lg font-bold bg-pink-600 hover:bg-pink-500 text-white" onClick={() => onStatusUpdate(job.id, 'ARRIVED')}>
+                                        ARRIVED
+                                    </Button>
+                                    <Button variant="outline" className="w-full h-12 text-sm font-bold border-red-500/50 text-red-500 hover:bg-red-500/10" onClick={() => onStatusUpdate(job.id, 'CANCELLED')}>
+                                        CANCEL JOB
+                                    </Button>
+                                </>
                             )}
                             {job.status === 'ARRIVED' && (
-                                <Button className="w-full h-14 text-lg font-bold bg-purple-600 hover:bg-purple-500 text-white" onClick={() => onStatusUpdate(job.id, 'POB')}>
-                                    PASSENGER ON BOARD
-                                </Button>
+                                <>
+                                    <Button className="w-full h-14 text-lg font-bold bg-purple-600 hover:bg-purple-500 text-white" onClick={() => onStatusUpdate(job.id, 'POB')}>
+                                        PASSENGER ON BOARD
+                                    </Button>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button variant="outline" className="h-12 text-sm font-bold border-red-500/50 text-red-500 hover:bg-red-500/10" onClick={() => onStatusUpdate(job.id, 'CANCELLED')}>
+                                            CANCEL JOB
+                                        </Button>
+                                        <Button variant="outline" className="h-12 text-sm font-bold border-orange-500/50 text-orange-500 hover:bg-orange-500/10" onClick={() => onStatusUpdate(job.id, 'NO_SHOW')}>
+                                            NO SHOW
+                                        </Button>
+                                    </div>
+                                </>
                             )}
                             {job.status === 'POB' && (
                                 <Button className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-white" onClick={() => onStatusUpdate(job.id, 'COMPLETED')}>
