@@ -38,7 +38,7 @@ export const EmailService = {
     async sendDriverAssigned(booking: any, driver: any, orgSettings?: any) {
         const companyName = orgSettings?.name || 'Our Service';
         const subject = `Driver Assigned - ${driver.name} is on the way`;
-        const html = EmailTemplates.driverAssigned(booking, driver, companyName);
+        const html = EmailTemplates.driverAssigned(booking, driver, companyName, orgSettings?.enableLiveTracking !== false);
         const to = booking.customer?.email || booking.passengerEmail || booking.email;
 
         if (!to) {
@@ -52,7 +52,7 @@ export const EmailService = {
     async sendDriverArrived(booking: any, driver: any, orgSettings?: any) {
         const companyName = orgSettings?.name || 'Our Service';
         const subject = `Driver Arrived - ${driver.name} is waiting outside`;
-        const html = EmailTemplates.driverArrived(booking, driver, companyName);
+        const html = EmailTemplates.driverArrived(booking, driver, companyName, orgSettings?.enableLiveTracking !== false);
         const to = booking.customer?.email || booking.passengerEmail || booking.email;
 
         if (!to) {

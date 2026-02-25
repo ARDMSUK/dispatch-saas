@@ -34,8 +34,10 @@ export const EmailTemplates = {
     </div>
   `,
 
-  driverAssigned: (booking: any, driver: any, companyName: string = 'Our Service') => {
+  driverAssigned: (booking: any, driver: any, companyName: string = 'Our Service', enableLiveTracking = true) => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
+    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+
     return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Driver Assigned</h2>
@@ -48,12 +50,22 @@ export const EmailTemplates = {
       </div>
 
       <p>You can track your driver or contact them directly if needed.</p>
+      
+      ${enableLiveTracking ? `
+      <div style="margin-top: 30px;">
+        <a href="${trackingLink}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          Track My Driver
+        </a>
+      </div>
+      ` : ''}
     </div>
   `
   },
 
-  driverArrived: (booking: any, driver: any, companyName: string = 'Our Service') => {
+  driverArrived: (booking: any, driver: any, companyName: string = 'Our Service', enableLiveTracking = true) => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
+    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+
     return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Driver Arrived</h2>
@@ -66,6 +78,14 @@ export const EmailTemplates = {
       </div>
 
       <p>Please make your way out to the vehicle.</p>
+      
+      ${enableLiveTracking ? `
+      <div style="margin-top: 30px;">
+        <a href="${trackingLink}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          Track My Driver
+        </a>
+      </div>
+      ` : ''}
     </div>
   `
   },
