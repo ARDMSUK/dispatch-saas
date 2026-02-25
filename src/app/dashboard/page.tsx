@@ -129,7 +129,15 @@ export default function DashboardPage() {
                 console.error("Failed to load fleet", error);
             }
         };
-        fetchFleet();
+
+        fetchFleet(); // Initial load
+
+        // Poll for driver status updates every 15 seconds
+        const interval = setInterval(() => {
+            fetchFleet();
+        }, 15000);
+
+        return () => clearInterval(interval);
     }, [refreshTrigger]);
 
     const handleAssignDriver = async (driverId: string) => {
