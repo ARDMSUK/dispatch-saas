@@ -180,6 +180,35 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                         </div>
                     </CardContent>
                 </Card>
+
+                <Card className="bg-zinc-900 border-zinc-800">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Building2 className="w-5 h-5" />
+                            System Features
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                            <input
+                                type="checkbox"
+                                name="enableLiveTracking"
+                                id="enableLiveTracking"
+                                checked={tenant.enableLiveTracking !== false}
+                                onChange={(e) => setTenant({ ...tenant, enableLiveTracking: e.target.checked })}
+                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                            />
+                            <div className="space-y-1">
+                                <label htmlFor="enableLiveTracking" className="text-white font-medium cursor-pointer">
+                                    Enable Live Tracking Links in SMS
+                                </label>
+                                <p className="text-sm text-zinc-500">
+                                    If enabled, SMS notifications sent to customers when a driver is assigned will include a secure link to track their ride in real-time.
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <div className="flex justify-between items-center pt-6 pb-20">

@@ -49,7 +49,8 @@ export async function PATCH(req: Request) {
             lat,
             lng,
             useZonePricing: body.useZonePricing,
-            autoDispatch: body.autoDispatch
+            autoDispatch: body.autoDispatch,
+            enableLiveTracking: body.enableLiveTracking
         };
 
         if ((session.user.role as string) === 'SUPER_ADMIN') {

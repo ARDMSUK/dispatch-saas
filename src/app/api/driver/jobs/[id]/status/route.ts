@@ -50,10 +50,41 @@ export async function POST(
             });
         }
 
-        // Send Notification if status is completed?
-        // We already have a notification trigger in handleStatusUpdate in frontend, 
-        // but here it is backend. Ideally we should trigger notifications here too.
-        // For now, MVP just updates DB.
+        // Send Notifications based on new status
+        try {
+            // Need full job info with customer and driver for templates
+            const fullJob = await prisma.job.findUnique({
+                where: { id: jobId },
+                include: { customer: true }
+            });
+
+            const fullDriver = await prisma.driver.findUnique({
+                where: { id: driver.driverId },
+                include: { vehicles: true }
+            });
+
+            const tenantSettings = await prisma.tenant.findUnique({
+                where: { id: job.tenantId }
+            });
+
+            if (fullJob && fullDriver) {
+                const { EmailService } = await import('@/lib/email-service');
+                const { SmsService } = await import('@/lib/sms-service');
+
+                if (status === 'EN_ROUTE') {
+                    // Driver Accepted Job
+                    await EmailService.sendDriverAssigned(fullJob, fullDriver, tenantSettings);
+                    await SmsService.sendDriverAssigned(fullJob, fullDriver, tenantSettings);
+                } else if (status === 'ARRIVED') {
+                    // Driver Arrived
+                    await EmailService.sendDriverArrived(fullJob, fullDriver, tenantSettings);
+                    await SmsService.sendDriverArrived(fullJob, fullDriver, tenantSettings);
+                }
+            }
+        } catch (notifErr) {
+            console.error("Failed to send status update notifications:", notifErr);
+            // Don't fail the request if notifications fail
+        }
 
         return NextResponse.json(updatedJob);
 

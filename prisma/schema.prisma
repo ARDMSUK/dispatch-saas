@@ -30,6 +30,7 @@ model Tenant {
   // Configuration
   useZonePricing Boolean @default(false)
   autoDispatch   Boolean @default(false)
+  enableLiveTracking Boolean @default(true)
 
   // Integrations (Encrypted/Stored secure in prod, text for now)
   stripeSecretKey      String?

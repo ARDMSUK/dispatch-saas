@@ -26,6 +26,7 @@ export default function SettingsPage() {
     // Configuration State
     const [useZonePricing, setUseZonePricing] = useState(false);
     const [autoDispatch, setAutoDispatch] = useState(false);
+    const [enableLiveTracking, setEnableLiveTracking] = useState(true);
 
     // SMS Templates State
     const [smsTemplateConfirmation, setSmsTemplateConfirmation] = useState('');
@@ -76,6 +77,7 @@ export default function SettingsPage() {
 
                 setUseZonePricing(data.useZonePricing ?? false);
                 setAutoDispatch(data.autoDispatch ?? false);
+                setEnableLiveTracking(data.enableLiveTracking ?? true);
 
                 // Load templates
                 setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
@@ -126,6 +128,7 @@ export default function SettingsPage() {
                     lng,
                     useZonePricing,
                     autoDispatch,
+                    enableLiveTracking,
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
                     smsTemplateDriverArrived

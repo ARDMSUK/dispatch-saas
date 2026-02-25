@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
         const statusFilter = type === 'history'
             ? { in: ['COMPLETED', 'CANCELLED', 'NO_SHOW'] }
-            : { in: ['ASSIGNED', 'DISPATCHED', 'EN_ROUTE', 'POB'] };
+            : { in: ['ASSIGNED', 'DISPATCHED', 'EN_ROUTE', 'ARRIVED', 'POB'] };
 
         const jobs = await prisma.job.findMany({
             where: {

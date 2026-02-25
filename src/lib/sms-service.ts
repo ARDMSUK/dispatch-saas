@@ -11,21 +11,25 @@ const client = (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN)
 
 export const SmsService = {
     parseTemplate(template: string, booking: any, driver?: any) {
-        const vehicle = driver?.vehicles?.[0];
-        const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+        const vehicle = driver?.vehicles?.[0] || driver?.vehicle;
+        const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg || vehicle.registration})` : 'our car';
 
-        const date = new Date(booking.pickupTime).toLocaleString([], {
+        const date = new Date(booking.pickupTime || booking.pickupDate).toLocaleString([], {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
+
+        const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
 
         return template
             .replace(/{booking_id}/g, booking.id || '')
             .replace(/{pickup_time}/g, date)
-            .replace(/{pickup_address}/g, booking.pickupAddress || '')
-            .replace(/{dropoff_address}/g, booking.dropoffAddress || '')
+            .replace(/{pickup_address}/g, booking.pickupAddress || booking.pickup || '')
+            .replace(/{dropoff_address}/g, booking.dropoffAddress || booking.dropoff || '')
+            .replace(/{destination}/g, booking.dropoffAddress || booking.dropoff || '')
             .replace(/{driver_name}/g, driver?.name || '')
             .replace(/{driver_phone}/g, driver?.phone || '')
-            .replace(/{vehicle_details}/g, vehicleDesc);
+            .replace(/{vehicle_details}/g, vehicleDesc)
+            .replace(/{tracking_link}/g, trackingLink);
     },
 
     async sendBookingConfirmation(booking: any, orgSettings?: any) {
@@ -35,11 +39,12 @@ export const SmsService = {
         if (orgSettings?.smsTemplateConfirmation) {
             message = this.parseTemplate(orgSettings.smsTemplateConfirmation, booking);
         } else {
-            const date = new Date(booking.pickupTime).toLocaleString([], {
+            const date = new Date(booking.pickupTime || booking.pickupDate).toLocaleString([], {
                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
             });
             const company = orgSettings?.name || 'Dispatch';
-            message = `${company}: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress}`;
+            const destination = booking.dropoffAddress || booking.dropoff || 'your destination';
+            message = `${company}: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${destination}`;
         }
 
         return this.sendSms(booking.passengerPhone, message);
@@ -52,10 +57,17 @@ export const SmsService = {
         if (orgSettings?.smsTemplateDriverAssigned) {
             message = this.parseTemplate(orgSettings.smsTemplateDriverAssigned, booking, driver);
         } else {
-            const vehicle = driver.vehicles?.[0];
-            const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+            const vehicle = driver.vehicles?.[0] || driver.vehicle;
+            const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg || vehicle.registration})` : 'our car';
             const company = orgSettings?.name || 'Dispatch';
+            const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+
             message = `${company}: Driver Assigned.\n${driver.name} is on the way in ${vehicleDesc}.\nCall: ${driver.phone}`;
+
+            // Respect live tracking toggle
+            if (orgSettings?.enableLiveTracking !== false) {
+                message += `\nTrack: ${trackingLink}`;
+            }
         }
 
         return this.sendSms(booking.passengerPhone, message);
@@ -68,8 +80,8 @@ export const SmsService = {
         if (orgSettings?.smsTemplateDriverArrived) {
             message = this.parseTemplate(orgSettings.smsTemplateDriverArrived, booking, driver);
         } else {
-            const vehicle = driver.vehicles?.[0];
-            const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg})` : 'our car';
+            const vehicle = driver.vehicles?.[0] || driver.vehicle;
+            const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg || vehicle.registration})` : 'our car';
             const company = orgSettings?.name || 'Dispatch';
             message = `${company}: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
         }
@@ -80,12 +92,14 @@ export const SmsService = {
     async sendJobOfferToDriver(booking: any, driver: any, orgSettings?: any) {
         if (!driver.phone) return;
 
-        const date = new Date(booking.pickupTime).toLocaleString([], {
+        const date = new Date(booking.pickupTime || booking.pickupDate).toLocaleString([], {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
         const company = orgSettings?.name || 'Dispatch';
-        const message = `${company}: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress}\nTo: ${booking.dropoffAddress}\nLog in to view details.`;
+        const fare = booking.fare ? `\nFare: £${booking.fare.toFixed(2)}` : '';
+        const cxPhone = booking.passengerPhone ? `\nCx Tel: ${booking.passengerPhone}` : '';
+        const message = `${company}: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${booking.dropoffAddress || booking.dropoff}${fare}${cxPhone}\nLog in to view details.`;
         return this.sendSms(driver.phone, message);
     },
 
