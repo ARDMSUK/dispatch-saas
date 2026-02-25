@@ -11,12 +11,17 @@ import { Loader2, ShieldCheck, Truck } from 'lucide-react';
 export default function DriverLoginPage() {
     const router = useRouter();
     const [step, setStep] = useState<'CALLSIGN' | 'PIN'>('CALLSIGN');
+    const [tenantSlug, setTenantSlug] = useState('');
     const [callsign, setCallsign] = useState('');
     const [pin, setPin] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleCallsignSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!tenantSlug.trim()) {
+            toast.error("Enter your company code");
+            return;
+        }
         if (!callsign.trim()) {
             toast.error("Enter your callsign");
             return;
@@ -39,22 +44,10 @@ export default function DriverLoginPage() {
         setLoading(true);
 
         try {
-            // We need to fetch the tenant slug somehow. 
-            // For now, let's hardcode 'zercabs' or retrieve from local storage if we had a tenant selection screen.
-            // Actually, the API `POST /api/driver/auth/login` expects { tenantSlug, callsign, pin }.
-            // In a real multi-tenant app, the driver would likely have a unique URL like `app.dispatch.com/zercabs/driver` 
-            // or we'd ask for the Company ID first. 
-            // For this focused task, I'll default to the seed tenant 'demo-cabs' 
-            // but I'll add a small "Company ID" field if needed later. 
-            // The seed data in `setup_driver_data.ts` used 'zercabs', but `seed.ts` used 'demo-cabs'.
-            // Let's assume 'zercabs' based on setup_driver_data.ts
-
-            const tenantSlug = 'demo-taxis';
-
             const res = await fetch('/api/driver/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ companySlug: tenantSlug, callsign, pin })
+                body: JSON.stringify({ companySlug: tenantSlug.toLowerCase(), callsign, pin })
             });
 
             const data = await res.json();
@@ -104,15 +97,26 @@ export default function DriverLoginPage() {
             {/* Step 1: Callsign */}
             {step === 'CALLSIGN' && (
                 <form onSubmit={handleCallsignSubmit} className="flex-1 flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                    <div className="space-y-2">
-                        <label className="text-xs uppercase font-bold text-zinc-500 ml-1">Your Callsign</label>
-                        <Input
-                            autoFocus
-                            value={callsign}
-                            onChange={(e) => setCallsign(e.target.value.toUpperCase())}
-                            placeholder="e.g. CAB-001"
-                            className="h-14 text-lg bg-zinc-900 border-zinc-800 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest uppercase"
-                        />
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase font-bold text-zinc-500 ml-1">Company Code</label>
+                            <Input
+                                autoFocus
+                                value={tenantSlug}
+                                onChange={(e) => setTenantSlug(e.target.value.toLowerCase())}
+                                placeholder="e.g. demo-taxis"
+                                className="h-14 text-lg bg-zinc-900 border-zinc-800 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest lowercase"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase font-bold text-zinc-500 ml-1">Your Callsign</label>
+                            <Input
+                                value={callsign}
+                                onChange={(e) => setCallsign(e.target.value.toUpperCase())}
+                                placeholder="e.g. CAB-001"
+                                className="h-14 text-lg bg-zinc-900 border-zinc-800 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest uppercase"
+                            />
+                        </div>
                     </div>
                     <Button type="submit" className="h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black w-full shadow-lg shadow-amber-900/20">
                         CONTINUE
