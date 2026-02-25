@@ -114,9 +114,13 @@ export default function DriverDashboard() {
         setActiveJob({ ...activeJob, status: newStatus });
 
         try {
-            const res = await fetch(`/api/jobs/${jobId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+            const token = localStorage.getItem('driver_token');
+            const res = await fetch(`/api/driver/jobs/${jobId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ status: newStatus })
             });
 
