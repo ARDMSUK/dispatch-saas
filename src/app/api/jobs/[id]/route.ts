@@ -88,14 +88,18 @@ export async function PATCH(
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: updatedJob.tenantId } });
 
         // --- Notifications ---
-        // 1. Driver Assigned (Dispatched)
+        // 1. Job Offered to Driver (Dispatched)
         if (status === 'DISPATCHED' && updatedJob.driverId) {
-            console.log(`[API] Job ${jobId} Dispatched. Sending Notification...`);
-            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
-            // Notify Passenger
-            SmsService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+            console.log(`[API] Job ${jobId} Dispatched. Sending Notification to Driver...`);
             // Notify Driver
             SmsService.sendJobOfferToDriver(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+        }
+
+        // 1.2 Driver Accepted / En Route
+        if (status === 'EN_ROUTE' && updatedJob.driverId) {
+            console.log(`[API] Job ${jobId} En Route. Sending Notification to Passenger...`);
+            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+            SmsService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
         }
 
         // 1.5 Driver Arrived
