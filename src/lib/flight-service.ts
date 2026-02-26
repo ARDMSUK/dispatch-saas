@@ -22,6 +22,12 @@ export async function fetchFlightStatus(flightNumber: string) {
 
         const data = await res.json();
 
+        // Handle cases where API returns 200 OK but body contains an error (e.g., missing API key)
+        if (data.error) {
+            console.error("[FlightService] API returned an error:", data.error.message || data.error);
+            return getMockFlightData(flightNumber);
+        }
+
         if (data && data.data && data.data.length > 0) {
             const flight = data.data[0];
             return {
@@ -36,6 +42,7 @@ export async function fetchFlightStatus(flightNumber: string) {
             };
         }
 
+        console.warn(`[FlightService] No real flight data found for ${flightNumber}. Falling back to mock data.`);
         // If no data found for some reason, fallback to mock to prevent crashing dashboard
         return getMockFlightData(flightNumber);
 
@@ -62,7 +69,7 @@ function getMockFlightData(flightNumber: string) {
         scheduledArrival: scheduled.toISOString(),
         estimatedArrival: estimated.toISOString(),
         actualArrival: null,
-        airline: "Mock Airlines",
+        airline: "[MOCK] Mock Airlines",
         terminal: "5",
         gate: "A12",
         baggage: "Carousel 3",
