@@ -12,7 +12,20 @@ type Props = {
 };
 
 export function StepDetails({ data, onUpdate, onNext }: Props) {
-    const isValid = data.passengerName.length > 2 && data.passengerPhone.length > 5 && data.passengerEmail.includes('@');
+    const isAirport = (str: string) => {
+        const lower = (str || '').toLowerCase();
+        return lower.includes('airport') || lower.includes('lhr') || lower.includes('lgw') || lower.includes('heathrow') || lower.includes('gatwick') || lower.includes('stansted') || lower.includes('luton') || lower.includes('city airport');
+    };
+
+    const requiresFlight = isAirport(data.pickup) || isAirport(data.dropoff);
+
+    // Core validation
+    let isValid = data.passengerName.length > 2 && data.passengerPhone.length > 5 && data.passengerEmail.includes('@');
+
+    // Flight validation
+    if (requiresFlight && (!data.flightNumber || data.flightNumber.trim().length < 2)) {
+        isValid = false;
+    }
 
     return (
         <div className="space-y-6 h-full flex flex-col">

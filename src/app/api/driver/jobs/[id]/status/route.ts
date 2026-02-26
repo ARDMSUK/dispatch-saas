@@ -43,7 +43,7 @@ export async function POST(
         });
 
         // Automatically free the driver if the job is finished
-        let driverUpdateData: any = {};
+        const driverUpdateData: any = {};
 
         if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(status)) {
             driverUpdateData.status = 'FREE';
