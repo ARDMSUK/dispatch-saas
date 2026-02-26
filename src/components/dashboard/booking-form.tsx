@@ -238,6 +238,17 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             return;
         }
 
+        // Mandatory Flight Number Validation for Airports
+        if (showFlightInput && !flightNumber) {
+            toast.error("Flight Number Required", { description: "Please enter a flight number for airport transfers." });
+            return;
+        }
+
+        if (isReturn && showFlightInput && !returnFlightNumber) {
+            toast.error("Return Flight Number Required", { description: "Please enter the return flight number for the airport." });
+            return;
+        }
+
         if (paymentType === 'CARD') {
             if (!quotedPrice || quotedPrice <= 0) {
                 toast.error("Price not calculated yet");

@@ -80,6 +80,9 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     const [dispatchJob, setDispatchJob] = useState<Job | null>(null);
     const [dispatchOpen, setDispatchOpen] = useState(false);
 
+    // Flight Tracking State
+    const [flights, setFlights] = useState<Record<string, any>>({});
+
     useEffect(() => {
         fetchJobs(); // Initial load
 
@@ -89,6 +92,39 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
         return () => clearInterval(interval);
     }, [refreshTrigger]);
+
+    // Fetch Flight Data for active jobs with flight numbers
+    useEffect(() => {
+        const fetchFlights = async () => {
+            const flightNumbersToFetch = new Set<string>();
+
+            jobs.forEach(job => {
+                // Only fetch flights for jobs that haven't been completed/cancelled
+                if (job.flightNumber && !['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(job.status)) {
+                    flightNumbersToFetch.add(job.flightNumber);
+                }
+            });
+
+            for (const fn of Array.from(flightNumbersToFetch)) {
+                // Skip if we already fetched it recently to save API calls
+                if (flights[fn]) continue;
+
+                try {
+                    const res = await fetch(`/api/flights?flightNumber=${encodeURIComponent(fn)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setFlights(prev => ({ ...prev, [fn]: data }));
+                    }
+                } catch (e) {
+                    console.error(`Failed to fetch flight ${fn}`, e);
+                }
+            }
+        };
+
+        if (jobs.length > 0) {
+            fetchFlights();
+        }
+    }, [jobs]); // Re-run when jobs list updates
 
     const fetchJobs = async (showLoading = true) => {
         if (showLoading) setLoading(true);
@@ -324,6 +360,46 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-mono text-[10px] flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> PAID
                             </Badge>
+                        )}
+                        {/* Live Flight Info Badge */}
+                        {job.flightNumber && (
+                            <div className="flex flex-wrap items-center gap-1.5 ml-1 border-l border-white/10 pl-2">
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 font-mono text-[10px] whitespace-nowrap">
+                                    ✈️ {job.flightNumber}
+                                </Badge>
+
+                                {flights[job.flightNumber] && (
+                                    (() => {
+                                        const f = flights[job.flightNumber];
+                                        const isDelayed = new Date(f.estimatedArrival).getTime() > new Date(f.scheduledArrival).getTime() + (15 * 60000);
+                                        const landed = f.status === 'landed' || f.actualArrival;
+
+                                        // Format the time HH:MM
+                                        const estTime = new Date(f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                                        if (landed) {
+                                            return (
+                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-mono text-[10px] whitespace-nowrap">
+                                                    LANDED {new Date(f.actualArrival || f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </Badge>
+                                            );
+                                        } else if (isDelayed) {
+                                            const delayMins = Math.round((new Date(f.estimatedArrival).getTime() - new Date(f.scheduledArrival).getTime()) / 60000);
+                                            return (
+                                                <Badge variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/20 font-mono text-[10px] animate-pulse whitespace-nowrap">
+                                                    DELAYED +{delayMins}m (EST: {estTime})
+                                                </Badge>
+                                            );
+                                        } else {
+                                            return (
+                                                <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 font-mono text-[10px] whitespace-nowrap">
+                                                    EST: {estTime}
+                                                </Badge>
+                                            );
+                                        }
+                                    })()
+                                )}
+                            </div>
                         )}
                     </div>
 
