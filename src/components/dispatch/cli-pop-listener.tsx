@@ -99,7 +99,7 @@ export function CliPopListener() {
             });
 
             // Navigate to the dispatch screen with pre-filled query params
-            router.push(`/dashboard/dispatch?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`);
+            router.push(`/dashboard?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`);
         } catch (e) {
             console.error("Failed to answer call", e);
         }
