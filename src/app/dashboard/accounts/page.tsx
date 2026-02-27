@@ -169,12 +169,12 @@ export default function AccountsPage() {
     );
 
     return (
-        <div className="h-full flex flex-col p-4 bg-zinc-50 gap-4">
+        <div className="h-full flex flex-col p-4 gap-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-zinc-800">Account Management</h1>
+                <h1 className="text-2xl font-bold">Account Management</h1>
                 <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                     <DialogTrigger asChild>
-                        <Button className="bg-zinc-800 hover:bg-zinc-700">
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                             <Plus className="mr-2 h-4 w-4" /> Add Account
                         </Button>
                     </DialogTrigger>
@@ -185,10 +185,10 @@ export default function AccountsPage() {
                         <div className="grid gap-6 py-4 max-h-[70vh] overflow-y-auto px-1">
                             {/* General Information */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">General Information</h3>
+                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">General Information</h3>
                                 <div className="grid grid-cols-[1fr_2fr] gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Account Code *</label>
+                                        <label className="text-xs font-medium text-zinc-400">Account Code *</label>
                                         <Input
                                             placeholder="Code (e.g. ACC-001)"
                                             value={formData.code}
@@ -196,7 +196,7 @@ export default function AccountsPage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Company Name *</label>
+                                        <label className="text-xs font-medium text-zinc-400">Company Name *</label>
                                         <Input
                                             placeholder="Company Name"
                                             value={formData.name}
@@ -206,7 +206,7 @@ export default function AccountsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">General Email</label>
+                                        <label className="text-xs font-medium text-zinc-400">General Email</label>
                                         <Input
                                             placeholder="General Email"
                                             value={formData.email}
@@ -214,7 +214,7 @@ export default function AccountsPage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">General Phone</label>
+                                        <label className="text-xs font-medium text-zinc-400">General Phone</label>
                                         <Input
                                             placeholder="General Phone"
                                             value={formData.phone}
@@ -226,18 +226,18 @@ export default function AccountsPage() {
 
                             {/* Primary Contact */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Primary Contact</h3>
+                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Primary Contact</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Full Name</label>
+                                        <label className="text-xs font-medium text-zinc-400">Full Name</label>
                                         <Input placeholder="Full Name" value={formData.contactName} onChange={e => setFormData({ ...formData, contactName: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Job Title</label>
+                                        <label className="text-xs font-medium text-zinc-400">Job Title</label>
                                         <Input placeholder="Job Title" value={formData.contactJobTitle} onChange={e => setFormData({ ...formData, contactJobTitle: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Department</label>
+                                        <label className="text-xs font-medium text-zinc-400">Department</label>
                                         <Input placeholder="Department" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} />
                                     </div>
                                 </div>
@@ -245,23 +245,23 @@ export default function AccountsPage() {
 
                             {/* Address */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Address</h3>
+                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Address</h3>
                                 <div className="space-y-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Address Line 1</label>
+                                        <label className="text-xs font-medium text-zinc-400">Address Line 1</label>
                                         <Input placeholder="Address Line 1" value={formData.addressLine1} onChange={e => setFormData({ ...formData, addressLine1: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Address Line 2</label>
+                                        <label className="text-xs font-medium text-zinc-400">Address Line 2</label>
                                         <Input placeholder="Address Line 2" value={formData.addressLine2} onChange={e => setFormData({ ...formData, addressLine2: e.target.value })} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-xs font-medium text-zinc-500">Town / City</label>
+                                            <label className="text-xs font-medium text-zinc-400">Town / City</label>
                                             <Input placeholder="Town / City" value={formData.townCity} onChange={e => setFormData({ ...formData, townCity: e.target.value })} />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-xs font-medium text-zinc-500">Postcode</label>
+                                            <label className="text-xs font-medium text-zinc-400">Postcode</label>
                                             <Input placeholder="Postcode" value={formData.postcode} onChange={e => setFormData({ ...formData, postcode: e.target.value })} />
                                         </div>
                                     </div>
@@ -270,7 +270,7 @@ export default function AccountsPage() {
 
                             {/* Billing and Accounts Payable */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Billing & Accounts Payable</h3>
+                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Billing & Accounts Payable</h3>
                                 <div className="flex items-center space-x-2 py-2">
                                     <input
                                         type="checkbox"
@@ -285,11 +285,11 @@ export default function AccountsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Accounts Payable Contact</label>
+                                        <label className="text-xs font-medium text-zinc-400">Accounts Payable Contact</label>
                                         <Input placeholder="AP Contact Name" value={formData.apContact} onChange={e => setFormData({ ...formData, apContact: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Payment Terms</label>
+                                        <label className="text-xs font-medium text-zinc-400">Payment Terms</label>
                                         <Select value={formData.paymentTerms || "monthly"} onValueChange={(val) => setFormData({ ...formData, paymentTerms: val })}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select terms" />
@@ -306,11 +306,11 @@ export default function AccountsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Accounts Payable Email</label>
+                                        <label className="text-xs font-medium text-zinc-400">Accounts Payable Email</label>
                                         <Input placeholder="AP Email" value={formData.apEmail} onChange={e => setFormData({ ...formData, apEmail: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Accounts Payable Tel</label>
+                                        <label className="text-xs font-medium text-zinc-400">Accounts Payable Tel</label>
                                         <Input placeholder="AP Phone" value={formData.apPhone} onChange={e => setFormData({ ...formData, apPhone: e.target.value })} />
                                     </div>
                                 </div>
@@ -318,14 +318,14 @@ export default function AccountsPage() {
 
                             {/* Contract Details */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Contract Details</h3>
+                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Contract Details</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">Start Date</label>
+                                        <label className="text-xs font-medium text-zinc-400">Start Date</label>
                                         <Input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-500">End Date</label>
+                                        <label className="text-xs font-medium text-zinc-400">End Date</label>
                                         <Input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
                                     </div>
                                 </div>
@@ -333,7 +333,7 @@ export default function AccountsPage() {
 
                             {/* Notes */}
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-zinc-500">Internal Notes</label>
+                                <label className="text-xs font-medium text-zinc-400">Internal Notes</label>
                                 <Input placeholder="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
                             </div>
                             {editingId && (
@@ -353,7 +353,7 @@ export default function AccountsPage() {
                                     </Select>
                                 </div>
                             )}
-                            <Button onClick={handleSave} className="w-full bg-zinc-800">
+                            <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                                 {editingId ? 'Update Account' : 'Create Account'}
                             </Button>
                         </div>
@@ -366,18 +366,18 @@ export default function AccountsPage() {
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-400" />
                     <Input
                         placeholder="Search accounts..."
-                        className="pl-8 bg-white"
+                        className="pl-8 bg-zinc-900/50 border-zinc-800"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <Card className="flex-1 overflow-hidden">
+            <Card className="flex-1 overflow-hidden bg-zinc-950/50 border-zinc-800">
                 <div className="overflow-auto max-h-full">
                     <Table>
-                        <TableHeader className="bg-zinc-100 sticky top-0">
-                            <TableRow>
+                        <TableHeader className="bg-zinc-900/50 sticky top-0">
+                            <TableRow className="border-zinc-800">
                                 <TableHead className="w-[100px]">Code</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Contact</TableHead>
@@ -397,7 +397,7 @@ export default function AccountsPage() {
                                 </TableRow>
                             ) : (
                                 filteredAccounts.map((account) => (
-                                    <TableRow key={account.id} className="hover:bg-zinc-50 group">
+                                    <TableRow key={account.id} className="hover:bg-zinc-800/50 group border-zinc-800">
                                         <TableCell className="font-bold font-mono">{account.code}</TableCell>
                                         <TableCell className="font-medium flex items-center gap-2">
                                             <Building2 className="h-4 w-4 text-zinc-400" />
@@ -423,10 +423,10 @@ export default function AccountsPage() {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900" onClick={() => handleEdit(account)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" onClick={() => handleEdit(account)}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(account.id)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-950/50" onClick={() => handleDelete(account.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
