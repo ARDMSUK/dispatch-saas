@@ -377,23 +377,25 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         // Format the time HH:MM
                                         const estTime = new Date(f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+                                        const termGate = [f.terminal ? `T${f.terminal}` : '', f.gate ? `G:${f.gate}` : ''].filter(Boolean).join(' ');
+
                                         if (landed) {
                                             return (
                                                 <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-mono text-[10px] whitespace-nowrap">
-                                                    LANDED {new Date(f.actualArrival || f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    LANDED {new Date(f.actualArrival || f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {termGate ? `(${termGate})` : ''}
                                                 </Badge>
                                             );
                                         } else if (isDelayed) {
                                             const delayMins = Math.round((new Date(f.estimatedArrival).getTime() - new Date(f.scheduledArrival).getTime()) / 60000);
                                             return (
                                                 <Badge variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/20 font-mono text-[10px] animate-pulse whitespace-nowrap">
-                                                    DELAYED +{delayMins}m (EST: {estTime})
+                                                    DELAYED +{delayMins}m (EST: {estTime}) {termGate ? `(${termGate})` : ''}
                                                 </Badge>
                                             );
                                         } else {
                                             return (
                                                 <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 font-mono text-[10px] whitespace-nowrap">
-                                                    EST: {estTime}
+                                                    EST: {estTime} {termGate ? `(${termGate})` : ''}
                                                 </Badge>
                                             );
                                         }

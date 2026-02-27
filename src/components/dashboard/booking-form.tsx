@@ -231,8 +231,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     // Payment Integration
     const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-    // Initial check: If CARD is selected, we intercept the flow
-    const handlePreSubmit = () => {
+    // Initial check: Validate Flight Terminal then proceed
+    const handlePreSubmit = async () => {
         if (!pickup || !dropoff) {
             toast.error("Please select a route first");
             return;
@@ -247,6 +247,36 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         if (isReturn && showFlightInput && !returnFlightNumber) {
             toast.error("Return Flight Number Required", { description: "Please enter the return flight number for the airport." });
             return;
+        }
+
+        // --- Terminal Validation Logic ---
+        if (showFlightInput && flightNumber) {
+            try {
+                const res = await fetch(`/api/flights?flightNumber=${encodeURIComponent(flightNumber)}`);
+                if (res.ok) {
+                    const flightData = await res.json();
+
+                    if (flightData && flightData.terminal && !flightData.error && flightData.airline && !flightData.airline.includes('[MOCK]')) {
+                        const actualTerminal = flightData.terminal.toString();
+                        const pickupLower = pickup.toLowerCase();
+
+                        // Extract terminal numbers from pickup string like "Terminal 5" or "T5"
+                        const tMatch = pickupLower.match(/(?:terminal\s*|t\s*)(\d)/i);
+                        const enteredTerminal = tMatch ? tMatch[1] : null;
+
+                        if (enteredTerminal && enteredTerminal !== actualTerminal) {
+                            toast.error("Terminal Mismatch Detected", {
+                                description: `Flight ${flightNumber} arrives at Terminal ${actualTerminal}, but you entered Terminal ${enteredTerminal}. Please correct the pickup address.`,
+                                duration: 8000
+                            });
+                            return; // Hard Block
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Flight validation failed", error);
+                // Fail open if API is down
+            }
         }
 
         if (paymentType === 'CARD') {
