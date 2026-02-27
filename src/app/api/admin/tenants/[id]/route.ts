@@ -40,7 +40,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             name, email, phone, address,
             stripeSecretKey, stripePublishableKey,
             twilioAccountSid, twilioAuthToken, twilioFromNumber,
-            resendApiKey
+            resendApiKey, aviationStackApiKey
         } = body;
 
         const updatedTenant = await prisma.tenant.update({
@@ -49,7 +49,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 name, email, phone, address,
                 stripeSecretKey, stripePublishableKey,
                 twilioAccountSid, twilioAuthToken, twilioFromNumber,
-                resendApiKey
+                resendApiKey, aviationStackApiKey
             }
         });
 

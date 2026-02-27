@@ -1,8 +1,8 @@
-export async function fetchFlightStatus(flightNumber: string) {
+export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: string | null) {
     if (!flightNumber) return null;
 
-    // Use AviationStack for real-time data
-    const API_KEY = process.env.AVIATIONSTACK_API_KEY;
+    // Use AviationStack for real-time data. Use tenant key if available, else fallback to global env
+    const API_KEY = tenantApiKey || process.env.AVIATIONSTACK_API_KEY;
 
     if (!API_KEY) {
         console.warn("[FlightService] No AVIATIONSTACK_API_KEY found, returning mock data");

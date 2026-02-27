@@ -41,6 +41,7 @@ model Tenant {
   twilioFromNumber     String?
   
   resendApiKey         String?
+  aviationStackApiKey  String?
 
   // Notification Templates (Super Admin ONLY)
   smsTemplateConfirmation     String? @db.Text

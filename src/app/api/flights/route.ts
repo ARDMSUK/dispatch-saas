@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { fetchFlightStatus } from '@/lib/flight-service';
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user?.id || !session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -16,7 +17,13 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Flight number is required' }, { status: 400 });
         }
 
-        const data = await fetchFlightStatus(flightNumber);
+        // Look up the aviation stack key for the current tenant
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: session.user.tenantId },
+            select: { aviationStackApiKey: true }
+        });
+
+        const data = await fetchFlightStatus(flightNumber, tenant?.aviationStackApiKey);
 
         return NextResponse.json(data);
     } catch (error) {

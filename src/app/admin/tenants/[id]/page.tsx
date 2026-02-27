@@ -178,6 +178,14 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 <Input name="resendApiKey" type="password" value={tenant.resendApiKey || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
                             </div>
                         </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-wider">AviationStack (Flights)</h3>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">API Key</label>
+                                <Input name="aviationStackApiKey" type="password" value={tenant.aviationStackApiKey || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" placeholder="Optional. Globally configured if left blank." />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
