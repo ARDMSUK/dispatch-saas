@@ -11,7 +11,29 @@ const UpdateAccountSchema = z.object({
     name: z.string().min(1).optional(),
     email: z.string().email().optional().or(z.literal('')),
     phone: z.string().optional().or(z.literal('')),
-    address: z.string().optional().or(z.literal('')),
+
+    // New Contact Fields
+    contactName: z.string().optional().or(z.literal('')),
+    contactJobTitle: z.string().optional().or(z.literal('')),
+    department: z.string().optional().or(z.literal('')),
+
+    // New Address Fields
+    addressLine1: z.string().optional().or(z.literal('')),
+    addressLine2: z.string().optional().or(z.literal('')),
+    townCity: z.string().optional().or(z.literal('')),
+    postcode: z.string().optional().or(z.literal('')),
+
+    // Billing and Accounts Payable
+    isAuthorisedToSetAccount: z.boolean().optional(),
+    apContact: z.string().optional().or(z.literal('')),
+    apPhone: z.string().optional().or(z.literal('')),
+    apEmail: z.string().email().optional().or(z.literal('')),
+    paymentTerms: z.string().optional().or(z.literal('')),
+
+    // Contract
+    startDate: z.string().datetime().optional().nullable(),
+    endDate: z.string().datetime().optional().nullable(),
+
     notes: z.string().optional().or(z.literal('')),
     isActive: z.boolean().optional(),
 });
@@ -35,7 +57,7 @@ export async function PATCH(
         }
         const tenantId = session.user.tenantId;
 
-        const { code, name, email, phone, address, notes, isActive } = validation.data;
+        const { code, ...updateData } = validation.data;
 
         // Check uniqueness if code is changing
         if (code) {
@@ -57,12 +79,7 @@ export async function PATCH(
             where: { id },
             data: {
                 code,
-                name,
-                email,
-                phone,
-                address,
-                notes,
-                isActive
+                ...updateData
             }
         });
 

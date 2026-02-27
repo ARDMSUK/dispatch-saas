@@ -24,7 +24,29 @@ export default function AccountsPage() {
         name: "",
         email: "",
         phone: "",
-        address: "",
+
+        // New Contact Fields
+        contactName: "",
+        contactJobTitle: "",
+        department: "",
+
+        // New Address Fields
+        addressLine1: "",
+        addressLine2: "",
+        townCity: "",
+        postcode: "",
+
+        // Billing and Accounts Payable
+        isAuthorisedToSetAccount: false,
+        apContact: "",
+        apPhone: "",
+        apEmail: "",
+        paymentTerms: "",
+
+        // Contract
+        startDate: "",
+        endDate: "",
+
         notes: "",
         isActive: true
     });
@@ -54,7 +76,14 @@ export default function AccountsPage() {
     }, []);
 
     const resetForm = () => {
-        setFormData({ code: "", name: "", email: "", phone: "", address: "", notes: "", isActive: true });
+        setFormData({
+            code: "", name: "", email: "", phone: "",
+            contactName: "", contactJobTitle: "", department: "",
+            addressLine1: "", addressLine2: "", townCity: "", postcode: "",
+            isAuthorisedToSetAccount: false, apContact: "", apPhone: "", apEmail: "", paymentTerms: "",
+            startDate: "", endDate: "",
+            notes: "", isActive: true
+        });
         setEditingId(null);
     };
 
@@ -90,11 +119,29 @@ export default function AccountsPage() {
     const handleEdit = (account: Account) => {
         setEditingId(account.id);
         setFormData({
-            code: account.code,
-            name: account.name,
+            code: account.code || "",
+            name: account.name || "",
             email: account.email || "",
             phone: account.phone || "",
-            address: account.address || "",
+
+            contactName: account.contactName || "",
+            contactJobTitle: account.contactJobTitle || "",
+            department: account.department || "",
+
+            addressLine1: account.addressLine1 || "",
+            addressLine2: account.addressLine2 || "",
+            townCity: account.townCity || "",
+            postcode: account.postcode || "",
+
+            isAuthorisedToSetAccount: account.isAuthorisedToSetAccount || false,
+            apContact: account.apContact || "",
+            apPhone: account.apPhone || "",
+            apEmail: account.apEmail || "",
+            paymentTerms: account.paymentTerms || "",
+
+            startDate: account.startDate ? new Date(account.startDate).toISOString().substring(0, 16) : "",
+            endDate: account.endDate ? new Date(account.endDate).toISOString().substring(0, 16) : "",
+
             notes: account.notes || "",
             isActive: account.isActive
         });
@@ -135,41 +182,160 @@ export default function AccountsPage() {
                         <DialogHeader>
                             <DialogTitle>{editingId ? 'Edit Account' : 'Add New Account'}</DialogTitle>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-[1fr_2fr] gap-4">
-                                <Input
-                                    placeholder="Code (e.g. ACC-001)"
-                                    value={formData.code}
-                                    onChange={e => setFormData({ ...formData, code: e.target.value })}
-                                />
-                                <Input
-                                    placeholder="Account Name"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                />
+                        <div className="grid gap-6 py-4 max-h-[70vh] overflow-y-auto px-1">
+                            {/* General Information */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">General Information</h3>
+                                <div className="grid grid-cols-[1fr_2fr] gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Account Code *</label>
+                                        <Input
+                                            placeholder="Code (e.g. ACC-001)"
+                                            value={formData.code}
+                                            onChange={e => setFormData({ ...formData, code: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Company Name *</label>
+                                        <Input
+                                            placeholder="Company Name"
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">General Email</label>
+                                        <Input
+                                            placeholder="General Email"
+                                            value={formData.email}
+                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">General Phone</label>
+                                        <Input
+                                            placeholder="General Phone"
+                                            value={formData.phone}
+                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    placeholder="Email for Invoicing"
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                />
-                                <Input
-                                    placeholder="Phone"
-                                    value={formData.phone}
-                                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                />
+
+                            {/* Primary Contact */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Primary Contact</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Full Name</label>
+                                        <Input placeholder="Full Name" value={formData.contactName} onChange={e => setFormData({ ...formData, contactName: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Job Title</label>
+                                        <Input placeholder="Job Title" value={formData.contactJobTitle} onChange={e => setFormData({ ...formData, contactJobTitle: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Department</label>
+                                        <Input placeholder="Department" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} />
+                                    </div>
+                                </div>
                             </div>
-                            <Input
-                                placeholder="Billing Address"
-                                value={formData.address}
-                                onChange={e => setFormData({ ...formData, address: e.target.value })}
-                            />
-                            <Input
-                                placeholder="Notes"
-                                value={formData.notes}
-                                onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                            />
+
+                            {/* Address */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Address</h3>
+                                <div className="space-y-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Address Line 1</label>
+                                        <Input placeholder="Address Line 1" value={formData.addressLine1} onChange={e => setFormData({ ...formData, addressLine1: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Address Line 2</label>
+                                        <Input placeholder="Address Line 2" value={formData.addressLine2} onChange={e => setFormData({ ...formData, addressLine2: e.target.value })} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium text-zinc-500">Town / City</label>
+                                            <Input placeholder="Town / City" value={formData.townCity} onChange={e => setFormData({ ...formData, townCity: e.target.value })} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium text-zinc-500">Postcode</label>
+                                            <Input placeholder="Postcode" value={formData.postcode} onChange={e => setFormData({ ...formData, postcode: e.target.value })} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Billing and Accounts Payable */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Billing & Accounts Payable</h3>
+                                <div className="flex items-center space-x-2 py-2">
+                                    <input
+                                        type="checkbox"
+                                        id="authorised"
+                                        checked={formData.isAuthorisedToSetAccount}
+                                        onChange={e => setFormData({ ...formData, isAuthorisedToSetAccount: e.target.checked })}
+                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                    />
+                                    <label htmlFor="authorised" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Authorised to set account?
+                                    </label>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Accounts Payable Contact</label>
+                                        <Input placeholder="AP Contact Name" value={formData.apContact} onChange={e => setFormData({ ...formData, apContact: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Payment Terms</label>
+                                        <Select value={formData.paymentTerms || "monthly"} onValueChange={(val) => setFormData({ ...formData, paymentTerms: val })}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select terms" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="weekly">Weekly</SelectItem>
+                                                <SelectItem value="bi-weekly">Bi-Weekly</SelectItem>
+                                                <SelectItem value="monthly">Monthly</SelectItem>
+                                                <SelectItem value="net-30">Net 30</SelectItem>
+                                                <SelectItem value="net-60">Net 60</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Accounts Payable Email</label>
+                                        <Input placeholder="AP Email" value={formData.apEmail} onChange={e => setFormData({ ...formData, apEmail: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Accounts Payable Tel</label>
+                                        <Input placeholder="AP Phone" value={formData.apPhone} onChange={e => setFormData({ ...formData, apPhone: e.target.value })} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Contract Details */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-zinc-900 border-b pb-2">Contract Details</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">Start Date</label>
+                                        <Input type="datetime-local" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-zinc-500">End Date</label>
+                                        <Input type="datetime-local" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            <div className="space-y-1">
+                                <label className="text-xs font-medium text-zinc-500">Internal Notes</label>
+                                <Input placeholder="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
+                            </div>
                             {editingId && (
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <label className="text-sm font-medium">Status</label>
@@ -243,7 +409,13 @@ export default function AccountsPage() {
                                                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {account.phone || '-'}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-sm truncate max-w-[200px]">{account.address || '-'}</TableCell>
+                                        <TableCell className="text-sm truncate max-w-[200px]">
+                                            {account.addressLine1 ? (
+                                                <>
+                                                    {account.addressLine1} {account.townCity ? `, ${account.townCity}` : ''} {account.postcode ? ` ${account.postcode}` : ''}
+                                                </>
+                                            ) : '-'}
+                                        </TableCell>
                                         <TableCell>
                                             <Badge variant={account.isActive ? 'default' : 'destructive'} className={account.isActive ? "bg-green-600" : ""}>
                                                 {account.isActive ? 'ACTIVE' : 'SUSPENDED'}

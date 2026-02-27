@@ -48,7 +48,29 @@ export interface Account {
     name: string;
     email?: string | null;
     phone?: string | null;
-    address?: string | null;
+
+    // New Contact Fields
+    contactName?: string | null;
+    contactJobTitle?: string | null;
+    department?: string | null;
+
+    // New Address Fields
+    addressLine1?: string | null;
+    addressLine2?: string | null;
+    townCity?: string | null;
+    postcode?: string | null;
+
+    // Billing and Accounts Payable
+    isAuthorisedToSetAccount: boolean;
+    apContact?: string | null;
+    apPhone?: string | null;
+    apEmail?: string | null;
+    paymentTerms?: string | null;
+
+    // Contract
+    startDate?: string | null;
+    endDate?: string | null;
+
     isActive: boolean;
     notes?: string | null;
 }

@@ -123,14 +123,35 @@ model Account {
   id          String   @id @default(cuid())
   code        String   // e.g. ACC-001
   name        String   // e.g. "Corp Inc."
-  email       String?
-  phone       String?
-  address     String?
+  email                   String?
+  phone                   String?
   
-  isActive    Boolean  @default(true)
-  notes       String?
+  // New Contact Fields
+  contactName             String?
+  contactJobTitle         String?
+  department              String?
+  
+  // New Address Fields
+  addressLine1            String?
+  addressLine2            String?
+  townCity                String?
+  postcode                String?
+  
+  // Billing and Accounts Payable
+  isAuthorisedToSetAccount Boolean @default(false)
+  apContact               String?
+  apPhone                 String?
+  apEmail                 String?
+  paymentTerms            String? // e.g., weekly, monthly
+  
+  // Contract
+  startDate               DateTime?
+  endDate                 DateTime?
 
-  tenantId    String
+  isActive                Boolean  @default(true)
+  notes                   String?
+
+  tenantId                String
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
   
   customers   Customer[]
