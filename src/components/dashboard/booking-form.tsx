@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -25,6 +26,8 @@ function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: nu
 }
 
 export function BookingForm({ onJobCreated }: BookingFormProps) {
+    const searchParams = useSearchParams();
+
     // --- STATE ---
     const [pickup, setPickup] = useState('');
     const [dropoff, setDropoff] = useState('');
@@ -46,6 +49,19 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [instructions, setInstructions] = useState('');
     const [reminders, setReminders] = useState('');
     const [debugData, setDebugData] = useState<any>(null); // DEBUG STATE
+
+    // Auto-fill from CLI pop URL parameters
+    useEffect(() => {
+        const phoneParam = searchParams.get('phone');
+        const nameParam = searchParams.get('name');
+
+        if (phoneParam) {
+            setPassengerPhone(decodeURIComponent(phoneParam));
+        }
+        if (nameParam) {
+            setPassengerName(decodeURIComponent(nameParam));
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (paymentType === 'ACCOUNT') {
