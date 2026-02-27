@@ -14,13 +14,20 @@ export async function GET(req: Request) {
 
         const accounts = await prisma.account.findMany({
             where: {
-                tenantId,
-                isActive: true
+                tenantId
             },
             select: {
                 id: true,
                 name: true,
-                code: true
+                code: true,
+                email: true,
+                phone: true,
+                contactName: true,
+                contactJobTitle: true,
+                addressLine1: true,
+                townCity: true,
+                postcode: true,
+                isActive: true, // Needed for the frontend table!
             },
             orderBy: {
                 name: 'asc'
@@ -101,11 +108,13 @@ export async function POST(req: Request) {
         const startDateVal = startDate ? new Date(startDate) : null;
         const endDateVal = endDate ? new Date(endDate) : null;
 
+        const prismaData: any = { ...accountData };
+        if (startDateVal !== null) prismaData.startDate = startDateVal;
+        if (endDateVal !== null) prismaData.endDate = endDateVal;
+
         const newAccount = await prisma.account.create({
             data: {
-                ...accountData,
-                startDate: startDateVal,
-                endDate: endDateVal,
+                ...prismaData,
                 tenantId
             }
         });
