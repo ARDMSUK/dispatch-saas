@@ -31,8 +31,8 @@ const UpdateAccountSchema = z.object({
     paymentTerms: z.string().optional().or(z.literal('')),
 
     // Contract
-    startDate: z.string().datetime().optional().nullable(),
-    endDate: z.string().datetime().optional().nullable(),
+    startDate: z.string().optional().or(z.literal('')).nullable(),
+    endDate: z.string().optional().or(z.literal('')).nullable(),
 
     notes: z.string().optional().or(z.literal('')),
     isActive: z.boolean().optional(),
@@ -57,7 +57,7 @@ export async function PATCH(
         }
         const tenantId = session.user.tenantId;
 
-        const { code, ...updateData } = validation.data;
+        const { code, startDate, endDate, ...updateData } = validation.data;
 
         // Check uniqueness if code is changing
         if (code) {
@@ -75,12 +75,13 @@ export async function PATCH(
             }
         }
 
+        const prismaData: any = { code, ...updateData };
+        if (startDate !== undefined) prismaData.startDate = startDate ? new Date(startDate) : null;
+        if (endDate !== undefined) prismaData.endDate = endDate ? new Date(endDate) : null;
+
         const updatedAccount = await prisma.account.update({
             where: { id },
-            data: {
-                code,
-                ...updateData
-            }
+            data: prismaData
         });
 
         return NextResponse.json(updatedAccount);

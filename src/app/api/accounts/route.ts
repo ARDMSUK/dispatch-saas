@@ -57,8 +57,8 @@ const CreateAccountSchema = z.object({
     apEmail: z.string().email().optional().or(z.literal('')),
     paymentTerms: z.string().optional().or(z.literal('')),
 
-    startDate: z.string().datetime().optional().nullable(),
-    endDate: z.string().datetime().optional().nullable(),
+    startDate: z.string().optional().or(z.literal('')).nullable(),
+    endDate: z.string().optional().or(z.literal('')).nullable(),
 
     isActive: z.boolean().default(true),
     notes: z.string().optional().or(z.literal('')),
@@ -95,9 +95,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Account code already exists' }, { status: 409 });
         }
 
+        const { startDate, endDate, ...accountData } = validation.data;
+
+        // Parse dates for Prisma
+        const startDateVal = startDate ? new Date(startDate) : null;
+        const endDateVal = endDate ? new Date(endDate) : null;
+
         const newAccount = await prisma.account.create({
             data: {
-                ...data,
+                ...accountData,
+                startDate: startDateVal,
+                endDate: endDateVal,
                 tenantId
             }
         });

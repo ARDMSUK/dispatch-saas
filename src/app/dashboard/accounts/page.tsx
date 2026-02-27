@@ -139,8 +139,8 @@ export default function AccountsPage() {
             apEmail: account.apEmail || "",
             paymentTerms: account.paymentTerms || "",
 
-            startDate: account.startDate ? new Date(account.startDate).toISOString().substring(0, 16) : "",
-            endDate: account.endDate ? new Date(account.endDate).toISOString().substring(0, 16) : "",
+            startDate: account.startDate ? new Date(account.startDate).toISOString().substring(0, 10) : "",
+            endDate: account.endDate ? new Date(account.endDate).toISOString().substring(0, 10) : "",
 
             notes: account.notes || "",
             isActive: account.isActive
@@ -322,11 +322,11 @@ export default function AccountsPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-zinc-500">Start Date</label>
-                                        <Input type="datetime-local" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
+                                        <Input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-xs font-medium text-zinc-500">End Date</label>
-                                        <Input type="datetime-local" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+                                        <Input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
                                     </div>
                                 </div>
                             </div>
