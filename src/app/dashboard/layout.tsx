@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { GoogleMapsLoader } from "@/components/dashboard/google-maps-loader";
+import { CliPopListener } from "@/components/dispatch/cli-pop-listener";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
         <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role} isImpersonating={isImpersonating}>
             <GoogleMapsLoader>
                 {children}
+                <CliPopListener />
             </GoogleMapsLoader>
         </DashboardShell>
     );

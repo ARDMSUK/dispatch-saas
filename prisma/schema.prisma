@@ -70,6 +70,7 @@ model Tenant {
   fixedPrices  FixedPrice[]
   surcharges   Surcharge[]
   zones        Zone[]
+  incomingCalls IncomingCall[]
 
   @@map("companies")
   @@schema("public")
@@ -373,5 +374,20 @@ model Surcharge {
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
 
   @@map("surcharges")
+  @@schema("public")
+}
+
+model IncomingCall {
+  id        String   @id @default(cuid())
+  phone     String   // The caller's phone number
+  status    String   @default("RINGING") // RINGING, ANSWERED, DISMISSED
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("incoming_calls")
   @@schema("public")
 }
