@@ -22,7 +22,7 @@ export function CliPopListener() {
         // Poll for active calls
         const interval = setInterval(async () => {
             try {
-                const res = await fetch("/api/dispatch/calls/active");
+                const res = await fetch("/api/dispatch/calls/active", { cache: 'no-store' });
                 if (res.ok) {
                     const calls: IncomingCall[] = await res.json();
 
