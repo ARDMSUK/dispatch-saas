@@ -67,7 +67,19 @@ async function handleWebhook(req: Request) {
             return NextResponse.json({ error: 'Missing or invalid phone parameter' }, { status: 400 });
         }
 
-        // 3. Create Incoming Call Record
+        // 3. Prevent duplicate "ringing" states by dismissing any stale calls for this number
+        await prisma.incomingCall.updateMany({
+            where: {
+                tenantId: tenant.id,
+                phone: cleanPhone,
+                status: 'RINGING'
+            },
+            data: {
+                status: 'DISMISSED'
+            }
+        });
+
+        // 4. Create Incoming Call Record
         const incomingCall = await prisma.incomingCall.create({
             data: {
                 tenantId: tenant.id,
