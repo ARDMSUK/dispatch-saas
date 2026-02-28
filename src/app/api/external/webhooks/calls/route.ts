@@ -46,6 +46,11 @@ async function handleWebhook(req: Request) {
         // 2. Extract Phone Number (From Query or Body)
         let phone = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
 
+        // Discard unreplaced Yay.com macros like {caller_id} from the URL
+        if (phone && !phone.match(/[0-9]/)) {
+            phone = null;
+        }
+
         if (!phone && req.method === 'POST') {
             try {
                 const body = await req.json();
