@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from "@/auth";
+import { revalidatePath } from 'next/cache';
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
     try {
@@ -29,6 +30,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
             where: { id: params.id },
             data: { status }
         });
+
+        // Force the polling endpoint to clear its cache
+        revalidatePath('/api/dispatch/calls/active');
 
         return NextResponse.json(updatedCall);
     } catch (error) {
