@@ -15,6 +15,7 @@ interface IncomingCall {
 export function CliPopListener() {
     const [activeCall, setActiveCall] = useState<IncomingCall | null>(null);
     const [customerName, setCustomerName] = useState<string | null>(null);
+    const [handledCallIds, setHandledCallIds] = useState<Set<string>>(new Set());
     const router = useRouter();
 
     useEffect(() => {
@@ -26,34 +27,37 @@ export function CliPopListener() {
                     const calls: IncomingCall[] = await res.json();
 
                     if (calls.length > 0) {
-                        const call = calls[0]; // Take the oldest ringing call
-                        // Try to find if we already have it in state so we don't re-fetch customer unnecessarily
-                        if (activeCall?.id !== call.id) {
-                            setActiveCall(call);
+                        // Find the oldest ringing call that we HAVEN'T handled locally yet
+                        const unhandledCall = calls.find(c => !handledCallIds.has(c.id));
 
-                            // Attempt to look up the customer name from our database
-                            // Note: In a full implementation, you'd want a dedicated endpoint like `/api/customers/lookup?phone=${call.phone}`
-                            // To keep it simple for now, we'll try to fetch it if we had such an endpoint, or just display the number.
-                            try {
-                                // As a fast lookup trick, we check if they exist by grabbing all customers and finding a match.
-                                // (Optimize this in production)
-                                const custRes = await fetch("/api/customers");
-                                if (custRes.ok) {
-                                    const customers = await custRes.json();
-                                    const match = customers.find((c: any) => c.phone === call.phone);
-                                    if (match && match.name) {
-                                        setCustomerName(match.name);
-                                    } else {
-                                        setCustomerName(null);
+                        if (unhandledCall) {
+                            if (activeCall?.id !== unhandledCall.id) {
+                                setActiveCall(unhandledCall);
+
+                                // Attempt to look up the customer name from our database
+                                // Note: In a full implementation, you'd want a dedicated endpoint like `/api/customers/lookup?phone=${call.phone}`
+                                // To keep it simple for now, we'll try to fetch it if we had such an endpoint, or just display the number.
+                                try {
+                                    // As a fast lookup trick, we check if they exist by grabbing all customers and finding a match.
+                                    // (Optimize this in production)
+                                    const custRes = await fetch("/api/customers");
+                                    if (custRes.ok) {
+                                        const customers = await custRes.json();
+                                        const match = customers.find((c: any) => c.phone === unhandledCall.phone);
+                                        if (match && match.name) {
+                                            setCustomerName(match.name);
+                                        } else {
+                                            setCustomerName(null);
+                                        }
                                     }
+                                } catch (e) {
+                                    // ignore
                                 }
-                            } catch (e) {
-                                // ignore
                             }
+                        } else {
+                            setActiveCall(null);
+                            setCustomerName(null);
                         }
-                    } else {
-                        setActiveCall(null);
-                        setCustomerName(null);
                     }
                 }
             } catch (err) {
@@ -67,9 +71,10 @@ export function CliPopListener() {
     const handleDismiss = async () => {
         if (!activeCall) return;
 
-        // Optimistically hide
+        // Optimistically hide and mark as handled locally
         const callId = activeCall.id;
         setActiveCall(null);
+        setHandledCallIds(prev => new Set(prev).add(callId));
 
         try {
             await fetch(`/api/dispatch/calls/${callId}`, {
@@ -89,7 +94,9 @@ export function CliPopListener() {
         const phone = activeCall.phone;
         const name = customerName || "";
 
+        // Mark as handled locally
         setActiveCall(null);
+        setHandledCallIds(prev => new Set(prev).add(callId));
 
         try {
             await fetch(`/api/dispatch/calls/${callId}`, {

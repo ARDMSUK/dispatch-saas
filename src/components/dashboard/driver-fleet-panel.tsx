@@ -71,6 +71,14 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                                             <span>•</span>
                                             <span>{driver.phone}</span>
                                         </div>
+                                        {driver.zoneQueues && driver.zoneQueues.length > 0 && (
+                                            <div className="text-[9px] mt-1 flex items-center gap-1.5 text-emerald-400/90 font-medium">
+                                                <span className="px-1.5 py-0.5 rounded flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                    {driver.zoneQueues[0].zone?.name || 'Queued'}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

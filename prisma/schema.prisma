@@ -30,6 +30,7 @@ model Tenant {
   // Configuration
   useZonePricing Boolean @default(false)
   autoDispatch   Boolean @default(false)
+  dispatchAlgorithm String @default("CLOSEST") // CLOSEST, LONGEST_WAITING
   enableLiveTracking Boolean @default(true)
 
   // Integrations (Encrypted/Stored secure in prod, text for now)
@@ -185,6 +186,9 @@ model Driver {
   preAssignedJobs Job[] @relation("PreAssignedDriver")
   vehicles  Vehicle[] // Vehicles assigned to this driver
 
+  // Queue Position
+  zoneQueues ZoneQueue[] 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -270,6 +274,7 @@ model Job {
   // Status
   status         String   @default("PENDING") 
   // PENDING, UNASSIGNED, DISPATCHED, EN_ROUTE, POB, COMPLETED, CANCELLED
+  autoDispatch   Boolean  @default(true) // Manual override for dispatchers
 
   // Relations
   tenantId  String
@@ -319,6 +324,9 @@ model Zone {
 
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  // Queuing System
+  driversInQueue ZoneQueue[]
 
   // Relations for Pricing
   pickupFixedPrices  FixedPrice[] @relation("PickupZone")
@@ -389,5 +397,23 @@ model IncomingCall {
   updatedAt DateTime @updatedAt
 
   @@map("incoming_calls")
+  @@schema("public")
+}
+
+model ZoneQueue {
+  id        String   @id @default(cuid())
+  
+  driverId  String
+  driver    Driver   @relation(fields: [driverId], references: [id])
+  
+  zoneId    String
+  zone      Zone     @relation(fields: [zoneId], references: [id])
+  
+  tenantId  String
+  
+  joinedAt  DateTime @default(now())
+  
+  @@unique([driverId]) // A driver can only be in one queue at a time
+  @@map("zone_queues")
   @@schema("public")
 }

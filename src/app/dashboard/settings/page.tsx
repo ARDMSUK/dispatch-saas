@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
@@ -26,6 +27,7 @@ export default function SettingsPage() {
     // Configuration State
     const [useZonePricing, setUseZonePricing] = useState(false);
     const [autoDispatch, setAutoDispatch] = useState(false);
+    const [dispatchAlgorithm, setDispatchAlgorithm] = useState("CLOSEST");
     const [enableLiveTracking, setEnableLiveTracking] = useState(true);
 
     // SMS Templates State
@@ -77,6 +79,7 @@ export default function SettingsPage() {
 
                 setUseZonePricing(data.useZonePricing ?? false);
                 setAutoDispatch(data.autoDispatch ?? false);
+                setDispatchAlgorithm(data.dispatchAlgorithm || "CLOSEST");
                 setEnableLiveTracking(data.enableLiveTracking ?? true);
 
                 // Load templates
@@ -128,6 +131,7 @@ export default function SettingsPage() {
                     lng,
                     useZonePricing,
                     autoDispatch,
+                    dispatchAlgorithm,
                     enableLiveTracking,
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
@@ -237,48 +241,6 @@ export default function SettingsPage() {
                         <label className="block text-sm font-medium text-zinc-400 mb-1">API Key</label>
                         <div className="font-mono text-sm bg-black/50 px-3 py-2 rounded border border-white/5 flex items-center justify-between group text-zinc-500 cursor-not-allowed">
                             <span className="truncate">{apiKey}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Configuration Section */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
-                    ⚙️ System Configuration
-                </h2>
-                <div className="space-y-6">
-                    <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
-                        <Checkbox
-                            id="zonePricing"
-                            checked={useZonePricing}
-                            onCheckedChange={(checked) => setUseZonePricing(checked as boolean)}
-                        />
-                        <div className="space-y-1">
-                            <Label htmlFor="zonePricing" className="text-white font-medium cursor-pointer">
-                                Enable Zone-Based Pricing
-                            </Label>
-                            <p className="text-sm text-zinc-500">
-                                If enabled, the system will attempt to calculate prices based on defined Zones and Fixed Prices.
-                                If disabled, it will fall back to distance-based (mileage) pricing only.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
-                        <Checkbox
-                            id="autoDispatch"
-                            checked={autoDispatch}
-                            onCheckedChange={(checked) => setAutoDispatch(checked as boolean)}
-                        />
-                        <div className="space-y-1">
-                            <Label htmlFor="autoDispatch" className="text-white font-medium cursor-pointer">
-                                Enable Automatic Dispatch
-                            </Label>
-                            <p className="text-sm text-zinc-500">
-                                If enabled, the system will automatically assign jobs to available drivers.
-                                If disabled, all jobs remain 'Unassigned' until manually dispatched.
-                            </p>
                         </div>
                     </div>
                 </div>

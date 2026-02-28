@@ -10,14 +10,30 @@ const WebhookSchema = z.object({
 });
 
 export async function POST(req: Request) {
+    return handleWebhook(req);
+}
+
+export async function GET(req: Request) {
+    return handleWebhook(req);
+}
+
+async function handleWebhook(req: Request) {
     try {
-        // 1. Authenticate via Bearer Token (Tenant API Key)
-        const authHeader = req.headers.get('authorization');
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return NextResponse.json({ error: 'Missing or invalid Authorization header' }, { status: 401 });
+        const { searchParams } = new URL(req.url);
+
+        // 1. Authenticate via Bearer Token OR Query Parameter
+        let apiKey = searchParams.get('token') || searchParams.get('apiKey');
+
+        if (!apiKey) {
+            const authHeader = req.headers.get('authorization');
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                apiKey = authHeader.split(' ')[1];
+            }
         }
 
-        const apiKey = authHeader.split(' ')[1];
+        if (!apiKey) {
+            return NextResponse.json({ error: 'Missing API Key in URL (?token=...) or Authorization header' }, { status: 401 });
+        }
 
         const tenant = await prisma.tenant.findUnique({
             where: { apiKey }
@@ -27,24 +43,35 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid API Key' }, { status: 401 });
         }
 
-        // 2. Validate payload
-        const body = await req.json();
-        const validation = WebhookSchema.safeParse(body);
+        // 2. Extract Phone Number (From Query or Body)
+        let phone = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
 
-        if (!validation.success) {
-            return NextResponse.json({ error: 'Invalid payload', details: validation.error }, { status: 400 });
+        if (!phone && req.method === 'POST') {
+            try {
+                const body = await req.json();
+                phone = body.phone || body.caller || body.from;
+            } catch (e) {
+                // Ignore JSON parse error if body is empty
+            }
+        }
+
+        // Clean phone number (remove non-digits / spaces)
+        let cleanPhone = phone ? phone.replace(/[^0-9+]/g, '') : null;
+
+        if (!cleanPhone || cleanPhone.length < 5) {
+            return NextResponse.json({ error: 'Missing or invalid phone parameter' }, { status: 400 });
         }
 
         // 3. Create Incoming Call Record
         const incomingCall = await prisma.incomingCall.create({
             data: {
                 tenantId: tenant.id,
-                phone: validation.data.phone,
+                phone: cleanPhone,
                 status: 'RINGING' // Default
             }
         });
 
-        return NextResponse.json({ success: true, callId: incomingCall.id }, { status: 201 });
+        return NextResponse.json({ success: true, callId: incomingCall.id, phone: cleanPhone }, { status: 201 });
 
     } catch (error) {
         console.error('Webhook Error:', error);

@@ -102,6 +102,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [recurrenceRule, setRecurrenceRule] = useState('DAILY'); // DAILY, WEEKLY, MON,WED,FRI
     const [recurrenceEnd, setRecurrenceEnd] = useState('');
 
+    // Dispatch Config
+    const [autoDispatch, setAutoDispatch] = useState(true);
+
 
     // ... (useEffect omitted for brevity, logic unchanged)
 
@@ -345,6 +348,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 // Wait & Return
                 waitingTime: isWaitAndReturn ? waitingTime : 0,
                 isWaitAndReturn,
+                // Dispatch
+                autoDispatch,
                 // Recurrence
                 isRecurring,
                 recurrenceRule: isRecurring ? recurrenceRule : null,
@@ -412,6 +417,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         setIsRecurring(false);
         setRecurrenceRule('DAILY');
         setRecurrenceEnd('');
+        setAutoDispatch(true);
 
         const now = new Date();
         now.setMinutes(now.getMinutes() + 10);
@@ -800,6 +806,19 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         />
                         <label htmlFor="recurringToggle" className="text-sm text-white flex-1 cursor-pointer select-none flex items-center gap-2">
                             <RotateCw className="h-3 w-3 text-emerald-500" /> Recurring Booking
+                        </label>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-2 rounded border border-indigo-500/30 bg-indigo-500/10 mb-2">
+                        <input
+                            type="checkbox"
+                            id="autoDispatchToggle"
+                            checked={autoDispatch}
+                            onChange={(e) => setAutoDispatch(e.target.checked)}
+                            className="w-4 h-4 rounded border-indigo-500 text-indigo-500 focus:ring-indigo-500/20"
+                        />
+                        <label htmlFor="autoDispatchToggle" className="text-sm text-indigo-200 flex-1 cursor-pointer select-none flex items-center gap-2">
+                            <Zap className="h-3 w-3 text-indigo-500" /> Auto-Dispatch Job
                         </label>
                     </div>
 

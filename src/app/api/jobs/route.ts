@@ -158,7 +158,8 @@ export async function POST(request: Request) {
             pickupLat: body.pickupLat || null,
             pickupLng: body.pickupLng || null,
             dropoffLat: body.dropoffLat || null,
-            dropoffLng: body.dropoffLng || null
+            dropoffLng: body.dropoffLng || null,
+            autoDispatch: body.autoDispatch !== undefined ? body.autoDispatch : true
         };
 
         // 5. Build Job Data List (Handle Recurrence)

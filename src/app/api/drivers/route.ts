@@ -12,7 +12,12 @@ export async function GET() {
         const drivers = await prisma.driver.findMany({
             where: { tenantId: session.user.tenantId },
             include: {
-                vehicles: true // Include assigned vehicles
+                vehicles: true, // Include assigned vehicles
+                zoneQueues: {
+                    include: {
+                        zone: true
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         });

@@ -50,7 +50,8 @@ export async function PATCH(req: Request) {
             lng,
             useZonePricing: body.useZonePricing,
             autoDispatch: body.autoDispatch,
-            enableLiveTracking: body.enableLiveTracking
+            enableLiveTracking: body.enableLiveTracking,
+            dispatchAlgorithm: body.dispatchAlgorithm
         };
 
         if ((session.user.role as string) === 'SUPER_ADMIN') {

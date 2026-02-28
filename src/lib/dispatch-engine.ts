@@ -22,7 +22,7 @@ export class DispatchEngine {
         // 0. Check Tenant Configuration
         const tenant = await prisma.tenant.findUnique({
             where: { id: tenantId },
-            select: { autoDispatch: true }
+            select: { autoDispatch: true, dispatchAlgorithm: true }
         });
 
         if (!tenant?.autoDispatch) {
@@ -45,6 +45,7 @@ export class DispatchEngine {
             where: {
                 tenantId: tenantId,
                 status: 'PENDING',
+                autoDispatch: true,
                 pickupTime: {
                     gte: lookback,
                     lte: lookahead
@@ -65,14 +66,17 @@ export class DispatchEngine {
             return report;
         }
 
-        // 3. Find Available Drivers
+        // 3. Find Available Drivers and their Queues
         // Strict Mode: Only FREE drivers.
         const availableDrivers = await prisma.driver.findMany({
             where: {
                 tenantId: tenantId,
                 status: 'FREE',
             },
-            include: { vehicles: true }
+            include: {
+                vehicles: true,
+                zoneQueues: true // Include queue data for LONGEST_WAITING logic
+            }
         });
 
         // 4. Match Logic
@@ -103,7 +107,14 @@ export class DispatchEngine {
                 }
             }
 
-            const driver = this.findBestDriver(job, driverLocations, assignedDriverIds, jobZoneId, zones);
+            const driver = this.findBestDriver(
+                job,
+                driverLocations,
+                assignedDriverIds,
+                jobZoneId,
+                zones,
+                tenant.dispatchAlgorithm
+            );
 
             if (driver) {
                 await this.assignJob(job, driver);
@@ -121,41 +132,73 @@ export class DispatchEngine {
 
     private static findBestDriver(
         job: Job,
-        drivers: (Driver & { parsedLat?: number, parsedLng?: number })[],
+        drivers: (Driver & { parsedLat?: number, parsedLng?: number, zoneQueues?: any[] })[],
         excludedIds: Set<string>,
         jobZoneId: string | null,
-        zones: any[]
+        zones: any[],
+        dispatchAlgorithm: string
     ): Driver | null {
         const candidates = drivers.filter(d => !excludedIds.has(d.id));
 
         if (candidates.length === 0) return null;
 
-        // 1. Zone Priority
-        let filteredCandidates = candidates;
+        // 1. Zone Filtering
+        let zoneCandidates = candidates;
         if (jobZoneId) {
-            const driversInZone = candidates.filter(d => {
-                if (!d.parsedLat || !d.parsedLng) return false;
-                const zone = zones.find(z => z.id === jobZoneId);
-                if (!zone) return false;
-                try {
-                    const coords = JSON.parse(zone.coordinates);
-                    return isPointInPolygon([d.parsedLat, d.parsedLng], coords);
-                } catch { return false; }
-            });
+            // First, see if any drivers are officially in the ZoneQueue for this zone
+            const queueMembers = candidates.filter(d =>
+                d.zoneQueues?.some(q => q.zoneId === jobZoneId)
+            );
 
-            if (driversInZone.length > 0) {
-                // report? console.log(`[Dispatch] Found ${driversInZone.length} drivers in zone for job ${job.id}`);
-                filteredCandidates = driversInZone;
+            if (queueMembers.length > 0) {
+                zoneCandidates = queueMembers;
             } else {
-                // Fallback to all candidates
-                // console.log(`[Dispatch] No drivers in zone for job ${job.id}, falling back.`);
+                // Fallback: Check if any drivers are geometrically in the zone even if they missed a queue ping
+                const geometricCandidates = candidates.filter(d => {
+                    if (!d.parsedLat || !d.parsedLng) return false;
+                    const zone = zones.find(z => z.id === jobZoneId);
+                    if (!zone) return false;
+                    try {
+                        const coords = JSON.parse(zone.coordinates);
+                        return isPointInPolygon([d.parsedLat, d.parsedLng], coords);
+                    } catch { return false; }
+                });
+
+                if (geometricCandidates.length > 0) {
+                    zoneCandidates = geometricCandidates;
+                }
+                // If STILL empty, zoneCandidates remains all candidates (fallback to global search)
             }
         }
 
-        // 2. Nearest Calculation
+        // 2. Sorting by Algorithm
+        if (dispatchAlgorithm === "LONGEST_WAITING" && jobZoneId) {
+            // Sort zoneCandidates by joinedAt ascending (longest waiting first)
+            const queueDrivers = zoneCandidates.filter(d => d.zoneQueues && d.zoneQueues.length > 0);
+
+            if (queueDrivers.length > 0) {
+                const sortedByQueue = queueDrivers.sort((a, b) => {
+                    const queueA = a.zoneQueues!.find(q => q.zoneId === jobZoneId);
+                    const queueB = b.zoneQueues!.find(q => q.zoneId === jobZoneId);
+
+                    // If both are in the queue, sort by oldest
+                    if (queueA && queueB) {
+                        return new Date(queueA.joinedAt).getTime() - new Date(queueB.joinedAt).getTime();
+                    }
+                    // If only A is in queue, A wins
+                    if (queueA) return -1;
+                    // If only B is in queue, B wins
+                    if (queueB) return 1;
+                    return 0;
+                });
+                return sortedByQueue[0];
+            }
+            // If we wanted LONGEST_WAITING but nobody is in the queue, fall through to CLOSEST
+        }
+
+        // 3. Nearest Calculation (CLOSEST or fallback)
         if (job.pickupLat && job.pickupLng) {
-            // Sort by distance
-            const sorted = filteredCandidates.sort((a, b) => {
+            const sorted = zoneCandidates.sort((a, b) => {
                 const distA = this.getDriverDistance(a, job.pickupLat!, job.pickupLng!);
                 const distB = this.getDriverDistance(b, job.pickupLat!, job.pickupLng!);
                 return distA - distB;
@@ -164,7 +207,7 @@ export class DispatchEngine {
         }
 
         // Fallback: First available
-        return filteredCandidates[0];
+        return zoneCandidates[0];
     }
 
     private static getDriverDistance(driver: Driver & { parsedLat?: number, parsedLng?: number }, lat: number, lng: number): number {
@@ -184,14 +227,10 @@ export class DispatchEngine {
             }
         });
 
-        // 2. Update Driver Status? 
-        // Usually we set driver to 'BUSY' immediately so they don't get another job?
-        // Yes, for MVP this is safest.
+        // 2. Update Driver Status
         await prisma.driver.update({
             where: { id: driver.id },
-            data: { status: 'BUSY' } // Driver must mark themselves FREE again after job? 
-            // Or 'ASSIGNED'? 
-            // Let's stick to 'BUSY' for now to block further assignments.
+            data: { status: 'BUSY' }
         });
 
         // 3. Send Notifications
