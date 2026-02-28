@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 
 // This is an external webhook intended to be called by a PBX (Twilio, 3CX, etc)
 // It authenticates via a Bearer token matching the Tenant's ApiKey
@@ -67,7 +68,19 @@ async function handleWebhook(req: Request) {
             return NextResponse.json({ error: 'Missing or invalid phone parameter' }, { status: 400 });
         }
 
-        // 3. Prevent duplicate "ringing" states by dismissing any stale calls for this number
+        // 3. Handle Answered or Hangup Events
+        const eventType = searchParams.get('event') || 'ringing';
+
+        if (eventType === 'answered' || eventType === 'hungup') {
+            await prisma.incomingCall.updateMany({
+                where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
+                data: { status: 'DISMISSED' }
+            });
+            revalidatePath('/api/dispatch/calls/active');
+            return NextResponse.json({ success: true, action: 'cleared', phone: cleanPhone });
+        }
+
+        // 4. Prevent duplicate "ringing" states by dismissing any stale calls for this number
         await prisma.incomingCall.updateMany({
             where: {
                 tenantId: tenant.id,
@@ -79,7 +92,7 @@ async function handleWebhook(req: Request) {
             }
         });
 
-        // 4. Create Incoming Call Record
+        // 5. Create Incoming Call Record
         const incomingCall = await prisma.incomingCall.create({
             data: {
                 tenantId: tenant.id,
@@ -88,6 +101,7 @@ async function handleWebhook(req: Request) {
             }
         });
 
+        revalidatePath('/api/dispatch/calls/active');
         return NextResponse.json({ success: true, callId: incomingCall.id, phone: cleanPhone }, { status: 201 });
 
     } catch (error) {
