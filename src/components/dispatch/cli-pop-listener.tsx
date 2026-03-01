@@ -58,6 +58,10 @@ export function CliPopListener() {
                             setActiveCall(null);
                             setCustomerName(null);
                         }
+                    } else {
+                        // If there are no active calls from the server, clear out the UI
+                        setActiveCall(null);
+                        setCustomerName(null);
                     }
                 }
             } catch (err) {
