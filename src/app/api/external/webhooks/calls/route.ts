@@ -22,6 +22,28 @@ async function handleWebhook(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
 
+        let eventType = searchParams.get('event') || 'ringing';
+        let phone: string | null = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
+
+        if (req.method === 'POST') {
+            try {
+                const body = await req.json();
+                phone = body.phone || body.caller || body.from || body.caller_id;
+
+                // Support Yay.com specific event types in the JSON payload
+                if (body.type) {
+                    const typeStr = String(body.type).toLowerCase();
+                    if (typeStr.includes('answered')) {
+                        eventType = 'answered';
+                    } else if (typeStr.includes('hungup') || typeStr.includes('hangup')) {
+                        eventType = 'hungup';
+                    }
+                }
+            } catch (e) {
+                // Ignore JSON parse error if body is empty
+            }
+        }
+
         // 1. Authenticate via Bearer Token OR Query Parameter
         let apiKey = searchParams.get('token') || searchParams.get('apiKey');
 
@@ -44,22 +66,12 @@ async function handleWebhook(req: Request) {
             return NextResponse.json({ error: 'Invalid API Key' }, { status: 401 });
         }
 
-        // 2. Extract Phone Number (From Query or Body)
-        let phone = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
-
         // Discard unreplaced Yay.com macros like {caller_id} from the URL
         if (phone && !phone.match(/[0-9]/)) {
             phone = null;
         }
 
-        if (!phone && req.method === 'POST') {
-            try {
-                const body = await req.json();
-                phone = body.phone || body.caller || body.from;
-            } catch (e) {
-                // Ignore JSON parse error if body is empty
-            }
-        }
+
 
         // Clean phone number (remove non-digits / spaces)
         let cleanPhone = phone ? phone.replace(/[^0-9+]/g, '') : null;
@@ -69,7 +81,6 @@ async function handleWebhook(req: Request) {
         }
 
         // 3. Handle Answered or Hangup Events
-        const eventType = searchParams.get('event') || 'ringing';
 
         if (eventType === 'answered' || eventType === 'hungup') {
             await prisma.incomingCall.updateMany({
