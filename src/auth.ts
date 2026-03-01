@@ -39,6 +39,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             name: user.name,
                             email: user.email,
                             role: user.role,
+                            accountId: user.accountId,
                             tenantId: user.tenantId,
                             tenantSlug: user.tenant.slug,
                         };
@@ -50,11 +51,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
-         
+
         async session({ session, token }: any) {
             if (token && session.user) {
                 session.user.id = token.id;
                 session.user.role = token.role;
+                session.user.accountId = token.accountId;
                 session.user.tenantId = token.impersonatedTenantId || token.tenantId; // Prefer impersonated
                 session.user.tenantSlug = token.impersonatedTenantSlug || token.tenantSlug;
 
@@ -70,6 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.accountId = user.accountId;
                 token.tenantId = user.tenantId;
                 token.tenantSlug = user.tenantSlug;
             }

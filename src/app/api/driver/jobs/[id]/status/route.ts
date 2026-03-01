@@ -21,7 +21,7 @@ export async function POST(
         }
 
         const body = await req.json();
-        const { status, lat, lng } = body;
+        const { status, lat, lng, paymentType } = body;
 
         // Verify Job Ownership
         const job = await prisma.job.findUnique({
@@ -37,9 +37,18 @@ export async function POST(
         }
 
         // Update Job
+        const updateData: any = { status };
+
+        if (status === 'COMPLETED' && paymentType) {
+            updateData.paymentType = paymentType;
+            if (['CASH', 'IN_CAR_TERMINAL', 'ACCOUNT'].includes(paymentType)) {
+                updateData.paymentStatus = 'PAID';
+            }
+        }
+
         const updatedJob = await prisma.job.update({
             where: { id: jobId },
-            data: { status }
+            data: updateData
         });
 
         // Automatically free the driver if the job is finished

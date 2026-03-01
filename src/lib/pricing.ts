@@ -73,12 +73,16 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
 
     // 0. Check Tenant Configuration
     let useZonePricing = false;
+    let enableDynamicPricing = false;
+    let enableWaitCalculations = false;
     if (companyId) {
         const tenant = await prisma.tenant.findUnique({
             where: { id: companyId },
-            select: { useZonePricing: true }
+            select: { useZonePricing: true, enableDynamicPricing: true, enableWaitCalculations: true }
         });
         if (tenant?.useZonePricing) useZonePricing = true;
+        if (tenant?.enableDynamicPricing) enableDynamicPricing = true;
+        if (tenant?.enableWaitCalculations) enableWaitCalculations = true;
     }
 
     // 0.1 Zone Detection (If enabled)
@@ -194,17 +198,19 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     // 4. Calculate Base Price
     let total = base + (distanceMiles * rate);
 
-    // --- Wait & Return Logic ---
+    // --- Wait logic (Wait & Return or standalone) ---
     if (req.isWaitAndReturn) {
         // Round Trip Distance
         const roundTripDistance = distanceMiles * 2;
         // Recalculate base price for round trip (using base + mileage)
         total = base + (roundTripDistance * rate);
+    }
 
-        // Add Waiting Time Cost
-        if (req.waitingTime && req.waitingTime > 0) {
-            const waitCost = req.waitingTime * (effectiveRule.waitingFreq || 0);
-            total += waitCost;
+    // Add Waiting Time Cost (Always if requested + enabled, or if it's Wait & Return)
+    let totalWaitCost = 0;
+    if (req.waitingTime && req.waitingTime > 0) {
+        if (req.isWaitAndReturn || enableWaitCalculations) {
+            totalWaitCost = req.waitingTime * (effectiveRule.waitingFreq || 0);
         }
     }
     // ---------------------------
@@ -218,7 +224,7 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     // Min Charge
     if (total < min) total = min;
 
-    // 4. Surcharges
+    // 4. Surcharges (Stops, Wait, and Dynamic Surges)
     const surcharges = [];
 
     // Stop Surcharges
@@ -226,6 +232,88 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
         const stopCharge = vias.length * 5.00;
         total += stopCharge;
         surcharges.push({ name: `${vias.length} x Stops`, amount: stopCharge });
+    }
+
+    // Wait Surcharge
+    if (totalWaitCost > 0) {
+        total += totalWaitCost;
+        surcharges.push({ name: `Waiting Time (${req.waitingTime}m)`, amount: totalWaitCost });
+    }
+
+    // Dynamic Surcharges (Surge Pricing)
+    if (enableDynamicPricing && companyId) {
+        try {
+            const rules = await prisma.surcharge.findMany({
+                where: { tenantId: companyId }
+            });
+
+            // Evaluation variables
+            const pTime = new Date(pickupTime);
+            // Day of week: 0 (Sun) to 6 (Sat)
+            const pDay = pTime.getDay().toString();
+
+            // Format time as HH:mm for comparison
+            const pHH = pTime.getHours().toString().padStart(2, '0');
+            const pMM = pTime.getMinutes().toString().padStart(2, '0');
+            const pTimeString = `${pHH}:${pMM}`;
+
+            for (const surcharge of rules) {
+                let applies = false;
+
+                // Priority 1: Exact Date Match
+                if (surcharge.startDate && surcharge.endDate) {
+                    if (pTime >= surcharge.startDate && pTime <= surcharge.endDate) {
+                        applies = true;
+                    }
+                }
+                // Priority 2: Recurring Weekly / Daily Match
+                else {
+                    let dayMatches = true;
+                    let timeMatches = true;
+
+                    if (surcharge.daysOfWeek) {
+                        const activeDays = surcharge.daysOfWeek.split(',');
+                        if (!activeDays.includes(pDay)) {
+                            dayMatches = false;
+                        }
+                    }
+
+                    if (surcharge.startTime && surcharge.endTime) {
+                        // Handle overnight spanning surges e.g. 22:00 to 06:00
+                        const sTime = surcharge.startTime;
+                        const eTime = surcharge.endTime;
+
+                        if (sTime <= eTime) {
+                            timeMatches = (pTimeString >= sTime && pTimeString <= eTime);
+                        } else {
+                            // Overnight surge (e.g. >= 22:00 OR <= 06:00)
+                            timeMatches = (pTimeString >= sTime || pTimeString <= eTime);
+                        }
+                    }
+
+                    if (dayMatches && timeMatches) applies = true;
+                }
+
+                if (applies) {
+                    let surgeAmount = 0;
+                    if (surcharge.type === 'PERCENT') {
+                        // multiplier e.g. 50% = base * 0.5
+                        surgeAmount = (total * (surcharge.value / 100));
+                    } else if (surcharge.type === 'FLAT') {
+                        surgeAmount = surcharge.value;
+                    }
+
+                    if (surgeAmount > 0) {
+                        surgeAmount = Number(parseFloat(surgeAmount.toString()).toFixed(2));
+                        total += surgeAmount;
+                        surcharges.push({ name: surcharge.name, amount: surgeAmount });
+                    }
+                }
+            }
+
+        } catch (e) {
+            console.error("[Pricing] Error applying dynamic surcharges", e);
+        }
     }
 
     return {

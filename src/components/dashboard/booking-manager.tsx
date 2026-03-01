@@ -571,7 +571,9 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="col-span-12 md:col-span-3 flex flex-col justify-center items-end border-l border-white/5 pl-4">
                         <span className="text-xl font-bold text-white">£{job.fare?.toFixed(2) || '0.00'}</span>
                         <span className={`text-[10px] uppercase tracking-wider font-bold ${getVehicleTextColor(job.vehicleType)}`}>{job.vehicleType}</span>
-                        <span className="text-[10px] text-zinc-500 mt-1">{job.paymentType}</span>
+                        <span className="text-[10px] text-zinc-500 mt-1">
+                            {job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType}
+                        </span>
                     </div>
                 </div>
             </div>

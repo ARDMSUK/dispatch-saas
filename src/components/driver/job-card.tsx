@@ -1,11 +1,14 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Navigation, Phone, User, Clock, MapPin } from 'lucide-react';
 
-export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusUpdate: (id: number, status: string) => void, onReject?: (id: number) => void }) {
+export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusUpdate: (id: number, status: string, paymentType?: string) => void, onReject?: (id: number) => void }) {
+    const [showPayment, setShowPayment] = useState(false);
+
     if (!job) return (
         <div className="flex flex-col items-center justify-center p-8 text-center text-zinc-500 border border-dashed border-zinc-800 rounded-xl bg-zinc-900/20">
             <Clock className="h-12 w-12 mb-4 opacity-50" />
@@ -19,7 +22,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
     const isHistory = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(job.status);
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg animate-in fade-in slide-in-from-bottom-2">
+        <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg animate-in fade-in slide-in-from-bottom-2">
             {/* Header / Status */}
             <div className={`p-4 flex justify-between items-center ${isOffer ? 'bg-amber-500/10 border-b border-amber-500/20' : 'bg-blue-500/10 border-b border-blue-500/20'}`}>
                 <Badge className={isOffer ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-blue-500 text-white hover:bg-blue-400'}>
@@ -164,12 +167,48 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                                 </>
                             )}
                             {job.status === 'POB' && (
-                                <Button className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-white" onClick={() => onStatusUpdate(job.id, 'COMPLETED')}>
+                                <Button className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-white" onClick={() => {
+                                    if (job.paymentType === 'ACCOUNT') {
+                                        onStatusUpdate(job.id, 'COMPLETED', 'ACCOUNT');
+                                    } else {
+                                        setShowPayment(true);
+                                    }
+                                }}>
                                     COMPLETE JOB
                                 </Button>
                             )}
                         </div>
                     )}
+                </div>
+            )}
+
+            {showPayment && (
+                <div className="absolute inset-0 z-50 bg-zinc-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+                    <h3 className="text-xl font-bold text-white mb-2">Payment Collection</h3>
+                    <p className="text-4xl font-black text-emerald-400 mb-2">£{job.fare?.toFixed(2)}</p>
+                    <p className="text-zinc-400 text-sm mb-8">Please process payment or confirm cash received.</p>
+
+                    <div className="w-full space-y-3">
+                        <Button
+                            className="w-full h-14 text-lg font-bold bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
+                            onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'CASH')}
+                        >
+                            💵 Collect Cash
+                        </Button>
+                        <Button
+                            className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20"
+                            onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'IN_CAR_TERMINAL')}
+                        >
+                            💳 Card Terminal
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="w-full h-12 text-zinc-500 mt-4"
+                            onClick={() => setShowPayment(false)}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
                 </div>
             )}
         </div>

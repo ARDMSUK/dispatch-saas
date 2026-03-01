@@ -37,7 +37,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { name, email, phone, address, lat, lng, useZonePricing, autoDispatch } = body;
+        const { name, email, phone, address, lat, lng, useZonePricing, autoDispatch, enableDynamicPricing, enableWaitCalculations, enableWebBooker } = body;
 
         // Validation: Ensure required fields if needed, but schema allows optional
 
@@ -51,7 +51,10 @@ export async function PATCH(req: Request) {
             useZonePricing: body.useZonePricing,
             autoDispatch: body.autoDispatch,
             enableLiveTracking: body.enableLiveTracking,
-            dispatchAlgorithm: body.dispatchAlgorithm
+            dispatchAlgorithm: body.dispatchAlgorithm,
+            enableDynamicPricing: typeof body.enableDynamicPricing === 'boolean' ? body.enableDynamicPricing : undefined,
+            enableWaitCalculations: typeof body.enableWaitCalculations === 'boolean' ? body.enableWaitCalculations : undefined,
+            enableWebBooker: typeof body.enableWebBooker === 'boolean' ? body.enableWebBooker : undefined
         };
 
         if ((session.user.role as string) === 'SUPER_ADMIN') {

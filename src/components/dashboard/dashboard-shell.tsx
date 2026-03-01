@@ -58,9 +58,11 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         {isAdmin && (
                             <>
                                 <div className="my-2 border-t border-white/5"></div>
+                                <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />
                                 <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />
                                 <NavItem href="/dashboard/zones" icon={Map} label="Zones" />
                                 <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />
+                                <NavItem href="/dashboard/invoices" icon={CreditCard} label="Billing & Invoicing" />
                                 <div className="my-2 border-t border-white/5"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
                                 <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />

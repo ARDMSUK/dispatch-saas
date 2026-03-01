@@ -18,6 +18,11 @@ export default function AccountsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
+    // Portal User State
+    const [portalUserEmail, setPortalUserEmail] = useState("");
+    const [portalUserPassword, setPortalUserPassword] = useState("");
+    const [isCreatingPortalUser, setIsCreatingPortalUser] = useState(false);
+
     // Form State
     const [formData, setFormData] = useState({
         code: "",
@@ -85,6 +90,8 @@ export default function AccountsPage() {
             notes: "", isActive: true
         });
         setEditingId(null);
+        setPortalUserEmail("");
+        setPortalUserPassword("");
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -145,6 +152,8 @@ export default function AccountsPage() {
             notes: account.notes || "",
             isActive: account.isActive
         });
+        setPortalUserEmail("");
+        setPortalUserPassword("");
         setIsDialogOpen(true);
     };
 
@@ -160,6 +169,32 @@ export default function AccountsPage() {
             }
         } catch (error) {
             console.error("Error deleting account", error);
+        }
+    };
+
+    const handleCreatePortalUser = async () => {
+        if (!editingId || !portalUserEmail || !portalUserPassword) return;
+        setIsCreatingPortalUser(true);
+        try {
+            const res = await fetch(`/api/accounts/${editingId}/portal-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: portalUserEmail, password: portalUserPassword })
+            });
+            if (res.ok) {
+                setPortalUserEmail("");
+                setPortalUserPassword("");
+                fetchAccounts(); // Refresh to get the new user in the list
+                alert("Portal user created successfully! They can now log in.");
+            } else {
+                const err = await res.json();
+                alert(`Failed to create user: ${err.error || err.message}`);
+            }
+        } catch (error) {
+            console.error("Error creating portal user:", error);
+            alert("Failed to create portal user.");
+        } finally {
+            setIsCreatingPortalUser(false);
         }
     };
 
@@ -330,6 +365,64 @@ export default function AccountsPage() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Portal Users Management (Only when editing) */}
+                            {editingId && (
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">B2B Portal Access</h3>
+
+                                    {/* Existing Users List */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-medium text-zinc-400">Existing Portal Logins</label>
+                                        <div className="bg-zinc-900/50 rounded-md p-2 space-y-2 max-h-32 overflow-y-auto border border-zinc-800">
+                                            {(() => {
+                                                const currentAccount = accounts.find(a => a.id === editingId);
+                                                if (!currentAccount?.users || currentAccount.users.length === 0) {
+                                                    return <p className="text-xs text-zinc-500 italic p-2">No portal users exist for this account yet.</p>;
+                                                }
+                                                return currentAccount.users.map(u => (
+                                                    <div key={u.id} className="flex justify-between items-center text-sm p-2 bg-zinc-950 rounded">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-zinc-200">{u.name}</span>
+                                                            <span className="text-xs text-zinc-500">{u.email}</span>
+                                                        </div>
+                                                        <Badge variant="outline" className="text-[10px]">B2B_ADMIN</Badge>
+                                                    </div>
+                                                ));
+                                            })()}
+                                        </div>
+                                    </div>
+
+                                    {/* Add New Portal User Form */}
+                                    <div className="bg-zinc-900/30 p-3 rounded-md border border-zinc-800/50 space-y-3">
+                                        <p className="text-xs font-medium text-zinc-300">Invite New Portal User</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Input
+                                                placeholder="Login Email"
+                                                value={portalUserEmail}
+                                                onChange={e => setPortalUserEmail(e.target.value)}
+                                                className="h-8 text-sm"
+                                            />
+                                            <Input
+                                                placeholder="Secure Password"
+                                                type="password"
+                                                value={portalUserPassword}
+                                                onChange={e => setPortalUserPassword(e.target.value)}
+                                                className="h-8 text-sm"
+                                            />
+                                        </div>
+                                        <Button
+                                            onClick={handleCreatePortalUser}
+                                            disabled={!portalUserEmail || !portalUserPassword || isCreatingPortalUser}
+                                            size="sm"
+                                            variant="secondary"
+                                            className="w-full h-8 text-xs"
+                                        >
+                                            {isCreatingPortalUser ? "Provisioning..." : "Create Portal Login"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Notes */}
                             <div className="space-y-1">

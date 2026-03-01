@@ -32,6 +32,9 @@ model Tenant {
   autoDispatch   Boolean @default(false)
   dispatchAlgorithm String @default("CLOSEST") // CLOSEST, LONGEST_WAITING
   enableLiveTracking Boolean @default(true)
+  enableDynamicPricing Boolean @default(false)
+  enableWaitCalculations Boolean @default(false)
+  enableWebBooker Boolean @default(false)
 
   // Integrations (Encrypted/Stored secure in prod, text for now)
   stripeSecretKey      String?
@@ -72,6 +75,7 @@ model Tenant {
   surcharges   Surcharge[]
   zones        Zone[]
   incomingCalls IncomingCall[]
+  invoices    Invoice[]
 
   @@map("companies")
   @@schema("public")
@@ -82,10 +86,13 @@ model User {
   email     String   @unique
   password  String   // Hashed
   name      String?
-  role      String   @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER
+  role      String   @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER, B2B_ADMIN
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
   
   resetToken       String?  @unique
   resetTokenExpiry DateTime?
@@ -158,6 +165,8 @@ model Account {
   
   customers   Customer[]
   jobs        Job[]     // Jobs booked to this account
+  users       User[]    // B2B Admin users for this account
+  invoices    Invoice[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -294,6 +303,10 @@ model Job {
   accountId  String?
   account    Account?  @relation(fields: [accountId], references: [id])
 
+  invoiceId  String?
+  invoice    Invoice?  @relation(fields: [invoiceId], references: [id])
+  isBilled   Boolean   @default(false)
+
   @@map("bookings")
   @@schema("public")
 }
@@ -415,5 +428,37 @@ model ZoneQueue {
   
   @@unique([driverId]) // A driver can only be in one queue at a time
   @@map("zone_queues")
+  @@schema("public")
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   // e.g. INV-1002
+  
+  issueDate     DateTime @default(now())
+  dueDate       DateTime
+  
+  status        String   @default("DRAFT") // DRAFT, ISSUED, PAID, OVERDUE, CANCELLED
+  
+  subtotal      Float    @default(0.00)
+  taxTotal      Float    @default(0.00)
+  total         Float    @default(0.00)
+  
+  notes         String?
+  
+  // Relations
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+
+  accountId     String
+  account       Account  @relation(fields: [accountId], references: [id])
+  
+  jobs          Job[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, invoiceNumber])
+  @@map("invoices")
   @@schema("public")
 }

@@ -73,6 +73,7 @@ export interface Account {
 
     isActive: boolean;
     notes?: string | null;
+    users?: { id: string; name: string | null; email: string }[];
 }
 
 export interface Customer {

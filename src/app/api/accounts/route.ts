@@ -28,6 +28,13 @@ export async function GET(req: Request) {
                 townCity: true,
                 postcode: true,
                 isActive: true, // Needed for the frontend table!
+                users: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
             },
             orderBy: {
                 name: 'asc'

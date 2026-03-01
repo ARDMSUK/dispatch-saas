@@ -108,7 +108,7 @@ export default function DriverDashboard() {
         }
     };
 
-    const handleStatusUpdate = async (jobId: number, newStatus: string) => {
+    const handleStatusUpdate = async (jobId: number, newStatus: string, paymentType?: string) => {
         // Optimistic Update
         const previousJob = activeJob;
         setActiveJob({ ...activeJob, status: newStatus });
@@ -121,7 +121,7 @@ export default function DriverDashboard() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ status: newStatus })
+                body: JSON.stringify({ status: newStatus, paymentType })
             });
 
             if (res.ok) {

@@ -29,6 +29,10 @@ export default function SettingsPage() {
     const [autoDispatch, setAutoDispatch] = useState(false);
     const [dispatchAlgorithm, setDispatchAlgorithm] = useState("CLOSEST");
     const [enableLiveTracking, setEnableLiveTracking] = useState(true);
+    const [enableDynamicPricing, setEnableDynamicPricing] = useState(false);
+    const [enableWaitCalculations, setEnableWaitCalculations] = useState(false);
+    const [enableWebBooker, setEnableWebBooker] = useState(false);
+    const [tenantSlug, setTenantSlug] = useState("");
 
     // SMS Templates State
     const [smsTemplateConfirmation, setSmsTemplateConfirmation] = useState('');
@@ -81,6 +85,10 @@ export default function SettingsPage() {
                 setAutoDispatch(data.autoDispatch ?? false);
                 setDispatchAlgorithm(data.dispatchAlgorithm || "CLOSEST");
                 setEnableLiveTracking(data.enableLiveTracking ?? true);
+                setEnableDynamicPricing(data.enableDynamicPricing ?? false);
+                setEnableWaitCalculations(data.enableWaitCalculations ?? false);
+                setEnableWebBooker(data.enableWebBooker ?? false);
+                setTenantSlug(data.slug || "");
 
                 // Load templates
                 setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
@@ -133,6 +141,9 @@ export default function SettingsPage() {
                     autoDispatch,
                     dispatchAlgorithm,
                     enableLiveTracking,
+                    enableDynamicPricing,
+                    enableWaitCalculations,
+                    enableWebBooker,
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
                     smsTemplateDriverArrived
@@ -243,6 +254,175 @@ export default function SettingsPage() {
                             <span className="truncate">{apiKey}</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Advanced Dispatch & Routing Section */}
+            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-400">
+                    🛣️ Advanced Dispatch & Routing
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-zinc-400">
+                        By default, the system uses <strong className="text-white">Manual Dispatching</strong> where operators assign jobs to drivers. You can opt-in to our advanced Auto-Dispatch engine to automate this based on selected algorithms.
+                    </p>
+
+                    <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                        <Checkbox
+                            id="autoDispatch"
+                            checked={autoDispatch}
+                            onCheckedChange={(checked) => setAutoDispatch(checked === true)}
+                            className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:text-white"
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                            <label
+                                htmlFor="autoDispatch"
+                                className="text-sm font-medium leading-none cursor-pointer text-white"
+                            >
+                                Enable Auto-Dispatch Engine
+                            </label>
+                            <p className="text-sm text-zinc-500">
+                                Automatically assign pending jobs to available drivers without human intervention.
+                            </p>
+                        </div>
+                    </div>
+
+                    {autoDispatch && (
+                        <div className="bg-black/30 p-4 rounded-lg border border-white/5 space-y-4 animate-in fade-in slide-in-from-top-1">
+                            <div>
+                                <Label className="text-zinc-300">Dispatch Algorithm</Label>
+                                <p className="text-xs text-zinc-500 mb-3">
+                                    Select the logic the engine will use to decide which driver gets the job.
+                                </p>
+                                <Select value={dispatchAlgorithm} onValueChange={setDispatchAlgorithm}>
+                                    <SelectTrigger className="w-full bg-black/50 border-white/10 text-white">
+                                        <SelectValue placeholder="Select Algorithm" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                        <SelectItem value="CLOSEST">
+                                            <span className="font-medium">Closest Driver (GPS Distance)</span>
+                                            <p className="text-xs text-zinc-400 mt-1">Assigns to the nearest driver by direct line-of-sight.</p>
+                                        </SelectItem>
+                                        <SelectItem value="LONGEST_WAITING">
+                                            <span className="font-medium">Zone Queueing (Longest Waiting)</span>
+                                            <p className="text-xs text-zinc-400 mt-1">First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.</p>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Complex Fares & Pricing Section */}
+            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-purple-400">
+                    💳 Complex Fares & Pricing
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-zinc-400">
+                        Configure advanced billing features like surge multipliers and automated penalty fees. Leave these disabled for standard fixed or mileage-based pricing.
+                    </p>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                            <Checkbox
+                                id="enableDynamicPricing"
+                                checked={enableDynamicPricing}
+                                onCheckedChange={(checked) => setEnableDynamicPricing(checked === true)}
+                                className="border-purple-500/50 data-[state=checked]:bg-purple-600 data-[state=checked]:text-white"
+                            />
+                            <div className="grid gap-1.5 leading-none">
+                                <label
+                                    htmlFor="enableDynamicPricing"
+                                    className="text-sm font-medium leading-none cursor-pointer text-white"
+                                >
+                                    Enable Dynamic Pricing (Surge)
+                                </label>
+                                <p className="text-sm text-zinc-500">
+                                    Automatically apply percentage or flat multipliers to fares based on active Surcharge rules (Time of day, Day of week, etc).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                            <Checkbox
+                                id="enableWaitCalculations"
+                                checked={enableWaitCalculations}
+                                onCheckedChange={(checked) => setEnableWaitCalculations(checked === true)}
+                                className="border-purple-500/50 data-[state=checked]:bg-purple-600 data-[state=checked]:text-white"
+                            />
+                            <div className="grid gap-1.5 leading-none">
+                                <label
+                                    htmlFor="enableWaitCalculations"
+                                    className="text-sm font-medium leading-none cursor-pointer text-white"
+                                >
+                                    Automate Wait Time Calculations
+                                </label>
+                                <p className="text-sm text-zinc-500">
+                                    Include driver wait times into the quoted price based on the selected vehicle tier&#39;s waiting rate.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Web Integration / Booker */}
+            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-blue-400">
+                    🌍 Web Integration
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-zinc-400">
+                        Allow customers to book directly from your own website using our standalone secure booking form.
+                    </p>
+
+                    <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                        <Checkbox
+                            id="enableWebBooker"
+                            checked={enableWebBooker}
+                            onCheckedChange={(checked) => setEnableWebBooker(checked === true)}
+                            className="border-blue-500/50 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                            <label
+                                htmlFor="enableWebBooker"
+                                className="text-sm font-medium leading-none cursor-pointer text-white"
+                            >
+                                Enable Standalone Web Booker
+                            </label>
+                            <p className="text-sm text-zinc-500">
+                                Unlocks the public `/booker` route for your tenant account.
+                            </p>
+                        </div>
+                    </div>
+
+                    {enableWebBooker && tenantSlug && (
+                        <div className="mt-4 bg-zinc-950 p-4 rounded-lg border border-white/10 relative">
+                            <Label className="text-zinc-400 mb-2 block">Iframe Embed Code</Label>
+                            <p className="text-xs text-zinc-500 mb-3">
+                                Copy and paste this code into a "Custom HTML" block on your website (e.g., WordPress, Wix, Squarespace) to embed the booking form.
+                            </p>
+                            <div className="relative group">
+                                <textarea
+                                    readOnly
+                                    value={`<iframe src="${window.location.origin}/booker/${tenantSlug}" width="100%" height="700px" style="border:none; border-radius:12px; overflow:hidden;" title="Book a Taxi"></iframe>`}
+                                    className="w-full h-24 bg-black border border-white/10 text-green-400 font-mono text-sm p-3 rounded resize-none"
+                                />
+                                <Button
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 h-8"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`<iframe src="${window.location.origin}/booker/${tenantSlug}" width="100%" height="700px" style="border:none; border-radius:12px; overflow:hidden;" title="Book a Taxi"></iframe>`);
+                                        toast.success("Embed code copied!");
+                                    }}
+                                >
+                                    Copy Code
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
