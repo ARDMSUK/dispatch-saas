@@ -17,7 +17,7 @@ export async function GET(req: Request) {
         const activeCalls = await prisma.incomingCall.findMany({
             where: {
                 tenantId,
-                status: 'RINGING',
+                status: { in: ['RINGING', 'ANSWERED'] },
                 createdAt: {
                     gte: new Date(Date.now() - 15 * 60 * 1000) // 15 minutes ago
                 }

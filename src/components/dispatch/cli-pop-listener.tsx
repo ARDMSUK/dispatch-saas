@@ -27,31 +27,48 @@ export function CliPopListener() {
                     const calls: IncomingCall[] = await res.json();
 
                     if (calls.length > 0) {
-                        // Find the oldest ringing call that we HAVEN'T handled locally yet
+                        // Find the oldest ringing/answered call that we HAVEN'T handled locally yet
                         const unhandledCall = calls.find(c => !handledCallIds.has(c.id));
 
                         if (unhandledCall) {
-                            if (activeCall?.id !== unhandledCall.id) {
-                                setActiveCall(unhandledCall);
+                            if (unhandledCall.status === 'ANSWERED') {
+                                // If the backend tells us it was answered (e.g. they picked up the physical phone via Yay)
+                                // We auto-navigate to the booking screen and autofill the number!
+                                setActiveCall(null);
+                                setHandledCallIds(prev => new Set(prev).add(unhandledCall.id));
 
-                                // Attempt to look up the customer name from our database
-                                // Note: In a full implementation, you'd want a dedicated endpoint like `/api/customers/lookup?phone=${call.phone}`
-                                // To keep it simple for now, we'll try to fetch it if we had such an endpoint, or just display the number.
+                                // Best-effort name lookup for the redirect
+                                let finalName = "";
                                 try {
-                                    // As a fast lookup trick, we check if they exist by grabbing all customers and finding a match.
-                                    // (Optimize this in production)
                                     const custRes = await fetch("/api/customers");
                                     if (custRes.ok) {
                                         const customers = await custRes.json();
                                         const match = customers.find((c: any) => c.phone === unhandledCall.phone);
-                                        if (match && match.name) {
-                                            setCustomerName(match.name);
-                                        } else {
-                                            setCustomerName(null);
-                                        }
+                                        if (match && match.name) finalName = match.name;
                                     }
-                                } catch (e) {
-                                    // ignore
+                                } catch (e) { }
+
+                                router.push(`/dashboard?phone=${encodeURIComponent(unhandledCall.phone)}&name=${encodeURIComponent(finalName)}`);
+                            } else {
+                                // It's still RINGING, show the popup
+                                if (activeCall?.id !== unhandledCall.id) {
+                                    setActiveCall(unhandledCall);
+
+                                    // Attempt to look up the customer name from our database
+                                    try {
+                                        const custRes = await fetch("/api/customers");
+                                        if (custRes.ok) {
+                                            const customers = await custRes.json();
+                                            const match = customers.find((c: any) => c.phone === unhandledCall.phone);
+                                            if (match && match.name) {
+                                                setCustomerName(match.name);
+                                            } else {
+                                                setCustomerName(null);
+                                            }
+                                        }
+                                    } catch (e) {
+                                        // ignore
+                                    }
                                 }
                             }
                         } else {

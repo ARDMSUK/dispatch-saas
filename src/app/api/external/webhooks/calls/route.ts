@@ -82,7 +82,16 @@ async function handleWebhook(req: Request) {
 
         // 3. Handle Answered or Hangup Events
 
-        if (eventType === 'answered' || eventType === 'hungup') {
+        if (eventType === 'answered') {
+            await prisma.incomingCall.updateMany({
+                where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
+                data: { status: 'ANSWERED' }
+            });
+            revalidatePath('/api/dispatch/calls/active');
+            return NextResponse.json({ success: true, action: 'answered', phone: cleanPhone });
+        }
+
+        if (eventType === 'hungup') {
             await prisma.incomingCall.updateMany({
                 where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
                 data: { status: 'DISMISSED' }
