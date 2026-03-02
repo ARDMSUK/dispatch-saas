@@ -28,21 +28,21 @@ import { Car } from "lucide-react";
 const formSchema = z.object({
     email: z.string().email(),
     password: z.string().min(1, "Password is required"),
+    twoFactorToken: z.string().optional(),
 });
 
 export default function LoginPage() {
     const router = useRouter();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-    // We need to use `signIn` from `next-auth/react`.
-    // If it fails to import, we know we need to fix it.
+    const [showTwoFactor, setShowTwoFactor] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "digitaldmgency@gmail.com",
             password: "password123", // Pre-filled for development
+            twoFactorToken: "",
         },
     });
 
@@ -51,20 +51,24 @@ export default function LoginPage() {
         setError("");
 
         try {
-            // We use the NextAuth v5 client import. 
-            // NOTE: Since we haven't set up the SessionProvider yet, this might feel weird, 
-            // but `signIn` simply hits the API endpoint.
-            // Dynamic import to avoid build crash if module missing during my contemplation
             const { signIn } = await import("next-auth/react");
 
             const res = await signIn("credentials", {
                 email: values.email,
                 password: values.password,
+                twoFactorToken: values.twoFactorToken,
                 redirect: false,
             });
 
             if (res?.error) {
-                setError("Invalid email or password");
+                if (res.error === "2FA_REQUIRED") {
+                    setShowTwoFactor(true);
+                    setError(""); // Clear error to just show the new field
+                } else if (res.error === "INVALID_2FA_TOKEN") {
+                    setError("Invalid Authenticator code. Please try again.");
+                } else {
+                    setError("Invalid email or password");
+                }
             } else {
                 router.push("/dashboard");
                 router.refresh();
@@ -93,28 +97,44 @@ export default function LoginPage() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Email</label>
-                            <Input
-                                {...register("email")}
-                                placeholder="dispatcher@example.com"
-                                className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
-                            />
-                            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium">Password</label>
-                                <a href="/forgot-password" className="text-xs text-yellow-500 hover:text-yellow-400">Forgot password?</a>
+                        {!showTwoFactor ? (
+                            <>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Email</label>
+                                    <Input
+                                        {...register("email")}
+                                        placeholder="dispatcher@example.com"
+                                        className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
+                                    />
+                                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm font-medium">Password</label>
+                                        <a href="/forgot-password" className="text-xs text-yellow-500 hover:text-yellow-400">Forgot password?</a>
+                                    </div>
+                                    <Input
+                                        type="password"
+                                        {...register("password")}
+                                        placeholder="••••••••"
+                                        className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
+                                    />
+                                    {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4">
+                                <label className="text-sm font-medium text-amber-500">Authenticator Code (2FA)</label>
+                                <p className="text-xs text-zinc-400 mb-2">Please open your Authenticator app and enter the 6-digit code.</p>
+                                <Input
+                                    {...register("twoFactorToken")}
+                                    placeholder="000111"
+                                    maxLength={6}
+                                    className="bg-zinc-900 border-zinc-800 text-amber-500 text-center text-2xl tracking-[0.5em] focus:ring-amber-500 focus:border-amber-500 h-14 font-mono"
+                                />
+                                {errors.twoFactorToken && <p className="text-xs text-red-500">{errors.twoFactorToken.message}</p>}
                             </div>
-                            <Input
-                                type="password"
-                                {...register("password")}
-                                placeholder="••••••••"
-                                className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
-                            />
-                            {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
-                        </div>
+                        )}
 
                         {error && <div className="text-sm text-red-500 text-center font-bold bg-red-900/20 p-2 rounded">{error}</div>}
 
@@ -123,7 +143,7 @@ export default function LoginPage() {
                             className="w-full bg-yellow-400 text-zinc-900 hover:bg-yellow-500 font-bold"
                             disabled={loading}
                         >
-                            {loading ? "Signing In..." : "Sign In"}
+                            {loading ? "Authenticating..." : showTwoFactor ? "Verify" : "Sign In"}
                         </Button>
                     </form>
                 </CardContent>

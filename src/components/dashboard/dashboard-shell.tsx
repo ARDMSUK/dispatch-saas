@@ -149,6 +149,13 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-white/10" />
+                                <DropdownMenuItem asChild className="cursor-pointer focus:bg-amber-500/10 focus:text-amber-500">
+                                    <Link href="/dashboard/profile">
+                                        <UserIcon className="mr-2 h-4 w-4" />
+                                        <span>My Profile & Security</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-white/10" />
                                 <DropdownMenuItem onClick={handleLogout} className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer">
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>Log out</span>

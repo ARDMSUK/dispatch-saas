@@ -17,12 +17,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             credentials: {
                 email: {},
                 password: {},
+                twoFactorToken: {}, // Optional token passed during step 2
             },
             authorize: async (credentials) => {
                 const validatedFields = LoginSchema.safeParse(credentials);
 
                 if (validatedFields.success) {
                     const { email, password } = validatedFields.data;
+                    const twoFactorToken = credentials.twoFactorToken as string | undefined;
 
                     const user = await prisma.user.findUnique({
                         where: { email },
@@ -34,6 +36,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
                     if (passwordsMatch) {
+                        // 2FA Challenge Logic
+                        if (user.twoFactorEnabled && user.twoFactorSecret) {
+                            if (!twoFactorToken) {
+                                // First step: user only provided password. We reject but indicate 2FA is needed.
+                                throw new Error("2FA_REQUIRED");
+                            }
+
+                            // Second step: user provided password AND token. Verify token.
+                            const speakeasy = (await import('speakeasy')).default;
+                            const isValid = speakeasy.totp.verify({
+                                secret: user.twoFactorSecret,
+                                encoding: 'base32',
+                                token: twoFactorToken,
+                                window: 1
+                            });
+
+                            if (!isValid) {
+                                throw new Error("INVALID_2FA_TOKEN");
+                            }
+                        }
+
+                        // Fully Authenticated
                         return {
                             id: user.id,
                             name: user.name,

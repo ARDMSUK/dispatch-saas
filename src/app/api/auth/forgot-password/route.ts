@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { randomBytes } from 'crypto';
+import crypto from 'crypto';
 import { sendEmail, getResetPasswordEmail } from '@/lib/email';
 
-// POST /api/auth/forgot-password
 export async function POST(req: Request) {
     try {
         const { email } = await req.json();
@@ -14,36 +13,55 @@ export async function POST(req: Request) {
 
         const user = await prisma.user.findUnique({
             where: { email },
+            include: { tenant: true }
         });
 
+        // Fail silently if user not found to prevent email enumeration
         if (!user) {
-            // Don't reveal if user exists
-            return NextResponse.json({ success: true, message: "If an account exists, a reset link has been sent." });
+            return NextResponse.json({ success: true, message: "If that email exists, a reset link has been sent." }, { status: 200 });
         }
 
-        // Generate Token
-        const resetToken = randomBytes(32).toString('hex');
-        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+        // Generate Crypto Token
+        const rawToken = crypto.randomBytes(32).toString('hex');
+
+        // Save to User with 1 Hour Expiry
+        const expiry = new Date();
+        expiry.setHours(expiry.getHours() + 1);
 
         await prisma.user.update({
-            where: { id: user.id },
+            where: { email },
             data: {
-                resetToken,
-                resetTokenExpiry,
-            },
+                resetToken: rawToken,
+                resetTokenExpiry: expiry
+            }
         });
 
         // Send Email
         const host = req.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
-        const resetLink = `${protocol}://${host}/auth/reset-password?token=${resetToken}`;
-        await sendEmail({
+        const resetLink = `${protocol}://${host}/reset-password?token=${rawToken}`;
+
+        // Determine whether to use Tenant's Resend Key or Global System Key
+        // If the user belongs to a tenant with a branded Resend key, we use that.
+        // Otherwise, it falls back to global NEXT_PUBLIC_RESEND_API_KEY inside sendEmail
+
+        const tenant = user.tenant;
+        const brandColor = tenant?.brandColor || "#f59e0b";
+        const logoUrl = tenant?.logoUrl || "";
+
+        const emailResult = await sendEmail({
             to: email,
-            subject: "Reset your password",
-            html: getResetPasswordEmail(resetLink),
+            subject: "Reset Your Password - Dispatch Platform",
+            html: getResetPasswordEmail(resetLink, brandColor, logoUrl),
+            apiKey: tenant?.resendApiKey
         });
 
-        return NextResponse.json({ success: true, message: "Reset link sent." });
+        if (!emailResult.success) {
+            console.error("[Forgot Password] Failed to send email", emailResult.error);
+            return NextResponse.json({ error: "Failed to send recovery email. Please try again later." }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true, message: "If that email exists, a reset link has been sent." }, { status: 200 });
 
     } catch (error) {
         console.error("Forgot Password Error:", error);
