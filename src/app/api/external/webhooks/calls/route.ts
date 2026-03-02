@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 // This is an external webhook intended to be called by a PBX (Twilio, 3CX, etc)
 // It authenticates via a Bearer token matching the Tenant's ApiKey
 
