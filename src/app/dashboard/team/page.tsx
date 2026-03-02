@@ -17,8 +17,17 @@ interface UserType {
     name: string;
     email: string;
     role: "ADMIN" | "DISPATCHER" | "SUPER_ADMIN";
+    permissions?: string[];
     createdAt: string;
 }
+
+const AVAILABLE_PERMISSIONS = [
+    { id: 'view_reports', label: 'Reports & Analytics' },
+    { id: 'manage_pricing', label: 'Pricing & Tariffs' },
+    { id: 'manage_zones', label: 'Zones' },
+    { id: 'manage_accounts', label: 'Corporate Accounts' },
+    { id: 'manage_billing', label: 'Billing & Invoices' }
+];
 
 export default function TeamPage() {
     const { data: session } = useSession();
@@ -30,11 +39,17 @@ export default function TeamPage() {
 
     // Form State
     const [formData, setFormData] = useState({
+        id: "",
         name: "",
         email: "",
         password: "",
-        role: "DISPATCHER" as "ADMIN" | "DISPATCHER"
+        role: "DISPATCHER" as "ADMIN" | "DISPATCHER",
+        permissions: [] as string[]
     });
+
+    const resetForm = () => {
+        setFormData({ id: "", name: "", email: "", password: "", role: "DISPATCHER", permissions: [] });
+    };
 
     useEffect(() => {
         if (session?.user && !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role as string)) {
@@ -60,30 +75,45 @@ export default function TeamPage() {
     };
 
     const handleSave = async () => {
-        if (!formData.name || !formData.email || !formData.password) {
-            toast.error("Please fill in all fields");
+        if (!formData.name || !formData.email || (!formData.id && !formData.password)) {
+            toast.error("Please fill in all required fields");
             return;
         }
 
         try {
-            const res = await fetch("/api/users", {
-                method: "POST",
+            const url = formData.id ? `/api/users/${formData.id}` : "/api/users";
+            const method = formData.id ? "PATCH" : "POST";
+
+            const res = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
 
             if (res.ok) {
-                toast.success("Team member added successfully");
+                toast.success(formData.id ? "Team member updated" : "Team member added successfully");
                 setIsDialogOpen(false);
-                setFormData({ name: "", email: "", password: "", role: "DISPATCHER" });
+                resetForm();
                 fetchUsers();
             } else {
                 const error = await res.json();
                 toast.error(error.message || error.error);
             }
         } catch (error) {
-            toast.error("Failed to create user");
+            toast.error("Failed to save user");
         }
+    };
+
+    const handleEdit = (user: UserType) => {
+        setFormData({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            password: "", // Don't show existing password
+            role: user.role === 'SUPER_ADMIN' ? 'ADMIN' : user.role, // Fallback for UI
+            permissions: user.permissions || []
+        });
+        setIsDialogOpen(true);
     };
 
     const handleDelete = async (id: string, name: string) => {
@@ -119,15 +149,18 @@ export default function TeamPage() {
                     <h1 className="text-2xl font-bold text-white tracking-tight">Team & Access</h1>
                     <p className="text-zinc-500 text-sm">Manage staff access and roles.</p>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                    setIsDialogOpen(open);
+                    if (!open) resetForm();
+                }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold">
+                        <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold" onClick={resetForm}>
                             <Plus className="mr-2 h-4 w-4" /> Add Member
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-zinc-900 border-white/10 text-white">
                         <DialogHeader>
-                            <DialogTitle>Add New Team Member</DialogTitle>
+                            <DialogTitle>{formData.id ? "Edit Team Member" : "Add New Team Member"}</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
@@ -147,10 +180,11 @@ export default function TeamPage() {
                                     className="bg-zinc-800 border-white/10"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                    disabled={!!formData.id}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-400">Password</label>
+                                <label className="text-sm font-medium text-zinc-400">Password {formData.id && "(Leave blank to keep existing)"}</label>
                                 <Input
                                     type="password"
                                     placeholder="••••••••"
@@ -175,8 +209,34 @@ export default function TeamPage() {
                                         : "Can create bookings and view drivers/vehicles only."}
                                 </p>
                             </div>
+
+                            {formData.role === 'DISPATCHER' && (
+                                <div className="space-y-3 pt-2 border-t border-white/5 mt-2">
+                                    <label className="text-sm font-medium text-zinc-400">Extra Permissions</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {AVAILABLE_PERMISSIONS.map(perm => (
+                                            <label key={perm.id} className="flex items-center space-x-2 text-sm text-zinc-300 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500/20"
+                                                    checked={formData.permissions.includes(perm.id)}
+                                                    onChange={(e) => {
+                                                        const newPerms = e.target.checked
+                                                            ? [...formData.permissions, perm.id]
+                                                            : formData.permissions.filter(p => p !== perm.id);
+                                                        setFormData({ ...formData, permissions: newPerms });
+                                                    }}
+                                                />
+                                                <span>{perm.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-zinc-500 italic">These allow specific access without granting full Admin rights.</p>
+                                </div>
+                            )}
+
                             <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-400 mt-2">
-                                Create Account
+                                {formData.id ? "Update Account" : "Create Account"}
                             </Button>
                         </div>
                     </DialogContent>
@@ -207,25 +267,46 @@ export default function TeamPage() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-zinc-500'}>
-                                        {['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
-                                        {user.role === 'SUPER_ADMIN' ? 'Admin' : (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
-                                    </Badge>
+                                    <div className="flex flex-col gap-1 items-start">
+                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-zinc-500'}>
+                                            {['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
+                                            {user.role === 'SUPER_ADMIN' ? 'Admin' : (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
+                                        </Badge>
+                                        {user.role === 'DISPATCHER' && user.permissions && user.permissions.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {user.permissions.map(p => (
+                                                    <span key={p} className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded border border-white/5">
+                                                        {AVAILABLE_PERMISSIONS.find(ap => ap.id === p)?.label || p}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-sm text-zinc-500">
                                     {new Date(user.createdAt).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {user.id !== session?.user?.id && (
+                                    <div className="flex justify-end gap-2">
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                            onClick={() => handleDelete(user.id, user.name)}
+                                            className="text-zinc-400 hover:text-white"
+                                            onClick={() => handleEdit(user)}
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Pencil className="w-4 h-4" />
                                         </Button>
-                                    )}
+                                        {user.id !== session?.user?.id && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                onClick={() => handleDelete(user.id, user.name)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

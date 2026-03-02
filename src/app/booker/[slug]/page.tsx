@@ -34,9 +34,31 @@ export default function BookerPage() {
     const [quote, setQuote] = useState<number | null>(null);
     const [pricingBreakdown, setPricingBreakdown] = useState<any>(null);
 
+    // Branding State
+    const [brandColor, setBrandColor] = useState('#3b82f6'); // Default Blue-500
+    const [logoUrl, setLogoUrl] = useState('');
+    const [companyName, setCompanyName] = useState('Book Your Ride');
+
     // Google Maps Autocomplete Hooks
     const pickupSearch = usePlacesAutocomplete({ requestOptions: { componentRestrictions: { country: "uk" } } }) as any;
     const dropoffSearch = usePlacesAutocomplete({ requestOptions: { componentRestrictions: { country: "uk" } } }) as any;
+
+    useEffect(() => {
+        const fetchTenantInfo = async () => {
+            try {
+                const res = await fetch(`/api/booker/${slug}/info`);
+                const data = await res.json();
+                if (res.ok) {
+                    if (data.brandColor) setBrandColor(data.brandColor);
+                    if (data.logoUrl) setLogoUrl(data.logoUrl);
+                    if (data.name) setCompanyName(data.name);
+                }
+            } catch (e) {
+                console.error("Failed to fetch tenant branding");
+            }
+        };
+        fetchTenantInfo();
+    }, [slug]);
 
     // Step 1: Get Quote
     const handleGetQuote = async () => {
@@ -148,13 +170,17 @@ export default function BookerPage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto p-4 sm:p-6 lg:p-8 h-full">
+        <div className="max-w-xl mx-auto p-4 sm:p-6 lg:p-8 h-full" style={{ '--primary-brand': brandColor } as React.CSSProperties}>
             <Card className="bg-zinc-950/90 border-zinc-800 shadow-2xl backdrop-blur-xl">
                 <CardHeader className="text-center border-b border-zinc-800 pb-6">
-                    <div className="w-12 h-12 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Navigation2 className="w-6 h-6" />
-                    </div>
-                    <CardTitle className="text-2xl text-white">Book Your Ride</CardTitle>
+                    {logoUrl ? (
+                        <img src={logoUrl} alt={companyName} className="h-16 object-contain mx-auto mb-4" />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${brandColor}33`, color: brandColor }}>
+                            <Navigation2 className="w-6 h-6" />
+                        </div>
+                    )}
+                    <CardTitle className="text-2xl text-white">{logoUrl ? companyName : "Book Your Ride"}</CardTitle>
                     <CardDescription className="text-zinc-400">Instant quotes and secure booking.</CardDescription>
                 </CardHeader>
 

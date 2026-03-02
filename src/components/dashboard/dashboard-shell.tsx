@@ -20,9 +20,15 @@ import { signOut, useSession } from "next-auth/react";
 export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
-    const { update } = useSession();
+    const { data: session, update } = useSession();
 
+    // Explicit Role Check
     const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(userRole as string);
+
+    // Explicit Permission Evaluator (Session user holds permissions array now)
+    const activeUser = session?.user as any;
+    const userPermissions: string[] = activeUser?.permissions || [];
+    const hasPermission = (permission_id: string) => isAdmin || userPermissions.includes(permission_id);
 
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
@@ -41,9 +47,6 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
 
     return (
         <div className="flex h-screen w-full bg-zinc-950 text-white overflow-hidden font-sans">
-            {/* COLLAPSIBLE SIDEBAR (Sheet on Mobile, hidden by default on Desktop unless toggled? User said "click button to open") */}
-            {/* We will use a Sheet for the "Admin Menu" as requested to keep it hidden */}
-
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetContent side="left" className="w-64 bg-zinc-900 border-r border-white/5 p-0">
                     <div className="h-16 flex items-center px-6 border-b border-white/5">
@@ -55,16 +58,22 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
                         <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
 
+                        {/* Granular Feature Access */}
+                        {(hasPermission('view_reports') || hasPermission('manage_pricing') || hasPermission('manage_zones') || hasPermission('manage_accounts') || hasPermission('manage_billing')) && (
+                            <div className="my-2 border-t border-white/5"></div>
+                        )}
+
+                        {hasPermission('view_reports') && <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />}
+                        {hasPermission('manage_pricing') && <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />}
+                        {hasPermission('manage_zones') && <NavItem href="/dashboard/zones" icon={Map} label="Zones" />}
+                        {hasPermission('manage_accounts') && <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />}
+                        {hasPermission('manage_billing') && <NavItem href="/dashboard/invoices" icon={CreditCard} label="Billing & Invoicing" />}
+
                         {isAdmin && (
                             <>
                                 <div className="my-2 border-t border-white/5"></div>
-                                <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />
-                                <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />
-                                <NavItem href="/dashboard/zones" icon={Map} label="Zones" />
-                                <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />
-                                <NavItem href="/dashboard/invoices" icon={CreditCard} label="Billing & Invoicing" />
-                                <div className="my-2 border-t border-white/5"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+                                <NavItem href="/dashboard/settings/billing" icon={CreditCard} label="SaaS Subscription" />
                                 <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
                             </>
                         )}

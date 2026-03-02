@@ -42,6 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             accountId: user.accountId,
                             tenantId: user.tenantId,
                             tenantSlug: user.tenant.slug,
+                            permissions: user.permissions as string[] || [], // Typecast and default
                         };
                     }
                 }
@@ -56,6 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (token && session.user) {
                 session.user.id = token.id;
                 session.user.role = token.role;
+                session.user.permissions = token.permissions || [];
                 session.user.accountId = token.accountId;
                 session.user.tenantId = token.impersonatedTenantId || token.tenantId; // Prefer impersonated
                 session.user.tenantSlug = token.impersonatedTenantSlug || token.tenantSlug;
@@ -72,6 +74,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.permissions = user.permissions;
                 token.accountId = user.accountId;
                 token.tenantId = user.tenantId;
                 token.tenantSlug = user.tenantSlug;

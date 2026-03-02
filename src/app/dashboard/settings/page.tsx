@@ -39,6 +39,10 @@ export default function SettingsPage() {
     const [smsTemplateDriverAssigned, setSmsTemplateDriverAssigned] = useState('');
     const [smsTemplateDriverArrived, setSmsTemplateDriverArrived] = useState('');
 
+    // Branding State
+    const [logoUrl, setLogoUrl] = useState('');
+    const [brandColor, setBrandColor] = useState('#f59e0b');
+
     // Initial Data
     const [slug, setSlug] = useState('');
     const [apiKey, setApiKey] = useState('');
@@ -94,6 +98,10 @@ export default function SettingsPage() {
                 setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
                 setSmsTemplateDriverAssigned(data.smsTemplateDriverAssigned || '');
                 setSmsTemplateDriverArrived(data.smsTemplateDriverArrived || '');
+
+                // Load Branding
+                setLogoUrl(data.logoUrl || '');
+                setBrandColor(data.brandColor || '#f59e0b');
             }
         } catch (error) {
             console.error(error);
@@ -144,6 +152,8 @@ export default function SettingsPage() {
                     enableDynamicPricing,
                     enableWaitCalculations,
                     enableWebBooker,
+                    logoUrl,
+                    brandColor,
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
                     smsTemplateDriverArrived
@@ -423,6 +433,68 @@ export default function SettingsPage() {
                             </div>
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Visual Branding */}
+            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-pink-400">
+                    ✨ Visual Branding
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-zinc-400">
+                        Customize how your company appears to your customers on the Web Booker and inside HTML email receipts.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <Label className="text-zinc-400">Public Logo URL</Label>
+                            <Input
+                                value={logoUrl}
+                                onChange={(e) => setLogoUrl(e.target.value)}
+                                placeholder="https://yourwebsite.com/logo.png"
+                                className="bg-black/50 border-white/10 mt-1"
+                            />
+                            <p className="text-xs text-zinc-500 mt-2">
+                                Provide a direct link to your company logo (PNG or SVG recommended).
+                            </p>
+                        </div>
+                        <div>
+                            <Label className="text-zinc-400">Primary Brand Color</Label>
+                            <div className="flex items-center gap-3 mt-1">
+                                <Input
+                                    type="color"
+                                    value={brandColor}
+                                    onChange={(e) => setBrandColor(e.target.value)}
+                                    className="w-12 h-10 p-1 bg-black/50 border-white/10 cursor-pointer"
+                                />
+                                <Input
+                                    type="text"
+                                    value={brandColor}
+                                    onChange={(e) => setBrandColor(e.target.value)}
+                                    className="bg-black/50 border-white/10 font-mono uppercase"
+                                    placeholder="#F59E0B"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 p-6 border border-white/10 rounded-lg bg-zinc-950">
+                        <Label className="text-zinc-500 mb-4 block">Live Preview</Label>
+                        <div className="flex items-center justify-between p-4 bg-white rounded-md max-w-sm">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Company Logo" className="h-8 object-contain" />
+                            ) : (
+                                <span className="font-bold text-black text-lg">{companyName || "Your Company"}</span>
+                            )}
+                            <div
+                                className="px-4 py-2 rounded text-white text-sm font-medium"
+                                style={{ backgroundColor: brandColor }}
+                            >
+                                Book Now
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

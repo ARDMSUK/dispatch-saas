@@ -36,6 +36,10 @@ model Tenant {
   enableWaitCalculations Boolean @default(false)
   enableWebBooker Boolean @default(false)
 
+  // White-Label Configuration
+  brandColor String @default("#f59e0b") // Default amber-500
+  logoUrl    String?
+
   // Integrations (Encrypted/Stored secure in prod, text for now)
   stripeSecretKey      String?
   stripePublishableKey String?
@@ -46,6 +50,12 @@ model Tenant {
   
   resendApiKey         String?
   aviationStackApiKey  String?
+
+  // SaaS Platform Subscription (Stripe)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String  @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, CANCELED
+  subscriptionPlan     String?
 
   // Notification Templates (Super Admin ONLY)
   smsTemplateConfirmation     String? @db.Text
@@ -87,6 +97,7 @@ model User {
   password  String   // Hashed
   name      String?
   role      String   @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER, B2B_ADMIN
+  permissions Json?  // e.g. ["view_reports", "view_pricing"]
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])

@@ -17,14 +17,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
         const { id } = params;
         const body = await req.json();
-        const { name, role, password } = body;
-
-        // Prevent modifying own role to lock accidentally?
-        // Actually, preventing deleting own account is more critical.
+        const { name, role, password, permissions } = body;
 
         const updateData: any = {};
         if (name) updateData.name = name;
         if (role) updateData.role = role;
+        if (permissions !== undefined) updateData.permissions = Array.isArray(permissions) ? permissions : [];
         if (password) {
             updateData.password = await hash(password, 12);
         }
@@ -39,7 +37,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
                 id: true,
                 name: true,
                 email: true,
-                role: true
+                role: true,
+                permissions: true
             }
         });
 

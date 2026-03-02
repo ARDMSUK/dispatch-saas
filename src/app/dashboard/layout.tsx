@@ -3,6 +3,8 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { GoogleMapsLoader } from "@/components/dashboard/google-maps-loader";
 import { CliPopListener } from "@/components/dispatch/cli-pop-listener";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { BillingLockoutOverlay } from "@/components/dashboard/billing-lockout-overlay";
 
 export default async function DashboardLayout({
     children,
@@ -21,6 +23,13 @@ export default async function DashboardLayout({
     const role = session?.user?.role || "DISPATCHER";
 
     const isImpersonating = session?.user?.isImpersonating || false;
+
+    const tenant = await prisma.tenant.findUnique({
+        where: { id: session.user.tenantId! },
+        select: { subscriptionStatus: true }
+    });
+
+    const status = tenant?.subscriptionStatus || "TRIALING";
 
     return (
         <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role} isImpersonating={isImpersonating}>

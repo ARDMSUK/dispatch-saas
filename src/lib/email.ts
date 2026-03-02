@@ -38,22 +38,24 @@ export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
     }
 }
 
-export const getResetPasswordEmail = (resetLink: string) => `
+export const getResetPasswordEmail = (resetLink: string, brandColor: string = '#f59e0b', logoUrl: string = '') => `
     <div style="font-family: sans-serif; max-w-md; margin: 0 auto;">
+        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="Company Logo" style="max-height: 50px;" /></div>` : ''}
         <h2>Reset Your Password</h2>
-        <p>You requested a password reset for your Dispatch SaaS account.</p>
+        <p>You requested a password reset for your account.</p>
         <p>Click the link below to set a new password:</p>
-        <a href="${resetLink}" style="display: inline-block; background: #f59e0b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
+        <a href="${resetLink}" style="display: inline-block; background: ${brandColor}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
         <p style="font-size: 12px; color: #666;">This link expires in 1 hour. If you didn't request this, please ignore this email.</p>
     </div>
 `;
 
-export const getWelcomeEmail = (name: string, loginUrl: string, email: string, tempPass: string) => `
+export const getWelcomeEmail = (name: string, loginUrl: string, email: string, tempPass: string, brandColor: string = '#f59e0b', logoUrl: string = '') => `
     <div style="font-family: sans-serif; max-w-md; margin: 0 auto;">
+        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="Company Logo" style="max-height: 50px;" /></div>` : ''}
         <h2>Welcome to the Team, ${name}!</h2>
-        <p>An account has been created for you on Dispatch SaaS.</p>
+        <p>An account has been created for you.</p>
         <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Login URL:</strong> <a href="${loginUrl}">${loginUrl}</a></p>
+            <p><strong>Login URL:</strong> <a href="${loginUrl}" style="color: ${brandColor};">${loginUrl}</a></p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Temporary Password:</strong> ${tempPass}</p>
         </div>

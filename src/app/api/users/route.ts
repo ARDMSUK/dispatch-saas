@@ -24,6 +24,7 @@ export async function GET() {
                 name: true,
                 email: true,
                 role: true,
+                permissions: true,
                 createdAt: true,
             },
             orderBy: { createdAt: 'desc' }
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { name, email, password, role } = body;
+        const { name, email, password, role, permissions } = body;
 
         if (!name || !email || !password || !role) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
                 email,
                 password: hashedPassword,
                 role, // 'ADMIN' or 'DISPATCHER'
+                permissions: Array.isArray(permissions) ? permissions : [],
                 tenantId: session.user.tenantId,
             },
             select: {
@@ -79,6 +81,7 @@ export async function POST(req: Request) {
                 name: true,
                 email: true,
                 role: true,
+                permissions: true,
                 createdAt: true
             }
         });

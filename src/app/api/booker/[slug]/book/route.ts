@@ -125,6 +125,27 @@ export async function POST(
             });
         }
 
+        // 6. Send Branded Confirmation Email
+        if (customer.email || passengerPhone) {
+            // In a real app we'd ask for email on the booker, but if we don't have it we might skip, 
+            // or we use a fallback if the customer profile already had one.
+            // For now, let's just attempt to send if we somehow had an email context, 
+            // or we log it. Note: Booker form currently only asks for Phone. 
+            // We will mock the email send for demonstration of the template.
+            import('@/lib/email').then(async ({ sendEmail, getPassengerReceiptEmail }) => {
+                const htmlReceipt = getPassengerReceiptEmail(
+                    tenant.name,
+                    { id: job.id, fare: pricingResult.price, pickup, dropoff },
+                    tenant.brandColor,
+                    tenant.logoUrl || ''
+                );
+
+                // We'd send it to customer.email if we captured it. 
+                // For demonstration, we log that the branded email was generated.
+                console.log("[Branded Email Generated] -> ", htmlReceipt.substring(0, 100));
+            });
+        }
+
         // Return secure response (no sensitive tenant tokens)
         return NextResponse.json({
             success: true,
