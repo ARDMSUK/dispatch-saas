@@ -27,7 +27,13 @@ export async function GET(req: Request) {
             }
         });
 
-        return NextResponse.json(activeCalls);
+        return NextResponse.json(activeCalls, {
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        });
     } catch (error) {
         console.error('Failed to fetch active calls', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

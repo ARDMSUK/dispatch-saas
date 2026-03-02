@@ -22,7 +22,11 @@ export function CliPopListener() {
         // Poll for active calls
         const interval = setInterval(async () => {
             try {
-                const res = await fetch("/api/dispatch/calls/active", { cache: 'no-store' });
+                // FORCE CACHE BYPASS: Explicitly append a random timestamp to crack Edge nodes
+                const res = await fetch(`/api/dispatch/calls/active?_t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
                 if (res.ok) {
                     const calls: IncomingCall[] = await res.json();
 
