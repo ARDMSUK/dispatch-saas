@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     try {
         const session = await auth();
         // Restrict reports to internal staff only
-        if (!session?.user?.tenantId || (session.user.role !== 'SUPERADMIN' && session.user.role !== 'DISPATCHER')) {
+        if (!session?.user?.tenantId || !['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'].includes(session.user.role as string)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
