@@ -76,7 +76,7 @@ async function handleWebhook(req: Request) {
 
 
         // Clean phone number (remove non-digits / spaces)
-        let cleanPhone = phone ? phone.replace(/[^0-9+]/g, '') : null;
+        const cleanPhone = phone ? phone.replace(/[^0-9+]/g, '') : null;
 
         if (!cleanPhone || cleanPhone.length < 5) {
             return NextResponse.json({ error: 'Missing or invalid phone parameter' }, { status: 400 });

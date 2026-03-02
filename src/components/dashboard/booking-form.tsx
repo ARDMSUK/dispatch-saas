@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -27,6 +27,7 @@ function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: nu
 
 export function BookingForm({ onJobCreated }: BookingFormProps) {
     const searchParams = useSearchParams();
+    const router = useRouter();
 
     // --- STATE ---
     const [pickup, setPickup] = useState('');
@@ -83,7 +84,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
             const newSearch = params.toString();
             const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
-            window.history.replaceState(null, '', newUrl);
+            router.replace(newUrl, { scroll: false });
         }
     }, [searchParams]);
 

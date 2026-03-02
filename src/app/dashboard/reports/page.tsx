@@ -43,7 +43,7 @@ export default function ReportsPage() {
         setError(null);
         try {
             let start = "";
-            let end = new Date().toISOString(); // End is usually now
+            const end = new Date().toISOString(); // End is usually now
 
             const today = new Date();
             if (range === "today") {
