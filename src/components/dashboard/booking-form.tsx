@@ -50,16 +50,40 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [reminders, setReminders] = useState('');
     const [debugData, setDebugData] = useState<any>(null); // DEBUG STATE
 
-    // Auto-fill from CLI pop URL parameters
+    // Auto-fill from CLI pop URL parameters and strip from URL
     useEffect(() => {
-        const phoneParam = searchParams.get('phone');
-        const nameParam = searchParams.get('name');
+        if (typeof window === 'undefined') return;
+
+        const params = new URLSearchParams(window.location.search);
+        const phoneParam = params.get('phone') || params.get('cli') || params.get('caller_id');
+        const nameParam = params.get('name');
+
+        let shouldCleanUrl = false;
 
         if (phoneParam) {
-            setPassengerPhone(decodeURIComponent(phoneParam));
+            const decodedPhone = decodeURIComponent(phoneParam);
+            setPassengerPhone(decodedPhone);
+            handlePhoneLookup(decodedPhone); // Moved lookup here from the old duplicated hook
+            shouldCleanUrl = true;
         }
+
         if (nameParam) {
             setPassengerName(decodeURIComponent(nameParam));
+            shouldCleanUrl = true;
+        }
+
+        if (shouldCleanUrl) {
+            // Strip the query parameters from the URL silently without reloading the page
+            // This allows the user to manually erase the fields or refresh the page without it
+            // being stubbornly re-filled from the ghost URL state!
+            params.delete('phone');
+            params.delete('cli');
+            params.delete('caller_id');
+            params.delete('name');
+
+            const newSearch = params.toString();
+            const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
+            window.history.replaceState(null, '', newUrl);
         }
     }, [searchParams]);
 
@@ -439,17 +463,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
     const [customerStats, setCustomerStats] = useState<{ total: number, lastDate: string } | null>(null);
 
-    // Check for CLI / URL Phone Param
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            const phoneParam = params.get('phone') || params.get('cli') || params.get('caller_id');
-            if (phoneParam) {
-                setPassengerPhone(phoneParam);
-                handlePhoneLookup(phoneParam);
-            }
-        }
-    }, []);
+    // (Check for CLI / URL Phone Param effect was removed and merged into the top-level URL parser)
 
     const handlePhoneLookup = async (phoneVal: string) => {
         if (!phoneVal || phoneVal.length < 5) return;
