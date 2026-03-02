@@ -4,10 +4,10 @@ import { calculatePrice } from '@/lib/pricing';
 
 export async function POST(
     req: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
-        const { slug } = params;
+        const { slug } = await params;
         const body = await req.json();
 
         // 1. Find the Tenant by Slug and ensure WebBooker is enabled
