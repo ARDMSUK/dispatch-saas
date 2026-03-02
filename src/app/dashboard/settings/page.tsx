@@ -498,6 +498,45 @@ export default function SettingsPage() {
                 </div>
             </div>
 
+            {/* Developer API */}
+            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-400">
+                    💻 Developer API
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-zinc-400">
+                        Use this secured token to build custom integrations (e.g., Zapier, Custom Apps) by sending HTTP requests directly to the `{window.location.host}/api/v1/bookings` ingestion endpoints.
+                    </p>
+
+                    <div>
+                        <Label className="text-zinc-400">Secret API Key</Label>
+                        <div className="flex items-center gap-3 mt-1">
+                            <Input
+                                value={apiKey || '••••••••••••••••••••••••••••••••'}
+                                readOnly
+                                className="bg-black/50 border-white/10 font-mono text-zinc-300 w-full md:w-2/3"
+                                type="password"
+                            />
+                            <Button
+                                variant="secondary"
+                                className="bg-zinc-800 hover:bg-zinc-700 text-white"
+                                onClick={() => {
+                                    if (apiKey) {
+                                        navigator.clipboard.writeText(apiKey);
+                                        toast.success("API Key copied to clipboard");
+                                    }
+                                }}
+                            >
+                                Copy Keystring
+                            </Button>
+                        </div>
+                        <p className="text-xs text-rose-500 mt-2 font-medium">
+                            Warning: Do not expose this key to the public. It provides direct read/write access to your tenant data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Communication Templates */}
             <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
