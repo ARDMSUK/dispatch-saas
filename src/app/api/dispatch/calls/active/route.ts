@@ -12,15 +12,20 @@ export async function GET(req: Request) {
         }
         const tenantId = session.user.tenantId;
 
-        // Fetch all currently ringing calls aimed at this tenant's dispatch
-        // Only return calls created within the last 15 minutes to prevent stale calls from popping up
+        // Fetch all currently ringing calls, and recently answered calls (max 30 seconds old)
         const activeCalls = await prisma.incomingCall.findMany({
             where: {
                 tenantId,
-                status: { in: ['RINGING', 'ANSWERED'] },
-                createdAt: {
-                    gte: new Date(Date.now() - 15 * 60 * 1000) // 15 minutes ago
-                }
+                OR: [
+                    {
+                        status: 'RINGING',
+                        createdAt: { gte: new Date(Date.now() - 15 * 60 * 1000) } // 15 mins
+                    },
+                    {
+                        status: 'ANSWERED',
+                        updatedAt: { gte: new Date(Date.now() - 30 * 1000) } // 30 sec
+                    }
+                ]
             },
             orderBy: {
                 createdAt: 'asc' // Oldest ringing first

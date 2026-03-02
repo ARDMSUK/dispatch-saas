@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PhoneCall, X, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,8 @@ interface IncomingCall {
 export function CliPopListener() {
     const [activeCall, setActiveCall] = useState<IncomingCall | null>(null);
     const [customerName, setCustomerName] = useState<string | null>(null);
-    const [handledCallIds, setHandledCallIds] = useState<Set<string>>(new Set());
+    // Use an imperative Ref to prevent stale closures during the polling loop
+    const handledCallIds = useRef<Set<string>>(new Set());
     const router = useRouter();
 
     useEffect(() => {
@@ -32,23 +33,22 @@ export function CliPopListener() {
 
                     if (calls.length > 0) {
                         // Find the oldest ringing/answered call that we HAVEN'T handled locally yet
-                        const unhandledCall = calls.find(c => !handledCallIds.has(c.id));
+                        const unhandledCall = calls.find(c => !handledCallIds.current.has(c.id));
 
                         if (unhandledCall) {
                             if (unhandledCall.status === 'ANSWERED') {
                                 // If the backend tells us it was answered (e.g. they picked up the physical phone via Yay)
                                 // We auto-navigate to the booking screen and autofill the number!
                                 setActiveCall(null);
-                                setHandledCallIds(prev => new Set(prev).add(unhandledCall.id));
+                                handledCallIds.current.add(unhandledCall.id);
 
                                 // Best-effort name lookup for the redirect
                                 let finalName = "";
                                 try {
-                                    const custRes = await fetch("/api/customers");
+                                    const custRes = await fetch("/api/customers/lookup?phone=" + encodeURIComponent(unhandledCall.phone));
                                     if (custRes.ok) {
-                                        const customers = await custRes.json();
-                                        const match = customers.find((c: any) => c.phone === unhandledCall.phone);
-                                        if (match && match.name) finalName = match.name;
+                                        const data = await custRes.json();
+                                        if (data.found && data.customer?.name) finalName = data.customer.name;
                                     }
                                 } catch (e) { }
 
@@ -60,12 +60,11 @@ export function CliPopListener() {
 
                                     // Attempt to look up the customer name from our database
                                     try {
-                                        const custRes = await fetch("/api/customers");
+                                        const custRes = await fetch("/api/customers/lookup?phone=" + encodeURIComponent(unhandledCall.phone));
                                         if (custRes.ok) {
-                                            const customers = await custRes.json();
-                                            const match = customers.find((c: any) => c.phone === unhandledCall.phone);
-                                            if (match && match.name) {
-                                                setCustomerName(match.name);
+                                            const data = await custRes.json();
+                                            if (data.found && data.customer?.name) {
+                                                setCustomerName(data.customer.name);
                                             } else {
                                                 setCustomerName(null);
                                             }
@@ -99,7 +98,7 @@ export function CliPopListener() {
         // Optimistically hide and mark as handled locally
         const callId = activeCall.id;
         setActiveCall(null);
-        setHandledCallIds(prev => new Set(prev).add(callId));
+        handledCallIds.current.add(callId);
 
         try {
             await fetch(`/api/dispatch/calls/${callId}`, {
@@ -121,7 +120,7 @@ export function CliPopListener() {
 
         // Mark as handled locally
         setActiveCall(null);
-        setHandledCallIds(prev => new Set(prev).add(callId));
+        handledCallIds.current.add(callId);
 
         try {
             await fetch(`/api/dispatch/calls/${callId}`, {
