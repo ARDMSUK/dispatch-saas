@@ -140,6 +140,14 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-4">
+                            <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider">Tenant API Key</h3>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Read-Only API Key (Used for Web Chat Widget)</label>
+                                <Input readOnly value={tenant.apiKey || ''} className="bg-zinc-950 border-zinc-800 text-zinc-400 cursor-not-allowed font-mono text-xs" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
                             <h3 className="text-sm font-bold text-amber-500 uppercase tracking-wider">Stripe</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -168,6 +176,10 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">From Number</label>
                                 <Input name="twilioFromNumber" value={tenant.twilioFromNumber || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Twilio Subaccount ID (WhatsApp Isolation)</label>
+                                <Input name="twilioSubaccountId" value={tenant.twilioSubaccountId || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
                             </div>
                         </div>
 
@@ -212,6 +224,63 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 </label>
                                 <p className="text-sm text-zinc-500">
                                     If enabled, SMS notifications sent to customers when a driver is assigned will include a secure link to track their ride in real-time.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                            <input
+                                type="checkbox"
+                                name="hasWebChatAi"
+                                id="hasWebChatAi"
+                                checked={tenant.hasWebChatAi === true}
+                                onChange={(e) => setTenant({ ...tenant, hasWebChatAi: e.target.checked })}
+                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                            />
+                            <div className="space-y-1">
+                                <label htmlFor="hasWebChatAi" className="text-white font-medium cursor-pointer">
+                                    Web Chat AI Widget
+                                </label>
+                                <p className="text-sm text-zinc-500">
+                                    Enables the standalone Cabot AI Web Chat script payload for this tenant's website.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                            <input
+                                type="checkbox"
+                                name="hasWhatsAppAi"
+                                id="hasWhatsAppAi"
+                                checked={tenant.hasWhatsAppAi === true}
+                                onChange={(e) => setTenant({ ...tenant, hasWhatsAppAi: e.target.checked })}
+                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                            />
+                            <div className="space-y-1">
+                                <label htmlFor="hasWhatsAppAi" className="text-white font-medium cursor-pointer">
+                                    WhatsApp AI Agent
+                                </label>
+                                <p className="text-sm text-zinc-500">
+                                    Enables inbound Twilio WhatsApp routing to Cabot AI for this tenant.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                            <input
+                                type="checkbox"
+                                name="hasVoiceAi"
+                                id="hasVoiceAi"
+                                checked={tenant.hasVoiceAi === true}
+                                onChange={(e) => setTenant({ ...tenant, hasVoiceAi: e.target.checked })}
+                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                            />
+                            <div className="space-y-1">
+                                <label htmlFor="hasVoiceAi" className="text-white font-medium cursor-pointer">
+                                    Voice AI Agent
+                                </label>
+                                <p className="text-sm text-zinc-500">
+                                    Enables AI-powered conversational voice dispatch mapping.
                                 </p>
                             </div>
                         </div>

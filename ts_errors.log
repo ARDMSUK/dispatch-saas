@@ -1,0 +1,141 @@
+.next/dev/types/validator.ts(513,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/booking/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/booking/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: number; status: string; pickup: string; dropoff: string; pickupDate: Date; ... 4 more ...; fare: number | null; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(585,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/dispatch/calls/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/dispatch/calls/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: string; phone: string; status: string; tenantId: string; createdAt: Date; updatedAt: Date; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(729,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/invoices/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/invoices/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(954,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/users/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/users/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: string; name: string | null; email: string; role: string; permissions: JsonValue; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(504,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/booking/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/booking/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: number; status: string; pickup: string; dropoff: string; pickupDate: Date; ... 4 more ...; fare: number | null; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(576,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/dispatch/calls/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/dispatch/calls/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: string; phone: string; status: string; tenantId: string; createdAt: Date; updatedAt: Date; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(720,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/invoices/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/invoices/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<unknown>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(945,31): error TS2344: Type 'typeof import("/Users/ar/.gemini/antigravity/scratch/dispatch-saas/src/app/api/users/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/users/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: string; name: string | null; email: string; role: string; permissions: JsonValue; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+check-min-fare.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+check-min-fare.ts(3,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+check-min-fare.ts(5,16): error TS2393: Duplicate function implementation.
+check-min-fare.ts(13,19): error TS7006: Parameter 'r' implicitly has an 'any' type.
+debug-pricing-rules.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+debug-pricing-rules.ts(3,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+debug-pricing-rules.ts(5,16): error TS2393: Duplicate function implementation.
+debug-pricing-rules.ts(17,19): error TS7006: Parameter 'r' implicitly has an 'any' type.
+debug-pricing-rules.ts(21,19): error TS7006: Parameter 'f' implicitly has an 'any' type.
+debug-tenants.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+debug-tenants.ts(3,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+debug-tenants.ts(5,16): error TS2393: Duplicate function implementation.
+debug-tenants.ts(11,21): error TS7006: Parameter 't' implicitly has an 'any' type.
+debug-tenants.ts(17,25): error TS7006: Parameter 'd' implicitly has an 'any' type.
+scripts/check_api_key.ts(1,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/check_api_key.ts(2,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/check_calls.ts(1,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/check_calls.ts(2,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/check_latest_job.ts(12,34): error TS18047: 'job.customer' is possibly 'null'.
+scripts/check_latest_job.ts(13,36): error TS2339: Property 'pickup' does not exist on type '{ customer: { id: string; name: string | null; phone: string; email: string | null; tenantId: string; createdAt: Date; updatedAt: Date; notes: string | null; accountId: string | null; isAccount: boolean; } | null; } & { ...; }'.
+scripts/clear_calls.ts(1,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/clear_calls.ts(2,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/list_api_keys.ts(1,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/list_api_keys.ts(2,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/promote-superuser.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/promote-superuser.ts(3,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/promote-superuser.ts(5,16): error TS2393: Duplicate function implementation.
+scripts/seed_reports.ts(51,43): error TS2339: Property 'vehicleType' does not exist on type '{ id: string; callsign: string; name: string; phone: string; email: string | null; badgeNumber: string | null; licenseExpiry: Date | null; pin: string | null; status: string; location: string | null; tenantId: string; createdAt: Date; updatedAt: Date; }'.
+scripts/setup_driver_data.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/setup_driver_data.ts(3,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/setup_driver_data.ts(5,16): error TS2393: Duplicate function implementation.
+scripts/test_in_car_payment.ts(2,29): error TS2307: Cannot find module 'node-mocks-http' or its corresponding type declarations.
+scripts/test_web_booker.ts(42,63): error TS2353: Object literal may only specify known properties, and 'slug' does not exist in type 'Promise<{ slug: string; }>'.
+scripts/test_web_booker.ts(67,60): error TS2353: Object literal may only specify known properties, and 'slug' does not exist in type 'Promise<{ slug: string; }>'.
+scripts/verify_dispatch.ts(2,9): error TS2451: Cannot redeclare block-scoped variable 'PrismaClient'.
+scripts/verify_dispatch.ts(3,7): error TS2451: Cannot redeclare block-scoped variable 'prisma'.
+scripts/verify_dispatch.ts(5,16): error TS2393: Duplicate function implementation.
+scripts/verify_driver_api.ts(2,16): error TS2393: Duplicate function implementation.
+src/app/api/b2b/bookings/route.ts(13,92): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/b2b/bookings/route.ts(18,40): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/b2b/bookings/route.ts(49,92): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/b2b/bookings/route.ts(54,40): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/b2b/ledger/route.ts(11,92): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/b2b/ledger/route.ts(16,40): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/invoices/[id]/route.ts(42,85): error TS2339: Property 'accountId' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/api/locations/drivers/route.ts(29,17): error TS2353: Object literal may only specify known properties, and 'vehicleType' does not exist in type 'DriverSelect<DefaultArgs>'.
+src/app/api/support/tickets/[id]/chat/route.ts(90,60): error TS2554: Expected 1 arguments, but got 3.
+src/app/api/widget/chat/route.ts(76,33): error TS2551: Property 'toDataStreamResponse' does not exist on type 'StreamTextResult<ToolSet, Output<string, string, never>>'. Did you mean 'toTextStreamResponse'?
+src/app/b2b/ledger/page.tsx(46,57): error TS2339: Property 'isBilled' does not exist on type 'Job'.
+src/app/b2b/ledger/page.tsx(79,24): error TS2339: Property 'paymentStatus' does not exist on type 'Job'.
+src/app/dashboard/layout.tsx(25,44): error TS2339: Property 'isImpersonating' does not exist on type '{ id: string; role: string; tenantId: string; tenantSlug: string; } & User'.
+src/app/dashboard/reports/page.tsx(222,49): error TS2322: Type '(value: number) => [string, "Revenue"]' is not assignable to type 'Formatter<number, "Revenue"> & ((value: number, name: "Revenue", item: Payload<number, "Revenue">, index: number, payload: Payload<number, "Revenue">[]) => ReactNode | [...])'.
+  Type '(value: number) => [string, "Revenue"]' is not assignable to type 'Formatter<number, "Revenue">'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/dashboard/reports/page.tsx(244,49): error TS2322: Type '(value: number) => [number, "Completed Jobs"]' is not assignable to type 'Formatter<number, "Completed Jobs"> & ((value: number, name: "Completed Jobs", item: Payload<number, "Completed Jobs">, index: number, payload: Payload<number, "Completed Jobs">[]) => ReactNode | [...])'.
+  Type '(value: number) => [number, "Completed Jobs"]' is not assignable to type 'Formatter<number, "Completed Jobs">'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/dashboard/reports/page.tsx(361,49): error TS2322: Type '(value: number) => [string, "Frequency"]' is not assignable to type 'Formatter<number, "Frequency"> & ((value: number, name: "Frequency", item: Payload<number, "Frequency">, index: number, payload: Payload<number, "Frequency">[]) => ReactNode | [...])'.
+  Type '(value: number) => [string, "Frequency"]' is not assignable to type 'Formatter<number, "Frequency">'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/shared/invoice/[id]/page.tsx(6,24): error TS2305: Module '"@/lib/types"' has no exported member 'Tenant'.
+src/components/dashboard/ticket-chat-client.tsx(22,23): error TS2339: Property 'input' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/dashboard/ticket-chat-client.tsx(22,30): error TS2339: Property 'handleInputChange' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/dashboard/ticket-chat-client.tsx(22,49): error TS2339: Property 'handleSubmit' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/dashboard/ticket-chat-client.tsx(22,63): error TS2339: Property 'isLoading' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/dashboard/ticket-chat-client.tsx(22,74): error TS2339: Property 'reload' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/dashboard/ticket-chat-client.tsx(23,9): error TS2353: Object literal may only specify known properties, and 'api' does not exist in type 'UseChatOptions<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/dashboard/ticket-chat-client.tsx(100,44): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+src/components/dashboard/ticket-chat-client.tsx(100,70): error TS7006: Parameter 'line' implicitly has an 'any' type.
+src/components/dashboard/ticket-chat-client.tsx(100,76): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/components/widget/widget-chat-client.tsx(16,23): error TS2339: Property 'input' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/widget/widget-chat-client.tsx(16,30): error TS2339: Property 'handleInputChange' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/widget/widget-chat-client.tsx(16,49): error TS2339: Property 'handleSubmit' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/widget/widget-chat-client.tsx(16,63): error TS2339: Property 'isLoading' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/widget/widget-chat-client.tsx(17,9): error TS2353: Object literal may only specify known properties, and 'api' does not exist in type 'UseChatOptions<UIMessage<unknown, UIDataTypes, UITools>>'.
+src/components/widget/widget-chat-client.tsx(88,32): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+verify-fixes.ts(4,16): error TS2393: Duplicate function implementation.
+verify-fixes.ts(15,40): error TS2345: Argument of type '{ pickup: string; dropoff: string; pickupLat: number; pickupLng: number; dropoffLat: number; dropoffLng: number; distanceMiles: number; }' is not assignable to parameter of type 'CalculatePriceParams'.
+  Property 'pickupTime' is missing in type '{ pickup: string; dropoff: string; pickupLat: number; pickupLng: number; dropoffLat: number; dropoffLng: number; distanceMiles: number; }' but required in type 'CalculatePriceParams'.

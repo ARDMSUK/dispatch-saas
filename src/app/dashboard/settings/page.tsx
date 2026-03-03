@@ -33,6 +33,7 @@ export default function SettingsPage() {
     const [enableWaitCalculations, setEnableWaitCalculations] = useState(false);
     const [enableWebBooker, setEnableWebBooker] = useState(false);
     const [tenantSlug, setTenantSlug] = useState("");
+    const [hasWebChatAi, setHasWebChatAi] = useState(false);
 
     // SMS Templates State
     const [smsTemplateConfirmation, setSmsTemplateConfirmation] = useState('');
@@ -93,6 +94,7 @@ export default function SettingsPage() {
                 setEnableWaitCalculations(data.enableWaitCalculations ?? false);
                 setEnableWebBooker(data.enableWebBooker ?? false);
                 setTenantSlug(data.slug || "");
+                setHasWebChatAi(data.hasWebChatAi ?? false);
 
                 // Load templates
                 setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
@@ -435,6 +437,46 @@ export default function SettingsPage() {
                     )}
                 </div>
             </div>
+
+            {/* AI Integrations / Chat Widget */}
+            {hasWebChatAi && (
+                <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-indigo-400">
+                        🤖 AI Chat Widget
+                    </h2>
+                    <div className="space-y-6">
+                        <p className="text-sm text-zinc-400">
+                            Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
+                        </p>
+
+                        <div className="mt-4 bg-zinc-950 p-4 rounded-lg border border-white/10 relative">
+                            <Label className="text-zinc-400 mb-2 block">Iframe Embed Code</Label>
+                            <p className="text-xs text-zinc-500 mb-3">
+                                Copy and paste this code near the bottom of your website's &lt;body&gt; tag.
+                            </p>
+                            <div className="relative group">
+                                <textarea
+                                    readOnly
+                                    value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`}
+                                    className="w-full h-32 bg-black border border-white/10 text-indigo-400 font-mono text-sm p-3 rounded resize-none"
+                                />
+                                <Button
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-white font-medium"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`<iframe src="${window.location.origin}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`);
+                                        toast.success("AI Widget code copied!");
+                                    }}
+                                >
+                                    Copy Code
+                                </Button>
+                            </div>
+                            <p className="text-xs text-rose-500 mt-2 font-medium">
+                                Important: This snippet includes your secret API Key. Do not share it unnecessarily, though it's required for the web client to function.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Visual Branding */}
             <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
