@@ -1,8 +1,13 @@
 "use client";
 
-import { useChat } from '@ai-sdk/react';
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send, MessageSquare, X, Bot, User } from "lucide-react";
+
+interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+}
 
 interface WidgetChatClientProps {
     apiKey: string | undefined;
@@ -10,17 +15,83 @@ interface WidgetChatClientProps {
 
 export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [input, setInput] = useState("");
+    const [isSending, setIsSending] = useState(false);
+    const [messages, setMessages] = useState<Message[]>([
+        { id: '1', role: 'assistant', content: "Hello! I'm the AI booking assistant. How can I help you today?" }
+    ]);
 
-    // Initialize the Vercel AI Chat hook passing the apiKey in headers
-    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-        api: `/api/widget/chat`,
-        headers: {
-            'x-api-key': apiKey || ''
-        },
-        initialMessages: [
-            { id: '1', role: 'assistant', content: "Hello! I'm the AI booking assistant. How can I help you today?" }
-        ]
-    });
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim() || isSending) return;
+
+        const currentInput = input;
+        setInput("");
+        setIsSending(true);
+
+        const newMessages = [...messages, { id: Date.now().toString(), role: 'user' as const, content: currentInput }];
+        setMessages([...newMessages, { id: 'temp', role: 'assistant', content: '' }]);
+
+        try {
+            const res = await fetch(`/api/widget/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey || ''
+                },
+                body: JSON.stringify({ messages: newMessages })
+            });
+
+            if (!res.ok) throw new Error("Failed to send message");
+
+            const reader = res.body?.getReader();
+            if (!reader) return;
+
+            const decoder = new TextDecoder();
+            let assistantMessage = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+
+                // ai SDK toTextStreamResponse often just returns raw text, but might send `0:"..."` format depending on exact version.
+                // We'll strip the `0:` prefix if it exists and json parse it, otherwise we treat it as raw text.
+                let newText = "";
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('0:')) {
+                        try {
+                            newText += JSON.parse(line.slice(2));
+                        } catch (e) {
+                            newText += line;
+                        }
+                    } else if (line.startsWith('3:')) {
+                        // Protocol error format, ignore
+                    } else {
+                        newText += line;
+                    }
+                }
+
+                if (newText) {
+                    assistantMessage += newText;
+                    setMessages((prev: Message[]) => [
+                        ...prev.slice(0, -1),
+                        { id: 'temp', role: 'assistant', content: assistantMessage }
+                    ]);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            setMessages((prev: Message[]) => [
+                ...prev.slice(0, -1),
+                { id: 'temp-err', role: 'assistant', content: "Sorry, I encountered an error connecting to the server." }
+            ]);
+        } finally {
+            setIsSending(false);
+        }
+    };
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -94,18 +165,18 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
             {/* Input Area */}
             <div className="p-3 bg-zinc-950 border-t border-zinc-800">
                 <form
-                    onSubmit={handleSubmit}
+                    onSubmit={handleFormSubmit}
                     className="flex flex-row gap-2"
                 >
                     <input
                         value={input}
-                        onChange={handleInputChange}
+                        onChange={(e) => setInput(e.target.value)}
                         placeholder="Type a message..."
                         className="flex-1 bg-zinc-900 rounded-full px-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500 border border-zinc-800"
                     />
                     <button
                         type="submit"
-                        disabled={!input.trim() || isLoading}
+                        disabled={!input.trim() || isSending}
                         className="w-10 h-10 rounded-full bg-amber-500 text-black flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-400 transition-colors"
                     >
                         <Send className="w-4 h-4 ml-0.5" />

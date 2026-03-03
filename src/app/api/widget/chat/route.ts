@@ -73,7 +73,7 @@ Rules:
             }
         });
 
-        const response = result.toDataStreamResponse();
+        const response = result.toTextStreamResponse();
 
         // Ensure CORS headers are firmly attached to the streaming response chunks
         response.headers.set('Access-Control-Allow-Origin', '*');
