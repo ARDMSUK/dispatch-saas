@@ -120,7 +120,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                     className="flex w-full items-center space-x-2"
                 >
                     <Input
-                        value={input}
+                        value={input || ''}
                         onChange={handleInputChange}
                         placeholder={status === 'ESCALATED' ? "Reply to human support..." : "Ask Cabot AI a question..."}
                         className="flex-1 bg-zinc-900 border-zinc-700 text-white focus-visible:ring-amber-500"
@@ -129,7 +129,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                     <Button
                         type="submit"
                         size="icon"
-                        disabled={!input.trim() || isLoading || status === 'CLOSED'}
+                        disabled={!(input || '').trim() || isLoading || status === 'CLOSED'}
                         className="bg-amber-500 hover:bg-amber-600 text-black shrink-0"
                     >
                         <Send className="h-4 w-4" />
