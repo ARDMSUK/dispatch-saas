@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon } from 'lucide-react';
+import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -57,6 +57,9 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
                         <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
                         <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
+
+                        <div className="my-2 border-t border-white/5"></div>
+                        <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />
 
                         {/* Granular Feature Access */}
                         {(hasPermission('view_reports') || hasPermission('manage_pricing') || hasPermission('manage_zones') || hasPermission('manage_accounts') || hasPermission('manage_billing')) && (
