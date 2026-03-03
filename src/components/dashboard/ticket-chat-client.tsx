@@ -19,19 +19,27 @@ interface ChatProps {
 
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
     // Vercel AI SDK hook. Automatically calls POST /api/support/tickets/:id/chat
-    const { messages, input, handleInputChange, handleSubmit, isLoading, reload } = useChat({
+    const { messages, input, handleInputChange, handleSubmit, isLoading, reload, setMessages } = useChat({
         api: `/api/support/tickets/${ticketId}/chat`,
-        initialMessages,
     });
 
-    // Auto-trigger AI response if the ticket is new
-    const hasTriggeredRef = useRef(false);
+    // Hydrate messages on mount and auto-trigger AI if it's a brand new ticket
+    const isHydratedRef = useRef(false);
     useEffect(() => {
-        if (!hasTriggeredRef.current && messages.length === 1 && messages[0].role === 'user' && status === 'PENDING_AI_REVIEW') {
-            hasTriggeredRef.current = true;
-            reload();
+        if (!isHydratedRef.current && initialMessages && initialMessages.length > 0) {
+            isHydratedRef.current = true;
+            // Ensure the IDs are strings to satisfy the SDK
+            const safeMessages = initialMessages.map(m => ({ ...m, id: String(m.id) }));
+            setMessages(safeMessages);
+
+            // If the chat has only one user message and is pending, trigger the AI
+            if (safeMessages.length === 1 && safeMessages[0].role === 'user' && status === 'PENDING_AI_REVIEW') {
+                setTimeout(() => {
+                    reload();
+                }, 500); // Small delay to guarantee state is committed
+            }
         }
-    }, [messages.length, status, reload]);
+    }, [initialMessages, status, setMessages, reload]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
