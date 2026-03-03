@@ -19,10 +19,19 @@ interface ChatProps {
 
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
     // Vercel AI SDK hook. Automatically calls POST /api/support/tickets/:id/chat
-    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    const { messages, input, handleInputChange, handleSubmit, isLoading, reload } = useChat({
         api: `/api/support/tickets/${ticketId}/chat`,
         initialMessages,
     });
+
+    // Auto-trigger AI response if the ticket is new
+    const hasTriggeredRef = useRef(false);
+    useEffect(() => {
+        if (!hasTriggeredRef.current && messages.length === 1 && messages[0].role === 'user' && status === 'PENDING_AI_REVIEW') {
+            hasTriggeredRef.current = true;
+            reload();
+        }
+    }, [messages.length, status, reload]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
 

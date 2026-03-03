@@ -27,13 +27,16 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
     }
 
     // Map Prisma messages to Vercel AI SDK format
-    const initialMessages = ticket.messages.map((msg) => ({
-        id: msg.id,
-        role: msg.senderType === 'TENANT_USER' ? 'user' : (msg.senderType === 'SYSTEM_ADMIN' ? 'assistant' : 'assistant'),
-        content: msg.content,
-        // Optional tracking if a human admin replied vs AI
-        name: msg.senderType === 'SYSTEM_ADMIN' ? 'Human Support' : (msg.senderType === 'AI_AGENT' ? 'Cabot AI' : undefined)
-    }));
+    const initialMessages = ticket.messages.map((msg) => {
+        const payload: any = {
+            id: msg.id,
+            role: msg.senderType === 'TENANT_USER' ? 'user' : 'assistant',
+            content: msg.content,
+        };
+        if (msg.senderType === 'SYSTEM_ADMIN') payload.name = 'Human Support';
+        else if (msg.senderType === 'AI_AGENT') payload.name = 'Cabot AI';
+        return payload;
+    });
 
     return (
         <div className="flex-1 p-8 pt-6 bg-zinc-950 min-h-screen text-white h-[calc(100vh-4rem)] flex flex-col">
