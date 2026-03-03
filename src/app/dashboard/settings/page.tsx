@@ -34,6 +34,8 @@ export default function SettingsPage() {
     const [enableWebBooker, setEnableWebBooker] = useState(false);
     const [tenantSlug, setTenantSlug] = useState("");
     const [hasWebChatAi, setHasWebChatAi] = useState(false);
+    const [hasWhatsAppAi, setHasWhatsAppAi] = useState(false);
+    const [twilioFromNumber, setTwilioFromNumber] = useState("");
 
     // SMS Templates State
     const [smsTemplateConfirmation, setSmsTemplateConfirmation] = useState('');
@@ -95,6 +97,8 @@ export default function SettingsPage() {
                 setEnableWebBooker(data.enableWebBooker ?? false);
                 setTenantSlug(data.slug || "");
                 setHasWebChatAi(data.hasWebChatAi ?? false);
+                setHasWhatsAppAi(data.hasWhatsAppAi ?? false);
+                setTwilioFromNumber(data.twilioFromNumber || "");
 
                 // Load templates
                 setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
@@ -438,43 +442,90 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            {/* AI Integrations / Chat Widget */}
-            {hasWebChatAi && (
+            {/* AI Integrations */}
+            {(hasWebChatAi || hasWhatsAppAi) && (
                 <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
                     <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-indigo-400">
-                        🤖 AI Chat Widget
+                        🤖 AI Integrations
                     </h2>
-                    <div className="space-y-6">
-                        <p className="text-sm text-zinc-400">
-                            Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
-                        </p>
 
-                        <div className="mt-4 bg-zinc-950 p-4 rounded-lg border border-white/10 relative">
-                            <Label className="text-zinc-400 mb-2 block">Iframe Embed Code</Label>
-                            <p className="text-xs text-zinc-500 mb-3">
-                                Copy and paste this code near the bottom of your website's &lt;body&gt; tag.
-                            </p>
-                            <div className="relative group">
-                                <textarea
-                                    readOnly
-                                    value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`}
-                                    className="w-full h-32 bg-black border border-white/10 text-indigo-400 font-mono text-sm p-3 rounded resize-none"
-                                />
-                                <Button
-                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-white font-medium"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(`<iframe src="${window.location.origin}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`);
-                                        toast.success("AI Widget code copied!");
-                                    }}
-                                >
-                                    Copy Code
-                                </Button>
+                    {hasWebChatAi && (
+                        <div className="mb-8 border-b border-white/10 pb-8">
+                            <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">🌐 Web Chat Widget</h3>
+                            <div className="space-y-6">
+                                <p className="text-sm text-zinc-400">
+                                    Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
+                                </p>
+
+                                <div className="mt-4 bg-zinc-950 p-4 rounded-lg border border-white/10 relative">
+                                    <Label className="text-zinc-400 mb-2 block">Iframe Embed Code</Label>
+                                    <p className="text-xs text-zinc-500 mb-3">
+                                        Copy and paste this code near the bottom of your website's &lt;body&gt; tag.
+                                    </p>
+                                    <div className="relative group">
+                                        <textarea
+                                            readOnly
+                                            value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`}
+                                            className="w-full h-32 bg-black border border-white/10 text-indigo-400 font-mono text-sm p-3 rounded resize-none"
+                                        />
+                                        <Button
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-white font-medium"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(`<iframe src="${window.location.origin}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`);
+                                                toast.success("AI Widget code copied!");
+                                            }}
+                                        >
+                                            Copy Code
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-rose-500 mt-2 font-medium">
+                                        Important: This snippet includes your secret API Key. Do not share it unnecessarily, though it's required for the web client to function.
+                                    </p>
+                                </div>
                             </div>
-                            <p className="text-xs text-rose-500 mt-2 font-medium">
-                                Important: This snippet includes your secret API Key. Do not share it unnecessarily, though it's required for the web client to function.
-                            </p>
                         </div>
-                    </div>
+                    )}
+
+                    {hasWhatsAppAi && (
+                        <div>
+                            <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">📱 WhatsApp AI Agent</h3>
+                            <div className="space-y-4">
+                                <p className="text-sm text-zinc-400">
+                                    Your WhatsApp Business number is connected and managed by our platform. Customers who message this number will talk directly to the AI to book rides.
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-zinc-950 p-4 rounded-lg border border-white/10">
+                                        <Label className="text-zinc-400 block mb-2">Connected WhatsApp Number</Label>
+                                        <div className="font-mono text-sm text-emerald-400">
+                                            {twilioFromNumber || "Awaiting Setup"}
+                                        </div>
+                                    </div>
+                                    <div className="bg-zinc-950 p-4 rounded-lg border border-white/10">
+                                        <Label className="text-zinc-400 block mb-2">Twilio Webhook URL</Label>
+                                        <div className="relative group">
+                                            <input
+                                                readOnly
+                                                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/twilio/whatsapp`}
+                                                className="w-full bg-black border border-white/10 text-indigo-400 font-mono text-xs p-2 rounded truncate pr-20"
+                                            />
+                                            <Button
+                                                className="absolute top-1 right-1 h-6 text-xs bg-zinc-800 hover:bg-zinc-700 text-white"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(`${window.location.origin}/api/twilio/whatsapp`);
+                                                    toast.success("Webhook URL copied");
+                                                }}
+                                            >
+                                                Copy
+                                            </Button>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-500 mt-2 leading-tight">
+                                            Set this as the incoming message Webhook in your Twilio Console.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

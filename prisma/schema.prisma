@@ -93,6 +93,7 @@ model Tenant {
   incomingCalls IncomingCall[]
   invoices    Invoice[]
   tickets     Ticket[]
+  whatsappSessions WhatsappSession[]
 
   @@map("companies")
   @@schema("public")
@@ -517,5 +518,21 @@ model TicketMessage {
   createdAt   DateTime @default(now())
   
   @@map("ticket_messages")
+  @@schema("public")
+}
+
+model WhatsappSession {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  
+  userPhone String   // Provide conversation isolation by user phone
+  messages  Json     @default("[]") // Array of { role: 'user'|'assistant', content: string }
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([tenantId, userPhone])
+  @@map("whatsapp_sessions")
   @@schema("public")
 }
