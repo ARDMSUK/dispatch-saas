@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat } from 'ai/react';
+import { useChat } from '@ai-sdk/react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -77,8 +77,8 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                                         {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                                     </div>
                                     <div className={`px-4 py-3 rounded-2xl text-sm ${m.role === 'user'
-                                            ? 'bg-amber-500 text-black rounded-br-sm'
-                                            : 'bg-zinc-800 text-zinc-100 rounded-bl-sm border border-zinc-700/50 shadow-lg'
+                                        ? 'bg-amber-500 text-black rounded-br-sm'
+                                        : 'bg-zinc-800 text-zinc-100 rounded-bl-sm border border-zinc-700/50 shadow-lg'
                                         }`}>
                                         {m.content.split('\\n').map((line, i) => (
                                             <p key={i} className="mb-1 last:mb-0 whitespace-pre-wrap">{line}</p>
