@@ -5,11 +5,10 @@ import { use, useEffect, useRef, useState } from "react";
 import { Send, MessageSquare, X, Bot, User } from "lucide-react";
 
 interface WidgetChatClientProps {
-    apiKeyPromise: Promise<string | undefined>;
+    apiKey: string | undefined;
 }
 
-export default function WidgetChatClient({ apiKeyPromise }: WidgetChatClientProps) {
-    const apiKey = use(apiKeyPromise);
+export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     // Initialize the Vercel AI Chat hook passing the apiKey in headers
@@ -81,8 +80,8 @@ export default function WidgetChatClient({ apiKeyPromise }: WidgetChatClientProp
                     >
                         <div
                             className={`px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user'
-                                    ? 'bg-amber-500 text-black rounded-tr-sm'
-                                    : 'bg-zinc-800 text-zinc-100 rounded-tl-sm'
+                                ? 'bg-amber-500 text-black rounded-tr-sm'
+                                : 'bg-zinc-800 text-zinc-100 rounded-tl-sm'
                                 }`}
                         >
                             {m.content}

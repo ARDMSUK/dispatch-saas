@@ -11,7 +11,7 @@ export default async function WidgetPage(
 
     return (
         <div className="w-full h-full bg-transparent overflow-hidden">
-            <WidgetChatClient apiKeyPromise={Promise.resolve(key)} />
+            <WidgetChatClient apiKey={key} />
         </div>
     );
 }
