@@ -112,7 +112,7 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
             <div className="fixed bottom-4 right-4 z-50">
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="flex items-center justify-center w-14 h-14 bg-amber-500 text-black rounded-full shadow-xl hover:bg-amber-400 transition-all hover:scale-105 active:scale-95"
+                    className="flex items-center justify-center w-14 h-14 bg-blue-700 text-black rounded-full shadow-xl hover:bg-blue-600 transition-all hover:scale-105 active:scale-95"
                 >
                     <MessageSquare className="w-6 h-6" />
                 </button>
@@ -126,12 +126,12 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
+                    <div className="w-8 h-8 rounded-full bg-blue-700/20 flex items-center justify-center text-blue-700">
                         <Bot className="w-4 h-4" />
                     </div>
                     <div>
                         <h3 className="font-semibold text-slate-900 text-sm">Booking Assistant</h3>
-                        <p className="text-xs text-amber-500">Online &bull; AI Powered</p>
+                        <p className="text-xs text-blue-700">Online &bull; AI Powered</p>
                     </div>
                 </div>
                 <button
@@ -151,7 +151,7 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
                     >
                         <div
                             className={`px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user'
-                                ? 'bg-amber-500 text-black rounded-tr-sm'
+                                ? 'bg-blue-700 text-black rounded-tr-sm'
                                 : 'bg-slate-200 text-slate-900 rounded-tl-sm'
                                 }`}
                         >
@@ -172,12 +172,12 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-sm text-slate-900 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500 border border-slate-200"
+                        className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-sm text-slate-900 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-700 border border-slate-200"
                     />
                     <button
                         type="submit"
                         disabled={!input.trim() || isSending}
-                        className="w-10 h-10 rounded-full bg-amber-500 text-black flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-400 transition-colors"
+                        className="w-10 h-10 rounded-full bg-blue-700 text-black flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
                     >
                         <Send className="w-4 h-4 ml-0.5" />
                     </button>

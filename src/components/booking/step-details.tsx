@@ -39,7 +39,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                         <input
                             type="text"
                             placeholder="Full Name"
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-amber-500/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-blue-700/50"
                             value={data.passengerName}
                             onChange={(e) => onUpdate({ passengerName: e.target.value })}
                         />
@@ -51,7 +51,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                         <input
                             type="email"
                             placeholder="Email Address"
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-amber-500/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-blue-700/50"
                             value={data.passengerEmail}
                             onChange={(e) => onUpdate({ passengerEmail: e.target.value })}
                         />
@@ -63,7 +63,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                         <input
                             type="tel"
                             placeholder="Mobile Number"
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-amber-500/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-blue-700/50"
                             value={data.passengerPhone}
                             onChange={(e) => onUpdate({ passengerPhone: e.target.value })}
                         />
@@ -75,7 +75,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                             <input
                                 type="number"
                                 min="1" max="16"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-amber-500/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-blue-700/50"
                                 value={data.passengers}
                                 onChange={(e) => onUpdate({ passengers: parseInt(e.target.value) })}
                             />
@@ -85,7 +85,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                             <input
                                 type="number"
                                 min="0" max="10"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-amber-500/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-blue-700/50"
                                 value={data.luggage}
                                 onChange={(e) => onUpdate({ luggage: parseInt(e.target.value) })}
                             />
@@ -110,7 +110,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
                         <textarea
                             placeholder="Driver Notes / Instructions..."
                             rows={3}
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-amber-500/50 resize-none"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-blue-700/50 resize-none"
                             value={data.notes || ''}
                             onChange={(e) => onUpdate({ notes: e.target.value })}
                         />
@@ -142,7 +142,7 @@ export function StepDetails({ data, onUpdate, onNext }: Props) {
             <Button
                 onClick={onNext}
                 disabled={!isValid}
-                className="w-full h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-xl"
+                className="w-full h-14 text-lg font-bold bg-blue-700 hover:bg-blue-600 text-black rounded-xl"
             >
                 Review Booking
             </Button>

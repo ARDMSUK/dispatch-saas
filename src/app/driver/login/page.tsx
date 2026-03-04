@@ -85,7 +85,7 @@ export default function DriverLoginPage() {
 
             {/* Header */}
             <div className="flex flex-col items-center justify-center pt-10 pb-6 space-y-4">
-                <div className="h-16 w-16 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <div className="h-16 w-16 bg-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-700/20">
                     <Truck className="h-8 w-8 text-black" />
                 </div>
                 <div className="text-center">
@@ -105,7 +105,7 @@ export default function DriverLoginPage() {
                                 value={tenantSlug}
                                 onChange={(e) => setTenantSlug(e.target.value.toLowerCase())}
                                 placeholder="e.g. demo-taxis"
-                                className="h-14 text-lg bg-slate-100 border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest lowercase"
+                                className="h-14 text-lg bg-slate-100 border-slate-200 focus:ring-blue-700 focus:border-blue-700 text-center tracking-widest lowercase"
                             />
                         </div>
                         <div className="space-y-2">
@@ -114,11 +114,11 @@ export default function DriverLoginPage() {
                                 value={callsign}
                                 onChange={(e) => setCallsign(e.target.value.toUpperCase())}
                                 placeholder="e.g. CAB-001"
-                                className="h-14 text-lg bg-slate-100 border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest uppercase"
+                                className="h-14 text-lg bg-slate-100 border-slate-200 focus:ring-blue-700 focus:border-blue-700 text-center tracking-widest uppercase"
                             />
                         </div>
                     </div>
-                    <Button type="submit" className="h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black w-full shadow-lg shadow-amber-900/20">
+                    <Button type="submit" className="h-14 text-lg font-bold bg-blue-700 hover:bg-blue-600 text-black w-full shadow-lg shadow-amber-900/20">
                         CONTINUE
                     </Button>
 
@@ -137,7 +137,7 @@ export default function DriverLoginPage() {
                         <p className="text-slate-500 mb-4">Enter PIN for <span className="text-slate-900 font-bold">{callsign}</span></p>
                         <div className="flex justify-center gap-4">
                             {[0, 1, 2, 3].map((i) => (
-                                <div key={i} className={`w-4 h-4 rounded-full transition-all duration-200 ${pin.length > i ? 'bg-amber-500 scale-110' : 'bg-slate-200'}`} />
+                                <div key={i} className={`w-4 h-4 rounded-full transition-all duration-200 ${pin.length > i ? 'bg-blue-700 scale-110' : 'bg-slate-200'}`} />
                             ))}
                         </div>
                     </div>
@@ -176,7 +176,7 @@ export default function DriverLoginPage() {
 
                     {loading && (
                         <div className="absolute inset-0 bg-slate-100 backdrop-blur-sm flex items-center justify-center z-50">
-                            <Loader2 className="h-10 w-10 text-amber-500 animate-spin" />
+                            <Loader2 className="h-10 w-10 text-blue-700 animate-spin" />
                         </div>
                     )}
                 </div>

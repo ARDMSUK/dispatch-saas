@@ -99,7 +99,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="bg-white border-slate-200 text-slate-900 sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="text-amber-500 uppercase tracking-widest text-sm font-bold">Edit Booking #{job?.id}</DialogTitle>
+                    <DialogTitle className="text-blue-700 uppercase tracking-widest text-sm font-bold">Edit Booking #{job?.id}</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -109,16 +109,16 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                         <div className="relative">
                             <div className="absolute left-3 top-3 text-emerald-500"><Navigation className="h-4 w-4" /></div>
                             <input
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={pickup}
                                 onChange={e => setPickup(e.target.value)}
                                 placeholder="Pickup"
                             />
                         </div>
                         <div className="relative">
-                            <div className="absolute left-3 top-3 text-amber-500"><MapPin className="h-4 w-4" /></div>
+                            <div className="absolute left-3 top-3 text-blue-700"><MapPin className="h-4 w-4" /></div>
                             <input
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={dropoff}
                                 onChange={e => setDropoff(e.target.value)}
                                 placeholder="Dropoff"
@@ -133,7 +133,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                             <div className="relative">
                                 <div className="absolute left-3 top-3 text-slate-400"><User className="h-4 w-4" /></div>
                                 <input
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                     value={passengerName}
                                     onChange={e => setPassengerName(e.target.value)}
                                     placeholder="Name"
@@ -142,7 +142,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                             <div className="relative">
                                 <div className="absolute left-3 top-3 text-slate-400"><Zap className="h-4 w-4" /></div>
                                 <input
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                     value={passengerPhone}
                                     onChange={e => setPassengerPhone(e.target.value)}
                                     placeholder="Phone"
@@ -157,12 +157,12 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                         <div className="grid grid-cols-2 gap-3">
                             <input
                                 type="datetime-local"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
                                 value={pickupTime}
                                 onChange={e => setPickupTime(e.target.value)}
                             />
                             <select
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 appearance-none"
                                 value={vehicleType}
                                 onChange={e => setVehicleType(e.target.value)}
                             >
@@ -179,14 +179,14 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                             <input
                                 type="number"
                                 step="0.01"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-8 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-8 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={fare}
                                 onChange={e => setFare(e.target.value)}
                                 placeholder="Fare"
                             />
                         </div>
                         <textarea
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 min-h-[80px]"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 min-h-[80px]"
                             value={notes}
                             onChange={e => setNotes(e.target.value)}
                             placeholder="Driver Notes..."
@@ -196,7 +196,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-400 uppercase">Designated Driver (Auto-Dispatch)</label>
                             <select
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 appearance-none"
                                 value={preAssignedDriverId}
                                 onChange={e => setPreAssignedDriverId(e.target.value)}
                             >
@@ -216,7 +216,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
 
                 <div className="flex justify-end gap-2 pt-2">
                     <Button variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-slate-200 text-slate-500">Cancel</Button>
-                    <Button onClick={handleSave} disabled={loading} className="bg-amber-500 hover:bg-amber-400 text-black font-bold">
+                    <Button onClick={handleSave} disabled={loading} className="bg-blue-700 hover:bg-blue-600 text-black font-bold">
                         {loading ? 'Saving...' : 'Save Changes'}
                     </Button>
                 </div>

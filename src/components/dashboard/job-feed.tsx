@@ -53,7 +53,7 @@ export function JobFeed({ onSelectJob, selectedJobId }: JobFeedProps) {
             <CardHeader className="pb-3 border-b border-slate-200">
                 <CardTitle className="text-slate-900 text-lg flex items-center justify-between">
                     Live Queue
-                    <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20">
+                    <Badge variant="secondary" className="bg-blue-700/10 text-blue-700 hover:bg-blue-700/20">
                         {jobs.length} Pending
                     </Badge>
                 </CardTitle>
@@ -69,10 +69,10 @@ export function JobFeed({ onSelectJob, selectedJobId }: JobFeedProps) {
                             <div
                                 key={job.id}
                                 onClick={() => onSelectJob(job)}
-                                className={`p-4 cursor-pointer transition-colors hover:bg-slate-200 ${selectedJobId === job.id ? 'bg-amber-500/10 border-l-2 border-amber-500' : 'border-l-2 border-transparent'}`}
+                                className={`p-4 cursor-pointer transition-colors hover:bg-slate-200 ${selectedJobId === job.id ? 'bg-blue-700/10 border-l-2 border-blue-700' : 'border-l-2 border-transparent'}`}
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <div className="flex items-center gap-2 text-amber-500 font-mono text-xs font-bold">
+                                    <div className="flex items-center gap-2 text-blue-700 font-mono text-xs font-bold">
                                         <Clock className="h-3 w-3" />
                                         {format(new Date(job.pickupTime), 'HH:mm')}
                                     </div>
@@ -86,7 +86,7 @@ export function JobFeed({ onSelectJob, selectedJobId }: JobFeedProps) {
                                         <div className="mt-1 min-w-[16px] flex flex-col items-center">
                                             <div className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
                                             <div className="w-0.5 h-full bg-slate-200 my-1" />
-                                            <div className="h-2 w-2 rounded-full bg-amber-500" />
+                                            <div className="h-2 w-2 rounded-full bg-blue-700" />
                                         </div>
                                         <div className="flex-1 space-y-2 min-w-0">
                                             <p className="text-sm text-slate-900 font-medium truncate" title={job.pickupAddress}>

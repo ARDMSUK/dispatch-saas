@@ -148,7 +148,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                         </div>
 
                         <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-amber-500 uppercase tracking-wider">Stripe</h3>
+                            <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider">Stripe</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Secret Key</label>
@@ -216,7 +216,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 id="enableLiveTracking"
                                 checked={tenant.enableLiveTracking !== false}
                                 onChange={(e) => setTenant({ ...tenant, enableLiveTracking: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
+                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
                                 <label htmlFor="enableLiveTracking" className="text-slate-900 font-medium cursor-pointer">
@@ -235,7 +235,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 id="hasWebChatAi"
                                 checked={tenant.hasWebChatAi === true}
                                 onChange={(e) => setTenant({ ...tenant, hasWebChatAi: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
+                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
                                 <label htmlFor="hasWebChatAi" className="text-slate-900 font-medium cursor-pointer">
@@ -254,7 +254,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 id="hasWhatsAppAi"
                                 checked={tenant.hasWhatsAppAi === true}
                                 onChange={(e) => setTenant({ ...tenant, hasWhatsAppAi: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
+                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
                                 <label htmlFor="hasWhatsAppAi" className="text-slate-900 font-medium cursor-pointer">
@@ -273,7 +273,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 id="hasVoiceAi"
                                 checked={tenant.hasVoiceAi === true}
                                 onChange={(e) => setTenant({ ...tenant, hasVoiceAi: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
+                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
                                 <label htmlFor="hasVoiceAi" className="text-slate-900 font-medium cursor-pointer">

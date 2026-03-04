@@ -24,8 +24,8 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
     return (
         <div className="relative bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-lg animate-in fade-in slide-in-from-bottom-2">
             {/* Header / Status */}
-            <div className={`p-4 flex justify-between items-center ${isOffer ? 'bg-amber-500/10 border-b border-amber-500/20' : 'bg-blue-500/10 border-b border-blue-500/20'}`}>
-                <Badge className={isOffer ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-blue-500 text-slate-900 hover:bg-blue-400'}>
+            <div className={`p-4 flex justify-between items-center ${isOffer ? 'bg-blue-700/10 border-b border-blue-700/20' : 'bg-blue-500/10 border-b border-blue-500/20'}`}>
+                <Badge className={isOffer ? 'bg-blue-700 text-black hover:bg-blue-600' : 'bg-blue-500 text-slate-900 hover:bg-blue-400'}>
                     {isOffer ? 'NEW JOB OFFER' : job.status.replace('_', ' ')}
                 </Badge>
                 <div className="text-right">
@@ -79,14 +79,14 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
 
                     {/* Dropoff */}
                     <div className="flex gap-3 relative z-10">
-                        <div className="mt-1 h-5 w-5 rounded-full bg-slate-100 border-2 border-amber-500 flex items-center justify-center shrink-0">
-                            <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                        <div className="mt-1 h-5 w-5 rounded-full bg-slate-100 border-2 border-blue-700 flex items-center justify-center shrink-0">
+                            <div className="h-2 w-2 rounded-full bg-blue-700"></div>
                         </div>
                         <div>
                             <p className="text-xs text-slate-400 font-bold uppercase mb-0.5">Dropoff</p>
                             <p className="text-sm text-slate-800 font-medium leading-snug">{job.dropoffAddress}</p>
                             {!isHistory && isInProgress && (
-                                <Button variant="link" className="h-auto p-0 text-amber-500 text-xs mt-1" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(job.dropoffAddress)}`, '_blank')}>
+                                <Button variant="link" className="h-auto p-0 text-blue-700 text-xs mt-1" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(job.dropoffAddress)}`, '_blank')}>
                                     <Navigation className="h-3 w-3 mr-1" /> Navigate
                                 </Button>
                             )}
@@ -114,8 +114,8 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
 
                 {/* Notes */}
                 {job.notes && (
-                    <div className="bg-amber-500/5 border border-amber-500/10 rounded-lg p-3">
-                        <p className="text-xs text-amber-500 font-medium whitespace-pre-wrap">{job.notes}</p>
+                    <div className="bg-blue-700/5 border border-blue-700/10 rounded-lg p-3">
+                        <p className="text-xs text-blue-700 font-medium whitespace-pre-wrap">{job.notes}</p>
                     </div>
                 )}
             </div>
@@ -133,7 +133,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                                 REJECT
                             </Button>
                             <Button
-                                className="h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-900/20"
+                                className="h-14 text-lg font-bold bg-blue-700 hover:bg-blue-600 text-black shadow-lg shadow-amber-900/20"
                                 onClick={() => onStatusUpdate(job.id, 'EN_ROUTE')}
                             >
                                 ACCEPT

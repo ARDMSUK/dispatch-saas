@@ -35,7 +35,7 @@ export function StepLocation({ data, onUpdate, onNext }: Props) {
                     </div>
                     <LocationInput
                         placeholder="Pickup Location"
-                        className="w-full bg-slate-100 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-amber-500/50 transition-all"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-blue-700/50 transition-all"
                         value={data.pickup}
                         onChange={(val) => onUpdate({ pickup: val, pickupCoords: null })}
                         onLocationSelect={(loc) => onUpdate({ pickup: loc.address, pickupCoords: { lat: loc.lat, lng: loc.lng } })}
@@ -44,12 +44,12 @@ export function StepLocation({ data, onUpdate, onNext }: Props) {
 
                 {/* Dropoff */}
                 <div className="relative group z-20">
-                    <div className="absolute left-3 top-4 text-amber-500">
+                    <div className="absolute left-3 top-4 text-blue-700">
                         <MapPin className="h-5 w-5" />
                     </div>
                     <LocationInput
                         placeholder="Dropoff Destination"
-                        className="w-full bg-slate-100 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-amber-500/50 transition-all"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-slate-900 focus:outline-none focus:border-blue-700/50 transition-all"
                         value={data.dropoff}
                         onChange={(val) => onUpdate({ dropoff: val, dropoffCoords: null })}
                         onLocationSelect={(loc) => onUpdate({ dropoff: loc.address, dropoffCoords: { lat: loc.lat, lng: loc.lng } })}
@@ -64,7 +64,7 @@ export function StepLocation({ data, onUpdate, onNext }: Props) {
                         </label>
                         <input
                             type="datetime-local"
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-amber-500/50 [color-scheme:dark]"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-blue-700/50 [color-scheme:dark]"
                             value={dateStr}
                             onChange={(e) => setDateStr(e.target.value)}
                         />
@@ -73,18 +73,18 @@ export function StepLocation({ data, onUpdate, onNext }: Props) {
 
                 {/* Return Toggle */}
                 <div className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-white/5 hover:bg-slate-200 transition-colors cursor-pointer" onClick={() => onUpdate({ isReturn: !data.isReturn })}>
-                    <div className={`h-5 w-5 rounded border flex items-center justify-center ${data.isReturn ? 'bg-amber-500 border-amber-500 text-black' : 'border-zinc-600'}`}>
+                    <div className={`h-5 w-5 rounded border flex items-center justify-center ${data.isReturn ? 'bg-blue-700 border-blue-700 text-black' : 'border-zinc-600'}`}>
                         {data.isReturn && <RotateCw className="h-3 w-3" />}
                     </div>
                     <span className="text-sm font-medium text-slate-900 select-none">Add Return Journey</span>
                 </div>
 
                 {data.isReturn && (
-                    <div className="pl-4 border-l-2 border-amber-500/20 animate-in slide-in-from-top-2">
+                    <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2">
                         <p className="text-xs text-slate-400 mb-2">Return Details (Swapped Route)</p>
                         <input
                             type="datetime-local"
-                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-amber-500/50 [color-scheme:dark]"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-blue-700/50 [color-scheme:dark]"
                             // Default return date logic could be here
                             onChange={(e) => onUpdate({ returnDate: new Date(e.target.value) })}
                         />
@@ -95,7 +95,7 @@ export function StepLocation({ data, onUpdate, onNext }: Props) {
             <Button
                 onClick={onNext}
                 disabled={!isValid}
-                className="w-full h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-xl"
+                className="w-full h-14 text-lg font-bold bg-blue-700 hover:bg-blue-600 text-black rounded-xl"
             >
                 Next Step
             </Button>

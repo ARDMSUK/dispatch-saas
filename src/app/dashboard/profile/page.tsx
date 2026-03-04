@@ -81,7 +81,7 @@ export default function ProfileSecurityPage() {
                 <Card className="bg-slate-100 border-slate-200 text-slate-900">
                     <CardHeader>
                         <div className="flex items-center gap-2">
-                            <ShieldCheck className="h-5 w-5 text-amber-500" />
+                            <ShieldCheck className="h-5 w-5 text-blue-700" />
                             <CardTitle>Two-Factor Authentication (2FA)</CardTitle>
                         </div>
                         <CardDescription className="text-slate-500">
@@ -101,11 +101,11 @@ export default function ProfileSecurityPage() {
                             <>
                                 {!qrCodeData ? (
                                     <div className="flex flex-col items-start gap-4">
-                                        <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 p-4 rounded-md w-full">
-                                            <ShieldAlert className="h-6 w-6 text-amber-400 shrink-0" />
+                                        <div className="flex items-center gap-3 bg-blue-700/10 border border-blue-700/20 p-4 rounded-md w-full">
+                                            <ShieldAlert className="h-6 w-6 text-blue-600 shrink-0" />
                                             <div>
-                                                <h4 className="font-medium text-amber-400">2FA is Not Enabled</h4>
-                                                <p className="text-sm text-amber-500/80">We highly recommend enabling 2FA to protect your account from unauthorized access.</p>
+                                                <h4 className="font-medium text-blue-600">2FA is Not Enabled</h4>
+                                                <p className="text-sm text-blue-700/80">We highly recommend enabling 2FA to protect your account from unauthorized access.</p>
                                             </div>
                                         </div>
                                         <Button
@@ -124,7 +124,7 @@ export default function ProfileSecurityPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium mb-1">Manual Entry Code:</p>
-                                            <code className="bg-white border border-slate-200 p-2 rounded block font-mono text-amber-400 tracking-wider text-center text-lg">
+                                            <code className="bg-white border border-slate-200 p-2 rounded block font-mono text-blue-600 tracking-wider text-center text-lg">
                                                 {qrCodeData.secret}
                                             </code>
                                         </div>
@@ -137,12 +137,12 @@ export default function ProfileSecurityPage() {
                                                     onChange={(e) => setVerifyToken(e.target.value)}
                                                     placeholder="Enter 6-digit code"
                                                     maxLength={6}
-                                                    className="bg-white border-slate-200 text-center text-lg tracking-widest focus:ring-amber-500 font-mono"
+                                                    className="bg-white border-slate-200 text-center text-lg tracking-widest focus:ring-blue-700 font-mono"
                                                 />
                                                 <Button
                                                     onClick={confirm2FASetup}
                                                     disabled={verifying || verifyToken.length !== 6}
-                                                    className="bg-amber-500 text-black hover:bg-amber-600 font-bold"
+                                                    className="bg-blue-700 text-black hover:bg-blue-800 font-bold"
                                                 >
                                                     {verifying ? "..." : "Verify"}
                                                 </Button>

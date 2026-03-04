@@ -146,7 +146,7 @@ export function BookingWizard() {
                 {/* Progress Bar */}
                 <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
                     <motion.div
-                        className="h-full bg-amber-500"
+                        className="h-full bg-blue-700"
                         initial={{ width: '25%' }}
                         animate={{ width: `${step * 25}%` }}
                         transition={{ duration: 0.3 }}

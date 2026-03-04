@@ -160,7 +160,7 @@ export default function TariffsTab() {
                         />
                     </div>
 
-                    <Button onClick={handleSave} disabled={loading} className="bg-amber-500 text-black hover:bg-amber-600">
+                    <Button onClick={handleSave} disabled={loading} className="bg-blue-700 text-black hover:bg-blue-800">
                         {loading ? 'Saving...' : 'Save Tariff Settings'}
                     </Button>
                 </div>

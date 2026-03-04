@@ -75,7 +75,7 @@ export function AddDriverDialog({ onDriverAdded }: { onDriverAdded: () => void }
                         <Label>Email</Label>
                         <Input name="email" type="email" placeholder="driver@example.com" className="bg-white border-slate-200" />
                     </div>
-                    <Button type="submit" className="w-full bg-amber-500 text-black hover:bg-amber-400" disabled={loading}>
+                    <Button type="submit" className="w-full bg-blue-700 text-black hover:bg-blue-600" disabled={loading}>
                         {loading ? 'Adding...' : 'Add Driver'}
                     </Button>
                 </form>
@@ -160,7 +160,7 @@ export function AddVehicleDialog({ onVehicleAdded }: { onVehicleAdded: () => voi
                         <Label>Color</Label>
                         <Input name="color" placeholder="Black" className="bg-white border-slate-200" />
                     </div>
-                    <Button type="submit" className="w-full bg-amber-500 text-black hover:bg-amber-400" disabled={loading}>
+                    <Button type="submit" className="w-full bg-blue-700 text-black hover:bg-blue-600" disabled={loading}>
                         {loading ? 'Adding...' : 'Add Vehicle'}
                     </Button>
                 </form>

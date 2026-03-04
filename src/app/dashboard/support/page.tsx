@@ -31,7 +31,7 @@ export default async function SupportTicketsPage() {
             case 'ANSWERED':
                 return <Badge variant="outline" className="text-emerald-600 border-emerald-400/20 bg-emerald-400/10"><CheckCircle2 className="w-3 h-3 mr-1" /> Answered</Badge>;
             case 'ESCALATED':
-                return <Badge variant="outline" className="text-amber-400 border-amber-400/20 bg-amber-400/10"><AlertCircle className="w-3 h-3 mr-1" /> Escalated to Human</Badge>;
+                return <Badge variant="outline" className="text-blue-600 border-blue-600/20 bg-blue-600/10"><AlertCircle className="w-3 h-3 mr-1" /> Escalated to Human</Badge>;
             case 'CLOSED':
                 return <Badge variant="outline" className="text-slate-400 border-slate-300 bg-slate-200">Closed</Badge>;
             default:
@@ -47,7 +47,7 @@ export default async function SupportTicketsPage() {
                     <p className="text-slate-500 mt-1">Get instant answers from our AI Assistant or escalate to human support.</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <Button asChild className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+                    <Button asChild className="bg-blue-700 hover:bg-blue-800 text-black font-semibold">
                         <Link href="/dashboard/support/new">
                             <Plus className="mr-2 h-4 w-4" /> Open New Ticket
                         </Link>

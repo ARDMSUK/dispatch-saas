@@ -109,7 +109,7 @@ export default function SurchargesTab() {
             <div className="flex justify-end bg-slate-100 p-4 rounded-lg shadow-sm border border-slate-200">
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-amber-500 text-black hover:bg-amber-600">
+                        <Button className="bg-blue-700 text-black hover:bg-blue-800">
                             <Plus className="mr-2 h-4 w-4" /> Add Surcharge
                         </Button>
                     </DialogTrigger>
@@ -186,7 +186,7 @@ export default function SurchargesTab() {
                                 onChange={e => setFormData({ ...formData, daysOfWeek: e.target.value })}
                             />
 
-                            <Button onClick={handleCreate} className="w-full bg-amber-500 text-black hover:bg-amber-600">Create Surcharge</Button>
+                            <Button onClick={handleCreate} className="w-full bg-blue-700 text-black hover:bg-blue-800">Create Surcharge</Button>
                         </div>
                     </DialogContent>
                 </Dialog>
@@ -212,7 +212,7 @@ export default function SurchargesTab() {
                             surcharges.map((s) => (
                                 <TableRow key={s.id} className="border-slate-200 hover:bg-slate-200/50">
                                     <TableCell className="font-medium text-slate-900">{s.name}</TableCell>
-                                    <TableCell className="font-bold text-amber-500">
+                                    <TableCell className="font-bold text-blue-700">
                                         {s.type === 'PERCENT' ? `+${s.value}%` : `+£${s.value.toFixed(2)}`}
                                     </TableCell>
                                     <TableCell><Badge variant="outline" className="border-white/20 text-slate-600">{s.type}</Badge></TableCell>

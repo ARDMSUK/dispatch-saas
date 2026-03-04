@@ -231,15 +231,15 @@ export function LocationInput({
 
                         {/* CUSTOM SHORTCUTS */}
                         {customSuggestions.length > 0 && (
-                            <CommandGroup heading="Quick Matches" className="text-amber-500">
+                            <CommandGroup heading="Quick Matches" className="text-blue-700">
                                 {customSuggestions.map((item) => (
                                     <CommandItem
                                         key={item.id}
                                         value={item.label} // Use label for display/selection
                                         onSelect={() => handleCustomSelect(item)}
-                                        className="cursor-pointer p-2 text-slate-900 bg-amber-500/10 hover:bg-amber-500/20 mb-1 rounded-sm border border-amber-500/20"
+                                        className="cursor-pointer p-2 text-slate-900 bg-blue-700/10 hover:bg-blue-700/20 mb-1 rounded-sm border border-blue-700/20"
                                     >
-                                        <Plane className="mr-2 h-4 w-4 text-amber-500" />
+                                        <Plane className="mr-2 h-4 w-4 text-blue-700" />
                                         <span className="font-bold">{item.label}</span>
                                     </CommandItem>
                                 ))}
@@ -254,7 +254,7 @@ export function LocationInput({
                                         key={place_id}
                                         value={description}
                                         onSelect={handleSelect}
-                                        className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-amber-500 cursor-pointer p-2 text-slate-900"
+                                        className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-blue-700 cursor-pointer p-2 text-slate-900"
                                     >
                                         <MapPin className="mr-2 h-4 w-4 opacity-50" />
                                         <span className="truncate">

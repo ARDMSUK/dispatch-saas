@@ -113,7 +113,7 @@ export default function NewTenantPage() {
             <div className="flex justify-between mb-8 relative">
                 <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -z-10" />
                 {[1, 2, 3].map((s) => (
-                    <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= s ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white border-slate-300 text-slate-400'}`}>
+                    <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= s ? 'bg-blue-700 border-blue-700 text-black' : 'bg-white border-slate-300 text-slate-400'}`}>
                         {step > s ? <Check className="w-5 h-5" /> : s}
                     </div>
                 ))}
@@ -188,7 +188,7 @@ export default function NewTenantPage() {
                     {step === 3 && (
                         <div className="space-y-6">
                             <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-amber-500 uppercase tracking-wider">Stripe Payments</h3>
+                                <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider">Stripe Payments</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Secret Key</label>
@@ -235,7 +235,7 @@ export default function NewTenantPage() {
                         </Button>
 
                         {step < 3 ? (
-                            <Button onClick={() => setStep(s => s + 1)} className="bg-amber-500 text-black hover:bg-amber-400">
+                            <Button onClick={() => setStep(s => s + 1)} className="bg-blue-700 text-black hover:bg-blue-600">
                                 Next <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         ) : (

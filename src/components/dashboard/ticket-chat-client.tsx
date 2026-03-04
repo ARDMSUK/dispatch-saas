@@ -57,7 +57,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
             case 'ANSWERED':
                 return <Badge variant="outline" className="text-emerald-600 border-emerald-400/20 bg-emerald-400/10"><CheckCircle2 className="w-3 h-3 mr-1" /> Answered</Badge>;
             case 'ESCALATED':
-                return <Badge variant="outline" className="text-amber-400 border-amber-400/20 bg-amber-400/10"><AlertCircle className="w-3 h-3 mr-1" /> Escalated to Human</Badge>;
+                return <Badge variant="outline" className="text-blue-600 border-blue-600/20 bg-blue-600/10"><AlertCircle className="w-3 h-3 mr-1" /> Escalated to Human</Badge>;
             case 'CLOSED':
                 return <Badge variant="outline" className="text-slate-400 border-slate-300 bg-slate-200">Closed</Badge>;
             default:
@@ -90,11 +90,11 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                         {messages.map((m) => (
                             <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`flex max-w-[80%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end gap-2`}>
-                                    <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-amber-500 text-black' : 'bg-blue-600 text-slate-900'}`}>
+                                    <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-blue-700 text-black' : 'bg-blue-600 text-slate-900'}`}>
                                         {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                                     </div>
                                     <div className={`px-4 py-3 rounded-2xl text-sm ${m.role === 'user'
-                                        ? 'bg-amber-500 text-black rounded-br-sm'
+                                        ? 'bg-blue-700 text-black rounded-br-sm'
                                         : 'bg-slate-200 text-slate-900 rounded-bl-sm border border-zinc-700/50 shadow-lg'
                                         }`}>
                                         {m.content.split('\\n').map((line, i) => (
@@ -131,14 +131,14 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                         value={input || ''}
                         onChange={handleInputChange}
                         placeholder={status === 'ESCALATED' ? "Reply to human support..." : "Ask Cabot AI a question..."}
-                        className="flex-1 bg-slate-100 border-slate-300 text-slate-900 focus-visible:ring-amber-500"
+                        className="flex-1 bg-slate-100 border-slate-300 text-slate-900 focus-visible:ring-blue-700"
                         disabled={status === 'CLOSED'}
                     />
                     <Button
                         type="submit"
                         size="icon"
                         disabled={!(input || '').trim() || isLoading || status === 'CLOSED'}
-                        className="bg-amber-500 hover:bg-amber-600 text-black shrink-0"
+                        className="bg-blue-700 hover:bg-blue-800 text-black shrink-0"
                     >
                         <Send className="h-4 w-4" />
                     </Button>

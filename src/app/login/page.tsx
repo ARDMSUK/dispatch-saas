@@ -124,13 +124,13 @@ export default function LoginPage() {
                             </>
                         ) : (
                             <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4">
-                                <label className="text-sm font-medium text-amber-500">Authenticator Code (2FA)</label>
+                                <label className="text-sm font-medium text-blue-700">Authenticator Code (2FA)</label>
                                 <p className="text-xs text-slate-500 mb-2">Please open your Authenticator app and enter the 6-digit code.</p>
                                 <Input
                                     {...register("twoFactorToken")}
                                     placeholder="000111"
                                     maxLength={6}
-                                    className="bg-slate-100 border-slate-200 text-amber-500 text-center text-2xl tracking-[0.5em] focus:ring-amber-500 focus:border-amber-500 h-14 font-mono"
+                                    className="bg-slate-100 border-slate-200 text-blue-700 text-center text-2xl tracking-[0.5em] focus:ring-blue-700 focus:border-blue-700 h-14 font-mono"
                                 />
                                 {errors.twoFactorToken && <p className="text-xs text-red-500">{errors.twoFactorToken.message}</p>}
                             </div>

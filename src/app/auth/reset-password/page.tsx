@@ -21,7 +21,7 @@ function ResetPasswordForm() {
             <div className="text-center py-12">
                 <h3 className="text-lg font-medium text-red-600">Invalid Link</h3>
                 <p className="mt-2 text-sm text-gray-500">This password reset link is invalid or has expired.</p>
-                <Link href="/forgot-password" className="mt-4 inline-block font-medium text-amber-600 hover:text-amber-500">
+                <Link href="/forgot-password" className="mt-4 inline-block font-medium text-blue-800 hover:text-blue-700">
                     Request a new link
                 </Link>
             </div>
@@ -73,7 +73,7 @@ function ResetPasswordForm() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-700 focus:border-blue-700 sm:text-sm"
                     />
                 </div>
             </div>
@@ -90,7 +90,7 @@ function ResetPasswordForm() {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-700 focus:border-blue-700 sm:text-sm"
                     />
                 </div>
             </div>
@@ -99,7 +99,7 @@ function ResetPasswordForm() {
                 <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-slate-900 bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-slate-900 bg-blue-800 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
                 >
                     {loading ? "Resetting..." : "Set New Password"}
                 </Button>

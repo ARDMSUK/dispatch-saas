@@ -83,7 +83,7 @@ export function DesignateDriverDialog({ job, open, onOpenChange, onSuccess }: De
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-600">Select Driver</label>
                         <select
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 appearance-none"
                             value={selectedDriverId}
                             onChange={e => setSelectedDriverId(e.target.value)}
                         >
@@ -104,7 +104,7 @@ export function DesignateDriverDialog({ job, open, onOpenChange, onSuccess }: De
                     <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-slate-500 hover:text-slate-900">
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} disabled={loading} className="bg-amber-500 hover:bg-amber-600 text-black">
+                    <Button onClick={handleSave} disabled={loading} className="bg-blue-700 hover:bg-blue-800 text-black">
                         {loading ? 'Saving...' : 'Save Designation'}
                     </Button>
                 </DialogFooter>

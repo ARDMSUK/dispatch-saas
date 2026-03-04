@@ -57,7 +57,7 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                                             <User className="h-4 w-4 text-slate-500" />
                                         </div>
                                         <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-black ${driver.status === 'ONLINE' ? 'bg-emerald-500' :
-                                            driver.status === 'BUSY' ? 'bg-amber-500' : 'bg-red-500'
+                                            driver.status === 'BUSY' ? 'bg-blue-700' : 'bg-red-500'
                                             }`} />
                                     </div>
                                     <div>
@@ -85,7 +85,7 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                                 {selectedJobId && onAssign ? (
                                     <Button
                                         size="sm"
-                                        className="h-7 text-xs bg-amber-500 text-black hover:bg-amber-400 font-bold animate-in fade-in"
+                                        className="h-7 text-xs bg-blue-700 text-black hover:bg-blue-600 font-bold animate-in fade-in"
                                         onClick={() => onAssign(driver.id)}
                                     >
                                         ASSIGN

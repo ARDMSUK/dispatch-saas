@@ -15,7 +15,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-amber-500 rounded-lg flex items-center justify-center font-bold text-black">Z</div>
+          <div className="h-8 w-8 bg-blue-700 rounded-lg flex items-center justify-center font-bold text-black">Z</div>
           <span className="text-xl font-bold text-slate-900 tracking-tight">ZerCabs</span>
         </div>
         <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
@@ -24,7 +24,7 @@ export default function LandingPage() {
           <a href="#" className="hover:text-slate-900 transition-colors">Business</a>
           <a href="#" className="hover:text-slate-900 transition-colors">Contact</a>
         </nav>
-        <a href="/login" className="text-sm font-bold text-amber-500 hover:text-amber-400">Driver Login</a>
+        <a href="/login" className="text-sm font-bold text-blue-700 hover:text-blue-600">Driver Login</a>
       </header>
 
       {/* Hero Content */}
@@ -32,7 +32,7 @@ export default function LandingPage() {
         <div className="text-center mb-10 space-y-4 max-w-2xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">
             Premium Travel,<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Redefined.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">Redefined.</span>
           </h1>
           <p className="text-lg text-slate-500">
             Experience the ultimate in comfort and reliability. Book your chauffeur service in seconds.

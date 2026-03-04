@@ -117,7 +117,7 @@ function TrackingContent() {
             {/* Left Panel: Status & Info */}
             <div className="w-full md:w-1/3 p-6 flex flex-col gap-6 border-r border-slate-800/50 z-10 bg-slate-950 shadow-2xl">
                 <div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-gold-400 to-amber-600 bg-clip-text text-transparent mb-2">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-gold-400 to-blue-800 bg-clip-text text-transparent mb-2">
                         Booking Tracker
                     </h1>
                     <p className="text-sm text-slate-400">Ref: #{booking.id.toString().padStart(6, '0')}</p>

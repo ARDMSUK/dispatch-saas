@@ -246,15 +246,15 @@ export default function DriverDashboard() {
                 {/* Bottom Nav */}
                 <div className="border-t border-slate-200 bg-zinc-900/90 backdrop-blur pb-safe">
                     <TabsList className="w-full h-16 bg-transparent p-0 gap-0">
-                        <TabsTrigger value="JOB" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-slate-400 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
+                        <TabsTrigger value="JOB" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-blue-700 text-slate-400 border-t-2 border-transparent data-[state=active]:border-blue-700 transition-colors">
                             <Truck className="h-5 w-5" />
                             <span className="text-[10px] font-medium">Job</span>
                         </TabsTrigger>
-                        <TabsTrigger value="HISTORY" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-slate-400 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
+                        <TabsTrigger value="HISTORY" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-blue-700 text-slate-400 border-t-2 border-transparent data-[state=active]:border-blue-700 transition-colors">
                             <Clock className="h-5 w-5" />
                             <span className="text-[10px] font-medium">History</span>
                         </TabsTrigger>
-                        <TabsTrigger value="PROFILE" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-slate-400 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
+                        <TabsTrigger value="PROFILE" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-blue-700 text-slate-400 border-t-2 border-transparent data-[state=active]:border-blue-700 transition-colors">
                             <User className="h-5 w-5" />
                             <span className="text-[10px] font-medium">Profile</span>
                         </TabsTrigger>

@@ -96,7 +96,7 @@ export function PaymentModal({ amount, bookingId, onSuccess, onCancel }: Payment
                     </Elements>
                 ) : (
                     <div className="flex justify-center py-12">
-                        <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+                        <Loader2 className="h-8 w-8 text-blue-700 animate-spin" />
                     </div>
                 )}
             </div>

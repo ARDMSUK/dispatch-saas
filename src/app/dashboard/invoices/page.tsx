@@ -262,7 +262,7 @@ export default function InvoicesPage() {
                                             ) : inv.status === 'OVERDUE' ? (
                                                 <Badge className="bg-red-500/10 text-red-400 hover:bg-red-500/20">OVERDUE</Badge>
                                             ) : (
-                                                <Badge className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20">{inv.status}</Badge>
+                                                <Badge className="bg-blue-700/10 text-blue-700 hover:bg-blue-700/20">{inv.status}</Badge>
                                             )}
                                         </TableCell>
                                         <TableCell>

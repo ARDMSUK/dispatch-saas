@@ -33,7 +33,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
         return (
-            <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-amber-500/10 text-amber-500' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'}`}>
+            <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-blue-700/10 text-blue-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'}`}>
                 <Icon className="h-4 w-4" />
                 <span className="text-sm font-medium">{label}</span>
             </Link>
@@ -104,7 +104,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
             {/* MAIN AREA */}
             <div className="flex-1 flex flex-col">
                 {isImpersonating && (
-                    <div className="bg-amber-500 text-black px-4 py-1 text-xs font-bold text-center flex items-center justify-center gap-2">
+                    <div className="bg-blue-700 text-black px-4 py-1 text-xs font-bold text-center flex items-center justify-center gap-2">
                         <span>VIEWING AS {tenantSlug.toUpperCase()}</span>
                         <Button
                             variant="link"
@@ -125,8 +125,8 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                             <Menu className="h-5 w-5" />
                         </Button>
                         <div className="flex items-center gap-2">
-                            <div className="bg-amber-500 h-6 w-6 rounded flex items-center justify-center font-bold text-black text-xs">D</div>
-                            <span className="font-bold tracking-wide text-sm hidden md:inline">DISPATCH<span className="text-amber-500">.SAAS</span></span>
+                            <div className="bg-blue-700 h-6 w-6 rounded flex items-center justify-center font-bold text-black text-xs">D</div>
+                            <span className="font-bold tracking-wide text-sm hidden md:inline">DISPATCH<span className="text-blue-700">.SAAS</span></span>
                         </div>
                     </div>
 
@@ -152,7 +152,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-white/10" />
-                                <DropdownMenuItem asChild className="cursor-pointer focus:bg-amber-500/10 focus:text-amber-500">
+                                <DropdownMenuItem asChild className="cursor-pointer focus:bg-blue-700/10 focus:text-blue-700">
                                     <Link href="/dashboard/profile">
                                         <UserIcon className="mr-2 h-4 w-4" />
                                         <span>My Profile & Security</span>

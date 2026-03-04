@@ -71,7 +71,7 @@ export default function NewTicketPage() {
                                 <label className="text-sm font-medium">Subject</label>
                                 <Input
                                     placeholder="e.g., How do I configure Stripe?"
-                                    className="bg-white border-slate-200 text-slate-900 focus:ring-amber-500 focus:border-amber-500"
+                                    className="bg-white border-slate-200 text-slate-900 focus:ring-blue-700 focus:border-blue-700"
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
                                     required
@@ -81,7 +81,7 @@ export default function NewTicketPage() {
                                 <label className="text-sm font-medium">How can we help?</label>
                                 <Textarea
                                     placeholder="Please provide as much detail as possible..."
-                                    className="h-32 bg-white border-slate-200 text-slate-900 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                                    className="h-32 bg-white border-slate-200 text-slate-900 focus:ring-blue-700 focus:border-blue-700 resize-none"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     required
@@ -91,7 +91,7 @@ export default function NewTicketPage() {
                         <CardFooter className="justify-end border-t border-zinc-800/50 pt-4">
                             <Button
                                 type="submit"
-                                className="bg-amber-500 hover:bg-amber-600 text-black font-bold"
+                                className="bg-blue-700 hover:bg-blue-800 text-black font-bold"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? "Opening..." : "Submit Ticket"}

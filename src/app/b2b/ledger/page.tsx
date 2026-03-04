@@ -89,7 +89,7 @@ export default function B2BLedger() {
                 <div className="flex gap-4">
                     <div className="flex flex-col items-end mr-4">
                         <span className="text-sm font-medium text-slate-500">Current Unbilled</span>
-                        <span className="text-2xl font-bold text-amber-500">£{totalUnbilled.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-blue-700">£{totalUnbilled.toFixed(2)}</span>
                     </div>
                 </div>
             </div>
@@ -171,7 +171,7 @@ export default function B2BLedger() {
                                                     ) : inv.status === 'OVERDUE' ? (
                                                         <Badge className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30">OVERDUE</Badge>
                                                     ) : (
-                                                        <Badge className="bg-amber-500/20 text-amber-500 border border-amber-500/30 hover:bg-amber-500/30">PENDING</Badge>
+                                                        <Badge className="bg-blue-700/20 text-blue-700 border border-blue-700/30 hover:bg-blue-700/30">PENDING</Badge>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right">

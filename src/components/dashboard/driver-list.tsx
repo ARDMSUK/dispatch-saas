@@ -57,7 +57,7 @@ export function DriverList({ onAssign, selectedJobId }: DriverListProps) {
         switch (status) {
             case 'FREE': return 'bg-emerald-500';
             case 'BUSY': return 'bg-red-500';
-            case 'AWAY': return 'bg-amber-500';
+            case 'AWAY': return 'bg-blue-700';
             default: return 'bg-zinc-500';
         }
     };
@@ -97,7 +97,7 @@ export function DriverList({ onAssign, selectedJobId }: DriverListProps) {
                         {selectedJobId && driver.status === 'FREE' && (
                             <Button
                                 size="sm"
-                                className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold h-7 text-xs mt-1"
+                                className="w-full bg-blue-700 hover:bg-blue-600 text-black font-bold h-7 text-xs mt-1"
                                 onClick={() => onAssign(driver.id)}
                             >
                                 Assign Job #{selectedJobId}

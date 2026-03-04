@@ -154,7 +154,7 @@ export default function TeamPage() {
                     if (!open) resetForm();
                 }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold" onClick={resetForm}>
+                        <Button className="bg-blue-700 text-black hover:bg-blue-600 font-bold" onClick={resetForm}>
                             <Plus className="mr-2 h-4 w-4" /> Add Member
                         </Button>
                     </DialogTrigger>
@@ -218,7 +218,7 @@ export default function TeamPage() {
                                             <label key={perm.id} className="flex items-center space-x-2 text-sm text-slate-600 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="rounded border-slate-300 bg-slate-200 text-amber-500 focus:ring-amber-500/20"
+                                                    className="rounded border-slate-300 bg-slate-200 text-blue-700 focus:ring-blue-700/20"
                                                     checked={formData.permissions.includes(perm.id)}
                                                     onChange={(e) => {
                                                         const newPerms = e.target.checked
@@ -235,7 +235,7 @@ export default function TeamPage() {
                                 </div>
                             )}
 
-                            <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-400 mt-2">
+                            <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-600 mt-2">
                                 {formData.id ? "Update Account" : "Create Account"}
                             </Button>
                         </div>
@@ -268,7 +268,7 @@ export default function TeamPage() {
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1 items-start">
-                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-slate-400'}>
+                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-blue-700 text-blue-700' : 'border-zinc-500 text-slate-400'}>
                                             {['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
                                             {user.role === 'SUPER_ADMIN' ? 'Admin' : (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
                                         </Badge>

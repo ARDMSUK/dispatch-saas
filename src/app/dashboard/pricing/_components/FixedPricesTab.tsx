@@ -102,7 +102,7 @@ export default function FixedPricesTab() {
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-amber-500 text-black hover:bg-amber-600">
+                        <Button className="bg-blue-700 text-black hover:bg-blue-800">
                             <Plus className="mr-2 h-4 w-4" /> Add Fixed Price
                         </Button>
                     </DialogTrigger>
@@ -157,7 +157,7 @@ export default function FixedPricesTab() {
                                     id="reverse"
                                     checked={formData.isReverse}
                                     onCheckedChange={(checked: boolean) => setFormData({ ...formData, isReverse: checked })}
-                                    className="border-white/20 data-[state=checked]:bg-amber-500 data-[state=checked]:text-black"
+                                    className="border-white/20 data-[state=checked]:bg-blue-700 data-[state=checked]:text-black"
                                 />
                                 <label
                                     htmlFor="reverse"
@@ -166,7 +166,7 @@ export default function FixedPricesTab() {
                                     Apply logic in reverse direction too?
                                 </label>
                             </div>
-                            <Button onClick={handleCreate} className="w-full bg-amber-500 text-black hover:bg-amber-600">Create Route</Button>
+                            <Button onClick={handleCreate} className="w-full bg-blue-700 text-black hover:bg-blue-800">Create Route</Button>
                         </div>
                     </DialogContent>
                 </Dialog>

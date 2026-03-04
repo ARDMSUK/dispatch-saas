@@ -140,7 +140,7 @@ export default function DriversPage() {
                 {isAdmin && (
                     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                         <DialogTrigger asChild>
-                            <Button className="bg-amber-500 text-black hover:bg-amber-400 font-bold">
+                            <Button className="bg-blue-700 text-black hover:bg-blue-600 font-bold">
                                 <Plus className="mr-2 h-4 w-4" /> Add Driver
                             </Button>
                         </DialogTrigger>
@@ -200,7 +200,7 @@ export default function DriversPage() {
                                     onChange={e => setFormData({ ...formData, pin: e.target.value })}
                                     className="bg-white border-slate-200"
                                 />
-                                <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-400">
+                                <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-600">
                                     {editingId ? 'Update Driver' : 'Create Driver'}
                                 </Button>
                             </div>
@@ -247,7 +247,7 @@ export default function DriversPage() {
                         ) : (
                             filteredDrivers.map((driver) => (
                                 <TableRow key={driver.id} className="hover:bg-slate-200 border-slate-200 group transition-colors">
-                                    <TableCell className="font-bold font-mono text-lg text-amber-500">{driver.callsign}</TableCell>
+                                    <TableCell className="font-bold font-mono text-lg text-blue-700">{driver.callsign}</TableCell>
                                     <TableCell className="font-medium text-slate-900">{driver.name}</TableCell>
                                     <TableCell>
                                         <DriverStatusCell driver={driver} onUpdate={fetchDrivers} />
@@ -309,7 +309,7 @@ function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () =
     const getBadgeStyle = (status: string) => {
         switch (status) {
             case 'FREE': return 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20';
-            case 'BUSY': return 'bg-amber-500/20 text-amber-500 border-amber-500/20';
+            case 'BUSY': return 'bg-blue-700/20 text-blue-700 border-blue-700/20';
             case 'POB': return 'bg-blue-500/20 text-blue-500 border-blue-500/20';
             case 'OFF_DUTY': return 'bg-slate-200 text-slate-400 border-slate-300';
             default: return 'bg-slate-200 text-slate-400';
@@ -329,7 +329,7 @@ function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () =
                 <DropdownMenuItem onClick={() => updateStatus('FREE')} className="text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-400">
                     <CheckCircle className="mr-2 h-4 w-4" /> Set FREE
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => updateStatus('BUSY')} className="text-amber-500 focus:bg-amber-500/10 focus:text-amber-400">
+                <DropdownMenuItem onClick={() => updateStatus('BUSY')} className="text-blue-700 focus:bg-blue-700/10 focus:text-blue-600">
                     <Clock className="mr-2 h-4 w-4" /> Set BUSY
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => updateStatus('OFF_DUTY')} className="text-slate-400 focus:bg-zinc-800 focus:text-zinc-400">

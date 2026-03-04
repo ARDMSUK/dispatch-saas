@@ -24,7 +24,7 @@ export function StepSummary({ data, onSubmit, isSubmitting }: Props) {
                         <div className="flex flex-col items-center pt-1">
                             <div className="w-2 h-2 rounded-full bg-emerald-500" />
                             <div className="w-0.5 h-full bg-white/10 min-h-[30px]" />
-                            <div className="w-2 h-2 rounded-full bg-amber-500" />
+                            <div className="w-2 h-2 rounded-full bg-blue-700" />
                         </div>
                         <div className="space-y-4 flex-1">
                             <div>
@@ -38,7 +38,7 @@ export function StepSummary({ data, onSubmit, isSubmitting }: Props) {
                     </div>
                     {data.isReturn && (
                         <div className="pt-3 border-t border-slate-200">
-                            <p className="text-xs text-amber-500 font-bold mb-1">RETURN JOURNEY ADDED</p>
+                            <p className="text-xs text-blue-700 font-bold mb-1">RETURN JOURNEY ADDED</p>
                             <p className="text-xs text-slate-500">
                                 {data.returnDate?.toLocaleString()}
                             </p>
@@ -69,8 +69,8 @@ export function StepSummary({ data, onSubmit, isSubmitting }: Props) {
                     <p className="text-sm text-slate-500">{data.passengerEmail}</p>
                 </div>
 
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-                    <h3 className="text-xs font-bold text-amber-500 uppercase mb-2">Payment Payment</h3>
+                <div className="bg-blue-700/10 border border-blue-700/20 rounded-xl p-4">
+                    <h3 className="text-xs font-bold text-blue-700 uppercase mb-2">Payment Payment</h3>
                     <p className="text-sm text-slate-900">Payment will be handled by the driver via {data.paymentType}.</p>
                 </div>
             </div>

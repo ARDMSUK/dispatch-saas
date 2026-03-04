@@ -223,7 +223,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'PENDING':
-            case 'UNASSIGNED': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+            case 'UNASSIGNED': return 'bg-blue-700/10 text-blue-700 border-blue-700/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
             case 'ARRIVED': return 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20';
@@ -303,7 +303,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         if (vType === 'Estate') return 'border-blue-500/30 bg-blue-500/5';
         if (vType === 'Executive') return 'border-emerald-500/30 bg-emerald-500/5';
         if (vType.includes('MPV')) return 'border-purple-500/30 bg-purple-500/5';
-        if (vType === 'Minibus' || vType === 'Coach') return 'border-amber-500/30 bg-amber-500/5';
+        if (vType === 'Minibus' || vType === 'Coach') return 'border-blue-700/30 bg-blue-700/5';
         return 'border-zinc-500/30 bg-zinc-500/5';
     };
 
@@ -311,7 +311,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         if (vType === 'Estate') return 'text-blue-500';
         if (vType === 'Executive') return 'text-emerald-500';
         if (vType.includes('MPV')) return 'text-purple-500';
-        if (vType === 'Minibus' || vType === 'Coach') return 'text-amber-500';
+        if (vType === 'Minibus' || vType === 'Coach') return 'text-blue-700';
         return 'text-slate-400';
     };
 
@@ -327,7 +327,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 }}
                 className={`
                     group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer mb-2
-                    ${selectedJobId === job.id ? 'bg-amber-500/10 border-amber-500/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
+                    ${selectedJobId === job.id ? 'bg-blue-700/10 border-blue-700/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
                 `}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -408,7 +408,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="flex items-center gap-2">
                         {/* Prominent Time */}
                         <div className="text-right">
-                            <div className="text-amber-400 font-black text-2xl leading-none tracking-tight">
+                            <div className="text-blue-600 font-black text-2xl leading-none tracking-tight">
                                 {new Date(job.pickupTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                             <div className="text-slate-400 text-[10px] uppercase font-bold">
@@ -426,7 +426,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <PopoverContent className="w-48 bg-white border-slate-200 p-1" align="end">
                                 <div className="space-y-0.5">
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setEditJob(job); setEditOpen(true); }}>
-                                        <Edit className="mr-2 h-3.5 w-3.5 text-amber-500" /> Edit Booking
+                                        <Edit className="mr-2 h-3.5 w-3.5 text-blue-700" /> Edit Booking
                                     </Button>
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setDesignateJob(job); setDesignateOpen(true); }}>
                                         <Car className="mr-2 h-3.5 w-3.5 text-purple-500" /> Designate Driver
@@ -515,7 +515,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         </div>
                         <div className="pl-[7px] py-1"><div className="w-[2px] h-3 bg-slate-200 ml-[1px]"></div></div>
                         <div className="flex items-start gap-2">
-                            <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-amber-500" /></div>
+                            <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-blue-700" /></div>
                             <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2">{job.dropoffAddress}</span>
                         </div>
                         {/* Notes / Reminders */}
@@ -587,7 +587,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="flex items-center gap-2 pb-2">
                         <div className="flex-1 overflow-x-auto scrollbar-none">
                             <TabsList className="inline-flex w-auto bg-slate-100 border border-slate-200 h-9 p-1 gap-1">
-                                <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-amber-500 data-[state=active]:text-black font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-blue-700 data-[state=active]:text-black font-bold uppercase whitespace-nowrap">
                                     Pending {filterJobs('PENDING_NOW').length > 0 && `(${filterJobs('PENDING_NOW').length})`}
                                 </TabsTrigger>
                                 <TabsTrigger value="TODAY" className="px-3 text-[10px] data-[state=active]:bg-teal-500 data-[state=active]:text-black font-bold uppercase whitespace-nowrap">

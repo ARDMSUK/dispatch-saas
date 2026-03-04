@@ -140,9 +140,9 @@ export function CliPopListener() {
 
     return (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-            <div className="bg-slate-100 border border-slate-200 shadow-xl shadow-amber-500/10 rounded-xl overflow-hidden min-w-[320px]">
+            <div className="bg-slate-100 border border-slate-200 shadow-xl shadow-blue-700/10 rounded-xl overflow-hidden min-w-[320px]">
                 {/* Header Tape */}
-                <div className="bg-amber-500 h-1.5 w-full animate-pulse" />
+                <div className="bg-blue-700 h-1.5 w-full animate-pulse" />
 
                 <div className="p-4 flex flex-col gap-3">
                     <div className="flex justify-between items-start">
@@ -159,7 +159,7 @@ export function CliPopListener() {
                         <span className="text-2xl font-bold font-mono text-slate-900 tracking-widest">{activeCall.phone}</span>
                         {customerName ? (
                             <div className="flex items-center gap-1.5 text-slate-600">
-                                <UserIcon className="h-4 w-4 text-amber-500" />
+                                <UserIcon className="h-4 w-4 text-blue-700" />
                                 <span className="font-medium text-lg">{customerName}</span>
                             </div>
                         ) : (
@@ -170,7 +170,7 @@ export function CliPopListener() {
                     <div className="flex gap-2 mt-2">
                         <Button
                             onClick={handleBook}
-                            className="flex-1 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold"
+                            className="flex-1 bg-blue-700 hover:bg-blue-800 text-amber-950 font-bold"
                         >
                             Answer & Book
                         </Button>

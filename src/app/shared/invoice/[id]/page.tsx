@@ -119,7 +119,7 @@ export default function InvoiceViewer() {
                             </div>
                             <div>
                                 <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">Status</h3>
-                                <p className={`font-bold uppercase tracking-wide ${invoice.status === 'PAID' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                <p className={`font-bold uppercase tracking-wide ${invoice.status === 'PAID' ? 'text-emerald-600' : 'text-blue-800'}`}>
                                     {invoice.status}
                                 </p>
                             </div>
