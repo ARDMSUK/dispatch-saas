@@ -46,6 +46,18 @@ export async function POST(req: Request) {
             });
         }
 
+        if (tenant.aiMessageCount >= tenant.aiMessageLimit) {
+            return new NextResponse('I am currently unavailable because my service quota has been reached for this billing period. Please contact human support.', {
+                status: 200, // Return 200 so the custom stream decoder just prints this string instead of crashing
+                headers: { 'Access-Control-Allow-Origin': '*' }
+            });
+        }
+
+        await prisma.tenant.update({
+            where: { id: tenant.id },
+            data: { aiMessageCount: { increment: 1 } }
+        });
+
         const { messages } = await req.json();
 
         const systemPrompt = `

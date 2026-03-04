@@ -39,11 +39,24 @@ export async function POST(req: Request) {
         const twiml = new twilio.twiml.MessagingResponse();
 
         if (!tenant) {
-            twiml.message("Sorry, this number is not configured for the AI Booking Agent.");
+            console.error(`No tenant found for incoming WhatsApp message to ${cleanTo}`);
+            twiml.message("Sorry, this WhatsApp service is currently unavailable.");
             return new NextResponse(twiml.toString(), {
                 headers: { 'Content-Type': 'text/xml' }
             });
         }
+
+        if (tenant.aiMessageCount >= tenant.aiMessageLimit) {
+            twiml.message("I am currently unavailable because my service quota has been reached. Please contact human support.");
+            return new NextResponse(twiml.toString(), {
+                headers: { 'Content-Type': 'text/xml' }
+            });
+        }
+
+        await prisma.tenant.update({
+            where: { id: tenant.id },
+            data: { aiMessageCount: { increment: 1 } }
+        });
 
         const userPhone = from.replace('whatsapp:', '');
 

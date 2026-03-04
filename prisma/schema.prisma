@@ -37,9 +37,12 @@ model Tenant {
   enableWebBooker Boolean @default(false)
 
   // AI & Add-on Features
-  hasWebChatAi   Boolean @default(false)
-  hasWhatsAppAi  Boolean @default(false)
-  hasVoiceAi     Boolean @default(false)
+  hasWebChatAi         Boolean  @default(false)
+  hasWhatsAppAi        Boolean  @default(false)
+  hasVoiceAi           Boolean  @default(false)
+  aiMessageCount       Int      @default(0)
+  aiMessageLimit       Int      @default(100)
+  aiBillingPeriodStart DateTime @default(now())
 
   // White-Label Configuration
   brandColor String @default("#f59e0b") // Default amber-500

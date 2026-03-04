@@ -446,9 +446,23 @@ export default function SettingsPage() {
             {/* AI Integrations */}
             {(hasWebChatAi || hasWhatsAppAi) && (
                 <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
-                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-indigo-400">
-                        🤖 AI Integrations
-                    </h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <h2 className="text-xl font-semibold flex items-center gap-2 text-indigo-400">
+                            🤖 AI Integrations
+                        </h2>
+                        {organizationData && typeof organizationData.aiMessageCount === 'number' && (
+                            <div className="text-sm font-medium text-zinc-300 bg-black/40 px-3 py-1.5 rounded-full border border-white/5 flex items-center gap-2">
+                                <span>Monthly Usage:</span>
+                                <div>
+                                    <span className={organizationData.aiMessageCount >= organizationData.aiMessageLimit ? "text-rose-400" : "text-emerald-400"}>
+                                        {organizationData.aiMessageCount}
+                                    </span>
+                                    <span className="text-zinc-500 mx-1">/</span>
+                                    <span className="text-zinc-400">{organizationData.aiMessageLimit}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {hasWebChatAi && (
                         <div className="mb-8 border-b border-white/10 pb-8">
