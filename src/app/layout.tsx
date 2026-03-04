@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 export default async function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default async function RootLayout({
       >
         <SessionProvider session={session}>
           {children}
+          <ServiceWorkerRegister />
         </SessionProvider>
         <Toaster position="top-right" theme="dark" richColors />
       </body>
