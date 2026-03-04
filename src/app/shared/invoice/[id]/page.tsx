@@ -60,7 +60,7 @@ export default function InvoiceViewer() {
             <div className="w-full max-w-4xl flex justify-end mb-6 print:hidden px-4">
                 <button
                     onClick={() => window.print()}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md shadow transition"
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-slate-900 px-4 py-2 rounded-md shadow transition"
                 >
                     <Printer className="w-4 h-4" /> Print / Save PDF
                 </button>
@@ -70,7 +70,7 @@ export default function InvoiceViewer() {
             <div className="w-full max-w-4xl bg-white shadow-2xl print:shadow-none print:w-full sm:rounded-lg overflow-hidden border border-neutral-200">
 
                 {/* Header Banner */}
-                <div className="bg-neutral-900 text-white p-8 sm:p-12 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div className="bg-neutral-900 text-slate-900 p-8 sm:p-12 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <div>
                         <h1 className="text-3xl font-black mb-1 tracking-tight uppercase">INVOICE</h1>
                         <p className="text-neutral-400 font-mono text-sm">{invoice.invoiceNumber}</p>

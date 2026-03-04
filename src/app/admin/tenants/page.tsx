@@ -19,7 +19,7 @@ export default async function TenantsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">Tenants</h2>
-                    <p className="text-zinc-400">Manage taxi companies and their configurations.</p>
+                    <p className="text-slate-500">Manage taxi companies and their configurations.</p>
                 </div>
                 <Link href="/admin/tenants/new">
                     <Button className="bg-white text-black hover:bg-zinc-200">
@@ -35,7 +35,7 @@ export default async function TenantsPage() {
                 ))}
 
                 {tenants.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-zinc-500 border border-dashed border-zinc-800 rounded-lg">
+                    <div className="col-span-full py-12 text-center text-slate-400 border border-dashed border-slate-200 rounded-lg">
                         <Building className="w-12 h-12 mx-auto mb-4 opacity-20" />
                         <p>No tenants found. Start by onboarding a new company.</p>
                     </div>

@@ -92,12 +92,12 @@ export default function B2BBookings() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "PENDING":
-            case "UNASSIGNED": return "bg-zinc-500/20 text-zinc-400 border-zinc-500/50";
-            case "DISPATCHED": return "bg-blue-500/20 text-blue-400 border-blue-500/50";
+            case "UNASSIGNED": return "bg-zinc-500/20 text-slate-500 border-zinc-500/50";
+            case "DISPATCHED": return "bg-blue-500/20 text-blue-600 border-blue-500/50";
             case "EN_ROUTE": return "bg-purple-500/20 text-purple-400 border-purple-500/50";
             case "ARRIVED": return "bg-orange-500/20 text-orange-400 border-orange-500/50";
-            case "POB": return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50";
-            default: return "bg-zinc-800 text-zinc-300 border-zinc-700";
+            case "POB": return "bg-emerald-500/20 text-emerald-600 border-emerald-500/50";
+            default: return "bg-slate-200 text-slate-600 border-slate-300";
         }
     };
 
@@ -105,13 +105,13 @@ export default function B2BBookings() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Active Bookings</h1>
-                    <p className="text-zinc-500 mt-1">Manage and track your upcoming corporate travel.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Active Bookings</h1>
+                    <p className="text-slate-400 mt-1">Manage and track your upcoming corporate travel.</p>
                 </div>
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-lg shadow-indigo-500/20 transition-all">
+                        <Button className="bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-medium shadow-lg shadow-indigo-500/20 transition-all">
                             <Plus className="w-4 h-4 mr-2" /> New Booking
                         </Button>
                     </DialogTrigger>
@@ -122,7 +122,7 @@ export default function B2BBookings() {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-zinc-400">Staff Member Name</label>
+                                    <label className="text-xs font-medium text-slate-500">Staff Member Name</label>
                                     <Input
                                         placeholder="Name"
                                         value={formData.passengerName}
@@ -130,7 +130,7 @@ export default function B2BBookings() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-zinc-400">Mobile Phone</label>
+                                    <label className="text-xs font-medium text-slate-500">Mobile Phone</label>
                                     <Input
                                         placeholder="+44..."
                                         value={formData.passengerPhone}
@@ -140,7 +140,7 @@ export default function B2BBookings() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-zinc-400">Pickup Address</label>
+                                <label className="text-xs font-medium text-slate-500">Pickup Address</label>
                                 <Input
                                     placeholder="Company HQ or Hotel"
                                     value={formData.pickupAddress}
@@ -148,7 +148,7 @@ export default function B2BBookings() {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-zinc-400">Destination</label>
+                                <label className="text-xs font-medium text-slate-500">Destination</label>
                                 <Input
                                     placeholder="Airport, Station, Office"
                                     value={formData.dropoffAddress}
@@ -158,7 +158,7 @@ export default function B2BBookings() {
 
                             <div className="grid grid-cols-[1fr_1fr_80px] gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-zinc-400">Date</label>
+                                    <label className="text-xs font-medium text-slate-500">Date</label>
                                     <Input
                                         type="date"
                                         value={formData.pickupDate}
@@ -166,7 +166,7 @@ export default function B2BBookings() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-zinc-400">Time (UTC)</label>
+                                    <label className="text-xs font-medium text-slate-500">Time (UTC)</label>
                                     <Input
                                         type="time"
                                         value={formData.pickupTime}
@@ -174,7 +174,7 @@ export default function B2BBookings() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-zinc-400">Pax</label>
+                                    <label className="text-xs font-medium text-slate-500">Pax</label>
                                     <Input
                                         type="number"
                                         min="1"
@@ -186,7 +186,7 @@ export default function B2BBookings() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-zinc-400">Instructions / Cost Center</label>
+                                <label className="text-xs font-medium text-slate-500">Instructions / Cost Center</label>
                                 <Input
                                     placeholder="e.g. Project Alpha, CC:10492"
                                     value={formData.notes}
@@ -209,70 +209,70 @@ export default function B2BBookings() {
             ) : bookings.length === 0 ? (
                 <Card className="bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4">
-                            <Car className="w-8 h-8 text-zinc-600" />
+                        <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                            <Car className="w-8 h-8 text-slate-500" />
                         </div>
-                        <h3 className="text-xl font-medium text-zinc-300">No active bookings</h3>
-                        <p className="text-zinc-500 mt-2 max-w-sm">You don't have any upcoming trips scheduled. Click "New Booking" to arrange travel.</p>
+                        <h3 className="text-xl font-medium text-slate-600">No active bookings</h3>
+                        <p className="text-slate-400 mt-2 max-w-sm">You don't have any upcoming trips scheduled. Click "New Booking" to arrange travel.</p>
                     </CardContent>
                 </Card>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {bookings.map(job => (
                         <Card key={job.id} className="bg-zinc-900/60 border-zinc-800/80 backdrop-blur-sm overflow-hidden flex flex-col hover:border-zinc-700 transition-colors">
-                            <div className="px-4 py-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/30">
+                            <div className="px-4 py-3 border-b border-slate-200 flex justify-between items-center bg-zinc-950/30">
                                 <Badge variant="outline" className={`font-mono ${getStatusColor(job.status)}`}>
                                     {job.status}
                                 </Badge>
-                                <span className="text-xs font-mono text-zinc-500">REF: {job.id}</span>
+                                <span className="text-xs font-mono text-slate-400">REF: {job.id}</span>
                             </div>
                             <CardContent className="p-5 flex-1 flex flex-col gap-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="mt-1 bg-zinc-800 p-2 rounded-md">
-                                        <CalendarClock className="w-4 h-4 text-indigo-400" />
+                                    <div className="mt-1 bg-slate-200 p-2 rounded-md">
+                                        <CalendarClock className="w-4 h-4 text-indigo-600" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-semibold text-zinc-200">
+                                        <span className="text-sm font-semibold text-slate-800">
                                             {format(new Date(job.pickupTime), 'E, MMM do yyyy')}
                                         </span>
-                                        <span className="text-2xl font-bold text-white tracking-tight">
+                                        <span className="text-2xl font-bold text-slate-900 tracking-tight">
                                             {format(new Date(job.pickupTime), 'HH:mm')}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-3 relative pt-2">
-                                    <div className="absolute left-3 top-5 bottom-4 w-px bg-zinc-800 -z-10"></div>
+                                    <div className="absolute left-3 top-5 bottom-4 w-px bg-slate-200 -z-10"></div>
 
                                     <div className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center z-10 shrink-0">
+                                        <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center z-10 shrink-0">
                                             <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                                         </div>
                                         <div className="flex flex-col justify-start pt-0.5">
-                                            <span className="text-sm text-zinc-300 font-medium leading-tight">{job.pickupAddress}</span>
+                                            <span className="text-sm text-slate-600 font-medium leading-tight">{job.pickupAddress}</span>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center z-10 shrink-0">
+                                        <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center z-10 shrink-0">
                                             <MapPin className="w-3 h-3 text-red-400" />
                                         </div>
                                         <div className="flex flex-col justify-start pt-0.5">
-                                            <span className="text-sm text-zinc-400 leading-tight">{job.dropoffAddress}</span>
+                                            <span className="text-sm text-slate-500 leading-tight">{job.dropoffAddress}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="mt-auto pt-4 border-t border-zinc-800/80 flex justify-between items-center">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-0.5">Passenger</span>
-                                        <span className="text-sm font-medium text-zinc-300">{job.passengerName}</span>
+                                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Passenger</span>
+                                        <span className="text-sm font-medium text-slate-600">{job.passengerName}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Badge variant="secondary" className="bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-800">
+                                        <Badge variant="secondary" className="bg-slate-200 text-slate-500 border-slate-300 hover:bg-slate-200">
                                             <Users className="w-3 h-3 mr-1" /> {job.passengers}
                                         </Badge>
-                                        <Badge variant="secondary" className="bg-zinc-800 text-zinc-400 border-zinc-700 font-mono hover:bg-zinc-800">
+                                        <Badge variant="secondary" className="bg-slate-200 text-slate-500 border-slate-300 font-mono hover:bg-slate-200">
                                             {job.vehicleType}
                                         </Badge>
                                     </div>

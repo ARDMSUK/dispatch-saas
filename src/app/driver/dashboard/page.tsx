@@ -181,19 +181,19 @@ export default function DriverDashboard() {
     if (!driver) return null;
 
     return (
-        <div className="flex flex-col h-screen bg-zinc-950 pb-20"> {/* pb-20 for bottom nav */}
+        <div className="flex flex-col h-screen bg-white pb-20"> {/* pb-20 for bottom nav */}
 
             {/* Header */}
-            <div className="bg-zinc-900 border-b border-zinc-800 p-4 pt-12 flex justify-between items-center sticky top-0 z-50 shadow-lg shadow-black/50">
+            <div className="bg-slate-100 border-b border-slate-200 p-4 pt-12 flex justify-between items-center sticky top-0 z-50 shadow-lg shadow-black/50">
                 <div>
-                    <h1 className="text-lg font-bold text-white leading-none">{driver.callsign}</h1>
-                    <p className="text-xs text-zinc-500">{driver.name}</p>
+                    <h1 className="text-lg font-bold text-slate-900 leading-none">{driver.callsign}</h1>
+                    <p className="text-xs text-slate-400">{driver.name}</p>
                 </div>
 
                 <Button
                     size="sm"
                     variant={online ? "default" : "secondary"}
-                    className={online ? "bg-emerald-500 hover:bg-emerald-600 text-black font-bold" : "bg-zinc-800 text-zinc-400"}
+                    className={online ? "bg-emerald-500 hover:bg-emerald-600 text-black font-bold" : "bg-slate-200 text-slate-500"}
                     onClick={toggleStatus}
                 >
                     <Power className="h-4 w-4 mr-2" />
@@ -212,8 +212,8 @@ export default function DriverDashboard() {
                                 onReject={(id) => handleStatusUpdate(id, 'UNASSIGNED')}
                             />
                         ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-zinc-600 space-y-4">
-                                <div className="h-20 w-20 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
+                            <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-4">
+                                <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
                                     <Power className="h-8 w-8 text-zinc-700" />
                                 </div>
                                 <p>Go Online to receive jobs</p>
@@ -227,13 +227,13 @@ export default function DriverDashboard() {
 
                     <TabsContent value="PROFILE" className="mt-0">
                         <div className="space-y-4">
-                            <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
-                                <h3 className="text-sm font-medium text-zinc-400 mb-2 uppercase tracking-wider">Vehicle</h3>
+                            <div className="bg-slate-100 rounded-xl p-4 border border-slate-200">
+                                <h3 className="text-sm font-medium text-slate-500 mb-2 uppercase tracking-wider">Vehicle</h3>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-white">Silver Prius</span>
+                                    <span className="text-slate-900">Silver Prius</span>
                                     <Badge variant="outline">Saloon</Badge>
                                 </div>
-                                <p className="text-zinc-500 text-sm mt-1">LV23 XYZ</p>
+                                <p className="text-slate-400 text-sm mt-1">LV23 XYZ</p>
                             </div>
 
                             <Button variant="destructive" className="w-full" onClick={handleLogout}>
@@ -244,17 +244,17 @@ export default function DriverDashboard() {
                 </div>
 
                 {/* Bottom Nav */}
-                <div className="border-t border-zinc-800 bg-zinc-900/90 backdrop-blur pb-safe">
+                <div className="border-t border-slate-200 bg-zinc-900/90 backdrop-blur pb-safe">
                     <TabsList className="w-full h-16 bg-transparent p-0 gap-0">
-                        <TabsTrigger value="JOB" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-zinc-500 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
+                        <TabsTrigger value="JOB" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-slate-400 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
                             <Truck className="h-5 w-5" />
                             <span className="text-[10px] font-medium">Job</span>
                         </TabsTrigger>
-                        <TabsTrigger value="HISTORY" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-zinc-500 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
+                        <TabsTrigger value="HISTORY" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-slate-400 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
                             <Clock className="h-5 w-5" />
                             <span className="text-[10px] font-medium">History</span>
                         </TabsTrigger>
-                        <TabsTrigger value="PROFILE" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-zinc-500 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
+                        <TabsTrigger value="PROFILE" className="flex-1 h-full flex flex-col items-center justify-center gap-1 rounded-none data-[state=active]:bg-transparent data-[state=active]:text-amber-500 text-slate-400 border-t-2 border-transparent data-[state=active]:border-amber-500 transition-colors">
                             <User className="h-5 w-5" />
                             <span className="text-[10px] font-medium">Profile</span>
                         </TabsTrigger>

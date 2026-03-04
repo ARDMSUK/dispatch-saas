@@ -13,7 +13,7 @@ export default function DriverLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-amber-500 selection:text-black">
+        <div className="min-h-screen bg-white text-slate-900 antialiased selection:bg-amber-500 selection:text-black">
             {children}
         </div>
     );

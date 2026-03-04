@@ -143,16 +143,16 @@ export default function VehiclesPage() {
         if (type === 'Executive') return 'border-emerald-500 text-emerald-500';
         if (type.includes('MPV')) return 'border-purple-500 text-purple-500';
         if (type === 'Minibus' || type === 'Coach') return 'border-amber-500 text-amber-500';
-        return 'border-zinc-500 text-zinc-500';
+        return 'border-zinc-500 text-slate-400';
     };
 
     const { data: session } = useSession();
     const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     return (
-        <div className="h-full flex flex-col p-4 bg-zinc-950 gap-4">
+        <div className="h-full flex flex-col p-4 bg-white gap-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-white">Vehicle Management</h1>
+                <h1 className="text-2xl font-bold text-slate-900">Vehicle Management</h1>
                 {isAdmin && (
                     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                         <DialogTrigger asChild>
@@ -160,27 +160,27 @@ export default function VehiclesPage() {
                                 <Plus className="mr-2 h-4 w-4" /> Add Vehicle
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-zinc-900 border-white/10 text-white">
+                        <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
                             <DialogHeader>
-                                <DialogTitle className="text-white">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
+                                <DialogTitle className="text-slate-900">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
                                 <Input
                                     placeholder="Registration (License Plate)"
-                                    className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                    className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
                                     value={formData.reg}
                                     onChange={e => setFormData({ ...formData, reg: e.target.value })}
                                 />
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         placeholder="Make (e.g. Toyota)"
-                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
                                         value={formData.make}
                                         onChange={e => setFormData({ ...formData, make: e.target.value })}
                                     />
                                     <Input
                                         placeholder="Model (e.g. Prius)"
-                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
                                         value={formData.model}
                                         onChange={e => setFormData({ ...formData, model: e.target.value })}
                                     />
@@ -188,12 +188,12 @@ export default function VehiclesPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         placeholder="Color"
-                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500"
+                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
                                         value={formData.color}
                                         onChange={e => setFormData({ ...formData, color: e.target.value })}
                                     />
                                     <select
-                                        className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                        className="flex h-9 w-full rounded-md border border-slate-200 bg-slate-200 px-3 py-1 text-sm text-slate-900 shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
                                         value={formData.type}
                                         onChange={e => setFormData({ ...formData, type: e.target.value })}
                                     >
@@ -209,9 +209,9 @@ export default function VehiclesPage() {
 
                                 {/* Driver Assignment */}
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500 ml-1">Assigned Driver</label>
+                                    <label className="text-xs text-slate-400 ml-1">Assigned Driver</label>
                                     <select
-                                        className="flex h-9 w-full rounded-md border border-white/10 bg-zinc-800 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                        className="flex h-9 w-full rounded-md border border-slate-200 bg-slate-200 px-3 py-1 text-sm text-slate-900 shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
                                         value={formData.driverId}
                                         onChange={e => setFormData({ ...formData, driverId: e.target.value })}
                                     >
@@ -227,12 +227,12 @@ export default function VehiclesPage() {
                                 <div className="space-y-1">
                                     <Input
                                         type="date"
-                                        className="bg-zinc-800 border-white/10 text-white placeholder:text-zinc-500 block w-full"
+                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500 block w-full"
                                         placeholder="MOT/License Expiry"
                                         value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
                                         onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
                                     />
-                                    <span className="text-[10px] text-zinc-500 ml-1">MOT/License Expiry</span>
+                                    <span className="text-[10px] text-slate-400 ml-1">MOT/License Expiry</span>
                                 </div>
                                 <Button onClick={handleSave} className="w-full bg-amber-500 text-black hover:bg-amber-600">
                                     {editingId ? 'Update Vehicle' : 'Create Vehicle'}
@@ -245,54 +245,54 @@ export default function VehiclesPage() {
 
             <div className="flex gap-2 mb-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-500" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
                     <Input
                         placeholder="Search vehicles..."
-                        className="pl-8 bg-zinc-900/50 border-white/10 text-white placeholder:text-zinc-500"
+                        className="pl-8 bg-slate-100 border-slate-200 text-slate-900 placeholder:text-zinc-500"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <Card className="flex-1 overflow-hidden bg-zinc-900/20 border-white/10">
+            <Card className="flex-1 overflow-hidden bg-zinc-900/20 border-slate-200">
                 <div className="overflow-auto max-h-full">
                     <Table>
-                        <TableHeader className="bg-zinc-900/50 sticky top-0">
-                            <TableRow className="hover:bg-transparent border-white/5">
-                                <TableHead className="w-[100px] text-zinc-400">Registration</TableHead>
-                                <TableHead className="text-zinc-400">Make/Model</TableHead>
-                                <TableHead className="text-zinc-400">Type</TableHead>
-                                <TableHead className="text-zinc-400">Color</TableHead>
-                                <TableHead className="text-zinc-400">Expiry</TableHead>
-                                <TableHead className="text-zinc-400">Driver</TableHead>
-                                {isAdmin && <TableHead className="text-right text-zinc-400">Actions</TableHead>}
+                        <TableHeader className="bg-slate-100 sticky top-0">
+                            <TableRow className="hover:bg-transparent border-slate-200">
+                                <TableHead className="w-[100px] text-slate-500">Registration</TableHead>
+                                <TableHead className="text-slate-500">Make/Model</TableHead>
+                                <TableHead className="text-slate-500">Type</TableHead>
+                                <TableHead className="text-slate-500">Color</TableHead>
+                                <TableHead className="text-slate-500">Expiry</TableHead>
+                                <TableHead className="text-slate-500">Driver</TableHead>
+                                {isAdmin && <TableHead className="text-right text-slate-500">Actions</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
-                                <TableRow className="hover:bg-transparent border-white/5">
-                                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-zinc-500">Loading vehicles...</TableCell>
+                                <TableRow className="hover:bg-transparent border-slate-200">
+                                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-slate-400">Loading vehicles...</TableCell>
                                 </TableRow>
                             ) : filteredVehicles.length === 0 ? (
-                                <TableRow className="hover:bg-transparent border-white/5">
-                                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-zinc-500">No vehicles found</TableCell>
+                                <TableRow className="hover:bg-transparent border-slate-200">
+                                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-slate-400">No vehicles found</TableCell>
                                 </TableRow>
                             ) : (
                                 filteredVehicles.map((vehicle) => (
-                                    <TableRow key={vehicle.id} className="hover:bg-white/5 border-white/5 group transition-colors">
-                                        <TableCell className="font-bold font-mono text-lg text-zinc-200">{vehicle.reg}</TableCell>
-                                        <TableCell className="font-medium text-zinc-300">{vehicle.make} {vehicle.model}</TableCell>
+                                    <TableRow key={vehicle.id} className="hover:bg-slate-200 border-slate-200 group transition-colors">
+                                        <TableCell className="font-bold font-mono text-lg text-slate-800">{vehicle.reg}</TableCell>
+                                        <TableCell className="font-medium text-slate-600">{vehicle.make} {vehicle.model}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={getVehicleBadgeStyle(vehicle.type)}>{vehicle.type}</Badge>
                                         </TableCell>
-                                        <TableCell className="text-zinc-400">{vehicle.color}</TableCell>
-                                        <TableCell className="text-xs text-zinc-500">
+                                        <TableCell className="text-slate-500">{vehicle.color}</TableCell>
+                                        <TableCell className="text-xs text-slate-400">
                                             {vehicle.expiryDate ? new Date(vehicle.expiryDate).toLocaleDateString() : '-'}
                                         </TableCell>
-                                        <TableCell className="text-sm text-zinc-400">
+                                        <TableCell className="text-sm text-slate-500">
                                             {vehicle.driver?.callsign ? (
-                                                <Badge variant="secondary" className="bg-zinc-800 text-zinc-300 border-zinc-700">
+                                                <Badge variant="secondary" className="bg-slate-200 text-slate-600 border-slate-300">
                                                     {vehicle.driver.callsign}
                                                 </Badge>
                                             ) : <span className="text-zinc-700">-</span>}
@@ -300,7 +300,7 @@ export default function VehiclesPage() {
                                         {isAdmin && (
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => handleEdit(vehicle)}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => handleEdit(vehicle)}>
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(vehicle.id)}>

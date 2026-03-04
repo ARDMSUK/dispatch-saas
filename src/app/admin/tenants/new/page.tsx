@@ -111,15 +111,15 @@ export default function NewTenantPage() {
 
             {/* Steps Indicator */}
             <div className="flex justify-between mb-8 relative">
-                <div className="absolute top-1/2 left-0 w-full h-0.5 bg-zinc-800 -z-10" />
+                <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -z-10" />
                 {[1, 2, 3].map((s) => (
-                    <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= s ? 'bg-amber-500 border-amber-500 text-black' : 'bg-zinc-950 border-zinc-700 text-zinc-500'}`}>
+                    <div key={s} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= s ? 'bg-amber-500 border-amber-500 text-black' : 'bg-white border-slate-300 text-slate-400'}`}>
                         {step > s ? <Check className="w-5 h-5" /> : s}
                     </div>
                 ))}
             </div>
 
-            <Card className="bg-zinc-900 border-zinc-800">
+            <Card className="bg-slate-100 border-slate-200">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         {step === 1 && <><Building2 /> Company Details</>}
@@ -134,17 +134,17 @@ export default function NewTenantPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Company Name *</label>
-                                    <Input name="companyName" value={formData.companyName} onChange={handleChange} placeholder="e.g. Acme Taxis" className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="companyName" value={formData.companyName} onChange={handleChange} placeholder="e.g. Acme Taxis" className="bg-white border-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Slug (subdomain) *</label>
-                                    <Input name="companySlug" value={formData.companySlug} onChange={handleChange} placeholder="acme-taxis" className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="companySlug" value={formData.companySlug} onChange={handleChange} placeholder="acme-taxis" className="bg-white border-slate-200" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Contact Email</label>
-                                    <Input name="companyEmail" value={formData.companyEmail} onChange={handleChange} placeholder="contact@acme.com" className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="companyEmail" value={formData.companyEmail} onChange={handleChange} placeholder="contact@acme.com" className="bg-white border-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Base Address</label>
@@ -155,11 +155,11 @@ export default function NewTenantPage() {
                                                 placeholder="Search base location..."
                                                 value={formData.address}
                                                 onChange={handleChange}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-white border-slate-200"
                                             />
                                         </Autocomplete>
                                     ) : (
-                                        <Input disabled placeholder="Loading maps..." className="bg-zinc-950 border-zinc-800" />
+                                        <Input disabled placeholder="Loading maps..." className="bg-white border-slate-200" />
                                     )}
                                 </div>
                             </div>
@@ -170,16 +170,16 @@ export default function NewTenantPage() {
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Admin Name *</label>
-                                <Input name="adminName" value={formData.adminName} onChange={handleChange} placeholder="John Doe" className="bg-zinc-950 border-zinc-800" />
+                                <Input name="adminName" value={formData.adminName} onChange={handleChange} placeholder="John Doe" className="bg-white border-slate-200" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Admin Email *</label>
-                                    <Input name="adminEmail" value={formData.adminEmail} onChange={handleChange} placeholder="admin@acme.com" className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="adminEmail" value={formData.adminEmail} onChange={handleChange} placeholder="admin@acme.com" className="bg-white border-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Password *</label>
-                                    <Input name="adminPassword" type="password" value={formData.adminPassword} onChange={handleChange} placeholder="••••••••" className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="adminPassword" type="password" value={formData.adminPassword} onChange={handleChange} placeholder="••••••••" className="bg-white border-slate-200" />
                                 </div>
                             </div>
                         </div>
@@ -192,11 +192,11 @@ export default function NewTenantPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Secret Key</label>
-                                        <Input name="stripeSecretKey" type="password" value={formData.stripeSecretKey} onChange={handleChange} placeholder="sk_live_..." className="bg-zinc-950 border-zinc-800" />
+                                        <Input name="stripeSecretKey" type="password" value={formData.stripeSecretKey} onChange={handleChange} placeholder="sk_live_..." className="bg-white border-slate-200" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Publishable Key</label>
-                                        <Input name="stripePublishableKey" value={formData.stripePublishableKey} onChange={handleChange} placeholder="pk_live_..." className="bg-zinc-950 border-zinc-800" />
+                                        <Input name="stripePublishableKey" value={formData.stripePublishableKey} onChange={handleChange} placeholder="pk_live_..." className="bg-white border-slate-200" />
                                     </div>
                                 </div>
                             </div>
@@ -206,16 +206,16 @@ export default function NewTenantPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Account SID</label>
-                                        <Input name="twilioAccountSid" value={formData.twilioAccountSid} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                        <Input name="twilioAccountSid" value={formData.twilioAccountSid} onChange={handleChange} className="bg-white border-slate-200" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Auth Token</label>
-                                        <Input name="twilioAuthToken" type="password" value={formData.twilioAuthToken} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                        <Input name="twilioAuthToken" type="password" value={formData.twilioAuthToken} onChange={handleChange} className="bg-white border-slate-200" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">From Number (Verified)</label>
-                                    <Input name="twilioFromNumber" value={formData.twilioFromNumber} onChange={handleChange} placeholder="+447..." className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="twilioFromNumber" value={formData.twilioFromNumber} onChange={handleChange} placeholder="+447..." className="bg-white border-slate-200" />
                                 </div>
                             </div>
 
@@ -223,13 +223,13 @@ export default function NewTenantPage() {
                                 <h3 className="text-sm font-bold text-green-500 uppercase tracking-wider">Resend Email</h3>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">API Key</label>
-                                    <Input name="resendApiKey" type="password" value={formData.resendApiKey} onChange={handleChange} placeholder="re_..." className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="resendApiKey" type="password" value={formData.resendApiKey} onChange={handleChange} placeholder="re_..." className="bg-white border-slate-200" />
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex justify-between pt-6 mt-4 border-t border-zinc-800">
+                    <div className="flex justify-between pt-6 mt-4 border-t border-slate-200">
                         <Button variant="ghost" disabled={step === 1} onClick={() => setStep(s => s - 1)}>
                             <ChevronLeft className="w-4 h-4 mr-2" /> Back
                         </Button>
@@ -239,7 +239,7 @@ export default function NewTenantPage() {
                                 Next <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         ) : (
-                            <Button onClick={handleSubmit} disabled={loading} className="bg-green-600 text-white hover:bg-green-500">
+                            <Button onClick={handleSubmit} disabled={loading} className="bg-green-600 text-slate-900 hover:bg-green-500">
                                 {loading ? "Creating..." : "Create Tenant"}
                             </Button>
                         )}

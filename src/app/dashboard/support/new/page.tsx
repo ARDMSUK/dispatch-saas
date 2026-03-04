@@ -47,22 +47,22 @@ export default function NewTicketPage() {
     };
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6 bg-zinc-950 min-h-screen text-white">
+        <div className="flex-1 space-y-4 p-8 pt-6 bg-white min-h-screen text-slate-900">
             <div className="flex items-center space-x-4 mb-6">
-                <Button variant="ghost" size="icon" asChild className="hover:bg-zinc-800 text-zinc-400">
+                <Button variant="ghost" size="icon" asChild className="hover:bg-slate-200 text-slate-500">
                     <Link href="/dashboard/support">
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
                 </Button>
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Open New Ticket</h2>
-                    <p className="text-zinc-400 text-sm">Describe your issue to our Support AI for instant assistance.</p>
+                    <p className="text-slate-500 text-sm">Describe your issue to our Support AI for instant assistance.</p>
                 </div>
             </div>
 
             <div className="max-w-2xl">
                 <form onSubmit={handleSubmit}>
-                    <Card className="bg-zinc-900 border-zinc-800">
+                    <Card className="bg-slate-100 border-slate-200">
                         <CardHeader>
                             <CardTitle>Ticket Details</CardTitle>
                         </CardHeader>
@@ -71,7 +71,7 @@ export default function NewTicketPage() {
                                 <label className="text-sm font-medium">Subject</label>
                                 <Input
                                     placeholder="e.g., How do I configure Stripe?"
-                                    className="bg-zinc-950 border-zinc-800 text-white focus:ring-amber-500 focus:border-amber-500"
+                                    className="bg-white border-slate-200 text-slate-900 focus:ring-amber-500 focus:border-amber-500"
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
                                     required
@@ -81,7 +81,7 @@ export default function NewTicketPage() {
                                 <label className="text-sm font-medium">How can we help?</label>
                                 <Textarea
                                     placeholder="Please provide as much detail as possible..."
-                                    className="h-32 bg-zinc-950 border-zinc-800 text-white focus:ring-amber-500 focus:border-amber-500 resize-none"
+                                    className="h-32 bg-white border-slate-200 text-slate-900 focus:ring-amber-500 focus:border-amber-500 resize-none"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     required

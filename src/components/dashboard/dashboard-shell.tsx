@@ -33,7 +33,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
         return (
-            <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-amber-500/10 text-amber-500' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}>
+            <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-amber-500/10 text-amber-500' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'}`}>
                 <Icon className="h-4 w-4" />
                 <span className="text-sm font-medium">{label}</span>
             </Link>
@@ -46,11 +46,11 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     };
 
     return (
-        <div className="flex h-screen w-full bg-zinc-950 text-white overflow-hidden font-sans">
+        <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans">
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                <SheetContent side="left" className="w-64 bg-zinc-900 border-r border-white/5 p-0">
-                    <div className="h-16 flex items-center px-6 border-b border-white/5">
-                        <SheetTitle className="font-bold text-lg tracking-wider text-white">ADMIN MENU</SheetTitle>
+                <SheetContent side="left" className="w-64 bg-slate-100 border-r border-slate-200 p-0">
+                    <div className="h-16 flex items-center px-6 border-b border-slate-200">
+                        <SheetTitle className="font-bold text-lg tracking-wider text-slate-900">ADMIN MENU</SheetTitle>
                     </div>
                     <div className="p-4 flex flex-col gap-1">
                         <NavItem href="/dashboard" icon={LayoutDashboard} label="Console" />
@@ -58,12 +58,12 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
                         <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
 
-                        <div className="my-2 border-t border-white/5"></div>
+                        <div className="my-2 border-t border-slate-200"></div>
                         <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />
 
                         {/* Granular Feature Access */}
                         {(hasPermission('view_reports') || hasPermission('manage_pricing') || hasPermission('manage_zones') || hasPermission('manage_accounts') || hasPermission('manage_billing')) && (
-                            <div className="my-2 border-t border-white/5"></div>
+                            <div className="my-2 border-t border-slate-200"></div>
                         )}
 
                         {hasPermission('view_reports') && <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />}
@@ -74,7 +74,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
 
                         {isAdmin && (
                             <>
-                                <div className="my-2 border-t border-white/5"></div>
+                                <div className="my-2 border-t border-slate-200"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
                                 <NavItem href="/dashboard/settings/billing" icon={CreditCard} label="SaaS Subscription" />
                                 <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
@@ -83,16 +83,16 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
 
                         {userRole === 'SUPER_ADMIN' && (
                             <>
-                                <div className="my-2 border-t border-white/5"></div>
-                                <div className="px-3 py-1 text-xs font-bold text-zinc-500 uppercase tracking-wider">Super Admin</div>
+                                <div className="my-2 border-t border-slate-200"></div>
+                                <div className="px-3 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Super Admin</div>
                                 <NavItem href="/admin/tenants" icon={Building2} label="Multi-Tenant Config" />
                             </>
                         )}
 
-                        <div className="my-2 border-t border-white/5"></div>
+                        <div className="my-2 border-t border-slate-200"></div>
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-red-400 hover:text-red-300 hover:bg-white/5 w-full text-left"
+                            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-red-400 hover:text-red-300 hover:bg-slate-200 w-full text-left"
                         >
                             <LogOut className="h-4 w-4" />
                             <span className="text-sm font-medium">Log Out</span>
@@ -119,9 +119,9 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                     </div>
                 )}
                 {/* GLOBAL HEADER */}
-                <header className="h-14 border-b border-white/10 flex items-center justify-between px-4 bg-zinc-900/50 backdrop-blur-md z-50 shrink-0">
+                <header className="h-14 border-b border-slate-200 flex items-center justify-between px-4 bg-slate-100 backdrop-blur-md z-50 shrink-0">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="text-zinc-400 hover:text-white">
+                        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="text-slate-500 hover:text-slate-900">
                             <Menu className="h-5 w-5" />
                         </Button>
                         <div className="flex items-center gap-2">
@@ -134,21 +134,21 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         <div className="flex flex-col items-end mr-4">
                             <div className="flex items-center gap-2">
                                 <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                <span className="text-[10px] font-bold text-emerald-400 tracking-wider">SYSTEM ONLINE</span>
+                                <span className="text-[10px] font-bold text-emerald-600 tracking-wider">SYSTEM ONLINE</span>
                             </div>
                         </div>
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center p-0 hover:bg-zinc-700">
+                                <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-slate-200 border border-slate-200 flex items-center justify-center p-0 hover:bg-zinc-700">
                                     <span className="text-xs font-bold">{userName.charAt(0)}</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-zinc-900 border-white/10 text-white" align="end" forceMount>
+                            <DropdownMenuContent className="w-56 bg-slate-100 border-slate-200 text-slate-900" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-medium leading-none">{userName}</p>
-                                        <p className="text-xs leading-none text-zinc-400">{tenantSlug}</p>
+                                        <p className="text-xs leading-none text-slate-500">{tenantSlug}</p>
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-white/10" />

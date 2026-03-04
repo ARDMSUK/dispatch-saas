@@ -69,23 +69,23 @@ export function DispatchDriverDialog({ job, open, onOpenChange, onSuccess }: Dis
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-950 border border-white/10 text-white sm:max-w-[400px]">
+            <DialogContent className="bg-white border border-slate-200 text-slate-900 sm:max-w-[400px]">
                 <DialogHeader>
                     <DialogTitle>Dispatch Driver Now</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 py-2">
                     <div className="flex flex-col space-y-2">
-                        <div className="text-xs text-zinc-400">Job Reference</div>
+                        <div className="text-xs text-slate-500">Job Reference</div>
                         <div className="text-sm font-mono bg-white/5 p-2 rounded">
                             #{job.id} - {job.pickupAddress}
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Select Available Driver</label>
+                        <label className="text-sm font-medium text-slate-600">Select Available Driver</label>
                         <select
-                            className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-emerald-400/50 appearance-none"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 appearance-none"
                             value={selectedDriverId}
                             onChange={e => setSelectedDriverId(e.target.value)}
                         >
@@ -100,7 +100,7 @@ export function DispatchDriverDialog({ job, open, onOpenChange, onSuccess }: Dis
                 </div>
 
                 <DialogFooter>
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-zinc-400 hover:text-white">
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-slate-500 hover:text-slate-900">
                         Cancel
                     </Button>
                     <Button onClick={handleDispatch} disabled={loading || !selectedDriverId} className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold">

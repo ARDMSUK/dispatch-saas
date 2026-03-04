@@ -82,8 +82,8 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-zinc-900">
-            <Card className="w-full max-w-md border-zinc-800 bg-zinc-950 text-white shadow-xl">
+        <div className="flex h-screen w-full items-center justify-center bg-slate-100">
+            <Card className="w-full max-w-md border-slate-200 bg-white text-slate-900 shadow-xl">
                 <CardHeader className="space-y-1 text-center">
                     <div className="flex justify-center mb-4">
                         <div className="h-12 w-12 bg-yellow-400 rounded-full flex items-center justify-center text-zinc-900">
@@ -91,7 +91,7 @@ export default function LoginPage() {
                         </div>
                     </div>
                     <CardTitle className="text-2xl font-bold">Dispatch SaaS</CardTitle>
-                    <CardDescription className="text-zinc-400">
+                    <CardDescription className="text-slate-500">
                         Enter your credentials to access the console
                     </CardDescription>
                 </CardHeader>
@@ -104,7 +104,7 @@ export default function LoginPage() {
                                     <Input
                                         {...register("email")}
                                         placeholder="dispatcher@example.com"
-                                        className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
+                                        className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400"
                                     />
                                     {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                                 </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                                         type="password"
                                         {...register("password")}
                                         placeholder="••••••••"
-                                        className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
+                                        className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400"
                                     />
                                     {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
                                 </div>
@@ -125,12 +125,12 @@ export default function LoginPage() {
                         ) : (
                             <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4">
                                 <label className="text-sm font-medium text-amber-500">Authenticator Code (2FA)</label>
-                                <p className="text-xs text-zinc-400 mb-2">Please open your Authenticator app and enter the 6-digit code.</p>
+                                <p className="text-xs text-slate-500 mb-2">Please open your Authenticator app and enter the 6-digit code.</p>
                                 <Input
                                     {...register("twoFactorToken")}
                                     placeholder="000111"
                                     maxLength={6}
-                                    className="bg-zinc-900 border-zinc-800 text-amber-500 text-center text-2xl tracking-[0.5em] focus:ring-amber-500 focus:border-amber-500 h-14 font-mono"
+                                    className="bg-slate-100 border-slate-200 text-amber-500 text-center text-2xl tracking-[0.5em] focus:ring-amber-500 focus:border-amber-500 h-14 font-mono"
                                 />
                                 {errors.twoFactorToken && <p className="text-xs text-red-500">{errors.twoFactorToken.message}</p>}
                             </div>
@@ -147,13 +147,13 @@ export default function LoginPage() {
                         </Button>
                     </form>
                 </CardContent>
-                <CardFooter className="justify-center text-xs text-zinc-500">
+                <CardFooter className="justify-center text-xs text-slate-400">
                     Protected by Dispatch Authority System
                 </CardFooter>
             </Card>
 
             {/* Quick Helper for Demo */}
-            <div className="absolute bottom-4 left-4 text-zinc-600 text-xs font-mono">
+            <div className="absolute bottom-4 left-4 text-slate-500 text-xs font-mono">
                 <p>Dev Login:</p>
                 <p>user: digitaldmagency@gmail.com</p>
                 <p>pass: pasword123</p>

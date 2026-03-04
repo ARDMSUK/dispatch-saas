@@ -97,7 +97,7 @@ export default function ZoneMap({ color = "#3b82f6", onPolygonComplete, zones = 
                         <button
                             type="submit"
                             disabled={isSearching}
-                            className="bg-zinc-800 text-white px-3 py-1 rounded text-sm hover:bg-zinc-700 disabled:opacity-50"
+                            className="bg-slate-200 text-slate-900 px-3 py-1 rounded text-sm hover:bg-zinc-700 disabled:opacity-50"
                         >
                             {isSearching ? "..." : "Go"}
                         </button>

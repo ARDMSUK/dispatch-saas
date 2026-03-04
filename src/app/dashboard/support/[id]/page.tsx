@@ -39,7 +39,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
     });
 
     return (
-        <div className="flex-1 p-8 pt-6 bg-zinc-950 min-h-screen text-white h-[calc(100vh-4rem)] flex flex-col">
+        <div className="flex-1 p-8 pt-6 bg-white min-h-screen text-slate-900 h-[calc(100vh-4rem)] flex flex-col">
             <TicketChatClient
                 ticketId={ticket.id}
                 subject={ticket.subject}

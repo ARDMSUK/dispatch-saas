@@ -25,7 +25,7 @@ export function BillingLockoutOverlay({ status }: BillingLockoutOverlayProps) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
             <div className="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                <div className="bg-red-500 p-6 flex items-center justify-center text-white">
+                <div className="bg-red-500 p-6 flex items-center justify-center text-slate-900">
                     <AlertCircle className="h-12 w-12" />
                 </div>
                 <div className="p-8 text-center space-y-4">

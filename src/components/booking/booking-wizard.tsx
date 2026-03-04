@@ -129,22 +129,22 @@ export function BookingWizard() {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col min-h-[600px]">
+        <div className="w-full max-w-2xl mx-auto bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col min-h-[600px]">
             {/* Header / Progress */}
-            <div className="p-6 border-b border-white/5 bg-black/20">
+            <div className="p-6 border-b border-slate-200 bg-slate-50">
                 <div className="flex justify-between items-center mb-4">
                     {step > 1 ? (
-                        <button onClick={prevStep} className="text-zinc-400 hover:text-white flex items-center gap-1 text-sm transition-colors">
+                        <button onClick={prevStep} className="text-slate-500 hover:text-slate-900 flex items-center gap-1 text-sm transition-colors">
                             <ChevronLeft className="h-4 w-4" /> Back
                         </button>
                     ) : (
-                        <span className="text-zinc-500 text-sm font-medium">New Booking</span>
+                        <span className="text-slate-400 text-sm font-medium">New Booking</span>
                     )}
-                    <span className="text-zinc-500 text-xs font-mono">STEP {step} OF 4</span>
+                    <span className="text-slate-400 text-xs font-mono">STEP {step} OF 4</span>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
                     <motion.div
                         className="h-full bg-amber-500"
                         initial={{ width: '25%' }}

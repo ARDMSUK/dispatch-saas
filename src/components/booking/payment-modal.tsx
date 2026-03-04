@@ -59,7 +59,7 @@ function PaymentForm({ amount, onSuccess }: { amount: number, onSuccess: (pid: s
             {message && <div className="text-red-500 text-sm">{message}</div>}
             <Button
                 disabled={isLoading || !stripe || !elements}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold h-12 rounded-xl"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold h-12 rounded-xl"
             >
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : `Pay £${amount.toFixed(2)}`}
             </Button>
@@ -83,11 +83,11 @@ export function PaymentModal({ amount, bookingId, onSuccess, onCancel }: Payment
     }, [amount, bookingId]);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+            <div className="bg-slate-100 border border-slate-200 rounded-2xl w-full max-w-md p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-white">Secure Payment</h3>
-                    <button onClick={onCancel} className="text-zinc-400 hover:text-white">Close</button>
+                    <h3 className="text-xl font-bold text-slate-900">Secure Payment</h3>
+                    <button onClick={onCancel} className="text-slate-500 hover:text-slate-900">Close</button>
                 </div>
 
                 {clientSecret ? (

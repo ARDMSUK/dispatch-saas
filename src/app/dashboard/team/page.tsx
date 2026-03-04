@@ -143,11 +143,11 @@ export default function TeamPage() {
     );
 
     return (
-        <div className="h-full flex flex-col p-4 bg-zinc-950 gap-4 text-zinc-100">
-            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+        <div className="h-full flex flex-col p-4 bg-white gap-4 text-slate-900">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white tracking-tight">Team & Access</h1>
-                    <p className="text-zinc-500 text-sm">Manage staff access and roles.</p>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Team & Access</h1>
+                    <p className="text-slate-400 text-sm">Manage staff access and roles.</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={(open) => {
                     setIsDialogOpen(open);
@@ -158,52 +158,52 @@ export default function TeamPage() {
                             <Plus className="mr-2 h-4 w-4" /> Add Member
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-zinc-900 border-white/10 text-white">
+                    <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
                         <DialogHeader>
                             <DialogTitle>{formData.id ? "Edit Team Member" : "Add New Team Member"}</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-400">Full Name</label>
+                                <label className="text-sm font-medium text-slate-500">Full Name</label>
                                 <Input
                                     placeholder="e.g. John Doe"
-                                    className="bg-zinc-800 border-white/10"
+                                    className="bg-slate-200 border-slate-200"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-400">Email Address</label>
+                                <label className="text-sm font-medium text-slate-500">Email Address</label>
                                 <Input
                                     type="email"
                                     placeholder="john@example.com"
-                                    className="bg-zinc-800 border-white/10"
+                                    className="bg-slate-200 border-slate-200"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                     disabled={!!formData.id}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-400">Password {formData.id && "(Leave blank to keep existing)"}</label>
+                                <label className="text-sm font-medium text-slate-500">Password {formData.id && "(Leave blank to keep existing)"}</label>
                                 <Input
                                     type="password"
                                     placeholder="••••••••"
-                                    className="bg-zinc-800 border-white/10"
+                                    className="bg-slate-200 border-slate-200"
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-zinc-400">Role</label>
+                                <label className="text-sm font-medium text-slate-500">Role</label>
                                 <select
-                                    className="w-full h-10 rounded-md border border-white/10 bg-zinc-800 px-3 py-2 text-sm text-white"
+                                    className="w-full h-10 rounded-md border border-slate-200 bg-slate-200 px-3 py-2 text-sm text-slate-900"
                                     value={formData.role}
                                     onChange={e => setFormData({ ...formData, role: e.target.value as any })}
                                 >
                                     <option value="DISPATCHER">Dispatcher (Staff)</option>
                                     <option value="ADMIN">Admin (Manager)</option>
                                 </select>
-                                <p className="text-xs text-zinc-500">
+                                <p className="text-xs text-slate-400">
                                     {['ADMIN', 'SUPER_ADMIN'].includes(formData.role)
                                         ? "Full access to settings, pricing, and team management."
                                         : "Can create bookings and view drivers/vehicles only."}
@@ -211,14 +211,14 @@ export default function TeamPage() {
                             </div>
 
                             {formData.role === 'DISPATCHER' && (
-                                <div className="space-y-3 pt-2 border-t border-white/5 mt-2">
-                                    <label className="text-sm font-medium text-zinc-400">Extra Permissions</label>
+                                <div className="space-y-3 pt-2 border-t border-slate-200 mt-2">
+                                    <label className="text-sm font-medium text-slate-500">Extra Permissions</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         {AVAILABLE_PERMISSIONS.map(perm => (
-                                            <label key={perm.id} className="flex items-center space-x-2 text-sm text-zinc-300 cursor-pointer">
+                                            <label key={perm.id} className="flex items-center space-x-2 text-sm text-slate-600 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500/20"
+                                                    className="rounded border-slate-300 bg-slate-200 text-amber-500 focus:ring-amber-500/20"
                                                     checked={formData.permissions.includes(perm.id)}
                                                     onChange={(e) => {
                                                         const newPerms = e.target.checked
@@ -231,7 +231,7 @@ export default function TeamPage() {
                                             </label>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-zinc-500 italic">These allow specific access without granting full Admin rights.</p>
+                                    <p className="text-xs text-slate-400 italic">These allow specific access without granting full Admin rights.</p>
                                 </div>
                             )}
 
@@ -243,39 +243,39 @@ export default function TeamPage() {
                 </Dialog>
             </div>
 
-            <Card className="overflow-hidden bg-zinc-900/20 border-white/10">
+            <Card className="overflow-hidden bg-zinc-900/20 border-slate-200">
                 <Table>
-                    <TableHeader className="bg-zinc-900/50">
-                        <TableRow className="border-white/5 hover:bg-transparent">
-                            <TableHead className="text-zinc-400">User</TableHead>
-                            <TableHead className="text-zinc-400">Role</TableHead>
-                            <TableHead className="text-zinc-400">Joined</TableHead>
-                            <TableHead className="text-right text-zinc-400">Actions</TableHead>
+                    <TableHeader className="bg-slate-100">
+                        <TableRow className="border-slate-200 hover:bg-transparent">
+                            <TableHead className="text-slate-500">User</TableHead>
+                            <TableHead className="text-slate-500">Role</TableHead>
+                            <TableHead className="text-slate-500">Joined</TableHead>
+                            <TableHead className="text-right text-slate-500">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center py-8 text-zinc-500">Loading team...</TableCell>
+                                <TableCell colSpan={4} className="text-center py-8 text-slate-400">Loading team...</TableCell>
                             </TableRow>
                         ) : filteredUsers.map((user) => (
-                            <TableRow key={user.id} className="border-white/5 hover:bg-white/5">
+                            <TableRow key={user.id} className="border-slate-200 hover:bg-slate-200">
                                 <TableCell>
                                     <div className="flex flex-col">
-                                        <span className="font-medium text-zinc-200">{user.name}</span>
-                                        <span className="text-xs text-zinc-500">{user.email}</span>
+                                        <span className="font-medium text-slate-800">{user.name}</span>
+                                        <span className="text-xs text-slate-400">{user.email}</span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1 items-start">
-                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-zinc-500'}>
+                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-amber-500 text-amber-500' : 'border-zinc-500 text-slate-400'}>
                                             {['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
                                             {user.role === 'SUPER_ADMIN' ? 'Admin' : (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
                                         </Badge>
                                         {user.role === 'DISPATCHER' && user.permissions && user.permissions.length > 0 && (
                                             <div className="flex flex-wrap gap-1 mt-1">
                                                 {user.permissions.map(p => (
-                                                    <span key={p} className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded border border-white/5">
+                                                    <span key={p} className="text-[10px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">
                                                         {AVAILABLE_PERMISSIONS.find(ap => ap.id === p)?.label || p}
                                                     </span>
                                                 ))}
@@ -283,7 +283,7 @@ export default function TeamPage() {
                                         )}
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-sm text-zinc-500">
+                                <TableCell className="text-sm text-slate-400">
                                     {new Date(user.createdAt).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -291,7 +291,7 @@ export default function TeamPage() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="text-zinc-400 hover:text-white"
+                                            className="text-slate-500 hover:text-slate-900"
                                             onClick={() => handleEdit(user)}
                                         >
                                             <Pencil className="w-4 h-4" />

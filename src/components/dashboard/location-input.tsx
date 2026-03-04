@@ -200,8 +200,8 @@ export function LocationInput({
                     {value || placeholder}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-[10000] bg-zinc-900 border border-white/10 shadow-2xl" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
-                <Command shouldFilter={false} className="bg-zinc-900">
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 z-[10000] bg-slate-100 border border-slate-200 shadow-2xl" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
+                <Command shouldFilter={false} className="bg-slate-100">
                     <CommandInput
                         placeholder={placeholder}
                         value={inputValue}
@@ -219,11 +219,11 @@ export function LocationInput({
                                         key={`freq-${i}`}
                                         value={item.address}
                                         onSelect={() => handleFrequentSelect(item.address)}
-                                        className="cursor-pointer p-2 text-white bg-emerald-500/10 hover:bg-emerald-500/20 mb-1 rounded-sm border border-emerald-500/20"
+                                        className="cursor-pointer p-2 text-slate-900 bg-emerald-500/10 hover:bg-emerald-500/20 mb-1 rounded-sm border border-emerald-500/20"
                                     >
                                         <MapPin className="mr-2 h-4 w-4 text-emerald-500" />
                                         <span className="font-medium truncate">{item.address}</span>
-                                        <span className="ml-auto text-[10px] text-zinc-500 bg-black/40 px-1 rounded">{item.count}</span>
+                                        <span className="ml-auto text-[10px] text-slate-400 bg-slate-100 px-1 rounded">{item.count}</span>
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
@@ -237,7 +237,7 @@ export function LocationInput({
                                         key={item.id}
                                         value={item.label} // Use label for display/selection
                                         onSelect={() => handleCustomSelect(item)}
-                                        className="cursor-pointer p-2 text-white bg-amber-500/10 hover:bg-amber-500/20 mb-1 rounded-sm border border-amber-500/20"
+                                        className="cursor-pointer p-2 text-slate-900 bg-amber-500/10 hover:bg-amber-500/20 mb-1 rounded-sm border border-amber-500/20"
                                     >
                                         <Plane className="mr-2 h-4 w-4 text-amber-500" />
                                         <span className="font-bold">{item.label}</span>
@@ -254,7 +254,7 @@ export function LocationInput({
                                         key={place_id}
                                         value={description}
                                         onSelect={handleSelect}
-                                        className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-amber-500 cursor-pointer p-2 text-white"
+                                        className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-amber-500 cursor-pointer p-2 text-slate-900"
                                     >
                                         <MapPin className="mr-2 h-4 w-4 opacity-50" />
                                         <span className="truncate">

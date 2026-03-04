@@ -203,13 +203,13 @@ export default function DashboardPage() {
     }, [map, drivers, user]);
 
     return (
-        <div className="h-full w-full bg-black text-white flex font-sans overflow-hidden">
+        <div className="h-full w-full bg-slate-50 text-slate-900 flex font-sans overflow-hidden">
 
             {/* 3-COLUMN LAYOUT */}
 
             {/* COL 1: NEW BOOKING (Fixed Width) */}
-            <div className="w-[380px] border-r border-white/5 bg-black h-full flex flex-col z-20 shadow-2xl shrink-0">
-                <div className="p-4 border-b border-white/5 bg-zinc-950/50">
+            <div className="w-[380px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shadow-2xl shrink-0">
+                <div className="p-4 border-b border-slate-200 bg-white">
                     {/* Header Removed */}
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
             </div>
 
             {/* COL 2: BOOKING MANAGER (Flex Grow) */}
-            <div className="flex-1 border-r border-white/5 bg-zinc-900/20 h-full relative z-10 flex flex-col min-w-[400px]">
+            <div className="flex-1 border-r border-slate-200 bg-zinc-900/20 h-full relative z-10 flex flex-col min-w-[400px]">
                 <BookingManager
                     onSelectJob={(j) => setSelectedJob(j)}
                     selectedJobId={selectedJob?.id}
@@ -227,10 +227,10 @@ export default function DashboardPage() {
             </div>
 
             {/* COL 3: MAP & FLEET (Fixed Width) */}
-            <div className="w-[450px] flex flex-col h-full bg-zinc-950 border-l border-white/5 z-20 shrink-0">
+            <div className="w-[450px] flex flex-col h-full bg-white border-l border-slate-200 z-20 shrink-0">
 
                 {/* TOP: MAP (50%) */}
-                <div className="h-1/2 relative bg-zinc-900 border-b border-white/5">
+                <div className="h-1/2 relative bg-slate-100 border-b border-slate-200">
                     <GoogleMap
                         mapContainerStyle={{ width: '100%', height: '100%' }}
                         center={
@@ -274,13 +274,13 @@ export default function DashboardPage() {
                     </GoogleMap>
 
                     {/* Map Info Overlay */}
-                    <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur border border-white/10 p-2 rounded text-xs font-mono text-zinc-400 shadow-xl pointer-events-none">
+                    <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur border border-slate-200 p-2 rounded text-xs font-mono text-slate-500 shadow-xl pointer-events-none">
                         London Live View
                     </div>
                 </div>
 
                 {/* BOTTOM: DRIVER FLEET (50%) */}
-                <div className="h-1/2 flex flex-col overflow-hidden bg-black">
+                <div className="h-1/2 flex flex-col overflow-hidden bg-slate-50">
                     <DriverFleetPanel
                         drivers={drivers}
                         vehicles={vehicles}

@@ -48,32 +48,32 @@ export function AddDriverDialog({ onDriverAdded }: { onDriverAdded: () => void }
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-400 hover:text-white">
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-slate-500 hover:text-slate-900">
                     <Plus className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border-white/10 text-white">
+            <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
                 <DialogHeader>
                     <DialogTitle>Add New Driver</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Label>Name</Label>
-                        <Input name="name" required placeholder="John Doe" className="bg-zinc-950 border-white/10" />
+                        <Input name="name" required placeholder="John Doe" className="bg-white border-slate-200" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Callsign</Label>
-                            <Input name="callsign" required placeholder="101" className="bg-zinc-950 border-white/10" />
+                            <Input name="callsign" required placeholder="101" className="bg-white border-slate-200" />
                         </div>
                         <div className="space-y-2">
                             <Label>Phone</Label>
-                            <Input name="phone" required placeholder="+44..." className="bg-zinc-950 border-white/10" />
+                            <Input name="phone" required placeholder="+44..." className="bg-white border-slate-200" />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Email</Label>
-                        <Input name="email" type="email" placeholder="driver@example.com" className="bg-zinc-950 border-white/10" />
+                        <Input name="email" type="email" placeholder="driver@example.com" className="bg-white border-slate-200" />
                     </div>
                     <Button type="submit" className="w-full bg-amber-500 text-black hover:bg-amber-400" disabled={loading}>
                         {loading ? 'Adding...' : 'Add Driver'}
@@ -123,11 +123,11 @@ export function AddVehicleDialog({ onVehicleAdded }: { onVehicleAdded: () => voi
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-400 hover:text-white">
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-slate-500 hover:text-slate-900">
                     <Plus className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border-white/10 text-white">
+            <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
                 <DialogHeader>
                     <DialogTitle>Add New Vehicle</DialogTitle>
                 </DialogHeader>
@@ -135,15 +135,15 @@ export function AddVehicleDialog({ onVehicleAdded }: { onVehicleAdded: () => voi
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Registration</Label>
-                            <Input name="reg" required placeholder="LOND 0N1" className="bg-zinc-950 border-white/10" />
+                            <Input name="reg" required placeholder="LOND 0N1" className="bg-white border-slate-200" />
                         </div>
                         <div className="space-y-2">
                             <Label>Type</Label>
                             <Select name="type" defaultValue="Saloon">
-                                <SelectTrigger className="bg-zinc-950 border-white/10">
+                                <SelectTrigger className="bg-white border-slate-200">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                <SelectContent className="bg-slate-100 border-slate-200 text-slate-900">
                                     <SelectItem value="Saloon">Saloon</SelectItem>
                                     <SelectItem value="Estate">Estate</SelectItem>
                                     <SelectItem value="MPV">MPV</SelectItem>
@@ -154,11 +154,11 @@ export function AddVehicleDialog({ onVehicleAdded }: { onVehicleAdded: () => voi
                     </div>
                     <div className="space-y-2">
                         <Label>Model</Label>
-                        <Input name="model" required placeholder="Mercedes E-Class" className="bg-zinc-950 border-white/10" />
+                        <Input name="model" required placeholder="Mercedes E-Class" className="bg-white border-slate-200" />
                     </div>
                     <div className="space-y-2">
                         <Label>Color</Label>
-                        <Input name="color" placeholder="Black" className="bg-zinc-950 border-white/10" />
+                        <Input name="color" placeholder="Black" className="bg-white border-slate-200" />
                     </div>
                     <Button type="submit" className="w-full bg-amber-500 text-black hover:bg-amber-400" disabled={loading}>
                         {loading ? 'Adding...' : 'Add Vehicle'}

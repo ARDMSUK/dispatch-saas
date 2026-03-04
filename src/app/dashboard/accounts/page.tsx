@@ -220,10 +220,10 @@ export default function AccountsPage() {
                         <div className="grid gap-6 py-4 max-h-[70vh] overflow-y-auto px-1">
                             {/* General Information */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">General Information</h3>
+                                <h3 className="text-sm font-semibold border-b border-slate-200 pb-2">General Information</h3>
                                 <div className="grid grid-cols-[1fr_2fr] gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Account Code *</label>
+                                        <label className="text-xs font-medium text-slate-500">Account Code *</label>
                                         <Input
                                             placeholder="Code (e.g. ACC-001)"
                                             value={formData.code}
@@ -231,7 +231,7 @@ export default function AccountsPage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Company Name *</label>
+                                        <label className="text-xs font-medium text-slate-500">Company Name *</label>
                                         <Input
                                             placeholder="Company Name"
                                             value={formData.name}
@@ -241,7 +241,7 @@ export default function AccountsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">General Email</label>
+                                        <label className="text-xs font-medium text-slate-500">General Email</label>
                                         <Input
                                             placeholder="General Email"
                                             value={formData.email}
@@ -249,7 +249,7 @@ export default function AccountsPage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">General Phone</label>
+                                        <label className="text-xs font-medium text-slate-500">General Phone</label>
                                         <Input
                                             placeholder="General Phone"
                                             value={formData.phone}
@@ -261,18 +261,18 @@ export default function AccountsPage() {
 
                             {/* Primary Contact */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Primary Contact</h3>
+                                <h3 className="text-sm font-semibold border-b border-slate-200 pb-2">Primary Contact</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Full Name</label>
+                                        <label className="text-xs font-medium text-slate-500">Full Name</label>
                                         <Input placeholder="Full Name" value={formData.contactName} onChange={e => setFormData({ ...formData, contactName: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Job Title</label>
+                                        <label className="text-xs font-medium text-slate-500">Job Title</label>
                                         <Input placeholder="Job Title" value={formData.contactJobTitle} onChange={e => setFormData({ ...formData, contactJobTitle: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Department</label>
+                                        <label className="text-xs font-medium text-slate-500">Department</label>
                                         <Input placeholder="Department" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} />
                                     </div>
                                 </div>
@@ -280,23 +280,23 @@ export default function AccountsPage() {
 
                             {/* Address */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Address</h3>
+                                <h3 className="text-sm font-semibold border-b border-slate-200 pb-2">Address</h3>
                                 <div className="space-y-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Address Line 1</label>
+                                        <label className="text-xs font-medium text-slate-500">Address Line 1</label>
                                         <Input placeholder="Address Line 1" value={formData.addressLine1} onChange={e => setFormData({ ...formData, addressLine1: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Address Line 2</label>
+                                        <label className="text-xs font-medium text-slate-500">Address Line 2</label>
                                         <Input placeholder="Address Line 2" value={formData.addressLine2} onChange={e => setFormData({ ...formData, addressLine2: e.target.value })} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-xs font-medium text-zinc-400">Town / City</label>
+                                            <label className="text-xs font-medium text-slate-500">Town / City</label>
                                             <Input placeholder="Town / City" value={formData.townCity} onChange={e => setFormData({ ...formData, townCity: e.target.value })} />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-xs font-medium text-zinc-400">Postcode</label>
+                                            <label className="text-xs font-medium text-slate-500">Postcode</label>
                                             <Input placeholder="Postcode" value={formData.postcode} onChange={e => setFormData({ ...formData, postcode: e.target.value })} />
                                         </div>
                                     </div>
@@ -305,7 +305,7 @@ export default function AccountsPage() {
 
                             {/* Billing and Accounts Payable */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Billing & Accounts Payable</h3>
+                                <h3 className="text-sm font-semibold border-b border-slate-200 pb-2">Billing & Accounts Payable</h3>
                                 <div className="flex items-center space-x-2 py-2">
                                     <input
                                         type="checkbox"
@@ -320,11 +320,11 @@ export default function AccountsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Accounts Payable Contact</label>
+                                        <label className="text-xs font-medium text-slate-500">Accounts Payable Contact</label>
                                         <Input placeholder="AP Contact Name" value={formData.apContact} onChange={e => setFormData({ ...formData, apContact: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Payment Terms</label>
+                                        <label className="text-xs font-medium text-slate-500">Payment Terms</label>
                                         <Select value={formData.paymentTerms || "monthly"} onValueChange={(val) => setFormData({ ...formData, paymentTerms: val })}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select terms" />
@@ -341,11 +341,11 @@ export default function AccountsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Accounts Payable Email</label>
+                                        <label className="text-xs font-medium text-slate-500">Accounts Payable Email</label>
                                         <Input placeholder="AP Email" value={formData.apEmail} onChange={e => setFormData({ ...formData, apEmail: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Accounts Payable Tel</label>
+                                        <label className="text-xs font-medium text-slate-500">Accounts Payable Tel</label>
                                         <Input placeholder="AP Phone" value={formData.apPhone} onChange={e => setFormData({ ...formData, apPhone: e.target.value })} />
                                     </div>
                                 </div>
@@ -353,14 +353,14 @@ export default function AccountsPage() {
 
                             {/* Contract Details */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">Contract Details</h3>
+                                <h3 className="text-sm font-semibold border-b border-slate-200 pb-2">Contract Details</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">Start Date</label>
+                                        <label className="text-xs font-medium text-slate-500">Start Date</label>
                                         <Input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-zinc-400">End Date</label>
+                                        <label className="text-xs font-medium text-slate-500">End Date</label>
                                         <Input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
                                     </div>
                                 </div>
@@ -369,22 +369,22 @@ export default function AccountsPage() {
                             {/* Portal Users Management (Only when editing) */}
                             {editingId && (
                                 <div className="space-y-4">
-                                    <h3 className="text-sm font-semibold border-b border-zinc-800 pb-2">B2B Portal Access</h3>
+                                    <h3 className="text-sm font-semibold border-b border-slate-200 pb-2">B2B Portal Access</h3>
 
                                     {/* Existing Users List */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-medium text-zinc-400">Existing Portal Logins</label>
-                                        <div className="bg-zinc-900/50 rounded-md p-2 space-y-2 max-h-32 overflow-y-auto border border-zinc-800">
+                                        <label className="text-xs font-medium text-slate-500">Existing Portal Logins</label>
+                                        <div className="bg-slate-100 rounded-md p-2 space-y-2 max-h-32 overflow-y-auto border border-slate-200">
                                             {(() => {
                                                 const currentAccount = accounts.find(a => a.id === editingId);
                                                 if (!currentAccount?.users || currentAccount.users.length === 0) {
-                                                    return <p className="text-xs text-zinc-500 italic p-2">No portal users exist for this account yet.</p>;
+                                                    return <p className="text-xs text-slate-400 italic p-2">No portal users exist for this account yet.</p>;
                                                 }
                                                 return currentAccount.users.map(u => (
-                                                    <div key={u.id} className="flex justify-between items-center text-sm p-2 bg-zinc-950 rounded">
+                                                    <div key={u.id} className="flex justify-between items-center text-sm p-2 bg-white rounded">
                                                         <div className="flex flex-col">
-                                                            <span className="font-medium text-zinc-200">{u.name}</span>
-                                                            <span className="text-xs text-zinc-500">{u.email}</span>
+                                                            <span className="font-medium text-slate-800">{u.name}</span>
+                                                            <span className="text-xs text-slate-400">{u.email}</span>
                                                         </div>
                                                         <Badge variant="outline" className="text-[10px]">B2B_ADMIN</Badge>
                                                     </div>
@@ -395,7 +395,7 @@ export default function AccountsPage() {
 
                                     {/* Add New Portal User Form */}
                                     <div className="bg-zinc-900/30 p-3 rounded-md border border-zinc-800/50 space-y-3">
-                                        <p className="text-xs font-medium text-zinc-300">Invite New Portal User</p>
+                                        <p className="text-xs font-medium text-slate-600">Invite New Portal User</p>
                                         <div className="grid grid-cols-2 gap-3">
                                             <Input
                                                 placeholder="Login Email"
@@ -426,7 +426,7 @@ export default function AccountsPage() {
 
                             {/* Notes */}
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-zinc-400">Internal Notes</label>
+                                <label className="text-xs font-medium text-slate-500">Internal Notes</label>
                                 <Input placeholder="Notes" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
                             </div>
                             {editingId && (
@@ -456,21 +456,21 @@ export default function AccountsPage() {
 
             <div className="flex gap-2 mb-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-zinc-400" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
                     <Input
                         placeholder="Search accounts..."
-                        className="pl-8 bg-zinc-900/50 border-zinc-800"
+                        className="pl-8 bg-slate-100 border-slate-200"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <Card className="flex-1 overflow-hidden bg-zinc-950/50 border-zinc-800">
+            <Card className="flex-1 overflow-hidden bg-white border-slate-200">
                 <div className="overflow-auto max-h-full">
                     <Table>
-                        <TableHeader className="bg-zinc-900/50 sticky top-0">
-                            <TableRow className="border-zinc-800">
+                        <TableHeader className="bg-slate-100 sticky top-0">
+                            <TableRow className="border-slate-200">
                                 <TableHead className="w-[100px]">Code</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Contact</TableHead>
@@ -486,18 +486,18 @@ export default function AccountsPage() {
                                 </TableRow>
                             ) : filteredAccounts.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-zinc-400">No accounts found</TableCell>
+                                    <TableCell colSpan={6} className="text-center py-8 text-slate-500">No accounts found</TableCell>
                                 </TableRow>
                             ) : (
                                 filteredAccounts.map((account) => (
-                                    <TableRow key={account.id} className="hover:bg-zinc-800/50 group border-zinc-800">
+                                    <TableRow key={account.id} className="hover:bg-slate-200/50 group border-slate-200">
                                         <TableCell className="font-bold font-mono">{account.code}</TableCell>
                                         <TableCell className="font-medium flex items-center gap-2">
-                                            <Building2 className="h-4 w-4 text-zinc-400" />
+                                            <Building2 className="h-4 w-4 text-slate-500" />
                                             {account.name}
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex flex-col text-sm text-zinc-600">
+                                            <div className="flex flex-col text-sm text-slate-500">
                                                 <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {account.email || '-'}</span>
                                                 <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {account.phone || '-'}</span>
                                             </div>
@@ -516,7 +516,7 @@ export default function AccountsPage() {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" onClick={() => handleEdit(account)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-zinc-100 hover:bg-slate-200" onClick={() => handleEdit(account)}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-950/50" onClick={() => handleDelete(account.id)}>

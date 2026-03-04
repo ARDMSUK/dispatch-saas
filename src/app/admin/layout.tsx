@@ -18,10 +18,10 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+        <div className="flex min-h-screen bg-white text-slate-900">
             {/* Admin Sidebar */}
-            <aside className="w-64 border-r border-zinc-800 bg-zinc-900 hidden md:flex flex-col">
-                <div className="p-6 border-b border-zinc-800">
+            <aside className="w-64 border-r border-slate-200 bg-slate-100 hidden md:flex flex-col">
+                <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center gap-2 font-bold text-xl text-red-500">
                         <Shield className="w-6 h-6" />
                         <span>Super Admin</span>
@@ -29,19 +29,19 @@ export default async function AdminLayout({
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2">
-                    <Link href="/admin/tenants" className="flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors">
+                    <Link href="/admin/tenants" className="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-200 rounded-md transition-colors">
                         <Building2 className="w-4 h-4" />
                         Tenants
                     </Link>
                     {/* Add more admin links here later */}
                 </nav>
 
-                <div className="p-4 border-t border-zinc-800 space-y-2">
-                    <div className="px-4 py-2 text-xs text-zinc-500">
+                <div className="p-4 border-t border-slate-200 space-y-2">
+                    <div className="px-4 py-2 text-xs text-slate-400">
                         Signed in as {session.user.email}
                     </div>
                     <Link href="/dashboard">
-                        <Button variant="outline" className="w-full justify-start text-zinc-400 border-zinc-700 hover:bg-zinc-800 hover:text-white">
+                        <Button variant="outline" className="w-full justify-start text-slate-500 border-slate-300 hover:bg-slate-200 hover:text-slate-900">
                             <LayoutDashboard className="w-4 h-4 mr-2" />
                             Go to App
                         </Button>
@@ -61,7 +61,7 @@ export default async function AdminLayout({
 
             {/* Main Content */}
             <main className="flex-1 overflow-auto">
-                <header className="h-16 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-10">
+                <header className="h-16 border-b border-slate-200 flex items-center justify-between px-6 bg-slate-100 backdrop-blur-xl sticky top-0 z-10">
                     <h1 className="font-semibold text-lg">Platform Management</h1>
                 </header>
                 <div className="p-6 max-w-7xl mx-auto">

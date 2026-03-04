@@ -81,7 +81,7 @@ export default function DriverLoginPage() {
     }
 
     return (
-        <div className="flex flex-col h-screen max-w-md mx-auto bg-zinc-950 p-6">
+        <div className="flex flex-col h-screen max-w-md mx-auto bg-white p-6">
 
             {/* Header */}
             <div className="flex flex-col items-center justify-center pt-10 pb-6 space-y-4">
@@ -89,8 +89,8 @@ export default function DriverLoginPage() {
                     <Truck className="h-8 w-8 text-black" />
                 </div>
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Driver Portal</h1>
-                    <p className="text-zinc-500 text-sm">Secure Dispatch System</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Driver Portal</h1>
+                    <p className="text-slate-400 text-sm">Secure Dispatch System</p>
                 </div>
             </div>
 
@@ -99,22 +99,22 @@ export default function DriverLoginPage() {
                 <form onSubmit={handleCallsignSubmit} className="flex-1 flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-xs uppercase font-bold text-zinc-500 ml-1">Company Code</label>
+                            <label className="text-xs uppercase font-bold text-slate-400 ml-1">Company Code</label>
                             <Input
                                 autoFocus
                                 value={tenantSlug}
                                 onChange={(e) => setTenantSlug(e.target.value.toLowerCase())}
                                 placeholder="e.g. demo-taxis"
-                                className="h-14 text-lg bg-zinc-900 border-zinc-800 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest lowercase"
+                                className="h-14 text-lg bg-slate-100 border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest lowercase"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs uppercase font-bold text-zinc-500 ml-1">Your Callsign</label>
+                            <label className="text-xs uppercase font-bold text-slate-400 ml-1">Your Callsign</label>
                             <Input
                                 value={callsign}
                                 onChange={(e) => setCallsign(e.target.value.toUpperCase())}
                                 placeholder="e.g. CAB-001"
-                                className="h-14 text-lg bg-zinc-900 border-zinc-800 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest uppercase"
+                                className="h-14 text-lg bg-slate-100 border-slate-200 focus:ring-amber-500 focus:border-amber-500 text-center tracking-widest uppercase"
                             />
                         </div>
                     </div>
@@ -123,7 +123,7 @@ export default function DriverLoginPage() {
                     </Button>
 
                     <div className="mt-8 text-center">
-                        <p className="text-zinc-600 text-xs">
+                        <p className="text-slate-500 text-xs">
                             Terminated? Contact Dispatch.
                         </p>
                     </div>
@@ -134,10 +134,10 @@ export default function DriverLoginPage() {
             {step === 'PIN' && (
                 <div className="flex-1 flex flex-col h-full animate-in fade-in zoom-in-95">
                     <div className="mb-8 text-center">
-                        <p className="text-zinc-400 mb-4">Enter PIN for <span className="text-white font-bold">{callsign}</span></p>
+                        <p className="text-slate-500 mb-4">Enter PIN for <span className="text-slate-900 font-bold">{callsign}</span></p>
                         <div className="flex justify-center gap-4">
                             {[0, 1, 2, 3].map((i) => (
-                                <div key={i} className={`w-4 h-4 rounded-full transition-all duration-200 ${pin.length > i ? 'bg-amber-500 scale-110' : 'bg-zinc-800'}`} />
+                                <div key={i} className={`w-4 h-4 rounded-full transition-all duration-200 ${pin.length > i ? 'bg-amber-500 scale-110' : 'bg-slate-200'}`} />
                             ))}
                         </div>
                     </div>
@@ -148,34 +148,34 @@ export default function DriverLoginPage() {
                                 key={num}
                                 onClick={() => handlePinDigit(num.toString())}
                                 disabled={loading || pin.length >= 4}
-                                className="h-16 rounded-xl bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 text-2xl font-semibold text-white active:scale-95 transition-all flex items-center justify-center"
+                                className="h-16 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-2xl font-semibold text-slate-900 active:scale-95 transition-all flex items-center justify-center"
                             >
                                 {num}
                             </button>
                         ))}
                         <button
                             onClick={() => setStep('CALLSIGN')}
-                            className="h-16 rounded-xl bg-zinc-900/20 hover:bg-zinc-800 text-xs font-bold text-zinc-500 active:scale-95 transition-all flex items-center justify-center uppercase"
+                            className="h-16 rounded-xl bg-zinc-900/20 hover:bg-slate-200 text-xs font-bold text-slate-400 active:scale-95 transition-all flex items-center justify-center uppercase"
                         >
                             Back
                         </button>
                         <button
                             onClick={() => handlePinDigit("0")}
                             disabled={loading || pin.length >= 4}
-                            className="h-16 rounded-xl bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 text-2xl font-semibold text-white active:scale-95 transition-all flex items-center justify-center"
+                            className="h-16 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-2xl font-semibold text-slate-900 active:scale-95 transition-all flex items-center justify-center"
                         >
                             0
                         </button>
                         <button
                             onClick={handlePinDelete}
-                            className="h-16 rounded-xl bg-zinc-900/20 hover:bg-zinc-800 text-zinc-400 active:scale-95 transition-all flex items-center justify-center"
+                            className="h-16 rounded-xl bg-zinc-900/20 hover:bg-slate-200 text-slate-500 active:scale-95 transition-all flex items-center justify-center"
                         >
                             ⌫
                         </button>
                     </div>
 
                     {loading && (
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="absolute inset-0 bg-slate-100 backdrop-blur-sm flex items-center justify-center z-50">
                             <Loader2 className="h-10 w-10 text-amber-500 animate-spin" />
                         </div>
                     )}

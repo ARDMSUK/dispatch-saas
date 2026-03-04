@@ -70,30 +70,30 @@ export default function ProfileSecurityPage() {
     };
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6 bg-zinc-950 min-h-screen text-white">
+        <div className="flex-1 space-y-4 p-8 pt-6 bg-white min-h-screen text-slate-900">
             <div className="flex items-center justify-between space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight">My Profile & Security</h2>
             </div>
-            <p className="text-zinc-400 mb-8">Manage your personal account settings and security preferences.</p>
+            <p className="text-slate-500 mb-8">Manage your personal account settings and security preferences.</p>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
                 {/* 2FA Card */}
-                <Card className="bg-zinc-900 border-zinc-800 text-white">
+                <Card className="bg-slate-100 border-slate-200 text-slate-900">
                     <CardHeader>
                         <div className="flex items-center gap-2">
                             <ShieldCheck className="h-5 w-5 text-amber-500" />
                             <CardTitle>Two-Factor Authentication (2FA)</CardTitle>
                         </div>
-                        <CardDescription className="text-zinc-400">
+                        <CardDescription className="text-slate-500">
                             Add an extra layer of security to your account using an Authenticator app (like Google Authenticator or Authy).
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {twoFactorActive.isActive ? (
                             <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-md">
-                                <ShieldCheck className="h-6 w-6 text-emerald-400" />
+                                <ShieldCheck className="h-6 w-6 text-emerald-600" />
                                 <div>
-                                    <h4 className="font-medium text-emerald-400">2FA is Enabled</h4>
+                                    <h4 className="font-medium text-emerald-600">2FA is Enabled</h4>
                                     <p className="text-sm text-emerald-500/80">Your account is secured with two-factor authentication.</p>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@ export default function ProfileSecurityPage() {
                                         <Button
                                             onClick={initiate2FASetup}
                                             disabled={loadingSetup}
-                                            className="bg-zinc-800 hover:bg-zinc-700 text-white"
+                                            className="bg-slate-200 hover:bg-zinc-700 text-slate-900"
                                         >
                                             {loadingSetup ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <QrCode className="mr-2 h-4 w-4" />}
                                             Setup Authenticator App
@@ -124,12 +124,12 @@ export default function ProfileSecurityPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium mb-1">Manual Entry Code:</p>
-                                            <code className="bg-zinc-950 border border-zinc-800 p-2 rounded block font-mono text-amber-400 tracking-wider text-center text-lg">
+                                            <code className="bg-white border border-slate-200 p-2 rounded block font-mono text-amber-400 tracking-wider text-center text-lg">
                                                 {qrCodeData.secret}
                                             </code>
                                         </div>
 
-                                        <div className="space-y-3 pt-4 border-t border-zinc-800">
+                                        <div className="space-y-3 pt-4 border-t border-slate-200">
                                             <label className="text-sm font-medium">Verify Code from App</label>
                                             <div className="flex gap-2">
                                                 <Input
@@ -137,7 +137,7 @@ export default function ProfileSecurityPage() {
                                                     onChange={(e) => setVerifyToken(e.target.value)}
                                                     placeholder="Enter 6-digit code"
                                                     maxLength={6}
-                                                    className="bg-zinc-950 border-zinc-800 text-center text-lg tracking-widest focus:ring-amber-500 font-mono"
+                                                    className="bg-white border-slate-200 text-center text-lg tracking-widest focus:ring-amber-500 font-mono"
                                                 />
                                                 <Button
                                                     onClick={confirm2FASetup}

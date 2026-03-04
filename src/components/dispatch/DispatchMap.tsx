@@ -61,12 +61,12 @@ const DispatchMap = ({ className, drivers = [] }: DispatchMapProps) => {
   return (
     <div className={`relative ${className}`}>
       {/* Map Controls Overlay */}
-      <div className="absolute top-4 right-4 z-[400] bg-zinc-900/90 backdrop-blur-sm p-2 rounded-lg border border-white/10 shadow-xl">
+      <div className="absolute top-4 right-4 z-[400] bg-zinc-900/90 backdrop-blur-sm p-2 rounded-lg border border-slate-200 shadow-xl">
         <Button
           variant={showHeatmap ? "default" : "outline"}
           size="sm"
           onClick={() => setShowHeatmap(!showHeatmap)}
-          className={`flex items-center gap-2 ${showHeatmap ? 'bg-orange-600 hover:bg-orange-700 text-white border-transparent' : 'bg-black/50 hover:bg-white/10 text-zinc-300 border-white/10'}`}
+          className={`flex items-center gap-2 ${showHeatmap ? 'bg-orange-600 hover:bg-orange-700 text-slate-900 border-transparent' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'}`}
         >
           <Layers className="h-4 w-4" />
           {showHeatmap ? 'Demand Heatmap On' : 'Show Demand Heatmap'}

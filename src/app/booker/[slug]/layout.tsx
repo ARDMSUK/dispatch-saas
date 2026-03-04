@@ -17,7 +17,7 @@ export default function BookerLayout({
     return (
         <html lang="en" className="dark h-full">
             <body className={`${inter.className} min-h-screen bg-transparent antialiased m-0 p-0`}>
-                <main className="w-full h-full bg-zinc-950/80 sm:bg-transparent">
+                <main className="w-full h-full bg-white/80 sm:bg-transparent">
                     {children}
                 </main>
                 <Toaster />

@@ -63,25 +63,25 @@ export function DriverList({ onAssign, selectedJobId }: DriverListProps) {
     };
 
     return (
-        <Card className="h-full bg-zinc-900 border-zinc-800 flex flex-col">
-            <CardHeader className="pb-3 border-b border-white/5">
-                <CardTitle className="text-white text-lg">Drivers</CardTitle>
+        <Card className="h-full bg-slate-100 border-slate-200 flex flex-col">
+            <CardHeader className="pb-3 border-b border-slate-200">
+                <CardTitle className="text-slate-900 text-lg">Drivers</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-zinc-700">
                 {drivers.map(driver => (
-                    <div key={driver.id} className="bg-black/20 rounded-lg p-3 border border-white/5 flex flex-col gap-2">
+                    <div key={driver.id} className="bg-slate-50 rounded-lg p-3 border border-slate-200 flex flex-col gap-2">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <div className={`h-2 w-2 rounded-full ${getStatusColor(driver.status)} shadow-[0_0_8px_currentColor]`} />
-                                <span className="font-bold text-white text-sm">{driver.callsign}</span>
-                                <span className="text-xs text-zinc-500">{driver.name.split(' ')[0]}</span>
+                                <span className="font-bold text-slate-900 text-sm">{driver.callsign}</span>
+                                <span className="text-xs text-slate-400">{driver.name.split(' ')[0]}</span>
                             </div>
                             <Badge variant="secondary" className="bg-white/5 text-xs">
                                 {driver.vehicle?.type || 'Vehicle'}
                             </Badge>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs text-zinc-400">
+                        <div className="flex items-center justify-between text-xs text-slate-500">
                             <div className="flex items-center gap-1">
                                 <Car className="h-3 w-3" />
                                 <span>{driver.vehicle?.reg || 'No Reg'}</span>

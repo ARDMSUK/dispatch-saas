@@ -140,30 +140,30 @@ export function CliPopListener() {
 
     return (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-            <div className="bg-zinc-900 border border-zinc-800 shadow-xl shadow-amber-500/10 rounded-xl overflow-hidden min-w-[320px]">
+            <div className="bg-slate-100 border border-slate-200 shadow-xl shadow-amber-500/10 rounded-xl overflow-hidden min-w-[320px]">
                 {/* Header Tape */}
                 <div className="bg-amber-500 h-1.5 w-full animate-pulse" />
 
                 <div className="p-4 flex flex-col gap-3">
                     <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2 text-emerald-400 font-semibold animate-pulse">
+                        <div className="flex items-center gap-2 text-emerald-600 font-semibold animate-pulse">
                             <PhoneCall className="h-4 w-4" />
                             <span>INCOMING CALL</span>
                         </div>
-                        <button onClick={handleDismiss} className="text-zinc-500 hover:text-zinc-300">
+                        <button onClick={handleDismiss} className="text-slate-400 hover:text-zinc-300">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <span className="text-2xl font-bold font-mono text-white tracking-widest">{activeCall.phone}</span>
+                        <span className="text-2xl font-bold font-mono text-slate-900 tracking-widest">{activeCall.phone}</span>
                         {customerName ? (
-                            <div className="flex items-center gap-1.5 text-zinc-300">
+                            <div className="flex items-center gap-1.5 text-slate-600">
                                 <UserIcon className="h-4 w-4 text-amber-500" />
                                 <span className="font-medium text-lg">{customerName}</span>
                             </div>
                         ) : (
-                            <span className="text-zinc-500 text-sm">New Caller</span>
+                            <span className="text-slate-400 text-sm">New Caller</span>
                         )}
                     </div>
 
@@ -177,7 +177,7 @@ export function CliPopListener() {
                         <Button
                             variant="outline"
                             onClick={handleDismiss}
-                            className="border-zinc-700 hover:bg-zinc-800 text-zinc-300"
+                            className="border-slate-300 hover:bg-slate-200 text-slate-600"
                         >
                             Dismiss
                         </Button>

@@ -83,7 +83,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-zinc-500">Loading...</div>;
+    if (loading) return <div className="p-8 text-center text-slate-400">Loading...</div>;
     if (!tenant) return <div className="p-8 text-center text-red-500">Tenant not found</div>;
 
     return (
@@ -96,7 +96,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="grid gap-6">
-                <Card className="bg-zinc-900 border-zinc-800">
+                <Card className="bg-slate-100 border-slate-200">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Building2 className="w-5 h-5" />
@@ -107,31 +107,31 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Name</label>
-                                <Input name="name" value={tenant.name} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                <Input name="name" value={tenant.name} onChange={handleChange} className="bg-white border-slate-200" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Slug</label>
-                                <Input name="slug" value={tenant.slug} disabled className="bg-zinc-950 border-zinc-800 opacity-50 cursor-not-allowed" />
+                                <Input name="slug" value={tenant.slug} disabled className="bg-white border-slate-200 opacity-50 cursor-not-allowed" />
                             </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Contact Email</label>
-                            <Input name="email" value={tenant.email || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                            <Input name="email" value={tenant.email || ''} onChange={handleChange} className="bg-white border-slate-200" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Phone</label>
-                                <Input name="phone" value={tenant.phone || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                <Input name="phone" value={tenant.phone || ''} onChange={handleChange} className="bg-white border-slate-200" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Address</label>
-                                <Input name="address" value={tenant.address || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                <Input name="address" value={tenant.address || ''} onChange={handleChange} className="bg-white border-slate-200" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-zinc-900 border-zinc-800">
+                <Card className="bg-slate-100 border-slate-200">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Key className="w-5 h-5" />
@@ -143,7 +143,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider">Tenant API Key</h3>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Read-Only API Key (Used for Web Chat Widget)</label>
-                                <Input readOnly value={tenant.apiKey || ''} className="bg-zinc-950 border-zinc-800 text-zinc-400 cursor-not-allowed font-mono text-xs" />
+                                <Input readOnly value={tenant.apiKey || ''} className="bg-white border-slate-200 text-slate-500 cursor-not-allowed font-mono text-xs" />
                             </div>
                         </div>
 
@@ -152,11 +152,11 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Secret Key</label>
-                                    <Input name="stripeSecretKey" type="password" value={tenant.stripeSecretKey || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="stripeSecretKey" type="password" value={tenant.stripeSecretKey || ''} onChange={handleChange} className="bg-white border-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Publishable Key</label>
-                                    <Input name="stripePublishableKey" value={tenant.stripePublishableKey || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="stripePublishableKey" value={tenant.stripePublishableKey || ''} onChange={handleChange} className="bg-white border-slate-200" />
                                 </div>
                             </div>
                         </div>
@@ -166,20 +166,20 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Account SID</label>
-                                    <Input name="twilioAccountSid" value={tenant.twilioAccountSid || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="twilioAccountSid" value={tenant.twilioAccountSid || ''} onChange={handleChange} className="bg-white border-slate-200" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">Auth Token</label>
-                                    <Input name="twilioAuthToken" type="password" value={tenant.twilioAuthToken || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                    <Input name="twilioAuthToken" type="password" value={tenant.twilioAuthToken || ''} onChange={handleChange} className="bg-white border-slate-200" />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">From Number</label>
-                                <Input name="twilioFromNumber" value={tenant.twilioFromNumber || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                <Input name="twilioFromNumber" value={tenant.twilioFromNumber || ''} onChange={handleChange} className="bg-white border-slate-200" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Twilio Subaccount ID (WhatsApp Isolation)</label>
-                                <Input name="twilioSubaccountId" value={tenant.twilioSubaccountId || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                <Input name="twilioSubaccountId" value={tenant.twilioSubaccountId || ''} onChange={handleChange} className="bg-white border-slate-200" />
                             </div>
                         </div>
 
@@ -187,7 +187,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             <h3 className="text-sm font-bold text-green-500 uppercase tracking-wider">Resend</h3>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">API Key</label>
-                                <Input name="resendApiKey" type="password" value={tenant.resendApiKey || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" />
+                                <Input name="resendApiKey" type="password" value={tenant.resendApiKey || ''} onChange={handleChange} className="bg-white border-slate-200" />
                             </div>
                         </div>
 
@@ -195,13 +195,13 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-wider">AviationStack (Flights)</h3>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">API Key</label>
-                                <Input name="aviationStackApiKey" type="password" value={tenant.aviationStackApiKey || ''} onChange={handleChange} className="bg-zinc-950 border-zinc-800" placeholder="Optional. Globally configured if left blank." />
+                                <Input name="aviationStackApiKey" type="password" value={tenant.aviationStackApiKey || ''} onChange={handleChange} className="bg-white border-slate-200" placeholder="Optional. Globally configured if left blank." />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-zinc-900 border-zinc-800">
+                <Card className="bg-slate-100 border-slate-200">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Building2 className="w-5 h-5" />
@@ -209,77 +209,77 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
                             <input
                                 type="checkbox"
                                 name="enableLiveTracking"
                                 id="enableLiveTracking"
                                 checked={tenant.enableLiveTracking !== false}
                                 onChange={(e) => setTenant({ ...tenant, enableLiveTracking: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
-                                <label htmlFor="enableLiveTracking" className="text-white font-medium cursor-pointer">
+                                <label htmlFor="enableLiveTracking" className="text-slate-900 font-medium cursor-pointer">
                                     Enable Live Tracking Links in SMS
                                 </label>
-                                <p className="text-sm text-zinc-500">
+                                <p className="text-sm text-slate-400">
                                     If enabled, SMS notifications sent to customers when a driver is assigned will include a secure link to track their ride in real-time.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
                             <input
                                 type="checkbox"
                                 name="hasWebChatAi"
                                 id="hasWebChatAi"
                                 checked={tenant.hasWebChatAi === true}
                                 onChange={(e) => setTenant({ ...tenant, hasWebChatAi: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
-                                <label htmlFor="hasWebChatAi" className="text-white font-medium cursor-pointer">
+                                <label htmlFor="hasWebChatAi" className="text-slate-900 font-medium cursor-pointer">
                                     Web Chat AI Widget
                                 </label>
-                                <p className="text-sm text-zinc-500">
+                                <p className="text-sm text-slate-400">
                                     Enables the standalone Cabot AI Web Chat script payload for this tenant's website.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
                             <input
                                 type="checkbox"
                                 name="hasWhatsAppAi"
                                 id="hasWhatsAppAi"
                                 checked={tenant.hasWhatsAppAi === true}
                                 onChange={(e) => setTenant({ ...tenant, hasWhatsAppAi: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
-                                <label htmlFor="hasWhatsAppAi" className="text-white font-medium cursor-pointer">
+                                <label htmlFor="hasWhatsAppAi" className="text-slate-900 font-medium cursor-pointer">
                                     WhatsApp AI Agent
                                 </label>
-                                <p className="text-sm text-zinc-500">
+                                <p className="text-sm text-slate-400">
                                     Enables inbound Twilio WhatsApp routing to Cabot AI for this tenant.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-start space-x-3 p-4 bg-black/30 rounded border border-white/5">
+                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
                             <input
                                 type="checkbox"
                                 name="hasVoiceAi"
                                 id="hasVoiceAi"
                                 checked={tenant.hasVoiceAi === true}
                                 onChange={(e) => setTenant({ ...tenant, hasVoiceAi: e.target.checked })}
-                                className="w-5 h-5 accent-amber-500 bg-zinc-950 border-zinc-800 mt-1"
+                                className="w-5 h-5 accent-amber-500 bg-white border-slate-200 mt-1"
                             />
                             <div className="space-y-1">
-                                <label htmlFor="hasVoiceAi" className="text-white font-medium cursor-pointer">
+                                <label htmlFor="hasVoiceAi" className="text-slate-900 font-medium cursor-pointer">
                                     Voice AI Agent
                                 </label>
-                                <p className="text-sm text-zinc-500">
+                                <p className="text-sm text-slate-400">
                                     Enables AI-powered conversational voice dispatch mapping.
                                 </p>
                             </div>
@@ -294,7 +294,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                     Delete Tenant
                 </Button>
 
-                <Button onClick={handleSave} disabled={saving} className="bg-green-600 text-white hover:bg-green-500 min-w-[150px]">
+                <Button onClick={handleSave} disabled={saving} className="bg-green-600 text-slate-900 hover:bg-green-500 min-w-[150px]">
                     {saving ? "Saving..." : (
                         <>
                             <Save className="w-4 h-4 mr-2" />

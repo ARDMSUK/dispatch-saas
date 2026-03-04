@@ -514,23 +514,23 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             {/* Header ... */}
             <div>
                 {/* Header Cleaned */}
-                <h1 className="text-2xl font-bold text-white">Booking Console</h1>
+                <h1 className="text-2xl font-bold text-slate-900">Booking Console</h1>
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4">
                 {/* 1. PICKUP TIME ... (Unchanged) */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Pickup Date & Time</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pickup Date & Time</label>
                     <div className="flex gap-2">
                         <input
                             type="datetime-local"
-                            className="flex-1 bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
                             value={pickupTime}
                             onChange={e => setPickupTime(e.target.value)}
                         />
                         <Button
                             variant="outline"
-                            className={`h-[42px] px-3 border-white/10 ${pickupTime.includes('T') ? 'bg-amber-500/10 text-amber-500 border-amber-500/50' : 'bg-black/40 text-zinc-400'}`}
+                            className={`h-[42px] px-3 border-slate-200 ${pickupTime.includes('T') ? 'bg-amber-500/10 text-amber-500 border-amber-500/50' : 'bg-slate-100 text-slate-500'}`}
                             onClick={() => {
                                 const now = new Date();
                                 now.setMinutes(now.getMinutes() + 10); // ASAP = +10 mins
@@ -541,13 +541,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </Button>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        <Button type="button" variant="outline" size="sm" className="bg-black/20 border-white/10 text-xs px-2 h-7"
+                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
                             onClick={() => { const now = new Date(); now.setMinutes(now.getMinutes() + 15); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>ASAP (+15m)</Button>
-                        <Button type="button" variant="outline" size="sm" className="bg-black/20 border-white/10 text-xs px-2 h-7"
+                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
                             onClick={() => { const now = new Date(); now.setMinutes(now.getMinutes() + 30); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>+30m</Button>
-                        <Button type="button" variant="outline" size="sm" className="bg-black/20 border-white/10 text-xs px-2 h-7"
+                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
                             onClick={() => { const now = new Date(); now.setHours(now.getHours() + 1); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>+1h</Button>
-                        <Button type="button" variant="outline" size="sm" className="bg-black/20 border-white/10 text-xs px-2 h-7"
+                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
                             onClick={() => { const now = new Date(); now.setDate(now.getDate() + 1); now.setHours(9, 0, 0, 0); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>Tomorrow 9AM</Button>
                     </div>
                 </div>
@@ -560,53 +560,53 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                         {customerStats && (
                             <div className="text-[10px] text-right">
-                                <span className="block text-emerald-400 font-bold">{customerStats.total} Previous Jobs</span>
-                                <span className="block text-zinc-500">Last: {new Date(customerStats.lastDate).toLocaleDateString()}</span>
+                                <span className="block text-emerald-600 font-bold">{customerStats.total} Previous Jobs</span>
+                                <span className="block text-slate-400">Last: {new Date(customerStats.lastDate).toLocaleDateString()}</span>
                             </div>
                         )}
                     </div>
                     <input
                         type="tel"
                         placeholder="Enter Number (e.g. 077...)"
-                        className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-lg font-mono text-white focus:outline-none focus:border-amber-400/50"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-slate-900 focus:outline-none focus:border-amber-400/50"
                         value={passengerPhone}
                         onChange={e => setPassengerPhone(e.target.value)}
                         onBlur={() => handlePhoneLookup(passengerPhone)}
                     />
                 </div>
 
-                <div className="border-t border-white/5 my-4"></div>
+                <div className="border-t border-slate-200 my-4"></div>
 
                 {/* 2. ROUTE ... (Unchanged) */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Journey</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Journey</label>
                     {/* Pickup */}
                     <div className="relative group z-50">
                         <div className="absolute left-3 top-3 text-emerald-500"><Navigation className="h-4 w-4" /></div>
-                        <LocationInput placeholder="Pickup Location (e.g. Heathrow T5)" className="w-full bg-black/40 border border-white/10 rounded-md py-6 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
+                        <LocationInput placeholder="Pickup Location (e.g. Heathrow T5)" className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
                     </div>
                     {/* Vias */}
                     {vias.map((via, index) => (
                         <div key={index} className="relative group flex gap-2">
                             <div className="relative flex-1">
-                                <div className="absolute left-3 top-3 text-zinc-500"><MapPin className="h-4 w-4" /></div>
-                                <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-black/40 border border-white/10 rounded-md py-6 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
+                                <div className="absolute left-3 top-3 text-slate-400"><MapPin className="h-4 w-4" /></div>
+                                <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
                             </div>
-                            <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-white/5" onClick={() => removeVia(index)}><X className="h-4 w-4" /></Button>
+                            <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-slate-200" onClick={() => removeVia(index)}><X className="h-4 w-4" /></Button>
                         </div>
                     ))}
                     <button onClick={addVia} className="text-xs text-amber-500 hover:text-amber-400 flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
                     {/* Dropoff */}
                     <div className="relative group z-40">
                         <div className="absolute left-3 top-3 text-amber-500"><MapPin className="h-4 w-4" /></div>
-                        <LocationInput placeholder="Destination" className="w-full bg-black/40 border border-white/10 rounded-md py-6 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
+                        <LocationInput placeholder="Destination" className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
                     </div>
                     {/* Flight */}
                     {showFlightInput && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                             <div className="relative group">
-                                <div className="absolute left-3 top-3 text-blue-400"><Plane className="h-4 w-4" /></div>
-                                <input type="text" placeholder="Flight Number (e.g. BA101)" className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-400/50" value={flightNumber} onChange={e => setFlightNumber(e.target.value.toUpperCase())} />
+                                <div className="absolute left-3 top-3 text-blue-600"><Plane className="h-4 w-4" /></div>
+                                <input type="text" placeholder="Flight Number (e.g. BA101)" className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50" value={flightNumber} onChange={e => setFlightNumber(e.target.value.toUpperCase())} />
                             </div>
 
                             {/* Meet & Greet Toggle */}
@@ -626,21 +626,21 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     )}
                 </div>
 
-                <div className="border-t border-white/5 my-4"></div>
+                <div className="border-t border-slate-200 my-4"></div>
 
                 {/* 3. DETAILS SECTION (Modified) */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Customer Details</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Customer Details</label>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="relative">
-                            <div className="absolute left-3 top-3 text-zinc-500">
+                            <div className="absolute left-3 top-3 text-slate-400">
                                 <User className="h-4 w-4" />
                             </div>
                             {/* Renamed Placeholder to 'Customer' */}
                             <input
                                 type="text"
                                 placeholder="Customer"
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={passengerName}
                                 onChange={e => setPassengerName(e.target.value)}
                             />
@@ -649,13 +649,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     {/* EMAIL FIELD (New) */}
                     <div className="relative">
-                        <div className="absolute left-3 top-3 text-zinc-500">
+                        <div className="absolute left-3 top-3 text-slate-400">
                             <span className="text-xs font-bold">@</span>
                         </div>
                         <input
                             type="email"
                             placeholder="Email Address"
-                            className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                             value={passengerEmail}
                             onChange={e => setPassengerEmail(e.target.value)}
                         />
@@ -663,23 +663,23 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     <div className="grid grid-cols-2 gap-3">
                         <div className="relative">
-                            <span className="absolute left-3 top-2.5 text-xs text-zinc-500 font-bold">PAX</span>
+                            <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">PAX</span>
                             <input
                                 type="number"
                                 min="1"
                                 max="16"
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={passengers}
                                 onChange={e => setPassengers(parseInt(e.target.value))}
                             />
                         </div>
                         <div className="relative">
-                            <span className="absolute left-3 top-2.5 text-xs text-zinc-500 font-bold">LUG</span>
+                            <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">LUG</span>
                             <input
                                 type="number"
                                 min="0"
                                 max="10"
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={luggage}
                                 onChange={e => setLuggage(parseInt(e.target.value))}
                             />
@@ -688,7 +688,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     <div className="grid grid-cols-1 gap-3">
                         <select
-                            className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 appearance-none"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
                             value={vehicleType}
                             onChange={e => {
                                 const newVal = e.target.value;
@@ -725,7 +725,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     )}
                     <div className="grid grid-cols-1 gap-3">
                         <select
-                            className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-emerald-400 font-bold focus:outline-none focus:border-amber-400/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-emerald-600 font-bold focus:outline-none focus:border-amber-400/50"
                             value={paymentType}
                             onChange={e => setPaymentType(e.target.value)}
                         >
@@ -739,14 +739,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <textarea
                         placeholder="Instructions (Notes)..."
                         rows={2}
-                        className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 resize-none"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 resize-none"
                         value={instructions}
                         onChange={e => setInstructions(e.target.value)}
                     />
 
                     {/* REMINDERS (New) */}
                     <select
-                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-blue-400/50 appearance-none"
+                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50 appearance-none"
                         value={reminders}
                         onChange={e => setReminders(e.target.value)}
                     >
@@ -759,22 +759,22 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                 </div>
 
-                <div className="border-t border-white/5 my-4"></div>
+                <div className="border-t border-slate-200 my-4"></div>
 
                 {/* 4. RETURN OPTION (Renamed from Schedule) */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Return Journey</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Return Journey</label>
 
                     {/* WAIT & RETURN TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-white/5 bg-white/5">
+                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5">
                         <input
                             type="checkbox"
                             id="waitReturnToggle"
                             checked={isWaitAndReturn}
                             onChange={(e) => setIsWaitAndReturn(e.target.checked)}
-                            className="w-4 h-4 rounded border-zinc-600 bg-black/40 text-amber-500 focus:ring-amber-500/20"
+                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-amber-500 focus:ring-amber-500/20"
                         />
-                        <label htmlFor="waitReturnToggle" className="text-sm text-white flex-1 cursor-pointer select-none flex items-center gap-2">
+                        <label htmlFor="waitReturnToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
                             <RotateCw className="h-3 w-3 text-amber-500" /> Wait & Return
                         </label>
                     </div>
@@ -787,7 +787,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     type="number"
                                     min="0"
                                     step="5"
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                     value={waitingTime}
                                     onChange={e => setWaitingTime(parseInt(e.target.value))}
                                 />
@@ -796,30 +796,30 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     )}
 
                     {/* RETURN BOOKING TOGGLE */}
-                    <div className={`flex items-center gap-3 p-2 rounded border border-white/5 bg-white/5 ${isWaitAndReturn ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className={`flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 ${isWaitAndReturn ? 'opacity-50 pointer-events-none' : ''}`}>
                         <input
                             type="checkbox"
                             id="returnToggle"
                             checked={isReturn}
                             onChange={(e) => setIsReturn(e.target.checked)}
                             disabled={isWaitAndReturn}
-                            className="w-4 h-4 rounded border-zinc-600 bg-black/40 text-amber-500 focus:ring-amber-500/20"
+                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-amber-500 focus:ring-amber-500/20"
                         />
-                        <label htmlFor="returnToggle" className="text-sm text-white flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <RotateCw className="h-3 w-3 text-zinc-400" /> Book Return Journey
+                        <label htmlFor="returnToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
+                            <RotateCw className="h-3 w-3 text-slate-500" /> Book Return Journey
                         </label>
                     </div>
 
                     {/* RECURRING TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-white/5 bg-white/5 mt-2">
+                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 mt-2">
                         <input
                             type="checkbox"
                             id="recurringToggle"
                             checked={isRecurring}
                             onChange={(e) => setIsRecurring(e.target.checked)}
-                            className="w-4 h-4 rounded border-zinc-600 bg-black/40 text-emerald-500 focus:ring-emerald-500/20"
+                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-emerald-500 focus:ring-emerald-500/20"
                         />
-                        <label htmlFor="recurringToggle" className="text-sm text-white flex-1 cursor-pointer select-none flex items-center gap-2">
+                        <label htmlFor="recurringToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
                             <RotateCw className="h-3 w-3 text-emerald-500" /> Recurring Booking
                         </label>
                     </div>
@@ -840,9 +840,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {isRecurring && (
                         <div className="pl-4 border-l-2 border-emerald-500/20 animate-in slide-in-from-top-2 space-y-4 mt-2">
                             <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-400 font-bold">Frequency</label>
+                                <label className="text-xs text-emerald-600 font-bold">Frequency</label>
                                 <select
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-emerald-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50"
                                     value={recurrenceRule}
                                     onChange={(e) => setRecurrenceRule(e.target.value)}
                                 >
@@ -853,10 +853,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 </select>
                             </div>
                             <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-400 font-bold">Repeat Until</label>
+                                <label className="text-xs text-emerald-600 font-bold">Repeat Until</label>
                                 <input
                                     type="date"
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-emerald-400/50 [color-scheme:dark]"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:dark]"
                                     value={recurrenceEnd}
                                     onChange={e => setRecurrenceEnd(e.target.value)}
                                 />
@@ -875,7 +875,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 </div>
                                 <LocationInput
                                     placeholder="Return Pickup (e.g. Hotel)"
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-6 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                     value={returnPickup}
                                     onChange={setReturnPickup}
                                     onLocationSelect={(loc) => {
@@ -892,7 +892,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 </div>
                                 <LocationInput
                                     placeholder="Return Destination"
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-6 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                     value={returnDropoff}
                                     onChange={setReturnDropoff}
                                     onLocationSelect={(loc) => {
@@ -905,20 +905,20 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             {/* RETURN DATE/TIME */}
                             <input
                                 type="datetime-local"
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
                                 value={returnDate}
                                 onChange={e => setReturnDate(e.target.value)}
                             />
 
                             {/* RETURN FLIGHT (Conditional logic can be same or just show it) */}
                             <div className="relative group">
-                                <div className="absolute left-3 top-3 text-blue-400">
+                                <div className="absolute left-3 top-3 text-blue-600">
                                     <Plane className="h-4 w-4" />
                                 </div>
                                 <input
                                     type="text"
                                     placeholder="Return Flight Number (Optional)"
-                                    className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-400/50"
+                                    className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50"
                                     value={returnFlightNumber}
                                     onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
                                 />
@@ -927,23 +927,23 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             {/* RETURN PAX & LUGGAGE */}
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-xs text-zinc-500 font-bold">PAX</span>
+                                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">PAX</span>
                                     <input
                                         type="number"
                                         min="1"
                                         max="16"
-                                        className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                         value={returnPassengers}
                                         onChange={e => setReturnPassengers(parseInt(e.target.value))}
                                     />
                                 </div>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-xs text-zinc-500 font-bold">LUG</span>
+                                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">LUG</span>
                                     <input
                                         type="number"
                                         min="0"
                                         max="10"
-                                        className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                         value={returnLuggage}
                                         onChange={e => setReturnLuggage(parseInt(e.target.value))}
                                     />
@@ -954,7 +954,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             <input
                                 type="text"
                                 placeholder="Return Journey Notes..."
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={returnNotes}
                                 onChange={e => setReturnNotes(e.target.value)}
                             />
@@ -963,29 +963,29 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 {/* QUOTE & SUBMIT */}
-                <div className={`mt-6 p-4 rounded-lg border border-dashed transition-all duration-300 ${quotedPrice ? "bg-emerald-500/10 border-emerald-500/30" : "bg-white/5 border-white/10"}`}>
+                <div className={`mt-6 p-4 rounded-lg border border-dashed transition-all duration-300 ${quotedPrice ? "bg-emerald-500/10 border-emerald-500/30" : "bg-white/5 border-slate-200"}`}>
                     <div className="flex justify-between items-center">
-                        <span className="text-zinc-400 text-xs uppercase tracking-wider font-bold">Estimated Fare</span>
+                        <span className="text-slate-500 text-xs uppercase tracking-wider font-bold">Estimated Fare</span>
                         {isCalculating ? (
                             <span className="text-amber-400 text-xs animate-pulse">Calculating...</span>
                         ) : (
                             <div className="flex flex-col items-end">
                                 <div className="flex items-center justify-end group" title="Click to manually override fare">
-                                    <span className="text-2xl font-mono text-white">£</span>
+                                    <span className="text-2xl font-mono text-slate-900">£</span>
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className="w-24 bg-transparent border-b border-dashed border-white/30 hover:border-amber-400 focus:border-amber-400 focus:border-solid text-2xl font-mono text-white text-right focus:outline-none transition-all ml-1 py-0 px-0"
+                                        className="w-24 bg-transparent border-b border-dashed border-white/30 hover:border-amber-400 focus:border-amber-400 focus:border-solid text-2xl font-mono text-slate-900 text-right focus:outline-none transition-all ml-1 py-0 px-0"
                                         value={quotedPrice !== null ? quotedPrice : ''}
                                         onChange={(e) => setQuotedPrice(e.target.value ? parseFloat(e.target.value) : null)}
                                         placeholder="0.00"
                                     />
                                 </div>
-                                <span className="block text-[10px] text-zinc-500 mt-1">
+                                <span className="block text-[10px] text-slate-400 mt-1">
                                     {debugData?.payload?.distance ? `${debugData.payload.distance.toFixed(1)} miles` : '0.0 miles'}
                                 </span>
                                 {isReturn && quotedPrice !== null && (
-                                    <span className="text-[10px] text-zinc-500 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
+                                    <span className="text-[10px] text-slate-400 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
                                 )}
                             </div>
                         )}

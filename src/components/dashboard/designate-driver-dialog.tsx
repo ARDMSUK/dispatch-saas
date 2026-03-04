@@ -67,23 +67,23 @@ export function DesignateDriverDialog({ job, open, onOpenChange, onSuccess }: De
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-950 border border-white/10 text-white sm:max-w-[400px]">
+            <DialogContent className="bg-white border border-slate-200 text-slate-900 sm:max-w-[400px]">
                 <DialogHeader>
                     <DialogTitle>Designate Driver (Auto-Dispatch)</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 py-2">
                     <div className="flex flex-col space-y-2">
-                        <div className="text-xs text-zinc-400">Job Reference</div>
+                        <div className="text-xs text-slate-500">Job Reference</div>
                         <div className="text-sm font-mono bg-white/5 p-2 rounded">
                             #{job.id} - {new Date(job.pickupTime).toLocaleString()}
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Select Driver</label>
+                        <label className="text-sm font-medium text-slate-600">Select Driver</label>
                         <select
-                            className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 appearance-none"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
                             value={selectedDriverId}
                             onChange={e => setSelectedDriverId(e.target.value)}
                         >
@@ -94,14 +94,14 @@ export function DesignateDriverDialog({ job, open, onOpenChange, onSuccess }: De
                                 </option>
                             ))}
                         </select>
-                        <p className="text-[10px] text-zinc-500">
+                        <p className="text-[10px] text-slate-400">
                             The job will be automatically dispatched to this driver 30 minutes before pickup.
                         </p>
                     </div>
                 </div>
 
                 <DialogFooter>
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-zinc-400 hover:text-white">
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-slate-500 hover:text-slate-900">
                         Cancel
                     </Button>
                     <Button onClick={handleSave} disabled={loading} className="bg-amber-500 hover:bg-amber-600 text-black">

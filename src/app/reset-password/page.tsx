@@ -36,7 +36,7 @@ function ResetPasswordForm() {
             <div className="flex flex-col items-center justify-center text-center space-y-4 py-4">
                 <AlertTriangle className="h-12 w-12 text-red-500" />
                 <p className="text-red-400 font-bold">Invalid Reset Link</p>
-                <p className="text-sm text-zinc-400">The link you followed is missing a valid security token.</p>
+                <p className="text-sm text-slate-500">The link you followed is missing a valid security token.</p>
                 <a href="/forgot-password" className="text-yellow-400 hover:text-yellow-300 transition-colors mt-4 text-sm font-bold block">
                     Request a new link
                 </a>
@@ -76,8 +76,8 @@ function ResetPasswordForm() {
         return (
             <div className="flex flex-col items-center justify-center text-center space-y-4 py-4">
                 <CheckCircle2 className="h-12 w-12 text-green-500" />
-                <p className="text-emerald-400 font-medium">Password Updated!</p>
-                <p className="text-sm text-zinc-400">Redirecting you to login...</p>
+                <p className="text-emerald-600 font-medium">Password Updated!</p>
+                <p className="text-sm text-slate-500">Redirecting you to login...</p>
             </div>
         );
     }
@@ -90,7 +90,7 @@ function ResetPasswordForm() {
                     type="password"
                     {...register("password")}
                     placeholder="••••••••"
-                    className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
+                    className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400"
                 />
                 {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
             </div>
@@ -101,7 +101,7 @@ function ResetPasswordForm() {
                     type="password"
                     {...register("confirmPassword")}
                     placeholder="••••••••"
-                    className="bg-zinc-900 border-zinc-800 text-white focus:ring-yellow-400 focus:border-yellow-400"
+                    className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400"
                 />
                 {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
             </div>
@@ -121,8 +121,8 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-zinc-900">
-            <Card className="w-full max-w-md border-zinc-800 bg-zinc-950 text-white shadow-xl">
+        <div className="flex h-screen w-full items-center justify-center bg-slate-100">
+            <Card className="w-full max-w-md border-slate-200 bg-white text-slate-900 shadow-xl">
                 <CardHeader className="space-y-1 text-center">
                     <div className="flex justify-center mb-4">
                         <div className="h-12 w-12 bg-yellow-400 rounded-full flex items-center justify-center text-zinc-900">
@@ -130,12 +130,12 @@ export default function ResetPasswordPage() {
                         </div>
                     </div>
                     <CardTitle className="text-2xl font-bold">Secure Reset</CardTitle>
-                    <CardDescription className="text-zinc-400">
+                    <CardDescription className="text-slate-500">
                         Create a strong, new password for your account.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Suspense fallback={<div className="text-center text-zinc-500">Loading secure environment...</div>}>
+                    <Suspense fallback={<div className="text-center text-slate-400">Loading secure environment...</div>}>
                         <ResetPasswordForm />
                     </Suspense>
                 </CardContent>

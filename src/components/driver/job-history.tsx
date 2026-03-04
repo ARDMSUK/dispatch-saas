@@ -31,12 +31,12 @@ export function JobHistory() {
 
     if (loading) return (
         <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 text-zinc-500 animate-spin" />
+            <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
         </div>
     );
 
     if (jobs.length === 0) return (
-        <div className="text-center py-20 text-zinc-500">
+        <div className="text-center py-20 text-slate-400">
             <p>No job history yet.</p>
         </div>
     );

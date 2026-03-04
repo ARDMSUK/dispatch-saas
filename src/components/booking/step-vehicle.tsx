@@ -89,7 +89,7 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
 
     return (
         <div className="space-y-6 h-full flex flex-col">
-            <h2 className="text-xl font-bold text-white mb-2">Choose your vehicle</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Choose your vehicle</h2>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                 {VEHICLES.map((v) => {
@@ -100,25 +100,25 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
                         <div
                             key={v.id}
                             onClick={() => handleSelect(v.id)}
-                            className={`relative p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-4 ${isSelected ? 'bg-amber-500/10 border-amber-500' : 'bg-black/40 border-white/10 hover:bg-white/5'}`}
+                            className={`relative p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-4 ${isSelected ? 'bg-amber-500/10 border-amber-500' : 'bg-slate-100 border-slate-200 hover:bg-slate-200'}`}
                         >
                             {/* Icon / Image Placeholder */}
-                            <div className={`h-12 w-16 rounded-lg flex items-center justify-center ${isSelected ? 'bg-amber-500 text-black' : 'bg-white/10 text-zinc-400'}`}>
+                            <div className={`h-12 w-16 rounded-lg flex items-center justify-center ${isSelected ? 'bg-amber-500 text-black' : 'bg-white/10 text-slate-500'}`}>
                                 <Car className="h-6 w-6" />
                             </div>
 
                             <div className="flex-1">
                                 <div className="flex justify-between items-center mb-1">
-                                    <h3 className={`font-bold ${isSelected ? 'text-amber-500' : 'text-white'}`}>{v.name}</h3>
+                                    <h3 className={`font-bold ${isSelected ? 'text-amber-500' : 'text-slate-900'}`}>{v.name}</h3>
                                     {loading ? (
                                         <div className="h-4 w-12 bg-white/10 animate-pulse rounded"></div>
                                     ) : price ? (
-                                        <span className={`font-mono font-bold text-lg ${isSelected ? 'text-white' : 'text-emerald-400'}`}>£{price.toFixed(2)}</span>
+                                        <span className={`font-mono font-bold text-lg ${isSelected ? 'text-slate-900' : 'text-emerald-600'}`}>£{price.toFixed(2)}</span>
                                     ) : (
-                                        <span className="text-xs text-zinc-500">Calc...</span>
+                                        <span className="text-xs text-slate-400">Calc...</span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-zinc-400">
+                                <div className="flex items-center gap-3 text-xs text-slate-500">
                                     <span className="flex items-center gap-1"><span className="font-bold">{v.seats}</span> Pax</span>
                                     <span className="flex items-center gap-1"><span className="font-bold">{v.bags}</span> Bags</span>
                                 </div>

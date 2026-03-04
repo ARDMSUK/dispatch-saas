@@ -97,7 +97,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-zinc-950 border-white/10 text-white sm:max-w-[500px]">
+            <DialogContent className="bg-white border-slate-200 text-slate-900 sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="text-amber-500 uppercase tracking-widest text-sm font-bold">Edit Booking #{job?.id}</DialogTitle>
                 </DialogHeader>
@@ -105,11 +105,11 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                 <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                     {/* Route */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-zinc-500 uppercase">Journey</label>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Journey</label>
                         <div className="relative">
                             <div className="absolute left-3 top-3 text-emerald-500"><Navigation className="h-4 w-4" /></div>
                             <input
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={pickup}
                                 onChange={e => setPickup(e.target.value)}
                                 placeholder="Pickup"
@@ -118,7 +118,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                         <div className="relative">
                             <div className="absolute left-3 top-3 text-amber-500"><MapPin className="h-4 w-4" /></div>
                             <input
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={dropoff}
                                 onChange={e => setDropoff(e.target.value)}
                                 placeholder="Dropoff"
@@ -128,21 +128,21 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
 
                     {/* Passenger */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-zinc-500 uppercase">Passenger</label>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Passenger</label>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative">
-                                <div className="absolute left-3 top-3 text-zinc-500"><User className="h-4 w-4" /></div>
+                                <div className="absolute left-3 top-3 text-slate-400"><User className="h-4 w-4" /></div>
                                 <input
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                     value={passengerName}
                                     onChange={e => setPassengerName(e.target.value)}
                                     placeholder="Name"
                                 />
                             </div>
                             <div className="relative">
-                                <div className="absolute left-3 top-3 text-zinc-500"><Zap className="h-4 w-4" /></div>
+                                <div className="absolute left-3 top-3 text-slate-400"><Zap className="h-4 w-4" /></div>
                                 <input
-                                    className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-10 pr-2 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                     value={passengerPhone}
                                     onChange={e => setPassengerPhone(e.target.value)}
                                     placeholder="Phone"
@@ -153,16 +153,16 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
 
                     {/* Details */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-zinc-500 uppercase">Details</label>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Details</label>
                         <div className="grid grid-cols-2 gap-3">
                             <input
                                 type="datetime-local"
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 [color-scheme:dark]"
                                 value={pickupTime}
                                 onChange={e => setPickupTime(e.target.value)}
                             />
                             <select
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
                                 value={vehicleType}
                                 onChange={e => setVehicleType(e.target.value)}
                             >
@@ -175,18 +175,18 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                             </select>
                         </div>
                         <div className="relative">
-                            <span className="absolute left-3 top-2.5 text-zinc-500 text-sm">£</span>
+                            <span className="absolute left-3 top-2.5 text-slate-400 text-sm">£</span>
                             <input
                                 type="number"
                                 step="0.01"
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 pl-8 pr-4 text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-8 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
                                 value={fare}
                                 onChange={e => setFare(e.target.value)}
                                 placeholder="Fare"
                             />
                         </div>
                         <textarea
-                            className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 min-h-[80px]"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 min-h-[80px]"
                             value={notes}
                             onChange={e => setNotes(e.target.value)}
                             placeholder="Driver Notes..."
@@ -194,9 +194,9 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
 
                         {/* Designated Driver */}
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-zinc-500 uppercase">Designated Driver (Auto-Dispatch)</label>
+                            <label className="text-xs font-bold text-slate-400 uppercase">Designated Driver (Auto-Dispatch)</label>
                             <select
-                                className="w-full bg-black/40 border border-white/10 rounded-md py-2.5 px-3 text-sm text-white focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
                                 value={preAssignedDriverId}
                                 onChange={e => setPreAssignedDriverId(e.target.value)}
                             >
@@ -207,7 +207,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                                     </option>
                                 ))}
                             </select>
-                            <p className="text-[10px] text-zinc-500">
+                            <p className="text-[10px] text-slate-400">
                                 This driver will be automatically assigned when the job is within 30 minutes of pickup.
                             </p>
                         </div>
@@ -215,7 +215,7 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-white/5 text-zinc-400">Cancel</Button>
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-slate-200 text-slate-500">Cancel</Button>
                     <Button onClick={handleSave} disabled={loading} className="bg-amber-500 hover:bg-amber-400 text-black font-bold">
                         {loading ? 'Saving...' : 'Save Changes'}
                     </Button>

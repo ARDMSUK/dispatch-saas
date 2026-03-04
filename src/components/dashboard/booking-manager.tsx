@@ -230,8 +230,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
             case 'POB': return 'bg-pink-500/10 text-pink-500 border-pink-500/20';
             case 'COMPLETED': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
             case 'CANCELLED': return 'bg-red-500/10 text-red-500 border-red-500/20';
-            case 'NO_SHOW': return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20 line-through';
-            default: return 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20';
+            case 'NO_SHOW': return 'bg-zinc-500/10 text-slate-500 border-zinc-500/20 line-through';
+            default: return 'bg-zinc-500/10 text-slate-400 border-zinc-500/20';
         }
     };
 
@@ -299,7 +299,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     };
 
     const getVehicleStyle = (vType: string) => {
-        if (vType === 'Saloon') return 'border-white/5 bg-zinc-900/50';
+        if (vType === 'Saloon') return 'border-slate-200 bg-slate-100';
         if (vType === 'Estate') return 'border-blue-500/30 bg-blue-500/5';
         if (vType === 'Executive') return 'border-emerald-500/30 bg-emerald-500/5';
         if (vType.includes('MPV')) return 'border-purple-500/30 bg-purple-500/5';
@@ -312,7 +312,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         if (vType === 'Executive') return 'text-emerald-500';
         if (vType.includes('MPV')) return 'text-purple-500';
         if (vType === 'Minibus' || vType === 'Coach') return 'text-amber-500';
-        return 'text-zinc-500';
+        return 'text-slate-400';
     };
 
     const JobCard = ({ job }: { job: Job }) => {
@@ -337,12 +337,12 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         </Badge>
                         {/* M&G Badge */}
                         {hasMeetGreet && (
-                            <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 font-mono text-[10px]">
+                            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-mono text-[10px]">
                                 M&G
                             </Badge>
                         )}
                         {job.returnBooking && (
-                            <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20 font-mono text-[10px]">
+                            <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 border-indigo-500/20 font-mono text-[10px]">
                                 RETURN
                             </Badge>
                         )}
@@ -357,14 +357,14 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             </Badge>
                         )}
                         {(job.paymentStatus === 'AUTHORIZED' || job.paymentStatus === 'PAID') && (
-                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-mono text-[10px] flex items-center gap-1">
+                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-mono text-[10px] flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> PAID
                             </Badge>
                         )}
                         {/* Live Flight Info Badge */}
                         {job.flightNumber && (
-                            <div className="flex flex-wrap items-center gap-1.5 ml-1 border-l border-white/10 pl-2">
-                                <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 font-mono text-[10px] whitespace-nowrap">
+                            <div className="flex flex-wrap items-center gap-1.5 ml-1 border-l border-slate-200 pl-2">
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-mono text-[10px] whitespace-nowrap">
                                     ✈️ {job.flightNumber}
                                 </Badge>
 
@@ -381,7 +381,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
                                         if (landed) {
                                             return (
-                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-mono text-[10px] whitespace-nowrap">
+                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-mono text-[10px] whitespace-nowrap">
                                                     LANDED {new Date(f.actualArrival || f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {termGate ? `(${termGate})` : ''}
                                                 </Badge>
                                             );
@@ -394,7 +394,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                             );
                                         } else {
                                             return (
-                                                <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 font-mono text-[10px] whitespace-nowrap">
+                                                <Badge variant="outline" className="bg-slate-200 text-slate-500 border-slate-300 font-mono text-[10px] whitespace-nowrap">
                                                     EST: {estTime} {termGate ? `(${termGate})` : ''}
                                                 </Badge>
                                             );
@@ -411,7 +411,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <div className="text-amber-400 font-black text-2xl leading-none tracking-tight">
                                 {new Date(job.pickupTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
-                            <div className="text-zinc-500 text-[10px] uppercase font-bold">
+                            <div className="text-slate-400 text-[10px] uppercase font-bold">
                                 {new Date(job.pickupTime).toLocaleDateString([], { day: 'numeric', month: 'short' })}
                             </div>
                         </div>
@@ -419,11 +419,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         {/* Action Menu */}
                         <Popover>
                             <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 text-zinc-500 hover:text-white">
+                                <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 text-slate-400 hover:text-slate-900">
                                     <MoreVertical className="h-4 w-4" />
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-48 bg-zinc-950 border-white/10 p-1" align="end">
+                            <PopoverContent className="w-48 bg-white border-slate-200 p-1" align="end">
                                 <div className="space-y-0.5">
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setEditJob(job); setEditOpen(true); }}>
                                         <Edit className="mr-2 h-3.5 w-3.5 text-amber-500" /> Edit Booking
@@ -436,7 +436,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         handleSendNotification('CONFIRMATION', job.id);
                                     }}>
                                         <div className="flex items-center">
-                                            <div className="w-[14px] mr-2 flex justify-center"><Send className="h-3 w-3 text-blue-400" /></div>
+                                            <div className="w-[14px] mr-2 flex justify-center"><Send className="h-3 w-3 text-blue-600" /></div>
                                             Resend Confirmation
                                         </div>
                                     </Button>
@@ -495,7 +495,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> Mark Cancelled
                                     </Button>
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'NO_SHOW'); }}>
-                                        <UserX className="mr-2 h-3.5 w-3.5 text-zinc-400" /> Mark No Show
+                                        <UserX className="mr-2 h-3.5 w-3.5 text-slate-500" /> Mark No Show
                                     </Button>
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'PENDING'); }}>
                                         <RefreshCw className="mr-2 h-3.5 w-3.5 text-blue-500" /> Re-Active (Pending)
@@ -511,16 +511,16 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="col-span-12 md:col-span-5 space-y-2">
                         <div className="flex items-start gap-2">
                             <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-emerald-500" /></div>
-                            <span className="text-sm text-zinc-100 font-medium leading-tight line-clamp-2">{job.pickupAddress}</span>
+                            <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2">{job.pickupAddress}</span>
                         </div>
-                        <div className="pl-[7px] py-1"><div className="w-[2px] h-3 bg-zinc-800 ml-[1px]"></div></div>
+                        <div className="pl-[7px] py-1"><div className="w-[2px] h-3 bg-slate-200 ml-[1px]"></div></div>
                         <div className="flex items-start gap-2">
                             <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-amber-500" /></div>
-                            <span className="text-sm text-zinc-100 font-medium leading-tight line-clamp-2">{job.dropoffAddress}</span>
+                            <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2">{job.dropoffAddress}</span>
                         </div>
                         {/* Notes / Reminders */}
                         {job.notes && (
-                            <div className="mt-2 pt-2 border-t border-white/5 space-y-1">
+                            <div className="mt-2 pt-2 border-t border-slate-200 space-y-1">
                                 {(() => {
                                     // Parse Notes: Check for [Header]
                                     // Make regex more flexible: allow optional whitespace after ] before capturing body
@@ -533,15 +533,15 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                                     <AlertCircle className="h-3 w-3 text-red-400 mt-0.5 shrink-0" />
                                                     <span className="text-xs text-red-300 font-bold">{header}</span>
                                                 </div>
-                                                {body && <p className="text-xs text-zinc-400 pl-5 whitespace-pre-wrap">{body}</p>}
+                                                {body && <p className="text-xs text-slate-500 pl-5 whitespace-pre-wrap">{body}</p>}
                                             </>
                                         );
                                     } else {
                                         // Plain notes
                                         return (
                                             <div className="flex items-start gap-2">
-                                                <div className="mt-0.5"><Edit className="h-3 w-3 text-zinc-500" /></div>
-                                                <p className="text-xs text-zinc-400 whitespace-pre-wrap">{job.notes}</p>
+                                                <div className="mt-0.5"><Edit className="h-3 w-3 text-slate-400" /></div>
+                                                <p className="text-xs text-slate-500 whitespace-pre-wrap">{job.notes}</p>
                                             </div>
                                         );
                                     }
@@ -550,28 +550,28 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         )}
                     </div>
 
-                    <div className="col-span-12 md:col-span-4 flex flex-col justify-center space-y-2 border-l border-white/5 pl-4">
-                        <div className="flex items-center gap-2 text-zinc-300 text-xs font-medium">
-                            <User className="h-3 w-3 text-zinc-500" /> {job.passengerName}
+                    <div className="col-span-12 md:col-span-4 flex flex-col justify-center space-y-2 border-l border-slate-200 pl-4">
+                        <div className="flex items-center gap-2 text-slate-600 text-xs font-medium">
+                            <User className="h-3 w-3 text-slate-400" /> {job.passengerName}
                         </div>
-                        <div className="flex items-center gap-2 text-zinc-400 text-xs">
+                        <div className="flex items-center gap-2 text-slate-500 text-xs">
                             <Phone className="h-3 w-3" /> {job.passengerPhone}
                         </div>
                         {/* Pax/Lug Data */}
                         <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 flex items-center gap-1">
+                            <span className="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-500 flex items-center gap-1">
                                 <User className="h-2.5 w-2.5" /> {job.passengers}
                             </span>
-                            <span className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 flex items-center gap-1">
+                            <span className="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-500 flex items-center gap-1">
                                 <span className="font-bold">LUG</span> {job.luggage}
                             </span>
                         </div>
                     </div>
 
-                    <div className="col-span-12 md:col-span-3 flex flex-col justify-center items-end border-l border-white/5 pl-4">
-                        <span className="text-xl font-bold text-white">£{job.fare?.toFixed(2) || '0.00'}</span>
+                    <div className="col-span-12 md:col-span-3 flex flex-col justify-center items-end border-l border-slate-200 pl-4">
+                        <span className="text-xl font-bold text-slate-900">£{job.fare?.toFixed(2) || '0.00'}</span>
                         <span className={`text-[10px] uppercase tracking-wider font-bold ${getVehicleTextColor(job.vehicleType)}`}>{job.vehicleType}</span>
-                        <span className="text-[10px] text-zinc-500 mt-1">
+                        <span className="text-[10px] text-slate-400 mt-1">
                             {job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType}
                         </span>
                     </div>
@@ -581,12 +581,12 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     };
 
     return (
-        <div className="h-full flex flex-col bg-zinc-950/50">
-            <div className="p-4 border-b border-white/5 space-y-3">
+        <div className="h-full flex flex-col bg-white">
+            <div className="p-4 border-b border-slate-200 space-y-3">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <div className="flex items-center gap-2 pb-2">
                         <div className="flex-1 overflow-x-auto scrollbar-none">
-                            <TabsList className="inline-flex w-auto bg-black/40 border border-white/10 h-9 p-1 gap-1">
+                            <TabsList className="inline-flex w-auto bg-slate-100 border border-slate-200 h-9 p-1 gap-1">
                                 <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-amber-500 data-[state=active]:text-black font-bold uppercase whitespace-nowrap">
                                     Pending {filterJobs('PENDING_NOW').length > 0 && `(${filterJobs('PENDING_NOW').length})`}
                                 </TabsTrigger>
@@ -605,15 +605,15 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 <TabsTrigger value="CANCELLED" className="px-3 text-[10px] data-[state=active]:bg-red-500 data-[state=active]:text-black font-bold uppercase whitespace-nowrap">
                                     Cancelled {filterJobs('CANCELLED').length > 0 && `(${filterJobs('CANCELLED').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="NO_SHOW" className="px-3 text-[10px] data-[state=active]:bg-zinc-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="NO_SHOW" className="px-3 text-[10px] data-[state=active]:bg-zinc-500 data-[state=active]:text-slate-900 font-bold uppercase whitespace-nowrap">
                                     No Show {filterJobs('NO_SHOW').length > 0 && `(${filterJobs('NO_SHOW').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="FUTURE" className="px-3 text-[10px] data-[state=active]:bg-zinc-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="FUTURE" className="px-3 text-[10px] data-[state=active]:bg-zinc-700 data-[state=active]:text-slate-900 font-bold uppercase whitespace-nowrap">
                                     Future {filterJobs('FUTURE').length > 0 && `(${filterJobs('FUTURE').length})`}
                                 </TabsTrigger>
                             </TabsList>
                         </div>
-                        <Button variant="outline" size="icon" className="h-9 w-9 border-white/10 bg-black/40 text-zinc-400 hover:text-white hover:bg-zinc-800 shrink-0" onClick={() => fetchJobs(true)}>
+                        <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 shrink-0" onClick={() => fetchJobs(true)}>
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
@@ -621,10 +621,10 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
                 {/* Future Tab Filter Toolbar */}
                 {activeTab === 'FUTURE' && (
-                    <div className="flex items-center gap-2 bg-zinc-900/50 p-2 rounded border border-white/5 animate-in slide-in-from-top-2">
-                        <CalendarIcon className="h-4 w-4 text-zinc-500" />
+                    <div className="flex items-center gap-2 bg-slate-100 p-2 rounded border border-slate-200 animate-in slide-in-from-top-2">
+                        <CalendarIcon className="h-4 w-4 text-slate-400" />
                         <Select value={futureFilter} onValueChange={setFutureFilter}>
-                            <SelectTrigger className="h-7 w-[120px] text-xs bg-zinc-800 border-white/10">
+                            <SelectTrigger className="h-7 w-[120px] text-xs bg-slate-200 border-slate-200">
                                 <SelectValue placeholder="Period" />
                             </SelectTrigger>
                             <SelectContent>
@@ -641,14 +641,14 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     type="date"
                                     value={customStartDate}
                                     onChange={(e) => setCustomStartDate(e.target.value)}
-                                    className="h-7 bg-zinc-800 border border-white/10 rounded px-2 text-xs text-white"
+                                    className="h-7 bg-slate-200 border border-slate-200 rounded px-2 text-xs text-slate-900"
                                 />
-                                <span className="text-zinc-500">-</span>
+                                <span className="text-slate-400">-</span>
                                 <input
                                     type="date"
                                     value={customEndDate}
                                     onChange={(e) => setCustomEndDate(e.target.value)}
-                                    className="h-7 bg-zinc-800 border border-white/10 rounded px-2 text-xs text-white"
+                                    className="h-7 bg-slate-200 border border-slate-200 rounded px-2 text-xs text-slate-900"
                                 />
                             </div>
                         )}
@@ -658,12 +658,12 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                 {loading ? (
-                    <div className="text-center py-20 text-zinc-600 animate-pulse">Loading jobs...</div>
+                    <div className="text-center py-20 text-slate-500 animate-pulse">Loading jobs...</div>
                 ) : filterJobs(activeTab).length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-zinc-600 border border-dashed border-white/5 rounded-lg bg-black/20">
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-500 border border-dashed border-slate-200 rounded-lg bg-slate-50">
                         <AlertCircle className="h-8 w-8 mb-2 opacity-20" />
                         <p className="text-sm">No bookings in this category.</p>
-                        {activeTab === 'FUTURE' && <p className="text-xs text-zinc-500 mt-1">Try adjusting the period filter.</p>}
+                        {activeTab === 'FUTURE' && <p className="text-xs text-slate-400 mt-1">Try adjusting the period filter.</p>}
                     </div>
                 ) : (
                     filterJobs(activeTab).map(job => (

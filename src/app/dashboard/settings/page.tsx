@@ -179,14 +179,14 @@ export default function SettingsPage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-zinc-500">Loading settings...</div>;
+    if (loading) return <div className="p-8 text-slate-400">Loading settings...</div>;
 
     return (
-        <div className="p-6 text-white max-w-4xl mx-auto overflow-y-auto h-full pb-20">
+        <div className="p-6 text-slate-900 max-w-4xl mx-auto overflow-y-auto h-full pb-20">
             <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
             {/* Organization Section */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                         🏢 Organization Details
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                     <Button
                         onClick={handleSave}
                         disabled={saving}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-slate-900"
                     >
                         {saving ? 'Saving...' : 'Save Changes'}
                     </Button>
@@ -202,33 +202,33 @@ export default function SettingsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <Label className="text-zinc-400">Company Name</Label>
+                        <Label className="text-slate-500">Company Name</Label>
                         <Input
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                     </div>
 
                     <div>
-                        <Label className="text-zinc-400">Email Address</Label>
+                        <Label className="text-slate-500">Email Address</Label>
                         <Input
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                     </div>
                     <div>
-                        <Label className="text-zinc-400">Telephone Number</Label>
+                        <Label className="text-slate-500">Telephone Number</Label>
                         <Input
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                     </div>
 
                     <div className="md:col-span-2 relative">
-                        <Label className="text-zinc-400">Operating Address</Label>
+                        <Label className="text-slate-500">Operating Address</Label>
                         <Input
                             value={value}
                             onChange={(e) => {
@@ -237,37 +237,37 @@ export default function SettingsPage() {
                             }}
                             disabled={!ready}
                             placeholder="Search for your office address..."
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                         {/* Autocomplete Suggestions */}
                         {status === "OK" && (
-                            <ul className="absolute z-50 w-full bg-zinc-900 border border-white/10 rounded-md mt-1 shadow-xl max-h-60 overflow-auto">
+                            <ul className="absolute z-50 w-full bg-slate-100 border border-slate-200 rounded-md mt-1 shadow-xl max-h-60 overflow-auto">
                                 {data.map(({ place_id, description }) => (
                                     <li
                                         key={place_id}
                                         onClick={() => handleAddressSelect(description)}
-                                        className="px-4 py-2 hover:bg-white/5 cursor-pointer text-sm text-zinc-300"
+                                        className="px-4 py-2 hover:bg-slate-200 cursor-pointer text-sm text-slate-600"
                                     >
                                         {description}
                                     </li>
                                 ))}
                             </ul>
                         )}
-                        <p className="text-xs text-zinc-500 mt-2">
+                        <p className="text-xs text-slate-400 mt-2">
                             This address will be used to center the Dispatch Map.
                             {lat && lng && <span className="text-emerald-500 ml-2">✓ Coordinates Found</span>}
                         </p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-1">Company Slug</label>
-                        <div className="font-mono text-sm bg-black/50 px-3 py-2 rounded border border-white/5 inline-block text-zinc-500 w-full cursor-not-allowed">
+                        <label className="block text-sm font-medium text-slate-500 mb-1">Company Slug</label>
+                        <div className="font-mono text-sm bg-slate-100 px-3 py-2 rounded border border-slate-200 inline-block text-slate-400 w-full cursor-not-allowed">
                             {slug}
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-1">API Key</label>
-                        <div className="font-mono text-sm bg-black/50 px-3 py-2 rounded border border-white/5 flex items-center justify-between group text-zinc-500 cursor-not-allowed">
+                        <label className="block text-sm font-medium text-slate-500 mb-1">API Key</label>
+                        <div className="font-mono text-sm bg-slate-100 px-3 py-2 rounded border border-slate-200 flex items-center justify-between group text-slate-400 cursor-not-allowed">
                             <span className="truncate">{apiKey}</span>
                         </div>
                     </div>
@@ -275,16 +275,16 @@ export default function SettingsPage() {
             </div>
 
             {/* Advanced Dispatch & Routing Section */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-400">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-600">
                     🛣️ Advanced Dispatch & Routing
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-zinc-400">
-                        By default, the system uses <strong className="text-white">Manual Dispatching</strong> where operators assign jobs to drivers. You can opt-in to our advanced Auto-Dispatch engine to automate this based on selected algorithms.
+                    <p className="text-sm text-slate-500">
+                        By default, the system uses <strong className="text-slate-900">Manual Dispatching</strong> where operators assign jobs to drivers. You can opt-in to our advanced Auto-Dispatch engine to automate this based on selected algorithms.
                     </p>
 
-                    <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                    <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
                         <Checkbox
                             id="autoDispatch"
                             checked={autoDispatch}
@@ -294,35 +294,35 @@ export default function SettingsPage() {
                         <div className="grid gap-1.5 leading-none">
                             <label
                                 htmlFor="autoDispatch"
-                                className="text-sm font-medium leading-none cursor-pointer text-white"
+                                className="text-sm font-medium leading-none cursor-pointer text-slate-900"
                             >
                                 Enable Auto-Dispatch Engine
                             </label>
-                            <p className="text-sm text-zinc-500">
+                            <p className="text-sm text-slate-400">
                                 Automatically assign pending jobs to available drivers without human intervention.
                             </p>
                         </div>
                     </div>
 
                     {autoDispatch && (
-                        <div className="bg-black/30 p-4 rounded-lg border border-white/5 space-y-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 space-y-4 animate-in fade-in slide-in-from-top-1">
                             <div>
-                                <Label className="text-zinc-300">Dispatch Algorithm</Label>
-                                <p className="text-xs text-zinc-500 mb-3">
+                                <Label className="text-slate-600">Dispatch Algorithm</Label>
+                                <p className="text-xs text-slate-400 mb-3">
                                     Select the logic the engine will use to decide which driver gets the job.
                                 </p>
                                 <Select value={dispatchAlgorithm} onValueChange={setDispatchAlgorithm}>
-                                    <SelectTrigger className="w-full bg-black/50 border-white/10 text-white">
+                                    <SelectTrigger className="w-full bg-slate-100 border-slate-200 text-slate-900">
                                         <SelectValue placeholder="Select Algorithm" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                    <SelectContent className="bg-slate-100 border-slate-200 text-slate-900">
                                         <SelectItem value="CLOSEST">
                                             <span className="font-medium">Closest Driver (GPS Distance)</span>
-                                            <p className="text-xs text-zinc-400 mt-1">Assigns to the nearest driver by direct line-of-sight.</p>
+                                            <p className="text-xs text-slate-500 mt-1">Assigns to the nearest driver by direct line-of-sight.</p>
                                         </SelectItem>
                                         <SelectItem value="LONGEST_WAITING">
                                             <span className="font-medium">Zone Queueing (Longest Waiting)</span>
-                                            <p className="text-xs text-zinc-400 mt-1">First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.</p>
+                                            <p className="text-xs text-slate-500 mt-1">First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.</p>
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -333,17 +333,17 @@ export default function SettingsPage() {
             </div>
 
             {/* Complex Fares & Pricing Section */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-purple-400">
                     💳 Complex Fares & Pricing
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-slate-500">
                         Configure advanced billing features like surge multipliers and automated penalty fees. Leave these disabled for standard fixed or mileage-based pricing.
                     </p>
 
                     <div className="grid grid-cols-1 gap-4">
-                        <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                        <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
                             <Checkbox
                                 id="enableDynamicPricing"
                                 checked={enableDynamicPricing}
@@ -353,17 +353,17 @@ export default function SettingsPage() {
                             <div className="grid gap-1.5 leading-none">
                                 <label
                                     htmlFor="enableDynamicPricing"
-                                    className="text-sm font-medium leading-none cursor-pointer text-white"
+                                    className="text-sm font-medium leading-none cursor-pointer text-slate-900"
                                 >
                                     Enable Dynamic Pricing (Surge)
                                 </label>
-                                <p className="text-sm text-zinc-500">
+                                <p className="text-sm text-slate-400">
                                     Automatically apply percentage or flat multipliers to fares based on active Surcharge rules (Time of day, Day of week, etc).
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                        <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
                             <Checkbox
                                 id="enableWaitCalculations"
                                 checked={enableWaitCalculations}
@@ -373,11 +373,11 @@ export default function SettingsPage() {
                             <div className="grid gap-1.5 leading-none">
                                 <label
                                     htmlFor="enableWaitCalculations"
-                                    className="text-sm font-medium leading-none cursor-pointer text-white"
+                                    className="text-sm font-medium leading-none cursor-pointer text-slate-900"
                                 >
                                     Automate Wait Time Calculations
                                 </label>
-                                <p className="text-sm text-zinc-500">
+                                <p className="text-sm text-slate-400">
                                     Include driver wait times into the quoted price based on the selected vehicle tier&#39;s waiting rate.
                                 </p>
                             </div>
@@ -387,16 +387,16 @@ export default function SettingsPage() {
             </div>
 
             {/* Web Integration / Booker */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-blue-400">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-blue-600">
                     🌍 Web Integration
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-slate-500">
                         Allow customers to book directly from your own website using our standalone secure booking form.
                     </p>
 
-                    <div className="flex items-center space-x-3 bg-black/30 p-4 rounded-lg border border-white/5">
+                    <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
                         <Checkbox
                             id="enableWebBooker"
                             checked={enableWebBooker}
@@ -406,27 +406,27 @@ export default function SettingsPage() {
                         <div className="grid gap-1.5 leading-none">
                             <label
                                 htmlFor="enableWebBooker"
-                                className="text-sm font-medium leading-none cursor-pointer text-white"
+                                className="text-sm font-medium leading-none cursor-pointer text-slate-900"
                             >
                                 Enable Standalone Web Booker
                             </label>
-                            <p className="text-sm text-zinc-500">
+                            <p className="text-sm text-slate-400">
                                 Unlocks the public `/booker` route for your tenant account.
                             </p>
                         </div>
                     </div>
 
                     {enableWebBooker && tenantSlug && (
-                        <div className="mt-4 bg-zinc-950 p-4 rounded-lg border border-white/10 relative">
-                            <Label className="text-zinc-400 mb-2 block">Iframe Embed Code</Label>
-                            <p className="text-xs text-zinc-500 mb-3">
+                        <div className="mt-4 bg-white p-4 rounded-lg border border-slate-200 relative">
+                            <Label className="text-slate-500 mb-2 block">Iframe Embed Code</Label>
+                            <p className="text-xs text-slate-400 mb-3">
                                 Copy and paste this code into a "Custom HTML" block on your website (e.g., WordPress, Wix, Squarespace) to embed the booking form.
                             </p>
                             <div className="relative group">
                                 <textarea
                                     readOnly
                                     value={`<iframe src="${window.location.origin}/booker/${tenantSlug}" width="100%" height="700px" style="border:none; border-radius:12px; overflow:hidden;" title="Book a Taxi"></iframe>`}
-                                    className="w-full h-24 bg-black border border-white/10 text-green-400 font-mono text-sm p-3 rounded resize-none"
+                                    className="w-full h-24 bg-slate-50 border border-slate-200 text-green-400 font-mono text-sm p-3 rounded resize-none"
                                 />
                                 <Button
                                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 h-8"
@@ -445,46 +445,46 @@ export default function SettingsPage() {
 
             {/* AI Integrations */}
             {(hasWebChatAi || hasWhatsAppAi) && (
-                <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+                <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <h2 className="text-xl font-semibold flex items-center gap-2 text-indigo-400">
+                        <h2 className="text-xl font-semibold flex items-center gap-2 text-indigo-600">
                             🤖 AI Integrations
                         </h2>
                         {organizationData && typeof organizationData.aiMessageCount === 'number' && (
-                            <div className="text-sm font-medium text-zinc-300 bg-black/40 px-3 py-1.5 rounded-full border border-white/5 flex items-center gap-2">
+                            <div className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 flex items-center gap-2">
                                 <span>Monthly Usage:</span>
                                 <div>
-                                    <span className={organizationData.aiMessageCount >= organizationData.aiMessageLimit ? "text-rose-400" : "text-emerald-400"}>
+                                    <span className={organizationData.aiMessageCount >= organizationData.aiMessageLimit ? "text-rose-600" : "text-emerald-600"}>
                                         {organizationData.aiMessageCount}
                                     </span>
-                                    <span className="text-zinc-500 mx-1">/</span>
-                                    <span className="text-zinc-400">{organizationData.aiMessageLimit}</span>
+                                    <span className="text-slate-400 mx-1">/</span>
+                                    <span className="text-slate-500">{organizationData.aiMessageLimit}</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {hasWebChatAi && (
-                        <div className="mb-8 border-b border-white/10 pb-8">
-                            <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">🌐 Web Chat Widget</h3>
+                        <div className="mb-8 border-b border-slate-200 pb-8">
+                            <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center gap-2">🌐 Web Chat Widget</h3>
                             <div className="space-y-6">
-                                <p className="text-sm text-zinc-400">
+                                <p className="text-sm text-slate-500">
                                     Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
                                 </p>
 
-                                <div className="mt-4 bg-zinc-950 p-4 rounded-lg border border-white/10 relative">
-                                    <Label className="text-zinc-400 mb-2 block">Iframe Embed Code</Label>
-                                    <p className="text-xs text-zinc-500 mb-3">
+                                <div className="mt-4 bg-white p-4 rounded-lg border border-slate-200 relative">
+                                    <Label className="text-slate-500 mb-2 block">Iframe Embed Code</Label>
+                                    <p className="text-xs text-slate-400 mb-3">
                                         Copy and paste this code near the bottom of your website's &lt;body&gt; tag.
                                     </p>
                                     <div className="relative group">
                                         <textarea
                                             readOnly
                                             value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`}
-                                            className="w-full h-32 bg-black border border-white/10 text-indigo-400 font-mono text-sm p-3 rounded resize-none"
+                                            className="w-full h-32 bg-slate-50 border border-slate-200 text-indigo-600 font-mono text-sm p-3 rounded resize-none"
                                         />
                                         <Button
-                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-white font-medium"
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-slate-900 font-medium"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(`<iframe src="${window.location.origin}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`);
                                                 toast.success("AI Widget code copied!");
@@ -503,31 +503,31 @@ export default function SettingsPage() {
 
                     {hasWhatsAppAi && (
                         <div>
-                            <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">📱 WhatsApp AI Agent</h3>
+                            <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center gap-2">📱 WhatsApp AI Agent</h3>
                             <div className="space-y-4">
-                                <p className="text-sm text-zinc-400">
+                                <p className="text-sm text-slate-500">
                                     Your WhatsApp Business number is connected and managed by our platform. Customers who message this number will talk directly to the AI to book rides.
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="bg-zinc-950 p-4 rounded-lg border border-white/10">
-                                        <Label className="text-zinc-400 block mb-2">Connected WhatsApp Number</Label>
+                                    <div className="bg-white p-4 rounded-lg border border-slate-200">
+                                        <Label className="text-slate-500 block mb-2">Connected WhatsApp Number</Label>
                                         <Input
                                             value={twilioFromNumber}
                                             onChange={(e) => setTwilioFromNumber(e.target.value)}
                                             placeholder="e.g. +447... or +14155238886"
-                                            className="bg-black/50 border-white/10 font-mono text-emerald-400"
+                                            className="bg-slate-100 border-slate-200 font-mono text-emerald-600"
                                         />
                                     </div>
-                                    <div className="bg-zinc-950 p-4 rounded-lg border border-white/10">
-                                        <Label className="text-zinc-400 block mb-2">Twilio Webhook URL</Label>
+                                    <div className="bg-white p-4 rounded-lg border border-slate-200">
+                                        <Label className="text-slate-500 block mb-2">Twilio Webhook URL</Label>
                                         <div className="relative group">
                                             <input
                                                 readOnly
                                                 value={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/twilio/whatsapp`}
-                                                className="w-full bg-black border border-white/10 text-indigo-400 font-mono text-xs p-2 rounded truncate pr-20"
+                                                className="w-full bg-slate-50 border border-slate-200 text-indigo-600 font-mono text-xs p-2 rounded truncate pr-20"
                                             />
                                             <Button
-                                                className="absolute top-1 right-1 h-6 text-xs bg-zinc-800 hover:bg-zinc-700 text-white"
+                                                className="absolute top-1 right-1 h-6 text-xs bg-slate-200 hover:bg-zinc-700 text-slate-900"
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(`${window.location.origin}/api/twilio/whatsapp`);
                                                     toast.success("Webhook URL copied");
@@ -536,7 +536,7 @@ export default function SettingsPage() {
                                                 Copy
                                             </Button>
                                         </div>
-                                        <p className="text-[10px] text-zinc-500 mt-2 leading-tight">
+                                        <p className="text-[10px] text-slate-400 mt-2 leading-tight">
                                             Set this as the incoming message Webhook in your Twilio Console.
                                         </p>
                                     </div>
@@ -548,50 +548,50 @@ export default function SettingsPage() {
             )}
 
             {/* Visual Branding */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-pink-400">
                     ✨ Visual Branding
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-slate-500">
                         Customize how your company appears to your customers on the Web Booker and inside HTML email receipts.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <Label className="text-zinc-400">Public Logo URL</Label>
+                            <Label className="text-slate-500">Public Logo URL</Label>
                             <Input
                                 value={logoUrl}
                                 onChange={(e) => setLogoUrl(e.target.value)}
                                 placeholder="https://yourwebsite.com/logo.png"
-                                className="bg-black/50 border-white/10 mt-1"
+                                className="bg-slate-100 border-slate-200 mt-1"
                             />
-                            <p className="text-xs text-zinc-500 mt-2">
+                            <p className="text-xs text-slate-400 mt-2">
                                 Provide a direct link to your company logo (PNG or SVG recommended).
                             </p>
                         </div>
                         <div>
-                            <Label className="text-zinc-400">Primary Brand Color</Label>
+                            <Label className="text-slate-500">Primary Brand Color</Label>
                             <div className="flex items-center gap-3 mt-1">
                                 <Input
                                     type="color"
                                     value={brandColor}
                                     onChange={(e) => setBrandColor(e.target.value)}
-                                    className="w-12 h-10 p-1 bg-black/50 border-white/10 cursor-pointer"
+                                    className="w-12 h-10 p-1 bg-slate-100 border-slate-200 cursor-pointer"
                                 />
                                 <Input
                                     type="text"
                                     value={brandColor}
                                     onChange={(e) => setBrandColor(e.target.value)}
-                                    className="bg-black/50 border-white/10 font-mono uppercase"
+                                    className="bg-slate-100 border-slate-200 font-mono uppercase"
                                     placeholder="#F59E0B"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-4 p-6 border border-white/10 rounded-lg bg-zinc-950">
-                        <Label className="text-zinc-500 mb-4 block">Live Preview</Label>
+                    <div className="mt-4 p-6 border border-slate-200 rounded-lg bg-white">
+                        <Label className="text-slate-400 mb-4 block">Live Preview</Label>
                         <div className="flex items-center justify-between p-4 bg-white rounded-md max-w-sm">
                             {logoUrl ? (
                                 <img src={logoUrl} alt="Company Logo" className="h-8 object-contain" />
@@ -599,7 +599,7 @@ export default function SettingsPage() {
                                 <span className="font-bold text-black text-lg">{companyName || "Your Company"}</span>
                             )}
                             <div
-                                className="px-4 py-2 rounded text-white text-sm font-medium"
+                                className="px-4 py-2 rounded text-slate-900 text-sm font-medium"
                                 style={{ backgroundColor: brandColor }}
                             >
                                 Book Now
@@ -610,27 +610,27 @@ export default function SettingsPage() {
             </div>
 
             {/* Developer API */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-400">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-600">
                     💻 Developer API
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-slate-500">
                         Use this secured token to build custom integrations (e.g., Zapier, Custom Apps) by sending HTTP requests directly to the `{window.location.host}/api/v1/bookings` ingestion endpoints.
                     </p>
 
                     <div>
-                        <Label className="text-zinc-400">Secret API Key</Label>
+                        <Label className="text-slate-500">Secret API Key</Label>
                         <div className="flex items-center gap-3 mt-1">
                             <Input
                                 value={apiKey || '••••••••••••••••••••••••••••••••'}
                                 readOnly
-                                className="bg-black/50 border-white/10 font-mono text-zinc-300 w-full md:w-2/3"
+                                className="bg-slate-100 border-slate-200 font-mono text-slate-600 w-full md:w-2/3"
                                 type="password"
                             />
                             <Button
                                 variant="secondary"
-                                className="bg-zinc-800 hover:bg-zinc-700 text-white"
+                                className="bg-slate-200 hover:bg-zinc-700 text-slate-900"
                                 onClick={() => {
                                     if (apiKey) {
                                         navigator.clipboard.writeText(apiKey);
@@ -649,45 +649,45 @@ export default function SettingsPage() {
             </div>
 
             {/* Communication Templates */}
-            <div className="bg-zinc-900/50 p-6 rounded-xl border border-white/10 mb-6 backdrop-blur-sm">
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
                 <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
                     💬 Communication Templates
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-zinc-400 mb-4">
+                    <p className="text-sm text-slate-500 mb-4">
                         Variables available: {'{booking_id}, {pickup_time}, {pickup_address}, {dropoff_address}, {driver_name}, {driver_phone}, {vehicle_details}'}
                     </p>
 
                     <div>
-                        <Label className="text-zinc-400">Booking Confirmation SMS</Label>
+                        <Label className="text-slate-500">Booking Confirmation SMS</Label>
                         <Textarea
                             value={smsTemplateConfirmation}
                             onChange={(e) => setSmsTemplateConfirmation(e.target.value)}
                             placeholder="Company: Booking #{booking_id} Confirmed.\nPickup: {pickup_time}\nFrom: {pickup_address}"
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                     </div>
 
                     <div>
-                        <Label className="text-zinc-400">Driver Assigned SMS</Label>
+                        <Label className="text-slate-500">Driver Assigned SMS</Label>
                         <Textarea
                             value={smsTemplateDriverAssigned}
                             onChange={(e) => setSmsTemplateDriverAssigned(e.target.value)}
                             placeholder="Company: Driver Assigned.\n{driver_name} is on the way in {vehicle_details}.\nCall: {driver_phone}"
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                     </div>
 
                     <div>
-                        <Label className="text-zinc-400">Driver Arrived SMS</Label>
+                        <Label className="text-slate-500">Driver Arrived SMS</Label>
                         <Textarea
                             value={smsTemplateDriverArrived}
                             onChange={(e) => setSmsTemplateDriverArrived(e.target.value)}
                             placeholder="Company: Driver Arrived.\n{driver_name} is waiting outside in {vehicle_details}.\nCall: {driver_phone}"
-                            className="bg-black/50 border-white/10 mt-1"
+                            className="bg-slate-100 border-slate-200 mt-1"
                         />
                     </div>
-                    <p className="text-xs text-zinc-500 mt-2">
+                    <p className="text-xs text-slate-400 mt-2">
                         Leave blank to use the default system messages.
                     </p>
                 </div>
@@ -695,8 +695,8 @@ export default function SettingsPage() {
 
 
             {/* Read Only Info */}
-            <div className="bg-zinc-900/30 p-6 rounded-xl border border-white/5">
-                <p className="text-sm text-zinc-500 text-center">
+            <div className="bg-zinc-900/30 p-6 rounded-xl border border-slate-200">
+                <p className="text-sm text-slate-400 text-center">
                     System Version 1.0.0 | Dispatch SaaS
                 </p>
             </div>

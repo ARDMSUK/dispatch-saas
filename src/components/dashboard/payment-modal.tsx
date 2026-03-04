@@ -63,10 +63,10 @@ function CheckoutForm({ amount, onSuccess, onError, onCancel }: CheckoutFormProp
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-zinc-900/50 p-4 rounded-lg border border-white/5">
+            <div className="bg-slate-100 p-4 rounded-lg border border-slate-200">
                 <div className="flex justify-between items-center mb-4 text-sm">
-                    <span className="text-zinc-400">Total to Pay</span>
-                    <span className="text-2xl font-bold text-white">£{amount.toFixed(2)}</span>
+                    <span className="text-slate-500">Total to Pay</span>
+                    <span className="text-2xl font-bold text-slate-900">£{amount.toFixed(2)}</span>
                 </div>
 
                 <PaymentElement
@@ -87,7 +87,7 @@ function CheckoutForm({ amount, onSuccess, onError, onCancel }: CheckoutFormProp
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="flex-1">
                     Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading || !stripe || !elements} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold">
+                <Button type="submit" disabled={isLoading || !stripe || !elements} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold">
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
                     Pay £{amount.toFixed(2)}
                 </Button>
@@ -145,9 +145,9 @@ export function PaymentModal({ open, onOpenChange, amount, currency = 'gbp', onP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-white/10 text-white">
+            <DialogContent className="sm:max-w-[425px] bg-white border-slate-200 text-slate-900">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-emerald-400">
+                    <DialogTitle className="flex items-center gap-2 text-emerald-600">
                         <CreditCard className="h-5 w-5" /> Secure Payment
                     </DialogTitle>
                 </DialogHeader>

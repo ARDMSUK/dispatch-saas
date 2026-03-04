@@ -4,7 +4,7 @@ import { GoogleMapsLoader } from '@/components/dashboard/google-maps-loader';
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-black relative flex flex-col">
+    <main className="min-h-screen bg-slate-50 relative flex flex-col">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black opacity-90"></div>
@@ -16,13 +16,13 @@ export default function LandingPage() {
       <header className="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 bg-amber-500 rounded-lg flex items-center justify-center font-bold text-black">Z</div>
-          <span className="text-xl font-bold text-white tracking-tight">ZerCabs</span>
+          <span className="text-xl font-bold text-slate-900 tracking-tight">ZerCabs</span>
         </div>
-        <nav className="hidden md:flex gap-6 text-sm font-medium text-zinc-300">
-          <a href="#" className="hover:text-white transition-colors">Services</a>
-          <a href="#" className="hover:text-white transition-colors">Fleet</a>
-          <a href="#" className="hover:text-white transition-colors">Business</a>
-          <a href="#" className="hover:text-white transition-colors">Contact</a>
+        <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
+          <a href="#" className="hover:text-slate-900 transition-colors">Services</a>
+          <a href="#" className="hover:text-slate-900 transition-colors">Fleet</a>
+          <a href="#" className="hover:text-slate-900 transition-colors">Business</a>
+          <a href="#" className="hover:text-slate-900 transition-colors">Contact</a>
         </nav>
         <a href="/login" className="text-sm font-bold text-amber-500 hover:text-amber-400">Driver Login</a>
       </header>
@@ -30,11 +30,11 @@ export default function LandingPage() {
       {/* Hero Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-4">
         <div className="text-center mb-10 space-y-4 max-w-2xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
-          <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">
             Premium Travel,<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Redefined.</span>
           </h1>
-          <p className="text-lg text-zinc-400">
+          <p className="text-lg text-slate-500">
             Experience the ultimate in comfort and reliability. Book your chauffeur service in seconds.
           </p>
         </div>
@@ -48,7 +48,7 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full p-6 text-center text-zinc-600 text-xs">
+      <footer className="relative z-10 w-full p-6 text-center text-slate-500 text-xs">
         &copy; 2026 ZerCabs. All rights reserved.
       </footer>
     </main>
