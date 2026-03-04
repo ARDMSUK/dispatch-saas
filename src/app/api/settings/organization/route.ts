@@ -56,7 +56,8 @@ export async function PATCH(req: Request) {
             enableWaitCalculations: typeof body.enableWaitCalculations === 'boolean' ? body.enableWaitCalculations : undefined,
             enableWebBooker: typeof body.enableWebBooker === 'boolean' ? body.enableWebBooker : undefined,
             logoUrl: body.logoUrl !== undefined ? body.logoUrl : undefined,
-            brandColor: body.brandColor !== undefined ? body.brandColor : undefined
+            brandColor: body.brandColor !== undefined ? body.brandColor : undefined,
+            twilioFromNumber: body.twilioFromNumber !== undefined ? body.twilioFromNumber : undefined
         };
 
         if ((session.user.role as string) === 'SUPER_ADMIN') {

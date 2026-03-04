@@ -162,7 +162,8 @@ export default function SettingsPage() {
                     brandColor,
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
-                    smsTemplateDriverArrived
+                    smsTemplateDriverArrived,
+                    twilioFromNumber
                 })
             });
 
@@ -496,9 +497,12 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="bg-zinc-950 p-4 rounded-lg border border-white/10">
                                         <Label className="text-zinc-400 block mb-2">Connected WhatsApp Number</Label>
-                                        <div className="font-mono text-sm text-emerald-400">
-                                            {twilioFromNumber || "Awaiting Setup"}
-                                        </div>
+                                        <Input
+                                            value={twilioFromNumber}
+                                            onChange={(e) => setTwilioFromNumber(e.target.value)}
+                                            placeholder="e.g. +447... or +14155238886"
+                                            className="bg-black/50 border-white/10 font-mono text-emerald-400"
+                                        />
                                     </div>
                                     <div className="bg-zinc-950 p-4 rounded-lg border border-white/10">
                                         <Label className="text-zinc-400 block mb-2">Twilio Webhook URL</Label>
