@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { calculatePrice } from '@/lib/pricing';
+import Stripe from 'stripe';
+
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+    "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+};
+
+export async function OPTIONS() {
+    return new Response(null, { status: 204, headers: corsHeaders });
+}
 
 export async function POST(
     req: Request,
@@ -10,156 +20,132 @@ export async function POST(
         const { slug } = await params;
         const body = await req.json();
 
-        // 1. Validate Tenant & Feature
         const tenant = await prisma.tenant.findUnique({
             where: { slug }
         });
 
         if (!tenant) {
-            return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Tenant not found' }, { status: 404, headers: corsHeaders });
         }
 
         if (!tenant.enableWebBooker) {
-            return NextResponse.json({ error: 'Web booking is not enabled for this tenant' }, { status: 403 });
+            return NextResponse.json({ error: 'Web booking is disabled' }, { status: 403, headers: corsHeaders });
         }
 
         const {
-            pickup, dropoff, pickupLat, pickupLng, dropoffLat, dropoffLng, vias, distanceMiles,
-            pickupTime, vehicleType, passengerName, passengerPhone, passengers,
-            luggage, notes, isWaitAndReturn, waitingTime, flightNumber
-        } = body;
-
-        if (!pickup || !dropoff || !pickupTime || !passengerName || !passengerPhone) {
-            return NextResponse.json({ error: 'Missing required booking fields' }, { status: 400 });
-        }
-
-        // 2. Fetch/Create Customer Profile by Phone
-        let customer = await prisma.customer.findFirst({
-            where: { phone: passengerPhone, tenantId: tenant.id }
-        });
-
-        if (!customer) {
-            customer = await prisma.customer.create({
-                data: {
-                    phone: passengerPhone,
-                    name: passengerName,
-                    tenantId: tenant.id
-                }
-            });
-        }
-
-        // 3. Re-calculate price server-side to prevent client tampering
-        const pricingResult = await calculatePrice({
-            pickup, dropoff, vias, distanceMiles,
-            pickupTime: new Date(pickupTime),
-            vehicleType,
-            companyId: tenant.id,
+            pickup,
+            dropoff,
+            vias,
+            pickupTime,
+            passengerName,
+            passengerPhone,
+            passengerEmail,
+            vehicleClass,
+            scheduledTime,
+            requiresWav,
+            price,
+            distanceMiles,
+            notes,
+            flightNumber,
             isWaitAndReturn,
             waitingTime,
-            pickupLat, pickupLng, dropoffLat, dropoffLng
-        });
+            paymentType, // 'CARD' or 'CASH'
+            expoPushToken // Used to alert the customer when the driver arrives
+        } = body;
 
-        // 4. Create Job on Dispatch Board
-        const job = await prisma.job.create({
-            data: {
+        if (!pickup || !dropoff || !passengerName || !passengerPhone) {
+            return NextResponse.json({ error: 'Missing required configuration' }, { status: 400, headers: corsHeaders });
+        }
+
+        // Generate Booking UID
+        const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+        // 2. Identify or Create Customer
+        const customer = await prisma.customer.upsert({
+            where: {
+                tenantId_phone: {
+                    tenantId: tenant.id,
+                    phone: passengerPhone,
+                }
+            },
+            update: {
+                name: passengerName,
+                email: passengerEmail,
+                expoPushToken: expoPushToken || undefined
+            },
+            create: {
                 tenantId: tenant.id,
-                customerId: customer.id,
-                pickupAddress: pickup,
-                dropoffAddress: dropoff,
-                pickupLat, pickupLng, dropoffLat, dropoffLng,
-                vias: vias ? JSON.parse(JSON.stringify(vias)) : null,
-                pickupTime: new Date(pickupTime),
-                passengerName,
-                passengerPhone,
-                passengers: parseInt(passengers || '1'),
-                luggage: parseInt(luggage || '0'),
-                vehicleType: vehicleType || 'Saloon',
-                flightNumber,
-                notes,
-                isReturn: false,
-                waitingTime: waitingTime || 0,
-
-                // Financials (Defaulting Cash/Pay In Car for MVP)
-                fare: pricingResult.price,
-                isFixedPrice: pricingResult.breakdown.isFixed,
-                paymentType: 'CASH',
-                paymentStatus: 'UNPAID',
-
-                // Dispatch setup
-                status: 'PENDING',
-                autoDispatch: tenant.autoDispatch // inherit tenant's auto-dispatch setting
+                phone: passengerPhone,
+                name: passengerName,
+                email: passengerEmail,
+                expoPushToken: expoPushToken || undefined
             }
         });
 
-        // 5. If it's a "Wait and Return" job, create the linked Return job seamlessly
-        if (isWaitAndReturn) {
-            const returnTime = new Date(new Date(pickupTime).getTime() + (waitingTime * 60000));
-            await prisma.job.create({
-                data: {
-                    tenantId: tenant.id,
-                    customerId: customer.id,
-                    parentJobId: job.id, // Link to original
+        const job = await prisma.job.create({
+            data: {
+                tenantId: tenant.id,
+                status: 'PENDING',
+                pickupAddress: pickup,
+                dropoffAddress: dropoff,
+                vias: vias || [],
+                pickupTime: pickupTime ? new Date(pickupTime) : (scheduledTime ? new Date(scheduledTime) : new Date()),
+                scheduledTime: scheduledTime ? new Date(scheduledTime) : undefined,
+                passengerName,
+                passengerPhone,
+                vehicleType: vehicleClass || 'Saloon',
+                requiresWav: requiresWav || false,
+                fare: parseFloat(price) || 0.0,
+                notes: notes || 'Booked via Web/App',
+                flightNumber,
+                isReturn: isWaitAndReturn || false,
+                waitingTime: waitingTime || 0
+            }
+        });
 
-                    // Flipped Route
-                    pickupAddress: dropoff,
-                    dropoffAddress: pickup,
-                    pickupLat: dropoffLat,
-                    pickupLng: dropoffLng,
-                    dropoffLat: pickupLat,
-                    dropoffLng: pickupLng,
+        let clientSecret = null;
+        let publishableKey = tenant.stripePublishableKey;
 
-                    pickupTime: returnTime,
-                    passengerName,
-                    passengerPhone,
-                    passengers: parseInt(passengers || '1'),
-                    luggage: parseInt(luggage || '0'),
-                    vehicleType: vehicleType || 'Saloon',
-                    isReturn: true,
-
-                    // Original job holds the fare mapping for the round trip
-                    fare: 0,
-                    paymentType: 'CASH',
-                    status: 'PENDING',
-                    autoDispatch: tenant.autoDispatch
-                }
+        // If customer requested to pay by card AND tenant has stripe connected
+        if (paymentType === 'CARD' && tenant.stripeSecretKey) {
+            const stripe = new Stripe(tenant.stripeSecretKey, {
+                apiVersion: '2025-02-24.acacia' as any, // Cast to any to bypass strict version match temporarily
             });
+
+            // Convert fare to smallest currency unit (pence/cents)
+            const amount = Math.round((parseFloat(price) || 0) * 100);
+
+            if (amount > 0) {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount,
+                    currency: 'gbp',
+                    metadata: {
+                        bookingId: job.id,
+                        tenantId: tenant.id
+                    }
+                });
+                clientSecret = paymentIntent.client_secret;
+
+                // Update booking with the intent ID
+                await prisma.job.update({
+                    where: { id: job.id },
+                    data: {
+                        stripePaymentIntentId: paymentIntent.id
+                    }
+                });
+            }
         }
 
-        // 6. Send Branded Confirmation Email
-        if (customer.email || passengerPhone) {
-            // In a real app we'd ask for email on the booker, but if we don't have it we might skip, 
-            // or we use a fallback if the customer profile already had one.
-            // For now, let's just attempt to send if we somehow had an email context, 
-            // or we log it. Note: Booker form currently only asks for Phone. 
-            // We will mock the email send for demonstration of the template.
-            import('@/lib/email').then(async ({ sendEmail, getPassengerReceiptEmail }) => {
-                const htmlReceipt = getPassengerReceiptEmail(
-                    tenant.name,
-                    job.id.toString(),
-                    pickup,
-                    dropoff,
-                    pickupTime,
-                    pricingResult.price.toString(),
-                    tenant.brandColor,
-                    tenant.logoUrl || ''
-                );
-
-                // We'd send it to customer.email if we captured it. 
-                // For demonstration, we log that the branded email was generated.
-                console.log("[Branded Email Generated] -> ", htmlReceipt.substring(0, 100));
-            });
-        }
-
-        // Return secure response (no sensitive tenant tokens)
         return NextResponse.json({
             success: true,
-            jobId: job.id,
-            fare: pricingResult.price,
-            message: 'Booking received successfully'
-        });
+            bookingId: job.id,
+            clientSecret,
+            publishableKey
+        }, { headers: corsHeaders });
 
     } catch (error) {
         console.error('Error creating public booking:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders });
     }
 }

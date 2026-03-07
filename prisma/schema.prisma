@@ -35,6 +35,7 @@ model Tenant {
   enableDynamicPricing Boolean @default(false)
   enableWaitCalculations Boolean @default(false)
   enableWebBooker Boolean @default(false)
+  enableWavOptions Boolean @default(false)
 
   // AI & Add-on Features
   hasWebChatAi         Boolean  @default(false)
@@ -146,6 +147,7 @@ model Customer {
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   jobs      Job[]
+  expoPushToken String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -214,6 +216,11 @@ model Driver {
   pin       String?  // Login PIN
   
   status    String   @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
+  
+  // Real-time tracking
+  currentLat Float?
+  currentLng Float?
+  lastLocationUpdate DateTime?
   location  String?  // JSON string for now: {lat, lng}
 
   tenantId  String
@@ -224,6 +231,8 @@ model Driver {
 
   // Queue Position
   zoneQueues ZoneQueue[] 
+  
+  expoPushToken     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -271,6 +280,7 @@ model Job {
 
   // Timing
   pickupTime     DateTime
+  scheduledTime  DateTime?
   bookedAt       DateTime @default(now())
   
   // Return Journey Linking
@@ -285,7 +295,11 @@ model Job {
   passengers     Int      @default(1)
   luggage        Int      @default(0)
   vehicleType    String   @default("Saloon")
+  requiresWav    Boolean  @default(false)
   flightNumber   String?
+  
+  // Safety
+  emergencyActive Boolean @default(false)
   
   notes          String?
 

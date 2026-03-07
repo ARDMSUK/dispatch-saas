@@ -35,6 +35,8 @@ export default function SettingsPage() {
     const [tenantSlug, setTenantSlug] = useState("");
     const [hasWebChatAi, setHasWebChatAi] = useState(false);
     const [hasWhatsAppAi, setHasWhatsAppAi] = useState(false);
+    const [aiMessageCount, setAiMessageCount] = useState(0);
+    const [aiMessageLimit, setAiMessageLimit] = useState(100);
     const [twilioFromNumber, setTwilioFromNumber] = useState("");
 
     // SMS Templates State
@@ -45,6 +47,10 @@ export default function SettingsPage() {
     // Branding State
     const [logoUrl, setLogoUrl] = useState('');
     const [brandColor, setBrandColor] = useState('#f59e0b');
+
+    // Integrations State
+    const [stripePublishableKey, setStripePublishableKey] = useState('');
+    const [stripeSecretKey, setStripeSecretKey] = useState('');
 
     // Initial Data
     const [slug, setSlug] = useState('');
@@ -98,6 +104,8 @@ export default function SettingsPage() {
                 setTenantSlug(data.slug || "");
                 setHasWebChatAi(data.hasWebChatAi ?? false);
                 setHasWhatsAppAi(data.hasWhatsAppAi ?? false);
+                setAiMessageCount(data.aiMessageCount ?? 0);
+                setAiMessageLimit(data.aiMessageLimit ?? 100);
                 setTwilioFromNumber(data.twilioFromNumber || "");
 
                 // Load templates
@@ -108,6 +116,10 @@ export default function SettingsPage() {
                 // Load Branding
                 setLogoUrl(data.logoUrl || '');
                 setBrandColor(data.brandColor || '#f59e0b');
+
+                // Load Integrations
+                setStripePublishableKey(data.stripePublishableKey || '');
+                setStripeSecretKey(data.stripeSecretKey || '');
             }
         } catch (error) {
             console.error(error);
@@ -163,7 +175,9 @@ export default function SettingsPage() {
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
                     smsTemplateDriverArrived,
-                    twilioFromNumber
+                    twilioFromNumber,
+                    stripePublishableKey,
+                    stripeSecretKey
                 })
             });
 
@@ -450,15 +464,15 @@ export default function SettingsPage() {
                         <h2 className="text-xl font-semibold flex items-center gap-2 text-indigo-600">
                             🤖 AI Integrations
                         </h2>
-                        {organizationData && typeof organizationData.aiMessageCount === 'number' && (
+                        {typeof aiMessageCount === 'number' && typeof aiMessageLimit === 'number' && (
                             <div className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 flex items-center gap-2">
                                 <span>Monthly Usage:</span>
                                 <div>
-                                    <span className={organizationData.aiMessageCount >= organizationData.aiMessageLimit ? "text-rose-600" : "text-emerald-600"}>
-                                        {organizationData.aiMessageCount}
+                                    <span className={aiMessageCount >= aiMessageLimit ? "text-rose-600" : "text-emerald-600"}>
+                                        {aiMessageCount}
                                     </span>
                                     <span className="text-slate-400 mx-1">/</span>
-                                    <span className="text-slate-500">{organizationData.aiMessageLimit}</span>
+                                    <span className="text-slate-500">{aiMessageLimit}</span>
                                 </div>
                             </div>
                         )}
@@ -604,6 +618,46 @@ export default function SettingsPage() {
                             >
                                 Book Now
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Payment Integrations */}
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-indigo-500">
+                    💳 Payment Integrations
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-slate-500">
+                        Connect your Stripe account to process in-app payments from the Customer App and Web Booker.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <Label className="text-slate-500">Stripe Publishable Key</Label>
+                            <Input
+                                value={stripePublishableKey}
+                                onChange={(e) => setStripePublishableKey(e.target.value)}
+                                placeholder="pk_live_..."
+                                className="bg-slate-100 border-slate-200 mt-1 font-mono text-sm"
+                            />
+                            <p className="text-xs text-slate-400 mt-2">
+                                Used safely by the frontend to initiate payments.
+                            </p>
+                        </div>
+                        <div>
+                            <Label className="text-slate-500">Stripe Secret Key</Label>
+                            <Input
+                                type="password"
+                                value={stripeSecretKey}
+                                onChange={(e) => setStripeSecretKey(e.target.value)}
+                                placeholder="sk_live_..."
+                                className="bg-slate-100 border-slate-200 mt-1 font-mono text-sm"
+                            />
+                            <p className="text-xs text-slate-400 mt-2">
+                                Used by our backend to process charges securely. Will be encrypted.
+                            </p>
                         </div>
                     </div>
                 </div>

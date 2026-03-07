@@ -57,6 +57,8 @@ export async function PATCH(req: Request) {
             enableWebBooker: typeof body.enableWebBooker === 'boolean' ? body.enableWebBooker : undefined,
             logoUrl: body.logoUrl !== undefined ? body.logoUrl : undefined,
             brandColor: body.brandColor !== undefined ? body.brandColor : undefined,
+            stripePublishableKey: body.stripePublishableKey !== undefined ? body.stripePublishableKey : undefined,
+            stripeSecretKey: body.stripeSecretKey !== undefined ? body.stripeSecretKey : undefined,
             twilioFromNumber: body.twilioFromNumber !== undefined ? body.twilioFromNumber : undefined
         };
 

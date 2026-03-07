@@ -1,12 +1,21 @@
-
 import { NextResponse } from 'next/server';
+
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+    return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
 
     if (!query || query.length < 3) {
-        return NextResponse.json({ results: [] });
+        return NextResponse.json({ results: [] }, { headers: corsHeaders });
     }
 
     try {
@@ -22,7 +31,6 @@ export async function GET(request: Request) {
 
         const data = await res.json();
 
-         
         const results = data.map((item: any) => ({
             label: item.display_name,
             value: item.display_name,
@@ -30,9 +38,9 @@ export async function GET(request: Request) {
             lon: item.lon
         }));
 
-        return NextResponse.json({ results });
+        return NextResponse.json({ results }, { headers: corsHeaders });
     } catch (error) {
         console.error('Autocomplete error:', error);
-        return NextResponse.json({ results: [] });
+        return NextResponse.json({ results: [] }, { status: 500, headers: corsHeaders });
     }
 }

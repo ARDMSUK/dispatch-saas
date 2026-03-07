@@ -37,7 +37,7 @@ export class DispatchEngine {
 
         // 2. Find PENDING Jobs (with pickup time in the future or recent past)
         const now = new Date();
-        const lookahead = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+        const lookahead = new Date(now.getTime() + 45 * 60 * 1000); // 45 minutes lookahead for Scheduled Bookings
         // Expanded lookback to catch failed assignments from recent past
         const lookback = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2 hours ago
 

@@ -205,6 +205,26 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Building2 className="w-5 h-5" />
+                            Embed Widgets
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Web Booking Widget</h3>
+                            <p className="text-sm text-slate-500 leading-relaxed">Copy this HTML snippet and give it to corporate clients (Hotels, Offices, Travel Agents) to embed your instant-booking pipeline directly onto their website.</p>
+                        </div>
+                        <div className="bg-slate-900 p-4 rounded-md overflow-x-auto relative">
+                            <code className="text-green-400 font-mono text-xs whitespace-pre-wrap">
+                                {`<iframe src="https://dispatch-saas.vercel.app/booker/${tenant.slug}?embed=true" width="100%" height="800px" frameborder="0" style="border-radius: 12px; box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);"></iframe>`}
+                            </code>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-slate-100 border-slate-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Building2 className="w-5 h-5" />
                             System Features
                         </CardTitle>
                     </CardHeader>

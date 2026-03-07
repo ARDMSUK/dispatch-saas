@@ -17,6 +17,16 @@ export default function BookerPage() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [bookingComplete, setBookingComplete] = useState(false);
+    const [isEmbed, setIsEmbed] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const queryParams = new URLSearchParams(window.location.search);
+            if (queryParams.get('embed') === 'true') {
+                setIsEmbed(true);
+            }
+        }
+    }, []);
 
     const [formData, setFormData] = useState({
         pickup: "",
@@ -170,8 +180,8 @@ export default function BookerPage() {
     }
 
     return (
-        <div className="max-w-xl mx-auto p-4 sm:p-6 lg:p-8 h-full" style={{ '--primary-brand': brandColor } as React.CSSProperties}>
-            <Card className="bg-zinc-950/90 border-slate-200 shadow-2xl backdrop-blur-xl">
+        <div className={`mx-auto h-full ${isEmbed ? 'p-0 w-full' : 'max-w-xl p-4 sm:p-6 lg:p-8'}`} style={{ '--primary-brand': brandColor } as React.CSSProperties}>
+            <Card className={`bg-zinc-950/90 shadow-2xl backdrop-blur-xl transition-all ${isEmbed ? 'border-0 rounded-none shadow-none min-h-screen' : 'border-slate-200'}`}>
                 <CardHeader className="text-center border-b border-slate-200 pb-6">
                     {logoUrl ? (
                         <img src={logoUrl} alt={companyName} className="h-16 object-contain mx-auto mb-4" />

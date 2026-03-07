@@ -55,6 +55,7 @@ export async function GET(req: Request) {
             luggage: j.luggage,
             notes: j.notes,
             vehicleType: j.vehicleType,
+            requiresWav: j.requiresWav,
             flightNumber: j.flightNumber,
             isReturn: j.isReturn
         }));
