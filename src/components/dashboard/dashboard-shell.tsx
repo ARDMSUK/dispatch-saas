@@ -33,7 +33,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
         return (
-            <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-blue-700/10 text-blue-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'}`}>
+            <Link href={href} onClick={() => setIsSidebarOpen(false)} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-blue-700/10 text-blue-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'}`}>
                 <Icon className="h-4 w-4" />
                 <span className="text-sm font-medium">{label}</span>
             </Link>
