@@ -810,60 +810,6 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                     </div>
 
-                    {/* RECURRING TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 mt-2">
-                        <input
-                            type="checkbox"
-                            id="recurringToggle"
-                            checked={isRecurring}
-                            onChange={(e) => setIsRecurring(e.target.checked)}
-                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-emerald-500 focus:ring-emerald-500/20"
-                        />
-                        <label htmlFor="recurringToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <RotateCw className="h-3 w-3 text-emerald-500" /> Recurring Booking
-                        </label>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-2 rounded border border-indigo-500/30 bg-indigo-500/10 mb-2">
-                        <input
-                            type="checkbox"
-                            id="autoDispatchToggle"
-                            checked={autoDispatch}
-                            onChange={(e) => setAutoDispatch(e.target.checked)}
-                            className="w-4 h-4 rounded border-indigo-500 text-indigo-500 focus:ring-indigo-500/20"
-                        />
-                        <label htmlFor="autoDispatchToggle" className="text-sm text-indigo-200 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <Zap className="h-3 w-3 text-indigo-500" /> Auto-Dispatch Job
-                        </label>
-                    </div>
-
-                    {isRecurring && (
-                        <div className="pl-4 border-l-2 border-emerald-500/20 animate-in slide-in-from-top-2 space-y-4 mt-2">
-                            <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-600 font-bold">Frequency</label>
-                                <select
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50"
-                                    value={recurrenceRule}
-                                    onChange={(e) => setRecurrenceRule(e.target.value)}
-                                >
-                                    <option value="DAILY">Daily</option>
-                                    <option value="WEEKLY">Weekly</option>
-                                    <option value="MON,WED,FRI">Mon, Wed, Fri</option>
-                                    <option value="MON-FRI">Mon - Fri</option>
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-600 font-bold">Repeat Until</label>
-                                <input
-                                    type="date"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:dark]"
-                                    value={recurrenceEnd}
-                                    onChange={e => setRecurrenceEnd(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    )}
-
                     {isReturn && (
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
                             <h3 className="text-xs text-blue-700 font-bold uppercase tracking-wider">Return Journey Details</h3>
@@ -960,6 +906,61 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             />
                         </div>
                     )}
+
+                    {/* RECURRING TOGGLE */}
+                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 mt-2">
+                        <input
+                            type="checkbox"
+                            id="recurringToggle"
+                            checked={isRecurring}
+                            onChange={(e) => setIsRecurring(e.target.checked)}
+                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-emerald-500 focus:ring-emerald-500/20"
+                        />
+                        <label htmlFor="recurringToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
+                            <RotateCw className="h-3 w-3 text-emerald-500" /> Recurring Booking
+                        </label>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-2 rounded border border-indigo-500/30 bg-indigo-500/10 mb-2">
+                        <input
+                            type="checkbox"
+                            id="autoDispatchToggle"
+                            checked={autoDispatch}
+                            onChange={(e) => setAutoDispatch(e.target.checked)}
+                            className="w-4 h-4 rounded border-indigo-500 text-indigo-500 focus:ring-indigo-500/20"
+                        />
+                        <label htmlFor="autoDispatchToggle" className="text-sm text-indigo-200 flex-1 cursor-pointer select-none flex items-center gap-2">
+                            <Zap className="h-3 w-3 text-indigo-500" /> Auto-Dispatch Job
+                        </label>
+                    </div>
+
+                    {isRecurring && (
+                        <div className="pl-4 border-l-2 border-emerald-500/20 animate-in slide-in-from-top-2 space-y-4 mt-2">
+                            <div className="grid grid-cols-1 gap-3">
+                                <label className="text-xs text-emerald-600 font-bold">Frequency</label>
+                                <select
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50"
+                                    value={recurrenceRule}
+                                    onChange={(e) => setRecurrenceRule(e.target.value)}
+                                >
+                                    <option value="DAILY">Daily</option>
+                                    <option value="WEEKLY">Weekly</option>
+                                    <option value="MON,WED,FRI">Mon, Wed, Fri</option>
+                                    <option value="MON-FRI">Mon - Fri</option>
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                                <label className="text-xs text-emerald-600 font-bold">Repeat Until</label>
+                                <input
+                                    type="date"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:dark]"
+                                    value={recurrenceEnd}
+                                    onChange={e => setRecurrenceEnd(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    )}
+
                 </div>
 
                 {/* QUOTE & SUBMIT */}
