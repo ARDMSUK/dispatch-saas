@@ -67,7 +67,8 @@ export async function POST(req: Request) {
                     email: adminEmail,
                     password: hashedPassword,
                     role: 'ADMIN', // The initial user is an ADMIN for that tenant
-                    tenantId: tenant.id
+                    tenantId: tenant.id,
+                    forcePasswordReset: true
                 }
             });
 

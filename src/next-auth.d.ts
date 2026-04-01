@@ -11,6 +11,8 @@ declare module "next-auth" {
             role: string;
             tenantId: string;
             tenantSlug: string;
+            forcePasswordReset?: boolean;
+            isImpersonating?: boolean;
         } & DefaultSession["user"]
     }
 
@@ -18,6 +20,7 @@ declare module "next-auth" {
         role: string;
         tenantId: string;
         tenantSlug: string;
+        forcePasswordReset?: boolean;
     }
 }
 
@@ -27,5 +30,6 @@ declare module "next-auth/jwt" {
         role: string;
         tenantId: string;
         tenantSlug: string;
+        forcePasswordReset?: boolean;
     }
 }

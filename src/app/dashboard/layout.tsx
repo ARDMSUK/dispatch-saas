@@ -17,6 +17,10 @@ export default async function DashboardLayout({
         redirect('/login');
     }
 
+    if (session.user?.forcePasswordReset) {
+        redirect('/auth/force-reset');
+    }
+
     const userName = session?.user?.name || "Operator";
     const tenantSlug = session?.user?.tenantSlug || "DEV";
 

@@ -67,6 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             tenantId: user.tenantId,
                             tenantSlug: user.tenant.slug,
                             permissions: user.permissions as string[] || [], // Typecast and default
+                            forcePasswordReset: user.forcePasswordReset,
                         };
                     }
                 }
@@ -85,6 +86,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.accountId = token.accountId;
                 session.user.tenantId = token.impersonatedTenantId || token.tenantId; // Prefer impersonated
                 session.user.tenantSlug = token.impersonatedTenantSlug || token.tenantSlug;
+                session.user.forcePasswordReset = token.forcePasswordReset;
 
                 // Flag to show we are impersonating
                 if (token.impersonatedTenantId) {
@@ -102,6 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.accountId = user.accountId;
                 token.tenantId = user.tenantId;
                 token.tenantSlug = user.tenantSlug;
+                token.forcePasswordReset = user.forcePasswordReset;
             }
 
             // Handle Impersonation Update

@@ -123,6 +123,8 @@ model User {
   twoFactorSecret  String?
   twoFactorEnabled Boolean  @default(false)
 
+  forcePasswordReset Boolean @default(false)
+
   ticketMessages TicketMessage[]
 
   createdAt DateTime @default(now())
