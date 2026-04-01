@@ -33,7 +33,7 @@ export async function GET(req: Request) {
                     select: { jobs: true }
                 },
                 jobs: {
-                    take: 1,
+                    take: 3,
                     orderBy: {
                         pickupTime: 'desc'
                     }
@@ -45,7 +45,18 @@ export async function GET(req: Request) {
             return NextResponse.json({ found: false });
         }
 
-        const lastJob = customer.jobs[0] || null;
+        const recentJobs = customer.jobs.map(job => ({
+            id: job.id || '',
+            pickup: job.pickupAddress,
+            pickupLat: job.pickupLat,
+            pickupLng: job.pickupLng,
+            dropoff: job.dropoffAddress,
+            dropoffLat: job.dropoffLat,
+            dropoffLng: job.dropoffLng,
+            date: job.pickupTime,
+        }));
+
+        const lastJob = recentJobs[0] || null;
 
         return NextResponse.json({
             found: true,
@@ -56,18 +67,11 @@ export async function GET(req: Request) {
                 phone: customer.phone,
                 notes: customer.notes
             },
-            lastJob: lastJob ? {
-                pickup: lastJob.pickupAddress,
-                pickupLat: lastJob.pickupLat,
-                pickupLng: lastJob.pickupLng,
-                dropoff: lastJob.dropoffAddress,
-                dropoffLat: lastJob.dropoffLat,
-                dropoffLng: lastJob.dropoffLng,
-                date: lastJob.pickupTime,
-            } : null,
+            lastJob: lastJob,
+            recentJobs: recentJobs,
             stats: {
                 totalBookings: customer._count.jobs,
-                lastBookingDate: lastJob?.pickupTime || null
+                lastBookingDate: lastJob?.date || null
             }
         });
 

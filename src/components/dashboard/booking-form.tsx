@@ -463,7 +463,39 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     }, [showFlightInput]);
 
     const [customerStats, setCustomerStats] = useState<{ total: number, lastDate: string } | null>(null);
+    const [recentJobs, setRecentJobs] = useState<any[]>([]);
+    const [phoneSearchOpen, setPhoneSearchOpen] = useState(false);
 
+    // Debounce phone lookup when > 7 chars
+    useEffect(() => {
+        if (passengerPhone.length > 7) {
+            const timer = setTimeout(() => {
+                handlePhoneLookup(passengerPhone);
+            }, 600);
+            return () => clearTimeout(timer);
+        } else {
+            setPhoneSearchOpen(false);
+            setRecentJobs([]);
+            setCustomerStats(null);
+        }
+    }, [passengerPhone]);
+
+    const handleSelectRecentJob = (job: any) => {
+        if (job.pickup) setPickup(job.pickup);
+        if (job.pickupLat && job.pickupLng) {
+            setPickupCoords({ lat: job.pickupLat, lng: job.pickupLng });
+        } else {
+            setPickupCoords(null);
+        }
+
+        if (job.dropoff) setDropoff(job.dropoff);
+        if (job.dropoffLat && job.dropoffLng) {
+            setDropoffCoords({ lat: job.dropoffLat, lng: job.dropoffLng });
+        } else {
+            setDropoffCoords(null);
+        }
+        setPhoneSearchOpen(false);
+    };
     // (Check for CLI / URL Phone Param effect was removed and merged into the top-level URL parser)
 
     const handlePhoneLookup = async (phoneVal: string) => {
@@ -476,21 +508,20 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 if (data.found && data.customer) {
                     toast.success("Customer Found", { description: `Welcome back, ${data.customer.name || 'valued customer'}` });
 
-                    // Auto-populate Details
+                    // Auto-populate Details immediately (user can override)
                     if (data.customer.name) setPassengerName(data.customer.name);
                     if (data.customer.email) setPassengerEmail(data.customer.email);
 
-                    // Auto-populate Journey (Last Job)
-                    if (data.lastJob) {
-                        setPickup(data.lastJob.pickup);
-                        // We'd ideally set coords too if we had a way to pass them directly to LocationInput or state
-                        if (data.lastJob.pickupLat && data.lastJob.pickupLng) {
-                            setPickupCoords({ lat: data.lastJob.pickupLat, lng: data.lastJob.pickupLng });
-                        }
-
-                        setDropoff(data.lastJob.dropoff);
-                        if (data.lastJob.dropoffLat && data.lastJob.dropoffLng) {
-                            setDropoffCoords({ lat: data.lastJob.dropoffLat, lng: data.lastJob.dropoffLng });
+                    // Show recent jobs if they exist instead of auto-populating
+                    if (data.recentJobs && data.recentJobs.length > 0) {
+                        setRecentJobs(data.recentJobs);
+                        setPhoneSearchOpen(true);
+                    } else {
+                        setRecentJobs([]);
+                        // Fall back to auto-populate if we just have one job and no recent array maybe? No, we rely on recentJobs now.
+                        if (data.lastJob && (!data.recentJobs || data.recentJobs.length === 0)) {
+                             // legacy fallback
+                             handleSelectRecentJob(data.lastJob);
                         }
                     }
 
@@ -565,14 +596,47 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             </div>
                         )}
                     </div>
-                    <input
-                        type="tel"
-                        placeholder="Enter Number (e.g. 077...)"
-                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-slate-900 focus:outline-none focus:border-blue-600/50"
-                        value={passengerPhone}
-                        onChange={e => setPassengerPhone(e.target.value)}
-                        onBlur={() => handlePhoneLookup(passengerPhone)}
-                    />
+                    <div className="relative">
+                        <input
+                            type="tel"
+                            placeholder="Enter Number (e.g. 077...)"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-slate-900 focus:outline-none focus:border-blue-600/50"
+                            value={passengerPhone}
+                            onChange={e => setPassengerPhone(e.target.value)}
+                        />
+                        {phoneSearchOpen && recentJobs.length > 0 && (
+                            <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 border border-blue-600/30 shadow-2xl rounded-md overflow-hidden max-h-80 overflow-y-auto">
+                                <div className="px-2 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50/50 border-b border-blue-100 uppercase flex justify-between items-center">
+                                    <span>Recent Jobs (Click to populate)</span>
+                                    <button onClick={() => setPhoneSearchOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="h-3 w-3" /></button>
+                                </div>
+                                <div className="p-1 space-y-1">
+                                    {recentJobs.map((job, idx) => (
+                                        <div 
+                                            key={job.id || idx} 
+                                            className="p-2 bg-white hover:bg-blue-50 cursor-pointer rounded border border-slate-100 transition-colors"
+                                            onClick={() => handleSelectRecentJob(job)}
+                                        >
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1">
+                                                    <Navigation className="h-3 w-3 text-emerald-500" /> Pickup
+                                                </span>
+                                                <span className="text-[10px] text-slate-400">
+                                                    {new Date(job.date).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-slate-800 font-medium truncate pl-4 mb-2 border-l-2 border-emerald-500/20">{job.pickup || 'Unknown'}</div>
+                                            
+                                            <span className="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-1 mb-1">
+                                                <MapPin className="h-3 w-3 text-blue-500" /> Dropoff
+                                            </span>
+                                            <div className="text-xs text-slate-800 font-medium truncate pl-4 border-l-2 border-blue-500/20">{job.dropoff || 'Unknown'}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="border-t border-slate-200 my-4"></div>
