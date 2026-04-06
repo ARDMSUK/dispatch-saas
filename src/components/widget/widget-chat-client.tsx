@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, MessageSquare, X, Bot, User } from "lucide-react";
+import { Send, MessageSquare, X, Bot, User, Minus } from "lucide-react";
 
 interface Message {
     id: string;
@@ -11,9 +11,10 @@ interface Message {
 
 interface WidgetChatClientProps {
     apiKey: string | undefined;
+    color?: string;
 }
 
-export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
+export default function WidgetChatClient({ apiKey, color = '#1d4ed8' }: WidgetChatClientProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState("");
     const [isSending, setIsSending] = useState(false);
@@ -102,6 +103,16 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
         }
     }, [messages]);
 
+    // Broadcast state to host window to resize iframe
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.parent) {
+            window.parent.postMessage({
+                type: 'resize-widget',
+                isOpen: isOpen
+            }, '*');
+        }
+    }, [isOpen]);
+
     if (!apiKey) {
         return <div className="p-4 text-sm text-red-500 bg-red-100 rounded">Error: API Key missing in widget URL.</div>;
     }
@@ -112,7 +123,8 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
             <div className="fixed bottom-4 right-4 z-50">
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="flex items-center justify-center w-14 h-14 bg-blue-700 text-black rounded-full shadow-xl hover:bg-blue-600 transition-all hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: color }}
+                    className="flex items-center justify-center w-14 h-14 text-white rounded-full shadow-xl transition-all hover:scale-105 active:scale-95"
                 >
                     <MessageSquare className="w-6 h-6" />
                 </button>
@@ -126,20 +138,30 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-700/20 flex items-center justify-center text-blue-700">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${color}33`, color: color }}>
                         <Bot className="w-4 h-4" />
                     </div>
                     <div>
                         <h3 className="font-semibold text-slate-900 text-sm">Booking Assistant</h3>
-                        <p className="text-xs text-blue-700">Online &bull; AI Powered</p>
+                        <p className="text-xs" style={{ color: color }}>Online &bull; AI Powered</p>
                     </div>
                 </div>
-                <button
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 text-slate-500 hover:text-slate-900 rounded-full hover:bg-slate-200 transition-colors"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors"
+                        title="Minimize"
+                    >
+                        <Minus className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors"
+                        title="Close"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
             {/* Messages Area */}
@@ -151,9 +173,10 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
                     >
                         <div
                             className={`px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user'
-                                ? 'bg-blue-700 text-black rounded-tr-sm'
+                                ? 'text-white rounded-tr-sm'
                                 : 'bg-slate-200 text-slate-900 rounded-tl-sm'
                                 }`}
+                            style={m.role === 'user' ? { backgroundColor: color } : undefined}
                         >
                             {m.content}
                         </div>
@@ -177,7 +200,8 @@ export default function WidgetChatClient({ apiKey }: WidgetChatClientProps) {
                     <button
                         type="submit"
                         disabled={!input.trim() || isSending}
-                        className="w-10 h-10 rounded-full bg-blue-700 text-black flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+                        style={{ backgroundColor: color }}
+                        className="w-10 h-10 rounded-full text-white flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         <Send className="w-4 h-4 ml-0.5" />
                     </button>

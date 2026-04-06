@@ -488,20 +488,23 @@ export default function SettingsPage() {
 
                                 <div className="mt-4 bg-white p-4 rounded-lg border border-slate-200 relative">
                                     <Label className="text-slate-500 mb-2 block">Iframe Embed Code</Label>
+                                    <Label className="text-slate-500 mb-2 block">Script Embed Code</Label>
                                     <p className="text-xs text-slate-400 mb-3">
                                         Copy and paste this code near the bottom of your website's &lt;body&gt; tag.
                                     </p>
                                     <div className="relative group">
-                                        <textarea
+                                        <Input
                                             readOnly
-                                            value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`}
-                                            className="w-full h-32 bg-slate-50 border border-slate-200 text-indigo-600 font-mono text-sm p-3 rounded resize-none"
+                                            className="font-mono text-xs bg-slate-50 border-slate-200 text-slate-800 break-all h-24"
+                                            value={`<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget.js" data-api-key="${apiKey}" data-color="${brandColor || '#1d4ed8'}"></script>`}
                                         />
                                         <Button
                                             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-slate-900 font-medium"
                                             onClick={() => {
-                                                navigator.clipboard.writeText(`<iframe src="${window.location.origin}/widget?key=${apiKey}" style="border:none; position:fixed; bottom:20px; right:20px; width:400px; height:600px; z-index:99999; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.3);" title="AI Booking Assistant"></iframe>`);
-                                                toast.success("AI Widget code copied!");
+                                                if (typeof window !== 'undefined') {
+                                                    navigator.clipboard.writeText(`<script src="${window.location.origin}/widget.js" data-api-key="${apiKey}" data-color="${brandColor || '#1d4ed8'}"></script>`);
+                                                    toast.success("Embed script copied!");
+                                                }
                                             }}
                                         >
                                             Copy Code
