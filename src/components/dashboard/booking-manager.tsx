@@ -373,13 +373,20 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         const f = flights[job.flightNumber];
                                         const isDelayed = new Date(f.estimatedArrival).getTime() > new Date(f.scheduledArrival).getTime() + (15 * 60000);
                                         const landed = f.status === 'landed' || f.actualArrival;
+                                        const cancelled = String(f.status).toLowerCase() === 'cancelled';
 
                                         // Format the time HH:MM
                                         const estTime = new Date(f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                                         const termGate = [f.terminal ? `T${f.terminal}` : '', f.gate ? `G:${f.gate}` : ''].filter(Boolean).join(' ');
 
-                                        if (landed) {
+                                        if (cancelled) {
+                                            return (
+                                                <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20 font-mono text-[10px] whitespace-nowrap">
+                                                    CANCELLED
+                                                </Badge>
+                                            );
+                                        } else if (landed) {
                                             return (
                                                 <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-mono text-[10px] whitespace-nowrap">
                                                     LANDED {new Date(f.actualArrival || f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {termGate ? `(${termGate})` : ''}
