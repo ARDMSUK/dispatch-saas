@@ -278,6 +278,11 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
     // Initial check: Validate Flight Terminal then proceed
     const handlePreSubmit = async () => {
+        if (isCalculating) {
+            toast.error("Price Calculating", { description: "Please wait a moment while the final price is calculated." });
+            return;
+        }
+
         if (!pickup || !dropoff) {
             toast.error("Please select a route first");
             return;
