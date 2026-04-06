@@ -103,7 +103,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [pickupTime, setPickupTime] = useState(() => {
         const now = new Date();
         now.setMinutes(now.getMinutes() + 10);
-        return now.toISOString().slice(0, 16);
+        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        return local;
     });
 
     // Return Booking
@@ -565,7 +566,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             onClick={() => {
                                 const now = new Date();
                                 now.setMinutes(now.getMinutes() + 10); // ASAP = +10 mins
-                                setPickupTime(now.toISOString().slice(0, 16));
+                                const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                                setPickupTime(local);
                             }}
                         >
                             ASAP

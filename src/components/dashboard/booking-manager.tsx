@@ -44,6 +44,7 @@ interface Job {
     accountRef?: string;
     pricePaid?: number;
     paymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL' | 'AUTHORIZED' | 'REFUNDED';
+    waitingTime?: number;
     commission?: number;
     driverPayment?: number;
     driverPaymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
@@ -344,6 +345,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         {job.returnBooking && (
                             <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 border-indigo-500/20 font-mono text-[10px]">
                                 RETURN
+                            </Badge>
+                        )}
+                        {(job.waitingTime || 0) > 0 && (
+                            <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 font-mono text-[10px]">
+                                WAIT & RETURN: {job.waitingTime}m
                             </Badge>
                         )}
                         {job.preAssignedDriver && job.status !== 'DISPATCHED' && job.status !== 'EN_ROUTE' && job.status !== 'ARRIVED' && job.status !== 'POB' && job.status !== 'COMPLETED' && (

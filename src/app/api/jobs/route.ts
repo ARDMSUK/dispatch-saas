@@ -72,6 +72,7 @@ export async function GET(req: Request) {
             notes: j.notes,
             flightNumber: j.flightNumber,
             returnBooking: j.isReturn,
+            waitingTime: j.waitingTime,
             source: 'WEB'
         }));
 
