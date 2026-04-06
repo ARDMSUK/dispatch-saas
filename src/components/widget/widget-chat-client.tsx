@@ -142,8 +142,8 @@ export default function WidgetChatClient({ apiKey, color = '#1d4ed8' }: WidgetCh
                         <Bot className="w-4 h-4" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-slate-900 text-sm">Booking Assistant</h3>
-                        <p className="text-xs" style={{ color: color }}>Online &bull; AI Powered</p>
+                        <h3 className="font-semibold text-slate-900 text-sm">CABAI</h3>
+                        <p className="text-xs" style={{ color: color }}>The AI Booking Assistant</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
