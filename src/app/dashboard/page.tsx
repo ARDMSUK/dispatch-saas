@@ -203,22 +203,22 @@ export default function DashboardPage() {
     }, [map, drivers, user]);
 
     return (
-        <div className="h-full w-full bg-slate-50 text-slate-900 flex font-sans overflow-hidden">
+        <div className="h-full w-full bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden">
 
             {/* 3-COLUMN LAYOUT */}
 
-            {/* COL 1: NEW BOOKING (Fixed Width) */}
-            <div className="w-[380px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shadow-2xl shrink-0">
-                <div className="p-4 border-b border-slate-200 bg-white">
-                    {/* Header Removed */}
+            {/* COL 1: NEW BOOKING (Fixed Width on Desktop, Max Width on Mobile) */}
+            <div className="w-full lg:w-[380px] border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 lg:h-full flex flex-col z-20 shadow-xl shrink-0 min-h-[600px] lg:min-h-0">
+                <div className="p-4 border-b border-slate-200 bg-white hidden lg:block">
+                    {/* Empty header block to match alignments if needed */}
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                <div className="flex-1 overflow-y-visible lg:overflow-y-auto p-4 custom-scrollbar">
                     <BookingForm onJobCreated={triggerRefresh} />
                 </div>
             </div>
 
-            {/* COL 2: BOOKING MANAGER (Flex Grow) */}
-            <div className="flex-1 border-r border-slate-200 bg-zinc-900/20 h-full relative z-10 flex flex-col min-w-[400px]">
+            {/* COL 2: BOOKING MANAGER (Flex Grow, takes remaining space on Desktop) */}
+            <div className="w-full lg:flex-1 border-b lg:border-b-0 lg:border-r border-slate-200 bg-zinc-900/20 lg:h-full relative z-10 flex flex-col min-w-full lg:min-w-[400px] min-h-[800px] lg:min-h-0">
                 <BookingManager
                     onSelectJob={(j) => setSelectedJob(j)}
                     selectedJobId={selectedJob?.id}
@@ -226,8 +226,8 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* COL 3: MAP & FLEET (Fixed Width) */}
-            <div className="w-[450px] flex flex-col h-full bg-white border-l border-slate-200 z-20 shrink-0">
+            {/* COL 3: MAP & FLEET (Fixed Width on Desktop) */}
+            <div className="w-full lg:w-[450px] flex flex-col h-[800px] lg:h-full bg-white border-l border-slate-200 z-20 shrink-0">
 
                 {/* TOP: MAP (50%) */}
                 <div className="h-1/2 relative bg-slate-100 border-b border-slate-200">
