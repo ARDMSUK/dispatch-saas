@@ -332,7 +332,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 `}
             >
                 <div className="flex justify-between items-start mb-3">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex flex-wrap gap-2 items-center flex-1 pr-2">
                         <Badge variant="outline" className={`${getStatusColor(job.status)} font-mono text-[10px] tracking-wider`}>
                             {job.status}
                         </Badge>

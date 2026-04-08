@@ -203,12 +203,12 @@ export default function DashboardPage() {
     }, [map, drivers, user]);
 
     return (
-        <div className="h-full w-full bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden">
+        <div className="h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden relative">
 
             {/* 3-COLUMN LAYOUT */}
 
             {/* COL 1: NEW BOOKING (Fixed Width on Desktop, Max Width on Mobile) */}
-            <div className="w-full lg:w-[380px] border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 lg:h-full flex flex-col z-20 shadow-xl shrink-0 min-h-[600px] lg:min-h-0">
+            <div className="w-full max-w-[100vw] lg:w-[380px] border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 lg:h-full flex flex-col z-20 shadow-xl shrink-0 min-h-[600px] lg:min-h-0 overflow-x-hidden">
                 <div className="p-4 border-b border-slate-200 bg-white hidden lg:block">
                     {/* Empty header block to match alignments if needed */}
                 </div>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
             </div>
 
             {/* COL 2: BOOKING MANAGER (Flex Grow, takes remaining space on Desktop) */}
-            <div className="w-full lg:flex-1 border-b lg:border-b-0 lg:border-r border-slate-200 bg-zinc-900/20 lg:h-full relative z-10 flex flex-col min-w-full lg:min-w-[400px] min-h-[800px] lg:min-h-0">
+            <div className="w-full max-w-[100vw] lg:flex-1 border-b lg:border-b-0 lg:border-r border-slate-200 bg-zinc-900/20 lg:h-full relative z-10 flex flex-col min-w-[300px] lg:min-w-[400px] min-h-[800px] lg:min-h-0 overflow-x-hidden">
                 <BookingManager
                     onSelectJob={(j) => setSelectedJob(j)}
                     selectedJobId={selectedJob?.id}
