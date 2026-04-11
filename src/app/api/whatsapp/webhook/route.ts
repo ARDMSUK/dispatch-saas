@@ -12,6 +12,16 @@ export async function POST(req: Request) {
         const eventType = body.event;
         const instanceId = body.instance;
 
+        // DEBUG: Save payload to DB so we can inspect the exact v2 schema
+        if (eventType === 'messages.upsert') {
+            try {
+                await prisma.tenant.updateMany({
+                   where: { whatsappInstanceId: instanceId },
+                   data: { emailBodyReceipt: JSON.stringify(body) }
+                });
+            } catch(e) {}
+        }
+
         // 1. Handle Connection Status Webhooks
         if (eventType === 'connection.update') {
             const state = body.data?.state; // 'open', 'close', 'connecting'
