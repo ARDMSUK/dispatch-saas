@@ -89,7 +89,7 @@ export default function TenantAIPage() {
                     <CardContent className="pt-6 space-y-6">
                         
                         {/* Status UI Contexts */}
-                        {(!status || status === "DISCONNECTED") && !qrCode && (
+                        {(!status || status === "DISCONNECTED" || (status === "CONNECTING" && !qrCode)) && (
                             <div className="bg-white border rounded-xl p-6 text-center space-y-4 shadow-sm">
                                 <div className="mx-auto w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
                                     <QrCode className="w-6 h-6 text-emerald-600" />

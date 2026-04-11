@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
+export const maxDuration = 60; // Extend Vercel timeout to 60 seconds so Baileys can boot
+
 // Gateway credentials (would be in your .env or master config)
 const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'http://localhost:8080';
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || 'global-master-key';
@@ -54,7 +56,7 @@ export async function POST(req: Request) {
                     instanceName: instanceId,
                     qrcode: true, // Tell it to return a Base64 QR code immediately
                     integration: 'WHATSAPP-BAILEYS',
-                    webhook_url: `${NEXT_PUBLIC_BASE_URL}/api/whatsapp/webhook`,
+                    webhook: `${NEXT_PUBLIC_BASE_URL}/api/whatsapp/webhook`,
                     webhook_by_events: false,
                     events: [
                         'MESSAGES_UPSERT',   // When we receive a text
