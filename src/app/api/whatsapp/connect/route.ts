@@ -68,9 +68,10 @@ export async function POST(req: Request) {
                 const errorData = await gatewayRes.json().catch(() => ({}));
                 console.error("[WHATSAPP] Gateway Rejection:", errorData);
                 
-                // Fallback for mocked mode or graceful degradation
+                // In Production: If no gateway URL is set, we throw immediately.
                 if (!process.env.EVOLUTION_API_URL) {
-                    return mockGatewayResponse();
+                    console.error("[WHATSAPP] Gateway Not Configured.");
+                    return NextResponse.json({ error: "Gateway Not Configured" }, { status: 502 });
                 }
 
                 return NextResponse.json({ error: "Gateway proxy failure", details: errorData }, { status: 502 });
@@ -87,11 +88,6 @@ export async function POST(req: Request) {
         } catch (fetchError) {
             console.error("[WHATSAPP] Fatal connection to gateway failed:", fetchError);
             
-            // If the user hasn't booted up the railway server yet, we'll return a graceful mock so the frontend continues to work
-            if (!process.env.EVOLUTION_API_URL || process.env.NODE_ENV === 'development') {
-                return mockGatewayResponse();
-            }
-
             return NextResponse.json({ error: "Cannot reach WhatsApp Gateway Server" }, { status: 503 });
         }
 
@@ -99,15 +95,4 @@ export async function POST(req: Request) {
         console.error("[API_WHATSAPP_CONNECT_ERROR]", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
-}
-
-// Temporary Mock to allow frontend design completely stress-free while Gateway spins up
-function mockGatewayResponse() {
-    console.log("[MOCK] Returning simulated QR Code for Evolution API");
-    // Standard mock base64 QR code graphic
-    const mockQr = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
-    return NextResponse.json({
-        qrcode: mockQr,
-        instanceName: "mock_instance_123"
-    });
 }

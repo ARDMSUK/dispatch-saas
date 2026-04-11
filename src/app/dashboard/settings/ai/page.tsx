@@ -13,6 +13,8 @@ export default function TenantAIPage() {
     const [status, setStatus] = useState<string>("DISCONNECTED");
     const [instanceId, setInstanceId] = useState<string | null>(null);
 
+    const [hasWebChat, setHasWebChat] = useState(false);
+
     // Initial Fetch for Tenant AI State
     useEffect(() => {
         fetch('/api/settings/organization') // Re-using organization route or we can create a specific one
@@ -21,6 +23,9 @@ export default function TenantAIPage() {
                 if (data && data.whatsappInstanceStatus) {
                     setStatus(data.whatsappInstanceStatus);
                     setInstanceId(data.whatsappInstanceId);
+                }
+                if (data && data.hasWebChatAi !== undefined) {
+                    setHasWebChat(data.hasWebChatAi);
                 }
             })
             .catch(() => console.error("Failed to fetch tenant AI settings"));
@@ -162,9 +167,15 @@ export default function TenantAIPage() {
                                 <Bot className="w-5 h-5" />
                                 Web Chat Widget
                             </CardTitle>
-                            <span className="text-xs font-medium bg-slate-100 text-slate-500 px-2 py-1 rounded-full border">
-                                Installed
-                            </span>
+                            {hasWebChat ? (
+                                <span className="text-xs font-medium bg-slate-100 text-slate-500 px-2 py-1 rounded-full border">
+                                    Configured
+                                </span>
+                            ) : (
+                                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
+                                    Setup Required
+                                </span>
+                            )}
                         </div>
                         <CardDescription className="pt-2">
                             The iframe booking assistant directly embedded onto your company's website.
