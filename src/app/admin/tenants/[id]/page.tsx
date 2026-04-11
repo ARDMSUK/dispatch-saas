@@ -4,9 +4,10 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ChevronLeft, Save, Building2, Key, Trash2, Layers, CreditCard } from "lucide-react";
+import { ChevronLeft, Save, Building2, Key, Trash2, Layers, CreditCard, ShieldAlert } from "lucide-react";
 
 export default function TenantConfigPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -14,32 +15,42 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [tenant, setTenant] = useState<any>(null);
+    const [plans, setPlans] = useState<any[]>([]);
 
-    // Fetch Tenant Data
     useEffect(() => {
-        fetch(`/api/admin/tenants/${id}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    toast.error(data.error);
-                } else {
-                    setTenant(data);
-                }
-                setLoading(false);
-            })
-            .catch(() => {
-                toast.error("Failed to load tenant");
-                setLoading(false);
-            });
+        Promise.all([
+            fetch(`/api/admin/tenants/${id}`).then(res => res.json()),
+            fetch(`/api/admin/plans`).then(res => res.json())
+        ]).then(([tenantData, plansData]) => {
+            if (tenantData.error) {
+                toast.error(tenantData.error);
+            } else {
+                setTenant(tenantData);
+            }
+            if (!plansData.error) {
+                setPlans(plansData);
+            }
+            setLoading(false);
+        }).catch(() => {
+            toast.error("Failed to load data");
+            setLoading(false);
+        });
     }, [id]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setTenant({ ...tenant, [e.target.name]: e.target.value });
+    };
+
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTenant({ ...tenant, [e.target.name]: e.target.checked });
     };
 
     const handleSave = async () => {
         setSaving(true);
         try {
+            // Nullify if empty
+            if (tenant.subscriptionPlanId === "") tenant.subscriptionPlanId = null;
+
             const res = await fetch(`/api/admin/tenants/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -66,10 +77,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
         }
 
         try {
-            const res = await fetch(`/api/admin/tenants/${id}`, {
-                method: "DELETE",
-            });
-
+            const res = await fetch(`/api/admin/tenants/${id}`, { method: "DELETE" });
             if (res.ok) {
                 toast.success("Tenant deleted successfully");
                 router.push("/admin/tenants");
@@ -83,371 +91,281 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-slate-400">Loading...</div>;
+    if (loading) return <div className="p-8 text-center text-slate-400">Loading Configuration...</div>;
     if (!tenant) return <div className="p-8 text-center text-red-500">Tenant not found</div>;
 
+    // Find the currently assigned SaaS plan
+    const activePlan = plans.find(p => p.id === tenant.subscriptionPlanId);
+
+    // Helper to check if a feature is unlocked by the active plan
+    const isPlanUnlocked = (featureField: string) => {
+        if (!activePlan) return false;
+        return activePlan[featureField] === true;
+    };
+
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-                <Button variant="ghost" onClick={() => router.back()}>
-                    <ChevronLeft className="w-4 h-4 mr-2" /> Back
+        <div className="max-w-5xl mx-auto space-y-6">
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" onClick={() => router.back()}>
+                        <ChevronLeft className="w-4 h-4 mr-2" /> Back
+                    </Button>
+                    <div>
+                        <h1 className="text-2xl font-bold">{tenant.name}</h1>
+                        <p className="text-slate-500">Tenant Management Console</p>
+                    </div>
+                </div>
+                <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-500 min-w-[150px]">
+                    {saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
                 </Button>
-                <h1 className="text-2xl font-bold">{tenant.name} Configuration</h1>
             </div>
 
-            <div className="grid gap-6">
-                <Card className="bg-slate-100 border-slate-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Building2 className="w-5 h-5" />
-                            Company Details
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Name</label>
-                                <Input name="name" value={tenant.name} onChange={handleChange} className="bg-white border-slate-200" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Slug</label>
-                                <Input name="slug" value={tenant.slug} disabled className="bg-white border-slate-200 opacity-50 cursor-not-allowed" />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Contact Email</label>
-                            <Input name="email" value={tenant.email || ''} onChange={handleChange} className="bg-white border-slate-200" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Phone</label>
-                                <Input name="phone" value={tenant.phone || ''} onChange={handleChange} className="bg-white border-slate-200" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Address</label>
-                                <Input name="address" value={tenant.address || ''} onChange={handleChange} className="bg-white border-slate-200" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+            <Tabs defaultValue="general" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 h-12 bg-slate-100 p-1 mb-6">
+                    <TabsTrigger value="general" className="data-[state=active]:bg-white">General Info</TabsTrigger>
+                    <TabsTrigger value="integrations" className="data-[state=active]:bg-white">API Keys</TabsTrigger>
+                    <TabsTrigger value="saas" className="data-[state=active]:bg-white">SaaS Subscription</TabsTrigger>
+                    <TabsTrigger value="danger" className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700">Danger Zone</TabsTrigger>
+                </TabsList>
 
-                <Card className="bg-slate-100 border-slate-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Key className="w-5 h-5" />
-                            API Integrations
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider">Tenant API Key</h3>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Read-Only API Key (Used for Web Chat Widget)</label>
-                                <Input readOnly value={tenant.apiKey || ''} className="bg-white border-slate-200 text-slate-500 cursor-not-allowed font-mono text-xs" />
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider">Stripe</h3>
+                {/* GENERAL TAB */}
+                <TabsContent value="general" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" /> Company Profile</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Secret Key</label>
-                                    <Input name="stripeSecretKey" type="password" value={tenant.stripeSecretKey || ''} onChange={handleChange} className="bg-white border-slate-200" />
+                                    <label className="text-sm font-medium">Business Name</label>
+                                    <Input name="name" value={tenant.name} onChange={handleChange} />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Publishable Key</label>
-                                    <Input name="stripePublishableKey" value={tenant.stripePublishableKey || ''} onChange={handleChange} className="bg-white border-slate-200" />
+                                    <label className="text-sm font-medium">Tenant Slug (Immutable)</label>
+                                    <Input name="slug" value={tenant.slug} disabled className="opacity-50" />
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-blue-500 uppercase tracking-wider">Twilio</h3>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Contact Email</label>
+                                <Input name="email" value={tenant.email || ''} onChange={handleChange} />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Account SID</label>
-                                    <Input name="twilioAccountSid" value={tenant.twilioAccountSid || ''} onChange={handleChange} className="bg-white border-slate-200" />
+                                    <label className="text-sm font-medium">Phone</label>
+                                    <Input name="phone" value={tenant.phone || ''} onChange={handleChange} />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Auth Token</label>
-                                    <Input name="twilioAuthToken" type="password" value={tenant.twilioAuthToken || ''} onChange={handleChange} className="bg-white border-slate-200" />
+                                    <label className="text-sm font-medium">Address</label>
+                                    <Input name="address" value={tenant.address || ''} onChange={handleChange} />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">From Number</label>
-                                <Input name="twilioFromNumber" value={tenant.twilioFromNumber || ''} onChange={handleChange} className="bg-white border-slate-200" />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* INTEGRATIONS TAB */}
+                <TabsContent value="integrations" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Key className="w-5 h-5" /> External Services</CardTitle>
+                            <CardDescription>Configure external API keys required to power this tenant's infrastructure.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-8">
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-bold text-teal-600 uppercase tracking-wider border-b pb-2">Tenant API Key</h3>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Public API Key</label>
+                                    <Input readOnly value={tenant.apiKey || ''} className="text-slate-500 font-mono text-xs bg-slate-50" />
+                                    <p className="text-xs text-slate-500">Used for embedding the Web Booker and Web Chat Widget publicly.</p>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Twilio Subaccount ID (WhatsApp Isolation)</label>
-                                <Input name="twilioSubaccountId" value={tenant.twilioSubaccountId || ''} onChange={handleChange} className="bg-white border-slate-200" />
+
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-bold text-blue-600 uppercase tracking-wider border-b pb-2">Stripe</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Secret Key</label>
+                                        <Input name="stripeSecretKey" type="password" value={tenant.stripeSecretKey || ''} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Publishable Key</label>
+                                        <Input name="stripePublishableKey" value={tenant.stripePublishableKey || ''} onChange={handleChange} />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-green-500 uppercase tracking-wider">Resend</h3>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">API Key</label>
-                                <Input name="resendApiKey" type="password" value={tenant.resendApiKey || ''} onChange={handleChange} className="bg-white border-slate-200" />
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-bold text-sky-600 uppercase tracking-wider border-b pb-2">Twilio</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Account SID</label>
+                                        <Input name="twilioAccountSid" value={tenant.twilioAccountSid || ''} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Auth Token</label>
+                                        <Input name="twilioAuthToken" type="password" value={tenant.twilioAuthToken || ''} onChange={handleChange} />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">From Number</label>
+                                        <Input name="twilioFromNumber" value={tenant.twilioFromNumber || ''} onChange={handleChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Subaccount ID (WhatsApp)</label>
+                                        <Input name="twilioSubaccountId" value={tenant.twilioSubaccountId || ''} onChange={handleChange} />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-wider">AviationStack (Flights)</h3>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">API Key</label>
-                                <Input name="aviationStackApiKey" type="password" value={tenant.aviationStackApiKey || ''} onChange={handleChange} className="bg-white border-slate-200" placeholder="Optional. Globally configured if left blank." />
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-emerald-600 uppercase tracking-wider border-b pb-2">Resend (Email)</h3>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">API Key</label>
+                                        <Input name="resendApiKey" type="password" value={tenant.resendApiKey || ''} onChange={handleChange} />
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wider border-b pb-2">AviationStack</h3>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">API Key</label>
+                                        <Input name="aviationStackApiKey" type="password" value={tenant.aviationStackApiKey || ''} onChange={handleChange} placeholder="Optional" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
-
-
-
-
-                <Card className="bg-slate-100 border-slate-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <CreditCard className="w-5 h-5" />
-                            SaaS Subscription & Modules
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Subscription Plan</label>
-                                <select 
-                                    name="subscriptionPlan"
-                                    value={tenant.subscriptionPlan || ''}
-                                    onChange={(e) => setTenant({ ...tenant, subscriptionPlan: e.target.value })}
-                                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                >
-                                    <option value="">No Plan Selected</option>
-                                    <option value="BASIC">Basic</option>
-                                    <option value="PRO">Pro</option>
-                                    <option value="ENTERPRISE">Enterprise</option>
-                                </select>
+                {/* SAAS SUBSCRIPTION TAB */}
+                <TabsContent value="saas" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><CreditCard className="w-5 h-5" /> Assigned SaaS Plan</CardTitle>
+                            <CardDescription>Assign this tenant to a subscription tier to automatically unlock modules.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Active Subscription Plan</label>
+                                    <select 
+                                        name="subscriptionPlanId"
+                                        value={tenant.subscriptionPlanId || ''}
+                                        onChange={handleChange}
+                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                                    >
+                                        <option value="">No Custom Plan Assigned</option>
+                                        {plans.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name} (${p.priceMonthly}/mo)</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Subscription Status</label>
+                                    <select 
+                                        name="subscriptionStatus"
+                                        value={tenant.subscriptionStatus || 'TRIALING'}
+                                        onChange={handleChange}
+                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                                    >
+                                        <option value="TRIALING">Trialing</option>
+                                        <option value="ACTIVE">Active</option>
+                                        <option value="PAST_DUE">Past Due</option>
+                                        <option value="CANCELED">Canceled</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Subscription Status</label>
-                                <select 
-                                    name="subscriptionStatus"
-                                    value={tenant.subscriptionStatus || 'TRIALING'}
-                                    onChange={(e) => setTenant({ ...tenant, subscriptionStatus: e.target.value })}
-                                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                >
-                                    <option value="TRIALING">Trialing</option>
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="PAST_DUE">Past Due</option>
-                                    <option value="CANCELED">Canceled</option>
-                                </select>
-                            </div>
-                        </div>
+                        </CardContent>
+                    </Card>
 
-                        <div className="space-y-4 pt-4 border-t border-slate-200">
-                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                                <Layers className="w-4 h-4" /> Feature Modules
-                            </h3>
-                            
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Layers className="w-5 h-5" /> Module Customization</CardTitle>
+                            <CardDescription>Feature modules automatically unlock based on the assigned plan. You can manually check boxes here to override and grant extra access.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* useZonePricing */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="useZonePricing"
-                                        checked={tenant.useZonePricing === true}
-                                        onChange={(e) => setTenant({ ...tenant, useZonePricing: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="useZonePricing" className="text-sm font-medium cursor-pointer">Zone-based Pricing Module</label>
-                                        <p className="text-xs text-slate-500">Enable advanced fixed pricing for custom geofenced zones.</p>
-                                    </div>
-                                </div>
-
-                                {/* enableDynamicPricing */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="enableDynamicPricing"
-                                        checked={tenant.enableDynamicPricing === true}
-                                        onChange={(e) => setTenant({ ...tenant, enableDynamicPricing: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="enableDynamicPricing" className="text-sm font-medium cursor-pointer">Dynamic Pricing (Surges)</label>
-                                        <p className="text-xs text-slate-500">Enable time/date multiplier surcharges and rules.</p>
-                                    </div>
-                                </div>
-
-                                {/* autoDispatch */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="autoDispatch"
-                                        checked={tenant.autoDispatch === true}
-                                        onChange={(e) => setTenant({ ...tenant, autoDispatch: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="autoDispatch" className="text-sm font-medium cursor-pointer">Auto-Dispatch Engine</label>
-                                        <p className="text-xs text-slate-500">Allow autonomous matching of drivers to incoming bookings.</p>
-                                    </div>
-                                </div>
-
-                                {/* enableWaitCalculations */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="enableWaitCalculations"
-                                        checked={tenant.enableWaitCalculations === true}
-                                        onChange={(e) => setTenant({ ...tenant, enableWaitCalculations: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="enableWaitCalculations" className="text-sm font-medium cursor-pointer">Wait & Return Module</label>
-                                        <p className="text-xs text-slate-500">Enable automated calculation of waiting time costs.</p>
-                                    </div>
-                                </div>
-
-                                {/* enableWebBooker */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="enableWebBooker"
-                                        checked={tenant.enableWebBooker === true}
-                                        onChange={(e) => setTenant({ ...tenant, enableWebBooker: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="enableWebBooker" className="text-sm font-medium cursor-pointer">Web Booking Widget</label>
-                                        <p className="text-xs text-slate-500">Enable the client-facing iframe booking widget for the tenant's public website.</p>
-                                    </div>
-                                </div>
-
-                                {/* enableB2BPortal */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="enableB2BPortal"
-                                        checked={tenant.enableB2BPortal === true}
-                                        onChange={(e) => setTenant({ ...tenant, enableB2BPortal: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="enableB2BPortal" className="text-sm font-medium cursor-pointer">Corporate B2B Portal</label>
-                                        <p className="text-xs text-slate-500">Enable secure login environments for corporate account customers.</p>
-                                    </div>
-                                </div>
-
-                                {/* enableWavOptions */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="enableWavOptions"
-                                        checked={tenant.enableWavOptions === true}
-                                        onChange={(e) => setTenant({ ...tenant, enableWavOptions: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="enableWavOptions" className="text-sm font-medium cursor-pointer">Wheelchair Accessible Fleet</label>
-                                        <p className="text-xs text-slate-500">Expose Wheelchair required settings throughout the workflow.</p>
-                                    </div>
-                                </div>
-                                
-                                {/* enableLiveTracking */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="enableLiveTracking"
-                                        checked={tenant.enableLiveTracking !== false}
-                                        onChange={(e) => setTenant({ ...tenant, enableLiveTracking: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="enableLiveTracking" className="text-sm font-medium cursor-pointer">Live Tracking Web Links</label>
-                                        <p className="text-xs text-slate-500">Enable secure passenger live tracking links in automated SMS.</p>
-                                    </div>
-                                </div>
-
-                                {/* hasWebChatAi */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="hasWebChatAi"
-                                        checked={tenant.hasWebChatAi === true}
-                                        onChange={(e) => setTenant({ ...tenant, hasWebChatAi: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="hasWebChatAi" className="text-sm font-medium cursor-pointer">AI Web Chat Widget</label>
-                                        <p className="text-xs text-slate-500">Enable Cabot AI Web Chat embedding on website.</p>
-                                    </div>
-                                </div>
-
-                                {/* hasWhatsAppAi */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="hasWhatsAppAi"
-                                        checked={tenant.hasWhatsAppAi === true}
-                                        onChange={(e) => setTenant({ ...tenant, hasWhatsAppAi: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="hasWhatsAppAi" className="text-sm font-medium cursor-pointer">WhatsApp AI Agent</label>
-                                        <p className="text-xs text-slate-500">Enable inbound Twilio WhatsApp routing to Cabot AI.</p>
-                                    </div>
-                                </div>
-
-                                {/* hasVoiceAi */}
-                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        id="hasVoiceAi"
-                                        checked={tenant.hasVoiceAi === true}
-                                        onChange={(e) => setTenant({ ...tenant, hasVoiceAi: e.target.checked })}
-                                        className="w-4 h-4 accent-blue-700 mt-0.5"
-                                    />
-                                    <div className="space-y-1">
-                                        <label htmlFor="hasVoiceAi" className="text-sm font-medium cursor-pointer">Voice AI Agent</label>
-                                        <p className="text-xs text-slate-500">Enable AI-powered conversational voice dispatch mapping.</p>
-                                    </div>
-                                </div>
+                                {[
+                                    { stateField: 'autoDispatch', planField: 'incAutoDispatch', label: 'Auto-Dispatch Engine' },
+                                    { stateField: 'useZonePricing', planField: 'incZonePricing', label: 'Zone Pricing Module' },
+                                    { stateField: 'enableDynamicPricing', planField: 'incDynamicPricing', label: 'Dynamic Pricing (Surge)' },
+                                    { stateField: 'enableWaitCalculations', planField: 'incWaitReturn', label: 'Wait & Return Engine' },
+                                    { stateField: 'enableWebBooker', planField: 'incWebBooker', label: 'Web Booking Widget' },
+                                    { stateField: 'enableB2BPortal', planField: 'incB2bPortal', label: 'Corporate B2B Portal' },
+                                    { stateField: 'enableWavOptions', planField: 'incWavOptions', label: 'WAV Dispatching' },
+                                    { stateField: 'enableLiveTracking', planField: 'incLiveTracking', label: 'Live Tracking Links' },
+                                    { stateField: 'hasWebChatAi', planField: 'incWebChatAi', label: 'AI Web Chat Widget' },
+                                    { stateField: 'hasWhatsAppAi', planField: 'incWhatsAppAi', label: 'WhatsApp AI Agent' },
+                                    { stateField: 'hasVoiceAi', planField: 'incVoiceAi', label: 'Voice AI Agent' }
+                                ].map(mod => {
+                                    const isPlanGranted = isPlanUnlocked(mod.planField);
+                                    const isManuallyGranted = tenant[mod.stateField] === true;
+                                    
+                                    return (
+                                        <div key={mod.stateField} className={`flex items-start space-x-3 p-3 rounded border transition-colors ${isPlanGranted ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
+                                            <input
+                                                type="checkbox"
+                                                name={mod.stateField}
+                                                id={mod.stateField}
+                                                checked={isPlanGranted || isManuallyGranted}
+                                                disabled={isPlanGranted}
+                                                onChange={handleCheckboxChange}
+                                                className="w-4 h-4 mt-0.5 accent-blue-600 cursor-pointer disabled:opacity-50"
+                                            />
+                                            <div className="space-y-1">
+                                                <label htmlFor={mod.stateField} className="text-sm font-medium cursor-pointer">
+                                                    {mod.label}
+                                                </label>
+                                                {isPlanGranted ? (
+                                                    <p className="text-xs text-blue-600 font-medium">Included in Active Plan</p>
+                                                ) : (
+                                                    <p className="text-xs text-slate-500">Custom Toggle</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </div>
 
-                        {/* Embed Codes Contextually Displayed */}
-                        {tenant.enableWebBooker === true && (
-                            <div className="space-y-4 pt-4 border-t border-slate-200 animate-in fade-in">
-                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Web Booking Widget (Embed Code)</h3>
-                                <p className="text-sm text-slate-500 leading-relaxed">Copy this HTML snippet to embed the instant-booking pipeline directly onto your website or a client's website.</p>
-                                <div className="bg-slate-900 p-4 rounded-md overflow-x-auto relative">
-                                    <code className="text-green-400 font-mono text-xs whitespace-pre-wrap">
-                                        {`<iframe src="https://dispatch-saas.vercel.app/booker/${tenant.slug}?embed=true" width="100%" height="800px" frameborder="0" style="border-radius: 12px; box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);"></iframe>`}
-                                    </code>
+                            {/* Embed Codes Contextually Displayed */}
+                            {(isPlanUnlocked('incWebBooker') || tenant.enableWebBooker) && (
+                                <div className="mt-8 space-y-4 pt-6 border-t border-slate-200 max-w-2xl">
+                                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Web Booking Widget (Embed Code)</h3>
+                                    <p className="text-sm text-slate-500">Copy this HTML snippet to embed the instant-booking pipeline onto a website.</p>
+                                    <div className="bg-slate-900 p-4 rounded-md overflow-x-auto relative shadow-inner">
+                                        <code className="text-emerald-400 font-mono text-xs whitespace-pre-wrap">
+                                            {`<iframe src="https://dispatch-saas.vercel.app/booker/${tenant.slug}?embed=true" width="100%" height="800px" frameborder="0" style="border-radius: 12px; border: 1px solid #e2e8f0;"></iframe>`}
+                                        </code>
+                                    </div>
                                 </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* DANGER ZONE TAB */}
+                <TabsContent value="danger" className="space-y-6">
+                    <Card className="border-red-200 bg-red-50/30">
+                        <CardHeader>
+                            <CardTitle className="text-red-700 flex items-center gap-2"><ShieldAlert className="w-5 h-5" /> Danger Zone</CardTitle>
+                            <CardDescription className="text-red-600/80">Irreversible actions that will permanently destroy data.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="rounded-lg border border-red-200 bg-white p-6 flex items-center justify-between">
+                                <div>
+                                    <h4 className="font-semibold text-slate-900">Delete Tenant Infrastructure</h4>
+                                    <p className="text-sm text-slate-500">Permanently destroys the tenant, including all jobs, drivers, logs, and accounts.</p>
+                                </div>
+                                <Button variant="destructive" onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete Tenant
+                                </Button>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="flex justify-between items-center pt-6 pb-20">
-                <Button variant="destructive" onClick={handleDelete} className="bg-red-900/50 hover:bg-red-900 text-red-200">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Tenant
-                </Button>
-
-                <Button onClick={handleSave} disabled={saving} className="bg-green-600 text-slate-900 hover:bg-green-500 min-w-[150px]">
-                    {saving ? "Saving..." : (
-                        <>
-                            <Save className="w-4 h-4 mr-2" />
-                            Save Changes
-                        </>
-                    )}
-                </Button>
-            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

@@ -44,7 +44,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             hasWebChatAi, hasWhatsAppAi, hasVoiceAi,
             useZonePricing, autoDispatch, enableLiveTracking, enableDynamicPricing,
             enableWaitCalculations, enableWebBooker, enableB2BPortal, enableWavOptions,
-            subscriptionStatus, subscriptionPlan
+            subscriptionStatus, subscriptionPlanId
         } = body;
 
         const updatedTenant = await prisma.tenant.update({
@@ -57,7 +57,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 hasWebChatAi, hasWhatsAppAi, hasVoiceAi,
                 useZonePricing, autoDispatch, enableLiveTracking, enableDynamicPricing,
                 enableWaitCalculations, enableWebBooker, enableB2BPortal, enableWavOptions,
-                subscriptionStatus, subscriptionPlan
+                subscriptionStatus, subscriptionPlanId
             }
         });
 
