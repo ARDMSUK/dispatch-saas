@@ -43,7 +43,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             resendApiKey, aviationStackApiKey,
             hasWebChatAi, hasWhatsAppAi, hasVoiceAi,
             useZonePricing, autoDispatch, enableLiveTracking, enableDynamicPricing,
-            enableWaitCalculations, enableWebBooker, enableWavOptions,
+            enableWaitCalculations, enableWebBooker, enableB2BPortal, enableWavOptions,
             subscriptionStatus, subscriptionPlan
         } = body;
 
@@ -56,7 +56,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 resendApiKey, aviationStackApiKey,
                 hasWebChatAi, hasWhatsAppAi, hasVoiceAi,
                 useZonePricing, autoDispatch, enableLiveTracking, enableDynamicPricing,
-                enableWaitCalculations, enableWebBooker, enableWavOptions,
+                enableWaitCalculations, enableWebBooker, enableB2BPortal, enableWavOptions,
                 subscriptionStatus, subscriptionPlan
             }
         });

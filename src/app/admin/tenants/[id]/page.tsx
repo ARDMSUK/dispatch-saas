@@ -320,8 +320,23 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                         className="w-4 h-4 accent-blue-700 mt-0.5"
                                     />
                                     <div className="space-y-1">
-                                        <label htmlFor="enableWebBooker" className="text-sm font-medium cursor-pointer">Web Booking Widget / Portal</label>
-                                        <p className="text-xs text-slate-500">Enable the client-facing Web Booker iframe and B2B portal options.</p>
+                                        <label htmlFor="enableWebBooker" className="text-sm font-medium cursor-pointer">Web Booking Widget</label>
+                                        <p className="text-xs text-slate-500">Enable the client-facing iframe booking widget for the tenant's public website.</p>
+                                    </div>
+                                </div>
+
+                                {/* enableB2BPortal */}
+                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
+                                    <input
+                                        type="checkbox"
+                                        id="enableB2BPortal"
+                                        checked={tenant.enableB2BPortal === true}
+                                        onChange={(e) => setTenant({ ...tenant, enableB2BPortal: e.target.checked })}
+                                        className="w-4 h-4 accent-blue-700 mt-0.5"
+                                    />
+                                    <div className="space-y-1">
+                                        <label htmlFor="enableB2BPortal" className="text-sm font-medium cursor-pointer">Corporate B2B Portal</label>
+                                        <p className="text-xs text-slate-500">Enable secure login environments for corporate account customers.</p>
                                     </div>
                                 </div>
 

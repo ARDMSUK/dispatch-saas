@@ -35,6 +35,7 @@ model Tenant {
   enableDynamicPricing Boolean @default(false)
   enableWaitCalculations Boolean @default(false)
   enableWebBooker Boolean @default(false)
+  enableB2BPortal Boolean @default(false)
   enableWavOptions Boolean @default(false)
 
   // AI & Add-on Features
