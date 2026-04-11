@@ -104,6 +104,49 @@ export async function POST(req: Request) {
                 finalInstanceName = data.instance?.instanceName || instanceId;
             }
             
+            // Sync the Webhook to Evolution API so we receive events (works for new AND old instances)
+            try {
+                await fetch(`${gatewayUrl}/webhook/set/${finalInstanceName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': EVOLUTION_API_KEY
+                    },
+                    body: JSON.stringify({
+                        webhook: {
+                            enabled: true,
+                            url: `${NEXT_PUBLIC_BASE_URL}/api/whatsapp/webhook`,
+                            byEvents: false,
+                            base64: false,
+                            events: ['MESSAGES_UPSERT', 'CONNECTION_UPDATE']
+                        }
+                    })
+                });
+                console.log("[WHATSAPP] Webhook registered successfully for", finalInstanceName);
+            } catch (webhookErr) {
+                console.error("[WHATSAPP] Failed to route webhook configuration", webhookErr);
+            }
+
+            // Sync connection status fallback
+            if (!qrCodeData && tenant.whatsappInstanceStatus !== "CONNECTED") {
+                // If it returned 200 OK but NO QR code, it might genuinely be fully connected!
+                try {
+                    const connState = await fetch(`${gatewayUrl}/instance/connectionState/${finalInstanceName}`, {
+                        headers: { 'apikey': EVOLUTION_API_KEY }
+                    });
+                    if (connState.ok) {
+                        const stateData = await connState.json();
+                        if (stateData.instance?.state === 'open') {
+                             await prisma.tenant.update({
+                                 where: { id: tenantId },
+                                 data: { whatsappInstanceStatus: "CONNECTED" }
+                             });
+                             console.log("[WHATSAPP] Silently promoted tenant to CONNECTED based on Gateway state.");
+                        }
+                    }
+                } catch(e) {}
+            }
+
             return NextResponse.json({
                 qrcode: qrCodeData,
                 instanceName: finalInstanceName
