@@ -41,7 +41,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             stripeSecretKey, stripePublishableKey,
             twilioAccountSid, twilioAuthToken, twilioFromNumber, twilioSubaccountId,
             resendApiKey, aviationStackApiKey,
-            hasWebChatAi, hasWhatsAppAi, hasVoiceAi
+            hasWebChatAi, hasWhatsAppAi, hasVoiceAi,
+            useZonePricing, autoDispatch, enableLiveTracking, enableDynamicPricing,
+            enableWaitCalculations, enableWebBooker, enableWavOptions,
+            subscriptionStatus, subscriptionPlan
         } = body;
 
         const updatedTenant = await prisma.tenant.update({
@@ -51,7 +54,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 stripeSecretKey, stripePublishableKey,
                 twilioAccountSid, twilioAuthToken, twilioFromNumber, twilioSubaccountId,
                 resendApiKey, aviationStackApiKey,
-                hasWebChatAi, hasWhatsAppAi, hasVoiceAi
+                hasWebChatAi, hasWhatsAppAi, hasVoiceAi,
+                useZonePricing, autoDispatch, enableLiveTracking, enableDynamicPricing,
+                enableWaitCalculations, enableWebBooker, enableWavOptions,
+                subscriptionStatus, subscriptionPlan
             }
         });
 
