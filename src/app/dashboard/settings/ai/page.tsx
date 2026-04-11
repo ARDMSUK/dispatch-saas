@@ -43,10 +43,11 @@ export default function TenantAIPage() {
                     setStatus("CONNECTING");
                     toast.success("QR Code generated! Please scan rapidly.");
                 } else {
-                    toast.error("Failed to parse QR Code");
+                    toast.error("Failed to parse QR Code from Response");
                 }
             } else {
-                toast.error("Gateway Server Error - Ensure Gateway is running.");
+                const errorData = await res.json().catch(() => ({}));
+                toast.error(`Gateway Error: ${JSON.stringify(errorData)}`);
             }
         } catch (error) {
             toast.error("Network error connecting to Gateway");

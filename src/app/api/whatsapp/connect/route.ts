@@ -81,13 +81,7 @@ export async function POST(req: Request) {
                     body: JSON.stringify({
                         instanceName: instanceId,
                         qrcode: true,
-                        integration: 'WHATSAPP-BAILEYS',
-                        webhook: `${NEXT_PUBLIC_BASE_URL}/api/whatsapp/webhook`,
-                        webhook_by_events: false,
-                        events: [
-                            'MESSAGES_UPSERT',
-                            'CONNECTION_UPDATE'
-                        ]
+                        integration: 'WHATSAPP-BAILEYS'
                     })
                 });
 
