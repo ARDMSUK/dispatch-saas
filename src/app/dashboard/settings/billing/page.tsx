@@ -16,7 +16,6 @@ export default async function BillingSettingsPage() {
             stripeCustomerId: true,
             stripeSubscriptionId: true,
             subscriptionStatus: true,
-            subscriptionPlan: true,
         }
     });
 
@@ -34,7 +33,7 @@ export default async function BillingSettingsPage() {
             <BillingSettingsClient
                 tenantId={tenant.id}
                 status={tenant.subscriptionStatus}
-                plan={tenant.subscriptionPlan}
+                plan={"Basic"}
                 hasCustomerProfile={!!tenant.stripeCustomerId}
             />
         </div>

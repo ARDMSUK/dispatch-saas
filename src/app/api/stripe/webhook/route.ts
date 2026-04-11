@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
                             stripeCustomerId: session.customer as string,
                             stripeSubscriptionId: session.subscription as string,
                             subscriptionStatus: "ACTIVE",
-                            subscriptionPlan: "TBD", // Ideally mapped from line items if multiple plans exist
+                            subscriptionPlanId: "TBD", // Ideally mapped from line items if multiple plans exist
                         },
                     });
                     console.log(`✅ Activated subscription for Tenant ${session.metadata.tenantId}`);

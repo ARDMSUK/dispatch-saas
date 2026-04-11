@@ -66,7 +66,8 @@ model Tenant {
   stripeCustomerId     String?
   stripeSubscriptionId String?
   subscriptionStatus   String  @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, CANCELED
-  subscriptionPlan     String?
+  subscriptionPlanId   String?
+  subscriptionPlan     SaasPlan? @relation(fields: [subscriptionPlanId], references: [id])
 
   // Notification Templates (Super Admin ONLY)
   smsTemplateConfirmation     String? @db.Text
@@ -101,6 +102,36 @@ model Tenant {
   whatsappSessions WhatsappSession[]
 
   @@map("companies")
+  @@schema("public")
+}
+
+model SaasPlan {
+  id              String   @id @default(cuid())
+  name            String
+  priceMonthly    Float    @default(0)
+  priceAnnually   Float    @default(0)
+  stripeProductId String?
+  stripePriceId   String?
+
+  // Features Unlocked
+  incZonePricing    Boolean @default(false)
+  incDynamicPricing Boolean @default(false)
+  incAutoDispatch   Boolean @default(false)
+  incWaitReturn     Boolean @default(false)
+  incWebBooker      Boolean @default(false)
+  incB2bPortal      Boolean @default(false)
+  incWavOptions     Boolean @default(false)
+  incLiveTracking   Boolean @default(true)
+  incWebChatAi      Boolean @default(false)
+  incWhatsAppAi     Boolean @default(false)
+  incVoiceAi        Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenants Tenant[]
+
+  @@map("saas_plans")
   @@schema("public")
 }
 
