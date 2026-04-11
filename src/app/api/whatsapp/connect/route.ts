@@ -42,8 +42,12 @@ export async function POST(req: Request) {
             });
         }
 
-        // Sanitize Gateway URL
-        const gatewayUrl = EVOLUTION_API_URL.replace(/\/$/, "");
+        // Sanitize Gateway URL (ensures https:// and no trailing slash)
+        let rawUrl = EVOLUTION_API_URL.replace(/\/$/, "");
+        if (!/^https?:\/\//i.test(rawUrl)) {
+            rawUrl = `https://${rawUrl}`;
+        }
+        const gatewayUrl = rawUrl;
 
         console.log(`[WHATSAPP] Requesting Gateway connection for instance: ${instanceId}`);
         
@@ -105,10 +109,13 @@ export async function POST(req: Request) {
                 instanceName: finalInstanceName
             });
 
-        } catch (fetchError) {
+        } catch (fetchError: any) {
             console.error("[WHATSAPP] Fatal connection to gateway failed:", fetchError);
             
-            return NextResponse.json({ error: "Cannot reach WhatsApp Gateway Server" }, { status: 503 });
+            return NextResponse.json({ 
+                error: "Cannot reach WhatsApp Gateway Server", 
+                details: fetchError?.message || String(fetchError) 
+            }, { status: 503 });
         }
 
     } catch (error) {
