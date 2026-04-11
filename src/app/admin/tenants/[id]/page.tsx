@@ -201,25 +201,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                     </CardContent>
                 </Card>
 
-                <Card className="bg-slate-100 border-slate-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Building2 className="w-5 h-5" />
-                            Embed Widgets
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Web Booking Widget</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">Copy this HTML snippet and give it to corporate clients (Hotels, Offices, Travel Agents) to embed your instant-booking pipeline directly onto their website.</p>
-                        </div>
-                        <div className="bg-slate-900 p-4 rounded-md overflow-x-auto relative">
-                            <code className="text-green-400 font-mono text-xs whitespace-pre-wrap">
-                                {`<iframe src="https://dispatch-saas.vercel.app/booker/${tenant.slug}?embed=true" width="100%" height="800px" frameborder="0" style="border-radius: 12px; box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);"></iframe>`}
-                            </code>
-                        </div>
-                    </CardContent>
-                </Card>
+
 
 
 
@@ -338,8 +320,8 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                         className="w-4 h-4 accent-blue-700 mt-0.5"
                                     />
                                     <div className="space-y-1">
-                                        <label htmlFor="enableWebBooker" className="text-sm font-medium cursor-pointer">B2B Corporate Portal / App</label>
-                                        <p className="text-xs text-slate-500">Allows creation of corporate account invoice dashboards and dispatching.</p>
+                                        <label htmlFor="enableWebBooker" className="text-sm font-medium cursor-pointer">Web Booking Widget / Portal</label>
+                                        <p className="text-xs text-slate-500">Enable the client-facing Web Booker iframe and B2B portal options.</p>
                                     </div>
                                 </div>
 
@@ -419,6 +401,19 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 </div>
                             </div>
                         </div>
+
+                        {/* Embed Codes Contextually Displayed */}
+                        {tenant.enableWebBooker === true && (
+                            <div className="space-y-4 pt-4 border-t border-slate-200 animate-in fade-in">
+                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Web Booking Widget (Embed Code)</h3>
+                                <p className="text-sm text-slate-500 leading-relaxed">Copy this HTML snippet to embed the instant-booking pipeline directly onto your website or a client's website.</p>
+                                <div className="bg-slate-900 p-4 rounded-md overflow-x-auto relative">
+                                    <code className="text-green-400 font-mono text-xs whitespace-pre-wrap">
+                                        {`<iframe src="https://dispatch-saas.vercel.app/booker/${tenant.slug}?embed=true" width="100%" height="800px" frameborder="0" style="border-radius: 12px; box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1);"></iframe>`}
+                                    </code>
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>
