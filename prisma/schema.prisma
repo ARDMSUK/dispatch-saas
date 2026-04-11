@@ -46,6 +46,10 @@ model Tenant {
   aiMessageLimit       Int      @default(100)
   aiBillingPeriodStart DateTime @default(now())
 
+  // Whatsapp Evolution API State
+  whatsappInstanceId     String?  // The dynamically generated Evolution API instance name
+  whatsappInstanceStatus String?  @default("DISCONNECTED") // DISCONNECTED, CONNECTING, CONNECTED
+
   // White-Label Configuration
   brandColor String @default("#f59e0b") // Default amber-500
   logoUrl    String?

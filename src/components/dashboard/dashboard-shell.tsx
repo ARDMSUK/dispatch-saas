@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare } from 'lucide-react';
+import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare, Sparkles } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -76,6 +76,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                             <>
                                 <div className="my-2 border-t border-slate-200"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+                                <NavItem href="/dashboard/settings/ai" icon={Sparkles} label="AI Agents" />
                                 <NavItem href="/dashboard/settings/billing" icon={CreditCard} label="SaaS Subscription" />
                                 <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
                             </>
