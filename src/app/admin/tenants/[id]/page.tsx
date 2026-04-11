@@ -221,91 +221,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                     </CardContent>
                 </Card>
 
-                <Card className="bg-slate-100 border-slate-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Building2 className="w-5 h-5" />
-                            System Features
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
-                            <input
-                                type="checkbox"
-                                name="enableLiveTracking"
-                                id="enableLiveTracking"
-                                checked={tenant.enableLiveTracking !== false}
-                                onChange={(e) => setTenant({ ...tenant, enableLiveTracking: e.target.checked })}
-                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
-                            />
-                            <div className="space-y-1">
-                                <label htmlFor="enableLiveTracking" className="text-slate-900 font-medium cursor-pointer">
-                                    Enable Live Tracking Links in SMS
-                                </label>
-                                <p className="text-sm text-slate-400">
-                                    If enabled, SMS notifications sent to customers when a driver is assigned will include a secure link to track their ride in real-time.
-                                </p>
-                            </div>
-                        </div>
 
-                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
-                            <input
-                                type="checkbox"
-                                name="hasWebChatAi"
-                                id="hasWebChatAi"
-                                checked={tenant.hasWebChatAi === true}
-                                onChange={(e) => setTenant({ ...tenant, hasWebChatAi: e.target.checked })}
-                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
-                            />
-                            <div className="space-y-1">
-                                <label htmlFor="hasWebChatAi" className="text-slate-900 font-medium cursor-pointer">
-                                    Web Chat AI Widget
-                                </label>
-                                <p className="text-sm text-slate-400">
-                                    Enables the standalone Cabot AI Web Chat script payload for this tenant's website.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
-                            <input
-                                type="checkbox"
-                                name="hasWhatsAppAi"
-                                id="hasWhatsAppAi"
-                                checked={tenant.hasWhatsAppAi === true}
-                                onChange={(e) => setTenant({ ...tenant, hasWhatsAppAi: e.target.checked })}
-                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
-                            />
-                            <div className="space-y-1">
-                                <label htmlFor="hasWhatsAppAi" className="text-slate-900 font-medium cursor-pointer">
-                                    WhatsApp AI Agent
-                                </label>
-                                <p className="text-sm text-slate-400">
-                                    Enables inbound Twilio WhatsApp routing to Cabot AI for this tenant.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start space-x-3 p-4 bg-slate-100 rounded border border-slate-200">
-                            <input
-                                type="checkbox"
-                                name="hasVoiceAi"
-                                id="hasVoiceAi"
-                                checked={tenant.hasVoiceAi === true}
-                                onChange={(e) => setTenant({ ...tenant, hasVoiceAi: e.target.checked })}
-                                className="w-5 h-5 accent-blue-700 bg-white border-slate-200 mt-1"
-                            />
-                            <div className="space-y-1">
-                                <label htmlFor="hasVoiceAi" className="text-slate-900 font-medium cursor-pointer">
-                                    Voice AI Agent
-                                </label>
-                                <p className="text-sm text-slate-400">
-                                    Enables AI-powered conversational voice dispatch mapping.
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 <Card className="bg-slate-100 border-slate-200">
                     <CardHeader>
@@ -439,6 +355,66 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                     <div className="space-y-1">
                                         <label htmlFor="enableWavOptions" className="text-sm font-medium cursor-pointer">Wheelchair Accessible Fleet</label>
                                         <p className="text-xs text-slate-500">Expose Wheelchair required settings throughout the workflow.</p>
+                                    </div>
+                                </div>
+                                
+                                {/* enableLiveTracking */}
+                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
+                                    <input
+                                        type="checkbox"
+                                        id="enableLiveTracking"
+                                        checked={tenant.enableLiveTracking !== false}
+                                        onChange={(e) => setTenant({ ...tenant, enableLiveTracking: e.target.checked })}
+                                        className="w-4 h-4 accent-blue-700 mt-0.5"
+                                    />
+                                    <div className="space-y-1">
+                                        <label htmlFor="enableLiveTracking" className="text-sm font-medium cursor-pointer">Live Tracking Web Links</label>
+                                        <p className="text-xs text-slate-500">Enable secure passenger live tracking links in automated SMS.</p>
+                                    </div>
+                                </div>
+
+                                {/* hasWebChatAi */}
+                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
+                                    <input
+                                        type="checkbox"
+                                        id="hasWebChatAi"
+                                        checked={tenant.hasWebChatAi === true}
+                                        onChange={(e) => setTenant({ ...tenant, hasWebChatAi: e.target.checked })}
+                                        className="w-4 h-4 accent-blue-700 mt-0.5"
+                                    />
+                                    <div className="space-y-1">
+                                        <label htmlFor="hasWebChatAi" className="text-sm font-medium cursor-pointer">AI Web Chat Widget</label>
+                                        <p className="text-xs text-slate-500">Enable Cabot AI Web Chat embedding on website.</p>
+                                    </div>
+                                </div>
+
+                                {/* hasWhatsAppAi */}
+                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
+                                    <input
+                                        type="checkbox"
+                                        id="hasWhatsAppAi"
+                                        checked={tenant.hasWhatsAppAi === true}
+                                        onChange={(e) => setTenant({ ...tenant, hasWhatsAppAi: e.target.checked })}
+                                        className="w-4 h-4 accent-blue-700 mt-0.5"
+                                    />
+                                    <div className="space-y-1">
+                                        <label htmlFor="hasWhatsAppAi" className="text-sm font-medium cursor-pointer">WhatsApp AI Agent</label>
+                                        <p className="text-xs text-slate-500">Enable inbound Twilio WhatsApp routing to Cabot AI.</p>
+                                    </div>
+                                </div>
+
+                                {/* hasVoiceAi */}
+                                <div className="flex items-start space-x-3 p-3 bg-white rounded border border-slate-200">
+                                    <input
+                                        type="checkbox"
+                                        id="hasVoiceAi"
+                                        checked={tenant.hasVoiceAi === true}
+                                        onChange={(e) => setTenant({ ...tenant, hasVoiceAi: e.target.checked })}
+                                        className="w-4 h-4 accent-blue-700 mt-0.5"
+                                    />
+                                    <div className="space-y-1">
+                                        <label htmlFor="hasVoiceAi" className="text-sm font-medium cursor-pointer">Voice AI Agent</label>
+                                        <p className="text-xs text-slate-500">Enable AI-powered conversational voice dispatch mapping.</p>
                                     </div>
                                 </div>
                             </div>
