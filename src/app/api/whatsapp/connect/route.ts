@@ -42,49 +42,73 @@ export async function POST(req: Request) {
             });
         }
 
-        // Call our dedicated Gateway Server (Evolution API)
+        // Sanitize Gateway URL
+        const gatewayUrl = EVOLUTION_API_URL.replace(/\/$/, "");
+
         console.log(`[WHATSAPP] Requesting Gateway connection for instance: ${instanceId}`);
         
         try {
-            const gatewayRes = await fetch(`${EVOLUTION_API_URL}/instance/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': EVOLUTION_API_KEY
-                },
-                body: JSON.stringify({
-                    instanceName: instanceId,
-                    qrcode: true, // Tell it to return a Base64 QR code immediately
-                    integration: 'WHATSAPP-BAILEYS',
-                    webhook: `${NEXT_PUBLIC_BASE_URL}/api/whatsapp/webhook`,
-                    webhook_by_events: false,
-                    events: [
-                        'MESSAGES_UPSERT',   // When we receive a text
-                        'CONNECTION_UPDATE'  // When the user actually scans the QR successfully
-                    ]
-                })
-            });
+            let qrCodeData = null;
+            let finalInstanceName = instanceId;
 
-            if (!gatewayRes.ok) {
-                // If the instance already exists on the server, we might just need to fetch its connection state or request a new QR
-                const errorData = await gatewayRes.json().catch(() => ({}));
-                console.error("[WHATSAPP] Gateway Rejection:", errorData);
-                
-                // In Production: If no gateway URL is set, we throw immediately.
-                if (!process.env.EVOLUTION_API_URL) {
-                    console.error("[WHATSAPP] Gateway Not Configured.");
-                    return NextResponse.json({ error: "Gateway Not Configured" }, { status: 502 });
+            // 1. If it already existed, it's already created on Railway. Just fetch a new QR.
+            if (tenant.whatsappInstanceId) {
+                console.log("[WHATSAPP] Fetching connection for existing instance...");
+                const connectRes = await fetch(`${gatewayUrl}/instance/connect/${instanceId}`, {
+                    method: 'GET',
+                    headers: { 'apikey': EVOLUTION_API_KEY }
+                });
+
+                if (connectRes.ok) {
+                    const data = await connectRes.json();
+                    if (data.base64) {
+                        qrCodeData = data.base64;
+                    }
+                } else {
+                    console.log("[WHATSAPP] Instance not found on gateway, falling back to CREATE.");
                 }
-
-                return NextResponse.json({ error: "Gateway proxy failure", details: errorData }, { status: 502 });
             }
 
-            const data = await gatewayRes.json();
+            // 2. If it's a completely new request or the Railway instance got deleted, CREATE it.
+            if (!qrCodeData) {
+                console.log("[WHATSAPP] Creating new instance on Gateway...");
+                const gatewayRes = await fetch(`${gatewayUrl}/instance/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': EVOLUTION_API_KEY
+                    },
+                    body: JSON.stringify({
+                        instanceName: instanceId,
+                        qrcode: true,
+                        integration: 'WHATSAPP-BAILEYS',
+                        webhook: `${NEXT_PUBLIC_BASE_URL}/api/whatsapp/webhook`,
+                        webhook_by_events: false,
+                        events: [
+                            'MESSAGES_UPSERT',
+                            'CONNECTION_UPDATE'
+                        ]
+                    })
+                });
+
+                if (!gatewayRes.ok) {
+                    const errorData = await gatewayRes.json().catch(() => ({}));
+                    console.error("[WHATSAPP] Gateway Creation Rejection:", errorData);
+                    
+                    if (!process.env.EVOLUTION_API_URL) {
+                        return NextResponse.json({ error: "Gateway Not Configured" }, { status: 502 });
+                    }
+                    return NextResponse.json({ error: "Gateway proxy failure", details: errorData }, { status: 502 });
+                }
+
+                const data = await gatewayRes.json();
+                qrCodeData = data.qrcode?.base64 || null;
+                finalInstanceName = data.instance?.instanceName || instanceId;
+            }
             
-            // Expected return from Evolution API contains the Base64 QR
             return NextResponse.json({
-                qrcode: data.qrcode?.base64 || null,
-                instanceName: data.instance?.instanceName || instanceId
+                qrcode: qrCodeData,
+                instanceName: finalInstanceName
             });
 
         } catch (fetchError) {
