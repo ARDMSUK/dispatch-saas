@@ -73,8 +73,14 @@ export async function POST(req: Request) {
                 const aiReply = completion.choices[0].message.content;
 
                 // Send reply back to passenger via the Gateway
-                const gatewayUrl = process.env.EVOLUTION_API_URL || 'http://localhost:8080';
-                await fetch(`${gatewayUrl}/message/sendText/${instanceId}`, {
+                let rawGateway = process.env.EVOLUTION_API_URL || 'http://localhost:8080';
+                rawGateway = rawGateway.replace(/\/$/, "");
+                if (!/^https?:\/\//i.test(rawGateway)) {
+                    rawGateway = `https://${rawGateway}`;
+                }
+
+                console.log(`[WHATSAPP WEBHOOK] Sending reply to ${remoteJid}...`);
+                const sendRes = await fetch(`${rawGateway}/message/sendText/${instanceId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -82,15 +88,17 @@ export async function POST(req: Request) {
                     },
                     body: JSON.stringify({
                         number: remoteJid, // Send back to exact contact
-                        options: {
-                            delay: 1500, // Make it look like "typing"
-                            presence: "composing",
-                        },
-                        textMessage: {
-                            text: aiReply
-                        }
+                        text: aiReply,
+                        delay: 1500 // Automatically injects "typing..." presence in v2
                     })
                 });
+
+                if (!sendRes.ok) {
+                    const sendErr = await sendRes.text();
+                    console.error("[WHATSAPP WEBHOOK] Gateway refused to send reply:", sendErr);
+                } else {
+                    console.log("[WHATSAPP WEBHOOK] AI Reply Sent successfully!");
+                }
 
             } catch (aiError) {
                 console.error("[WHATSAPP] Failed to generate AI response:", aiError);
