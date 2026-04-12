@@ -44,15 +44,20 @@ export async function POST(req: Request) {
 
         // 2. Handle Incoming Passenger Messages
         if (eventType === 'messages.upsert') {
-            const messageData = body.data?.message;
-            if (!messageData) return NextResponse.json({ success: true });
+            const payloadData = body.data;
+            if (!payloadData) return NextResponse.json({ success: true });
+
+            const messageKey = payloadData.key;
+            const messageObj = payloadData.message;
+
+            if (!messageKey || !messageObj) return NextResponse.json({ success: true });
 
             // Ensure we aren't replying to our own outgoing messages
-            if (messageData.key?.fromMe) return NextResponse.json({ success: true });
+            if (messageKey.fromMe) return NextResponse.json({ success: true });
 
-            const remoteJid = messageData.key?.remoteJid; // e.g. "447123456789@s.whatsapp.net"
+            const remoteJid = messageKey.remoteJid; // e.g. "447123456789@s.whatsapp.net"
             const passengerPhone = remoteJid?.split('@')[0];
-            const textContent = messageData.message?.conversation || messageData.message?.extendedTextMessage?.text || "";
+            const textContent = messageObj.conversation || messageObj.extendedTextMessage?.text || "";
 
             if (!textContent || !passengerPhone) return NextResponse.json({ success: true });
 
