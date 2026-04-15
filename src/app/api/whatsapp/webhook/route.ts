@@ -75,17 +75,124 @@ export async function POST(req: Request) {
             // ---- CABOT AI AGENT INJECTION HERE ----
             // We ping the LLM to decide what to reply to the passenger
             try {
-                const openai = new OpenAI();
-                // Simple MVP agent response for now
-                const completion = await openai.chat.completions.create({
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { role: "system", content: `You are the AI dispatch assistant for ${tenant.name}. You schedule taxis. Keep your answer under 2 sentences.` },
-                        { role: "user", content: textContent }
-                    ]
+                // Fetch or Create session
+                let session = await prisma.whatsappSession.findUnique({
+                    where: { tenantId_userPhone: { tenantId: tenant.id, userPhone: passengerPhone } }
                 });
 
-                const aiReply = completion.choices[0].message.content;
+                if (!session) {
+                    session = await prisma.whatsappSession.create({
+                        data: {
+                            tenantId: tenant.id,
+                            userPhone: passengerPhone,
+                            messages: []
+                        }
+                    });
+                }
+
+                // Add user message
+                let openAiMessages = Array.isArray(session.messages) ? session.messages as any[] : [];
+                openAiMessages.push({ role: "user", content: textContent });
+
+                const openai = new OpenAI();
+                
+                const systemPrompt = `You are the AI dispatch assistant for ${tenant.name}. You schedule taxis. Keep your answers brief.
+The current date and time is ${new Date().toLocaleString('en-GB')}. Use this as your reference point for "today" and allow bookings for future dates.
+Your goal is to collect:
+1. Pickup location
+2. Drop-off location
+3. Date and Time of pickup
+4. Passenger Name
+
+Ask for these details naturally. By default, assume 1 passenger and a "Saloon" vehicle unless specified otherwise.
+Once you have ALL 4 pieces of information, call the "create_booking" tool to finalize the booking. Do not confirm the booking until you have called the tool.`;
+
+                const tools = [
+                    {
+                        type: "function" as const,
+                        function: {
+                            name: "create_booking",
+                            description: "Creates a new taxi booking in the dispatch system when all details have been collected.",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    passengerName: { type: "string" },
+                                    pickupLocation: { type: "string" },
+                                    dropoffLocation: { type: "string" },
+                                    pickupTime: { type: "string", description: "ISO 8601 formatted date and time string for the pickup." },
+                                    passengers: { type: "number", default: 1 },
+                                    vehicleType: { type: "string", default: "Saloon" }
+                                },
+                                required: ["passengerName", "pickupLocation", "dropoffLocation", "pickupTime"]
+                            }
+                        }
+                    }
+                ];
+
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        ...openAiMessages
+                    ],
+                    tools: tools,
+                    tool_choice: "auto"
+                });
+
+                const responseMessage = completion.choices[0].message;
+                let finalAiReply = "";
+
+                if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+                    // Process tool call
+                    const toolCall = responseMessage.tool_calls[0] as any;
+                    if (toolCall.type === 'function' && toolCall.function?.name === 'create_booking') {
+                        const args = JSON.parse(toolCall.function.arguments);
+                        // Create the PENDING Job
+                        await prisma.job.create({
+                            data: {
+                                tenantId: tenant.id,
+                                passengerName: args.passengerName,
+                                passengerPhone: passengerPhone,
+                                pickupAddress: args.pickupLocation,
+                                dropoffAddress: args.dropoffLocation,
+                                pickupTime: new Date(args.pickupTime),
+                                passengers: args.passengers || 1,
+                                vehicleType: args.vehicleType || "Saloon",
+                                status: "PENDING"
+                            }
+                        });
+
+                        // Feed the tool result back to the AI
+                        openAiMessages.push(responseMessage);
+                        openAiMessages.push({
+                            role: "tool",
+                            tool_call_id: toolCall.id,
+                            content: "Booking successfully created with status PENDING."
+                        });
+
+                        const postToolCompletion = await openai.chat.completions.create({
+                            model: "gpt-4o",
+                            messages: [
+                                { role: "system", content: systemPrompt },
+                                ...openAiMessages
+                            ]
+                        });
+                        
+                        finalAiReply = postToolCompletion.choices[0].message.content || "";
+                        openAiMessages.push({ role: "assistant", content: finalAiReply });
+                    }
+                } else {
+                    finalAiReply = responseMessage.content || "";
+                    openAiMessages.push({ role: "assistant", content: finalAiReply });
+                }
+
+                // Save session
+                await prisma.whatsappSession.update({
+                    where: { id: session.id },
+                    data: { messages: openAiMessages }
+                });
+
+                const aiReply = finalAiReply;
 
                 // Send reply back to passenger via the Gateway
                 let rawGateway = process.env.EVOLUTION_API_URL || 'http://localhost:8080';
