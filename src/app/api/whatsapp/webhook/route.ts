@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { calculatePrice } from '@/lib/pricing';
 import OpenAI from 'openai';
 
 export async function POST(req: Request) {
@@ -112,14 +113,35 @@ Your goal is to collect all of the following requirements for a quote or booking
 10. Is a return journey required?
 11. If a return journey is required, you must also ask for: Return journey date, Return journey time, and if it's an airport transfer, the return flight number.
 
-Ask for these details naturally in conversation. Once you have ALL the required pieces of information, call the "create_booking" tool to finalize the booking. Do not confirm the booking until you have successfully called the tool.`;
+Ask for these details naturally in conversation. Once you have ALL the required pieces of information, you MUST follow this two-step process:
+STEP 1: Call the "calculate_quote" tool to get the estimated price based on the job details.
+STEP 2: Tell the passenger the estimated price and ask if they would like to proceed.
+STEP 3: ONLY IF they explicitly say yes and authorize the booking, call the "create_booking" tool to finalize the booking. Include the quoted fare. Do not confirm the booking until you have successfully called the create_booking tool.`;
 
                 const tools = [
                     {
                         type: "function" as const,
                         function: {
+                            name: "calculate_quote",
+                            description: "Calculates the estimated price for a trip based on distance, time, and vehicle type.",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    pickupLocation: { type: "string" },
+                                    dropoffLocation: { type: "string" },
+                                    pickupTime: { type: "string", description: "ISO 8601 formatted date and time string." },
+                                    vehicleType: { type: "string", default: "Saloon" },
+                                    isReturn: { type: "boolean" }
+                                },
+                                required: ["pickupLocation", "dropoffLocation", "pickupTime"]
+                            }
+                        }
+                    },
+                    {
+                        type: "function" as const,
+                        function: {
                             name: "create_booking",
-                            description: "Creates a new taxi booking in the dispatch system when all details have been collected.",
+                            description: "Creates a new taxi booking in the dispatch system once the quote is approved.",
                             parameters: {
                                 type: "object",
                                 properties: {
@@ -134,9 +156,10 @@ Ask for these details naturally in conversation. Once you have ALL the required 
                                     vehicleType: { type: "string", default: "Saloon" },
                                     isReturn: { type: "boolean" },
                                     returnTime: { type: "string", description: "ISO 8601 formatted date and time string for the return leg, if applicable." },
-                                    returnFlightNumber: { type: "string" }
+                                    returnFlightNumber: { type: "string" },
+                                    fare: { type: "number", description: "The previously quoted estimated price." }
                                 },
-                                required: ["passengerName", "passengerEmail", "passengerPhone", "pickupLocation", "dropoffLocation", "pickupTime", "passengers", "luggage", "isReturn"]
+                                required: ["passengerName", "passengerEmail", "passengerPhone", "pickupLocation", "dropoffLocation", "pickupTime", "passengers", "luggage", "isReturn", "fare"]
                             }
                         }
                     }
@@ -156,78 +179,105 @@ Ask for these details naturally in conversation. Once you have ALL the required 
                 let finalAiReply = "";
 
                 if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
-                    // Process tool call
-                    const toolCall = responseMessage.tool_calls[0] as any;
-                    if (toolCall.type === 'function' && toolCall.function?.name === 'create_booking') {
+                    openAiMessages.push(responseMessage);
+                    
+                    for (const toolCall of responseMessage.tool_calls) {
                         try {
-                            const args = JSON.parse(toolCall.function.arguments);
-                            // Create the PENDING Job
-                            const mainJob = await prisma.job.create({
-                                data: {
-                                    tenantId: tenant.id,
-                                    passengerName: args.passengerName,
-                                    passengerPhone: args.passengerPhone || passengerPhone,
-                                    passengerEmail: args.passengerEmail,
-                                    pickupAddress: args.pickupLocation,
-                                    dropoffAddress: args.dropoffLocation,
-                                    pickupTime: new Date(args.pickupTime),
-                                    passengers: args.passengers || 1,
-                                    luggage: args.luggage || 0,
+                            if (toolCall.type === 'function' && toolCall.function?.name === 'calculate_quote') {
+                                const args = JSON.parse(toolCall.function.arguments);
+                                const dateObj = new Date(args.pickupTime);
+                                const priceResult = await calculatePrice({
+                                    pickup: args.pickupLocation,
+                                    dropoff: args.dropoffLocation,
+                                    pickupTime: dateObj,
                                     vehicleType: args.vehicleType || "Saloon",
-                                    isReturn: args.isReturn || false,
-                                    status: "PENDING"
-                                }
-                            });
+                                    companyId: tenant.id
+                                });
 
-                            if (args.isReturn && args.returnTime) {
-                                await prisma.job.create({
+                                let totalQuote = priceResult.price;
+                                if (args.isReturn) {
+                                    totalQuote = priceResult.price * 2;
+                                }
+
+                                openAiMessages.push({
+                                    role: "tool",
+                                    tool_call_id: toolCall.id,
+                                    content: `The estimated price is £${totalQuote.toFixed(2)}. Breakdown: ${priceResult.breakdown.isFixed ? "Fixed Fare" : "Metered Fare"}. Present this price to the user.`
+                                });
+                            }
+                            else if (toolCall.type === 'function' && toolCall.function?.name === 'create_booking') {
+                                const args = JSON.parse(toolCall.function.arguments);
+                                
+                                const hasReturn = args.isReturn && args.returnTime;
+                                const mainFare = args.fare ? (hasReturn ? args.fare / 2 : args.fare) : null;
+                                
+                                // Create the PENDING Job
+                                const mainJob = await prisma.job.create({
                                     data: {
                                         tenantId: tenant.id,
-                                        parentJobId: mainJob.id,
                                         passengerName: args.passengerName,
                                         passengerPhone: args.passengerPhone || passengerPhone,
                                         passengerEmail: args.passengerEmail,
-                                        pickupAddress: args.dropoffLocation, // Return reverses the locations
-                                        dropoffAddress: args.pickupLocation,
-                                        pickupTime: new Date(args.returnTime),
+                                        pickupAddress: args.pickupLocation,
+                                        dropoffAddress: args.dropoffLocation,
+                                        pickupTime: new Date(args.pickupTime),
                                         passengers: args.passengers || 1,
                                         luggage: args.luggage || 0,
                                         vehicleType: args.vehicleType || "Saloon",
-                                        flightNumber: args.returnFlightNumber,
-                                        isReturn: true,
+                                        isReturn: args.isReturn || false,
+                                        fare: mainFare,
                                         status: "PENDING"
                                     }
                                 });
-                            }
 
-                            // Feed the tool result back to the AI
-                            openAiMessages.push(responseMessage);
-                            openAiMessages.push({
-                                role: "tool",
-                                tool_call_id: toolCall.id,
-                                content: "Booking successfully created with status PENDING."
-                            });
+                                if (hasReturn) {
+                                    await prisma.job.create({
+                                        data: {
+                                            tenantId: tenant.id,
+                                            parentJobId: mainJob.id,
+                                            passengerName: args.passengerName,
+                                            passengerPhone: args.passengerPhone || passengerPhone,
+                                            passengerEmail: args.passengerEmail,
+                                            pickupAddress: args.dropoffLocation,
+                                            dropoffAddress: args.pickupLocation,
+                                            pickupTime: new Date(args.returnTime),
+                                            passengers: args.passengers || 1,
+                                            luggage: args.luggage || 0,
+                                            vehicleType: args.vehicleType || "Saloon",
+                                            flightNumber: args.returnFlightNumber,
+                                            isReturn: true,
+                                            fare: args.fare ? args.fare / 2 : null,
+                                            status: "PENDING"
+                                        }
+                                    });
+                                }
+
+                                openAiMessages.push({
+                                    role: "tool",
+                                    tool_call_id: toolCall.id,
+                                    content: "Booking successfully created with status PENDING."
+                                });
+                            }
                         } catch (e: any) {
-                            console.error("[WHATSAPP WEBHOOK] DB Create Booking Error:", e);
-                            openAiMessages.push(responseMessage);
+                            console.error("[WHATSAPP WEBHOOK] Tool error:", e);
                             openAiMessages.push({
                                 role: "tool",
                                 tool_call_id: toolCall.id,
-                                content: `Error saving booking to database. Please let the user know there was an error submitting their booking details, or check if dates are ISO 8601 formatted. Error: ${e.message}`
+                                content: `Error processing request. Error: ${e.message}`
                             });
                         }
-
-                        const postToolCompletion = await openai.chat.completions.create({
-                            model: "gpt-4o",
-                            messages: [
-                                { role: "system", content: systemPrompt },
-                                ...openAiMessages
-                            ]
-                        });
-                        
-                        finalAiReply = postToolCompletion.choices[0].message.content || "";
-                        openAiMessages.push({ role: "assistant", content: finalAiReply });
                     }
+
+                    const postToolCompletion = await openai.chat.completions.create({
+                        model: "gpt-4o",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            ...openAiMessages
+                        ]
+                    });
+                    
+                    finalAiReply = postToolCompletion.choices[0].message.content || "";
+                    openAiMessages.push({ role: "assistant", content: finalAiReply });
                 } else {
                     finalAiReply = responseMessage.content || "";
                     openAiMessages.push({ role: "assistant", content: finalAiReply });
