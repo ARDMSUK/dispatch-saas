@@ -98,14 +98,21 @@ export async function POST(req: Request) {
                 
                 const systemPrompt = `You are the AI dispatch assistant for ${tenant.name}. You schedule taxis. Keep your answers brief.
 The current date and time is ${new Date().toLocaleString('en-GB')}. Use this as your reference point for "today" and allow bookings for future dates.
-Your goal is to collect:
-1. Pickup location
-2. Drop-off location
-3. Date and Time of pickup
-4. Passenger Name
 
-Ask for these details naturally. By default, assume 1 passenger and a "Saloon" vehicle unless specified otherwise.
-Once you have ALL 4 pieces of information, call the "create_booking" tool to finalize the booking. Do not confirm the booking until you have called the tool.`;
+Your goal is to collect all of the following requirements for a quote or booking:
+1. Date of travel
+2. Pickup time
+3. Pickup Address, including postcode
+4. Destination address
+5. Number of passengers
+6. Number of bags
+7. Passenger Name
+8. Email Address
+9. Telephone No
+10. Is a return journey required?
+11. If a return journey is required, you must also ask for: Return journey date, Return journey time, and if it's an airport transfer, the return flight number.
+
+Ask for these details naturally in conversation. Once you have ALL the required pieces of information, call the "create_booking" tool to finalize the booking. Do not confirm the booking until you have successfully called the tool.`;
 
                 const tools = [
                     {
@@ -117,13 +124,19 @@ Once you have ALL 4 pieces of information, call the "create_booking" tool to fin
                                 type: "object",
                                 properties: {
                                     passengerName: { type: "string" },
+                                    passengerEmail: { type: "string" },
+                                    passengerPhone: { type: "string" },
                                     pickupLocation: { type: "string" },
                                     dropoffLocation: { type: "string" },
                                     pickupTime: { type: "string", description: "ISO 8601 formatted date and time string for the pickup." },
                                     passengers: { type: "number", default: 1 },
-                                    vehicleType: { type: "string", default: "Saloon" }
+                                    luggage: { type: "number", default: 0 },
+                                    vehicleType: { type: "string", default: "Saloon" },
+                                    isReturn: { type: "boolean" },
+                                    returnTime: { type: "string", description: "ISO 8601 formatted date and time string for the return leg, if applicable." },
+                                    returnFlightNumber: { type: "string" }
                                 },
-                                required: ["passengerName", "pickupLocation", "dropoffLocation", "pickupTime"]
+                                required: ["passengerName", "passengerEmail", "passengerPhone", "pickupLocation", "dropoffLocation", "pickupTime", "passengers", "luggage", "isReturn"]
                             }
                         }
                     }
@@ -146,29 +159,63 @@ Once you have ALL 4 pieces of information, call the "create_booking" tool to fin
                     // Process tool call
                     const toolCall = responseMessage.tool_calls[0] as any;
                     if (toolCall.type === 'function' && toolCall.function?.name === 'create_booking') {
-                        const args = JSON.parse(toolCall.function.arguments);
-                        // Create the PENDING Job
-                        await prisma.job.create({
-                            data: {
-                                tenantId: tenant.id,
-                                passengerName: args.passengerName,
-                                passengerPhone: passengerPhone,
-                                pickupAddress: args.pickupLocation,
-                                dropoffAddress: args.dropoffLocation,
-                                pickupTime: new Date(args.pickupTime),
-                                passengers: args.passengers || 1,
-                                vehicleType: args.vehicleType || "Saloon",
-                                status: "PENDING"
-                            }
-                        });
+                        try {
+                            const args = JSON.parse(toolCall.function.arguments);
+                            // Create the PENDING Job
+                            const mainJob = await prisma.job.create({
+                                data: {
+                                    tenantId: tenant.id,
+                                    passengerName: args.passengerName,
+                                    passengerPhone: args.passengerPhone || passengerPhone,
+                                    passengerEmail: args.passengerEmail,
+                                    pickupAddress: args.pickupLocation,
+                                    dropoffAddress: args.dropoffLocation,
+                                    pickupTime: new Date(args.pickupTime),
+                                    passengers: args.passengers || 1,
+                                    luggage: args.luggage || 0,
+                                    vehicleType: args.vehicleType || "Saloon",
+                                    isReturn: args.isReturn || false,
+                                    status: "PENDING"
+                                }
+                            });
 
-                        // Feed the tool result back to the AI
-                        openAiMessages.push(responseMessage);
-                        openAiMessages.push({
-                            role: "tool",
-                            tool_call_id: toolCall.id,
-                            content: "Booking successfully created with status PENDING."
-                        });
+                            if (args.isReturn && args.returnTime) {
+                                await prisma.job.create({
+                                    data: {
+                                        tenantId: tenant.id,
+                                        parentJobId: mainJob.id,
+                                        passengerName: args.passengerName,
+                                        passengerPhone: args.passengerPhone || passengerPhone,
+                                        passengerEmail: args.passengerEmail,
+                                        pickupAddress: args.dropoffLocation, // Return reverses the locations
+                                        dropoffAddress: args.pickupLocation,
+                                        pickupTime: new Date(args.returnTime),
+                                        passengers: args.passengers || 1,
+                                        luggage: args.luggage || 0,
+                                        vehicleType: args.vehicleType || "Saloon",
+                                        flightNumber: args.returnFlightNumber,
+                                        isReturn: true,
+                                        status: "PENDING"
+                                    }
+                                });
+                            }
+
+                            // Feed the tool result back to the AI
+                            openAiMessages.push(responseMessage);
+                            openAiMessages.push({
+                                role: "tool",
+                                tool_call_id: toolCall.id,
+                                content: "Booking successfully created with status PENDING."
+                            });
+                        } catch (e: any) {
+                            console.error("[WHATSAPP WEBHOOK] DB Create Booking Error:", e);
+                            openAiMessages.push(responseMessage);
+                            openAiMessages.push({
+                                role: "tool",
+                                tool_call_id: toolCall.id,
+                                content: `Error saving booking to database. Please let the user know there was an error submitting their booking details, or check if dates are ISO 8601 formatted. Error: ${e.message}`
+                            });
+                        }
 
                         const postToolCompletion = await openai.chat.completions.create({
                             model: "gpt-4o",

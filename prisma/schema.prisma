@@ -330,6 +330,7 @@ model Job {
   // Details
   passengerName  String
   passengerPhone String
+  passengerEmail String?
   passengers     Int      @default(1)
   luggage        Int      @default(0)
   vehicleType    String   @default("Saloon")
