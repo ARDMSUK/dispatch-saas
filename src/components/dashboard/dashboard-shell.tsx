@@ -127,7 +127,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         </Button>
                         <div className="flex items-center gap-2">
                             <div className="bg-blue-700 h-6 w-6 rounded flex items-center justify-center font-bold text-black text-xs">D</div>
-                            <span className="font-bold tracking-wide text-sm hidden md:inline">DISPATCH<span className="text-blue-700">.SAAS</span></span>
+                            <span className="font-bold tracking-wide text-sm hidden md:inline">CAB<span className="text-blue-700">AI</span></span>
                         </div>
                     </div>
 

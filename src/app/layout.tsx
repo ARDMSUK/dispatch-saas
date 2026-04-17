@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dispatch SaaS | Operator Console",
+  title: "CABAI | Operator Console",
   description: "Premium Dispatch Platform",
 };
 

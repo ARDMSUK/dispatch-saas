@@ -36,7 +36,7 @@ export const EmailTemplates = {
 
   driverAssigned: (booking: any, driver: any, companyName: string = 'Our Service', enableLiveTracking = true) => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
-    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/track/${booking.id}`;
 
     return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -64,7 +64,7 @@ export const EmailTemplates = {
 
   driverArrived: (booking: any, driver: any, companyName: string = 'Our Service', enableLiveTracking = true) => {
     const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
-    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/track/${booking.id}`;
 
     return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
