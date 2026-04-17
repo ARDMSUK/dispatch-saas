@@ -40,8 +40,8 @@ export default function LoginPage() {
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "digitaldmagency@gmail.com",
-            password: "pasword123", // Pre-filled for development
+            email: "",
+            password: "",
             twoFactorToken: "",
         },
     });
@@ -90,7 +90,7 @@ export default function LoginPage() {
                             <Car className="h-8 w-8" />
                         </div>
                     </div>
-                    <CardTitle className="text-2xl font-bold">Dispatch SaaS</CardTitle>
+                    <CardTitle className="text-2xl font-bold">CABAI</CardTitle>
                     <CardDescription className="text-slate-500">
                         Enter your credentials to access the console
                     </CardDescription>
@@ -148,16 +148,11 @@ export default function LoginPage() {
                     </form>
                 </CardContent>
                 <CardFooter className="justify-center text-xs text-slate-400">
-                    Protected by Dispatch Authority System
+                    Protected by CABAI System Security
                 </CardFooter>
             </Card>
 
-            {/* Quick Helper for Demo */}
-            <div className="absolute bottom-4 left-4 text-slate-500 text-xs font-mono">
-                <p>Dev Login:</p>
-                <p>user: digitaldmagency@gmail.com</p>
-                <p>pass: pasword123</p>
-            </div>
+
         </div>
     );
 }
