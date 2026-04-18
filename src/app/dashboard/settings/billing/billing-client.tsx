@@ -130,15 +130,13 @@ export function BillingSettingsClient({ tenantId, status, plan, hasCustomerProfi
                     {hasCustomerProfile ? (
                         <Button variant="outline" onClick={handlePortal} disabled={isLoading}>
                             <CreditCard className="mr-2 h-4 w-4" />
-                            Update Payment Method
+                            Manage Billing & Invoices
                         </Button>
-                    ) : null}
-
-                    {(status !== "ACTIVE" && status !== "TRIALING") ? (
+                    ) : (
                         <Button onClick={handleCheckout} disabled={isLoading}>
                             Subscribe Now
                         </Button>
-                    ) : null}
+                    )}
                 </CardFooter>
             </Card>
         </div>
