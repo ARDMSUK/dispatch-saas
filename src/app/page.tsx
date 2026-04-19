@@ -15,8 +15,8 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-blue-700 rounded-lg flex items-center justify-center font-bold text-black">Z</div>
-          <span className="text-xl font-bold text-slate-900 tracking-tight">ZerCabs</span>
+          <div className="h-8 w-8 bg-blue-700 rounded-lg flex items-center justify-center font-bold text-black">C</div>
+          <span className="text-xl font-bold text-slate-900 tracking-tight">CABAI</span>
         </div>
         <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
           <a href="#" className="hover:text-slate-900 transition-colors">Services</a>
@@ -49,7 +49,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 w-full p-6 text-center text-slate-500 text-xs">
-        &copy; 2026 ZerCabs. All rights reserved.
+        &copy; 2026 CABAI. All rights reserved.
       </footer>
     </main>
   );
