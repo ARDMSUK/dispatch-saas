@@ -86,7 +86,7 @@ export const EmailService = {
                     throw new Error("Resend client not initialized");
                 }
                 const data = await resend.emails.send({
-                    from: `Dispatch <no-reply@taximarketingservices.co.uk>`,
+                    from: `CABAI System <no-reply@cabai.co.uk>`,
                     to: [to],
                     subject: subject,
                     html: html,
