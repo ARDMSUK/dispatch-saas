@@ -42,6 +42,9 @@ async function handleWebhook(req: Request) {
                     } else if (typeStr.includes('hungup') || typeStr.includes('hangup')) {
                         eventType = 'hungup';
                     }
+                } else if (body.answered_at || body.answer_type || body.answered_by) {
+                    // Fallback for Yay.com 'Call Answered' webhooks which often omit 'type'
+                    eventType = 'answered';
                 }
             } catch (e) {
                 // Ignore JSON parse error if body is empty
