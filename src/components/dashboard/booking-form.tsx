@@ -53,18 +53,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
     // Auto-fill from CLI pop URL parameters and strip from URL
     useEffect(() => {
-        if (typeof window === 'undefined') return;
-
-        const params = new URLSearchParams(window.location.search);
-        const phoneParam = params.get('phone') || params.get('cli') || params.get('caller_id');
-        const nameParam = params.get('name');
+        const phoneParam = searchParams.get('phone') || searchParams.get('cli') || searchParams.get('caller_id');
+        const nameParam = searchParams.get('name');
 
         let shouldCleanUrl = false;
 
         if (phoneParam) {
             const decodedPhone = decodeURIComponent(phoneParam);
             setPassengerPhone(decodedPhone);
-            handlePhoneLookup(decodedPhone); // Moved lookup here from the old duplicated hook
+            handlePhoneLookup(decodedPhone);
             shouldCleanUrl = true;
         }
 
@@ -75,18 +72,17 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
         if (shouldCleanUrl) {
             // Strip the query parameters from the URL silently without reloading the page
-            // This allows the user to manually erase the fields or refresh the page without it
-            // being stubbornly re-filled from the ghost URL state!
-            params.delete('phone');
-            params.delete('cli');
-            params.delete('caller_id');
-            params.delete('name');
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.delete('phone');
+            newParams.delete('cli');
+            newParams.delete('caller_id');
+            newParams.delete('name');
 
-            const newSearch = params.toString();
+            const newSearch = newParams.toString();
             const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
             router.replace(newUrl, { scroll: false });
         }
-    }, [searchParams]);
+    }, [searchParams, router]);
 
     useEffect(() => {
         if (paymentType === 'ACCOUNT') {
