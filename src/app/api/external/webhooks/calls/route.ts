@@ -26,11 +26,13 @@ async function handleWebhook(req: Request) {
 
         let eventType = searchParams.get('event') || 'ringing';
         let phone: string | null = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
+        let toPhone: string | null = searchParams.get('to') || searchParams.get('called');
 
         if (req.method === 'POST') {
             try {
                 const body = await req.json();
-                phone = body.phone || body.caller || body.from || body.caller_id;
+                phone = body.phone || body.caller || body.from || body.caller_id || phone;
+                toPhone = body.to || body.called || toPhone;
 
                 // Support Yay.com specific event types in the JSON payload
                 if (body.type) {
@@ -56,16 +58,34 @@ async function handleWebhook(req: Request) {
             }
         }
 
-        if (!apiKey) {
-            return NextResponse.json({ error: 'Missing API Key in URL (?token=...) or Authorization header' }, { status: 401 });
+        let tenant = null;
+
+        if (apiKey) {
+            tenant = await prisma.tenant.findUnique({
+                where: { apiKey }
+            });
         }
 
-        const tenant = await prisma.tenant.findUnique({
-            where: { apiKey }
-        });
+        // 2. Fallback: Dynamic Routing via "To" Phone Number
+        if (!tenant && toPhone) {
+            const cleanToPhone = toPhone.replace(/[^0-9]/g, '');
+            if (cleanToPhone.length >= 9) {
+                const tenantsWithPhone = await prisma.tenant.findMany({
+                    where: { phone: { not: null } }
+                });
+                
+                const targetSuffix = cleanToPhone.slice(-10); // Match last 10 digits
+                
+                tenant = tenantsWithPhone.find(t => {
+                    if (!t.phone) return false;
+                    const cleanTenantPhone = t.phone.replace(/[^0-9]/g, '');
+                    return cleanTenantPhone.endsWith(targetSuffix) || targetSuffix.endsWith(cleanTenantPhone);
+                }) || null;
+            }
+        }
 
         if (!tenant) {
-            return NextResponse.json({ error: 'Invalid API Key' }, { status: 401 });
+            return NextResponse.json({ error: 'Could not identify tenant from API Key or Inbound Phone Number' }, { status: 401 });
         }
 
         // Discard unreplaced Yay.com macros like {caller_id} from the URL
