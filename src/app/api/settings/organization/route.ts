@@ -17,7 +17,22 @@ export async function GET(req: Request) {
 
         if (!tenant) return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
 
-        return NextResponse.json(tenant);
+        // Strip sensitive keys if user is not an admin
+        const isAdmin = session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN';
+        const safeTenant = { ...tenant };
+
+        if (!isAdmin) {
+            delete (safeTenant as any).apiKey;
+            delete (safeTenant as any).stripeSecretKey;
+            delete (safeTenant as any).stripePublishableKey;
+            delete (safeTenant as any).twilioAccountSid;
+            delete (safeTenant as any).twilioAuthToken;
+            delete (safeTenant as any).twilioSubaccountId;
+            delete (safeTenant as any).resendApiKey;
+            delete (safeTenant as any).aviationStackApiKey;
+        }
+
+        return NextResponse.json(safeTenant);
     } catch (error) {
         console.error("GET /api/settings/organization error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
