@@ -283,13 +283,19 @@ export default function DashboardPage() {
                                         key={driver.id}
                                         position={pos}
                                         icon={{
-                                            path: "M17 6c0 5.5-7 15-7 15S3 11.5 3 6a7 7 0 1 1 14 0z",
-                                            fillColor: driver.status === 'ONLINE' ? '#10b981' : driver.status === 'BUSY' ? '#f59e0b' : '#ef4444',
+                                            path: "M 0, 0 m -10, 0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0",
+                                            fillColor: driver.status === 'ONLINE' ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
                                             fillOpacity: 1,
-                                            strokeWeight: 1, // White border
+                                            strokeWeight: 2,
                                             strokeColor: '#ffffff',
-                                            scale: 1.5,
-                                            labelOrigin: { x: 7, y: -10 } as any // Google types can be tricky
+                                            scale: 1.2,
+                                            labelOrigin: { x: 0, y: 0 } as any
+                                        }}
+                                        label={{
+                                            text: driver.callsign || "",
+                                            color: '#ffffff',
+                                            fontWeight: 'bold',
+                                            fontSize: '11px',
                                         }}
                                         title={`${driver.name} (${driver.callsign})`}
                                     />
