@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { BookingForm } from '@/components/dashboard/booking-form';
 import { BookingManager } from '@/components/dashboard/booking-manager';
+import { BookingManagerClassic } from '@/components/dashboard/booking-manager-classic';
 import { DriverFleetPanel } from '@/components/dashboard/driver-fleet-panel';
 
 // MAP CONSTANTS
@@ -245,12 +246,138 @@ export default function DashboardPage() {
         }
     }, [map, drivers, user, trackingDriverId]);
 
+    const isClassicLayout = user?.tenant?.consoleLayout === 'CLASSIC';
+
+    // Shared Map Rendering
+    const mapComponent = (
+        <div className="h-full w-full relative bg-slate-100">
+            <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={
+                    user?.tenant?.lat && user?.tenant?.lng
+                        ? { lat: user.tenant.lat, lng: user.tenant.lng }
+                        : LONDON_CENTER
+                }
+                zoom={user?.tenant?.lat ? 13 : 11}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
+                options={{
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                }}
+            >
+                {/* MARKERS */}
+                {drivers.map(driver => {
+                    if (!driver.location) return null;
+                    try {
+                        const pos = JSON.parse(driver.location);
+                        return (
+                            <MarkerF
+                                key={driver.id}
+                                position={pos}
+                                icon={{
+                                    path: "M 0, 0 m -10, 0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0",
+                                    fillColor: (driver.status === 'ONLINE' || driver.status === 'FREE') ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
+                                    fillOpacity: 1,
+                                    strokeWeight: 2,
+                                    strokeColor: '#ffffff',
+                                    scale: 1.2,
+                                    labelOrigin: { x: 0, y: 0 } as any
+                                }}
+                                label={{
+                                    text: driver.callsign || "",
+                                    color: '#ffffff',
+                                    fontWeight: 'bold',
+                                    fontSize: '11px',
+                                }}
+                                title={`${driver.name} (${driver.callsign})`}
+                            />
+                        );
+                    } catch (e) { return null; }
+
+                })}
+            </GoogleMap>
+
+            {/* Map Search Overlay */}
+            <div className="absolute top-4 left-4 right-14 flex gap-2 z-10">
+                <input
+                    type="text"
+                    placeholder="Search Driver (Callsign or Name)..."
+                    className="flex-1 bg-white border border-slate-200 rounded p-2 text-sm text-slate-900 shadow focus:outline-none"
+                    value={mapSearchTerm}
+                    onChange={e => setMapSearchTerm(e.target.value)}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                            handleSearchMap();
+                        }
+                    }}
+                />
+                <button 
+                    className="bg-blue-600 text-white px-4 rounded text-sm shadow hover:bg-blue-700"
+                    onClick={handleSearchMap}
+                >
+                    Find
+                </button>
+            </div>
+        </div>
+    );
+
+    // Shared Fleet Panel
+    const fleetComponent = (
+        <DriverFleetPanel
+            drivers={drivers}
+            vehicles={vehicles}
+            onRefresh={triggerRefresh}
+            onAssign={handleAssignDriver}
+            selectedJobId={selectedJob?.id?.toString()}
+        />
+    );
+
+    if (isClassicLayout) {
+        return (
+            <div className="h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-row font-sans overflow-hidden relative">
+                {/* COL 1: NEW BOOKING (Full Height) */}
+                <div className="w-full max-w-[100vw] lg:w-[380px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shrink-0">
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        <BookingForm onJobCreated={triggerRefresh} />
+                    </div>
+                </div>
+
+                {/* COL 2: RIGHT SIDE (Fleet, Map, Jobs) */}
+                <div className="hidden lg:flex flex-1 h-full flex-col overflow-hidden bg-slate-100/50">
+                    {/* TOP HALF: FLEET & MAP */}
+                    <div className="flex w-full h-[45vh] border-b border-slate-200 shrink-0 bg-white">
+                        {/* FLEET MANAGEMENT */}
+                        <div className="w-[350px] border-r border-slate-200 bg-slate-50 h-full flex flex-col shrink-0 overflow-y-auto">
+                            {fleetComponent}
+                        </div>
+
+                        {/* MAP */}
+                        <div className="flex-1 bg-slate-100 relative">
+                            {mapComponent}
+                        </div>
+                    </div>
+
+                    {/* BOTTOM HALF: COMPACT CARDS LIST */}
+                    <div className="flex-1 relative z-10 flex flex-col overflow-hidden">
+                        <BookingManagerClassic
+                            onSelectJob={(j) => setSelectedJob(j)}
+                            selectedJobId={selectedJob?.id}
+                            refreshTrigger={refreshTrigger}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Modern Layout (Default)
     return (
         <div className="h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden relative">
 
             {/* 3-COLUMN LAYOUT */}
 
-            {/* COL 1: NEW BOOKING (Fixed Width on Desktop, Max Width on Mobile) */}
+            {/* COL 1: NEW BOOKING */}
             <div className="w-full max-w-[100vw] lg:w-[380px] border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 lg:h-full flex flex-col z-20 shadow-xl shrink-0 min-h-[600px] lg:min-h-0 overflow-x-hidden">
                 <div className="p-4 border-b border-slate-200 bg-white hidden lg:block">
                     {/* Empty header block to match alignments if needed */}
@@ -260,7 +387,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* COL 2: BOOKING MANAGER (Flex Grow, takes remaining space on Desktop) */}
+            {/* COL 2: BOOKING MANAGER */}
             <div className="w-full max-w-[100vw] lg:flex-1 border-b lg:border-b-0 lg:border-r border-slate-200 bg-zinc-900/20 lg:h-full relative z-10 flex flex-col min-w-[300px] lg:min-w-[400px] min-h-[800px] lg:min-h-0 overflow-x-hidden">
                 <BookingManager
                     onSelectJob={(j) => setSelectedJob(j)}
@@ -269,90 +396,17 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* COL 3: MAP & FLEET (Fixed Width on Desktop) */}
+            {/* COL 3: MAP & FLEET */}
             <div className="w-full lg:w-[450px] flex flex-col h-[800px] lg:h-full bg-white border-l border-slate-200 z-20 shrink-0">
 
                 {/* TOP: MAP (50%) */}
                 <div className="h-1/2 relative bg-slate-100 border-b border-slate-200">
-                    <GoogleMap
-                        mapContainerStyle={{ width: '100%', height: '100%' }}
-                        center={
-                            user?.tenant?.lat && user?.tenant?.lng
-                                ? { lat: user.tenant.lat, lng: user.tenant.lng }
-                                : LONDON_CENTER
-                        }
-                        zoom={user?.tenant?.lat ? 13 : 11}
-                        onLoad={onLoad}
-                        onUnmount={onUnmount}
-                        options={{
-                            disableDefaultUI: true,
-                            zoomControl: true,
-                        }}
-                    >
-                        {/* MARKERS */}
-                        {drivers.map(driver => {
-                            if (!driver.location) return null;
-                            try {
-                                const pos = JSON.parse(driver.location);
-                                return (
-                                    <MarkerF
-                                        key={driver.id}
-                                        position={pos}
-                                        icon={{
-                                            path: "M 0, 0 m -10, 0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0",
-                                            fillColor: (driver.status === 'ONLINE' || driver.status === 'FREE') ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
-                                            fillOpacity: 1,
-                                            strokeWeight: 2,
-                                            strokeColor: '#ffffff',
-                                            scale: 1.2,
-                                            labelOrigin: { x: 0, y: 0 } as any
-                                        }}
-                                        label={{
-                                            text: driver.callsign || "",
-                                            color: '#ffffff',
-                                            fontWeight: 'bold',
-                                            fontSize: '11px',
-                                        }}
-                                        title={`${driver.name} (${driver.callsign})`}
-                                    />
-                                );
-                            } catch (e) { return null; }
-
-                        })}
-                    </GoogleMap>
-
-                    {/* Map Search Overlay */}
-                    <div className="absolute top-4 left-4 right-14 flex gap-2 z-10">
-                        <input
-                            type="text"
-                            placeholder="Search Driver (Callsign or Name)..."
-                            className="flex-1 bg-white border border-slate-200 rounded p-2 text-sm text-slate-900 shadow focus:outline-none"
-                            value={mapSearchTerm}
-                            onChange={e => setMapSearchTerm(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                    handleSearchMap();
-                                }
-                            }}
-                        />
-                        <button 
-                            className="bg-blue-600 text-white px-4 rounded text-sm shadow hover:bg-blue-700"
-                            onClick={handleSearchMap}
-                        >
-                            Find
-                        </button>
-                    </div>
+                    {mapComponent}
                 </div>
 
                 {/* BOTTOM: DRIVER FLEET (50%) */}
                 <div className="h-1/2 flex flex-col overflow-hidden bg-slate-50">
-                    <DriverFleetPanel
-                        drivers={drivers}
-                        vehicles={vehicles}
-                        onRefresh={triggerRefresh}
-                        onAssign={handleAssignDriver}
-                        selectedJobId={selectedJob?.id?.toString()}
-                    />
+                    {fleetComponent}
                 </div>
 
             </div>

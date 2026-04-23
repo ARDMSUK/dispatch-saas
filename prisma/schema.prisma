@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["multiSchema"]
 }
 
@@ -21,22 +21,23 @@ model Tenant {
   updatedAt DateTime @updatedAt
 
   // Contact & Location
-  email     String?
-  phone     String?
-  address   String?
-  lat       Float?
-  lng       Float?
+  email   String?
+  phone   String?
+  address String?
+  lat     Float?
+  lng     Float?
 
   // Configuration
-  useZonePricing Boolean @default(false)
-  autoDispatch   Boolean @default(false)
-  dispatchAlgorithm String @default("CLOSEST") // CLOSEST, LONGEST_WAITING
-  enableLiveTracking Boolean @default(true)
-  enableDynamicPricing Boolean @default(false)
+  useZonePricing         Boolean @default(false)
+  autoDispatch           Boolean @default(false)
+  dispatchAlgorithm      String  @default("CLOSEST") // CLOSEST, LONGEST_WAITING
+  enableLiveTracking     Boolean @default(true)
+  enableDynamicPricing   Boolean @default(false)
   enableWaitCalculations Boolean @default(false)
-  enableWebBooker Boolean @default(false)
-  enableB2BPortal Boolean @default(false)
-  enableWavOptions Boolean @default(false)
+  enableWebBooker        Boolean @default(false)
+  enableB2BPortal        Boolean @default(false)
+  enableWavOptions       Boolean @default(false)
+  consoleLayout          String  @default("MODERN") // MODERN, CLASSIC
 
   // AI & Add-on Features
   hasWebChatAi         Boolean  @default(false)
@@ -47,62 +48,62 @@ model Tenant {
   aiBillingPeriodStart DateTime @default(now())
 
   // Whatsapp Evolution API State
-  whatsappInstanceId     String?  // The dynamically generated Evolution API instance name
-  whatsappInstanceStatus String?  @default("DISCONNECTED") // DISCONNECTED, CONNECTING, CONNECTED
+  whatsappInstanceId     String? // The dynamically generated Evolution API instance name
+  whatsappInstanceStatus String? @default("DISCONNECTED") // DISCONNECTED, CONNECTING, CONNECTED
 
   // White-Label Configuration
-  brandColor String @default("#f59e0b") // Default amber-500
+  brandColor String  @default("#f59e0b") // Default amber-500
   logoUrl    String?
 
   // Integrations (Encrypted/Stored secure in prod, text for now)
   stripeSecretKey      String?
   stripePublishableKey String?
-  
-  twilioAccountSid     String?
-  twilioAuthToken      String?
-  twilioFromNumber     String?
-  twilioSubaccountId   String?
-  
-  resendApiKey         String?
-  aviationStackApiKey  String?
+
+  twilioAccountSid   String?
+  twilioAuthToken    String?
+  twilioFromNumber   String?
+  twilioSubaccountId String?
+
+  resendApiKey        String?
+  aviationStackApiKey String?
 
   // SaaS Platform Subscription (Stripe)
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  subscriptionStatus   String  @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, CANCELED
+  subscriptionStatus   String    @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, CANCELED
   subscriptionPlanId   String?
   subscriptionPlan     SaasPlan? @relation(fields: [subscriptionPlanId], references: [id])
 
   // Notification Templates (Super Admin ONLY)
-  smsTemplateConfirmation     String? @db.Text
-  smsTemplateDriverAssigned   String? @db.Text
-  smsTemplateDriverArrived    String? @db.Text
+  smsTemplateConfirmation   String? @db.Text
+  smsTemplateDriverAssigned String? @db.Text
+  smsTemplateDriverArrived  String? @db.Text
 
-  emailSubjectConfirmation    String? @db.Text
-  emailBodyConfirmation       String? @db.Text
-  
-  emailSubjectDriverAssigned  String? @db.Text
-  emailBodyDriverAssigned     String? @db.Text
-  
-  emailSubjectDriverArrived   String? @db.Text
-  emailBodyDriverArrived      String? @db.Text
-  
-  emailSubjectReceipt         String? @db.Text
-  emailBodyReceipt            String? @db.Text
+  emailSubjectConfirmation String? @db.Text
+  emailBodyConfirmation    String? @db.Text
 
-  users     User[]
-  customers Customer[]
-  drivers   Driver[]
-  vehicles  Vehicle[]
-  jobs      Job[]
-  accounts  Account[]
-  pricingRules PricingRule[]
-  fixedPrices  FixedPrice[]
-  surcharges   Surcharge[]
-  zones        Zone[]
-  incomingCalls IncomingCall[]
-  invoices    Invoice[]
-  tickets     Ticket[]
+  emailSubjectDriverAssigned String? @db.Text
+  emailBodyDriverAssigned    String? @db.Text
+
+  emailSubjectDriverArrived String? @db.Text
+  emailBodyDriverArrived    String? @db.Text
+
+  emailSubjectReceipt String? @db.Text
+  emailBodyReceipt    String? @db.Text
+
+  users            User[]
+  customers        Customer[]
+  drivers          Driver[]
+  vehicles         Vehicle[]
+  jobs             Job[]
+  accounts         Account[]
+  pricingRules     PricingRule[]
+  fixedPrices      FixedPrice[]
+  surcharges       Surcharge[]
+  zones            Zone[]
+  incomingCalls    IncomingCall[]
+  invoices         Invoice[]
+  tickets          Ticket[]
   whatsappSessions WhatsappSession[]
 
   @@map("companies")
@@ -110,10 +111,10 @@ model Tenant {
 }
 
 model SaasPlan {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   name            String
-  priceMonthly    Float    @default(0)
-  priceAnnually   Float    @default(0)
+  priceMonthly    Float   @default(0)
+  priceAnnually   Float   @default(0)
   stripeProductId String?
   stripePriceId   String?
 
@@ -140,25 +141,25 @@ model SaasPlan {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String   // Hashed
-  name      String?
-  role      String   @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER, B2B_ADMIN
-  permissions Json?  // e.g. ["view_reports", "view_pricing"]
+  id           String  @id @default(cuid())
+  email        String  @unique
+  password     String // Hashed
+  name         String?
+  role         String  @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER, B2B_ADMIN
+  permissions  Json? // e.g. ["view_reports", "view_pricing"]
   sipExtension String?
-  
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
   accountId String?
   account   Account? @relation(fields: [accountId], references: [id])
-  
-  resetToken       String?  @unique
+
+  resetToken       String?   @unique
   resetTokenExpiry DateTime?
-  
+
   twoFactorSecret  String?
-  twoFactorEnabled Boolean  @default(false)
+  twoFactorEnabled Boolean @default(false)
 
   forcePasswordReset Boolean @default(false)
 
@@ -172,20 +173,20 @@ model User {
 }
 
 model Customer {
-  id        String   @id @default(cuid())
-  phone     String
-  name      String?
-  email     String?
-  notes     String?
-  
-  // Account Status
-  isAccount     Boolean @default(false)
-  accountId     String?
-  account       Account? @relation(fields: [accountId], references: [id]) // Use proper relation
+  id    String  @id @default(cuid())
+  phone String
+  name  String?
+  email String?
+  notes String?
 
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  jobs      Job[]
+  // Account Status
+  isAccount Boolean  @default(false)
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id]) // Use proper relation
+
+  tenantId      String
+  tenant        Tenant  @relation(fields: [tenantId], references: [id])
+  jobs          Job[]
   expoPushToken String?
 
   createdAt DateTime @default(now())
@@ -197,81 +198,81 @@ model Customer {
 }
 
 model Account {
-  id          String   @id @default(cuid())
-  code        String   // e.g. ACC-001
-  name        String   // e.g. "Corp Inc."
-  email                   String?
-  phone                   String?
-  
+  id    String  @id @default(cuid())
+  code  String // e.g. ACC-001
+  name  String // e.g. "Corp Inc."
+  email String?
+  phone String?
+
   // New Contact Fields
-  contactName             String?
-  contactJobTitle         String?
-  department              String?
-  
+  contactName     String?
+  contactJobTitle String?
+  department      String?
+
   // New Address Fields
-  addressLine1            String?
-  addressLine2            String?
-  townCity                String?
-  postcode                String?
-  
+  addressLine1 String?
+  addressLine2 String?
+  townCity     String?
+  postcode     String?
+
   // Billing and Accounts Payable
   isAuthorisedToSetAccount Boolean @default(false)
-  apContact               String?
-  apPhone                 String?
-  apEmail                 String?
-  paymentTerms            String? // e.g., weekly, monthly
-  
+  apContact                String?
+  apPhone                  String?
+  apEmail                  String?
+  paymentTerms             String? // e.g., weekly, monthly
+
   // Contract
-  startDate               DateTime?
-  endDate                 DateTime?
+  startDate DateTime?
+  endDate   DateTime?
 
-  isActive                Boolean  @default(true)
-  notes                   String?
+  isActive Boolean @default(true)
+  notes    String?
 
-  tenantId                String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  
-  customers   Customer[]
-  jobs        Job[]     // Jobs booked to this account
-  users       User[]    // B2B Admin users for this account
-  invoices    Invoice[]
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  customers Customer[]
+  jobs      Job[] // Jobs booked to this account
+  users     User[] // B2B Admin users for this account
+  invoices  Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([tenantId, code])
   @@map("accounts")
   @@schema("public")
 }
 
 model Driver {
-  id        String   @id @default(cuid())
-  callsign  String   // e.g. "101"
-  name      String
-  phone     String
-  email     String?
-  badgeNumber String?
+  id            String    @id @default(cuid())
+  callsign      String // e.g. "101"
+  name          String
+  phone         String
+  email         String?
+  badgeNumber   String?
   licenseExpiry DateTime?
-  pin       String?  // Login PIN
-  
-  status    String   @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
-  
-  // Real-time tracking
-  currentLat Float?
-  currentLng Float?
-  lastLocationUpdate DateTime?
-  location  String?  // JSON string for now: {lat, lng}
+  pin           String? // Login PIN
 
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  jobs      Job[]
-  preAssignedJobs Job[] @relation("PreAssignedDriver")
-  vehicles  Vehicle[] // Vehicles assigned to this driver
+  status String @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
+
+  // Real-time tracking
+  currentLat         Float?
+  currentLng         Float?
+  lastLocationUpdate DateTime?
+  location           String? // JSON string for now: {lat, lng}
+
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  jobs            Job[]
+  preAssignedJobs Job[]     @relation("PreAssignedDriver")
+  vehicles        Vehicle[] // Vehicles assigned to this driver
 
   // Queue Position
-  zoneQueues ZoneQueue[] 
-  
-  expoPushToken     String?
+  zoneQueues ZoneQueue[]
+
+  expoPushToken String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -282,19 +283,19 @@ model Driver {
 }
 
 model Vehicle {
-  id        String   @id @default(cuid())
-  reg       String   // License Plate
-  make      String
-  model     String
-  color     String?
-  type      String   @default("Saloon") // Saloon, Estate, MPV, Exec
+  id         String    @id @default(cuid())
+  reg        String // License Plate
+  make       String
+  model      String
+  color      String?
+  type       String    @default("Saloon") // Saloon, Estate, MPV, Exec
   expiryDate DateTime? // MOT/Licence Expiry
 
-  driverId  String?
-  driver    Driver?  @relation(fields: [driverId], references: [id]) // Primary driver assignment
+  driverId String?
+  driver   Driver? @relation(fields: [driverId], references: [id]) // Primary driver assignment
 
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -304,8 +305,7 @@ model Vehicle {
 }
 
 model Job {
-  id        Int      @id @default(autoincrement())
-
+  id Int @id @default(autoincrement())
 
   // Route
   pickupAddress  String
@@ -314,110 +314,110 @@ model Job {
   pickupLng      Float?
   dropoffLat     Float?
   dropoffLng     Float?
-  
-  vias           Json?    // Array of {address, lat, lng} 
+
+  vias Json? // Array of {address, lat, lng} 
 
   // Timing
-  pickupTime     DateTime
-  scheduledTime  DateTime?
-  bookedAt       DateTime @default(now())
-  
+  pickupTime    DateTime
+  scheduledTime DateTime?
+  bookedAt      DateTime  @default(now())
+
   // Return Journey Linking
-  isReturn       Boolean  @default(false)
-  parentJobId    Int?     @unique // If this is a return job, link to original
-  parentJob      Job?     @relation("ReturnJob", fields: [parentJobId], references: [id])
-  returnJob      Job?     @relation("ReturnJob")
+  isReturn    Boolean @default(false)
+  parentJobId Int?    @unique // If this is a return job, link to original
+  parentJob   Job?    @relation("ReturnJob", fields: [parentJobId], references: [id])
+  returnJob   Job?    @relation("ReturnJob")
 
   // Details
   passengerName  String
   passengerPhone String
   passengerEmail String?
-  passengers     Int      @default(1)
-  luggage        Int      @default(0)
-  vehicleType    String   @default("Saloon")
-  requiresWav    Boolean  @default(false)
+  passengers     Int     @default(1)
+  luggage        Int     @default(0)
+  vehicleType    String  @default("Saloon")
+  requiresWav    Boolean @default(false)
   flightNumber   String?
-  
+
   // Safety
   emergencyActive Boolean @default(false)
-  
-  notes          String?
+
+  notes String?
 
   // Financials
-  fare           Float?   // Quoted/Final Fare
-  paymentType    String   @default("CASH") // CASH, CARD, ACCOUNT
-  paymentStatus  String   @default("UNPAID") // UNPAID, AUTHORIZED, PAID, REFUNDED
+  fare                  Float? // Quoted/Final Fare
+  paymentType           String  @default("CASH") // CASH, CARD, ACCOUNT
+  paymentStatus         String  @default("UNPAID") // UNPAID, AUTHORIZED, PAID, REFUNDED
   stripePaymentIntentId String?
   stripeClientSecret    String?
-  isFixedPrice   Boolean  @default(false)
-  
+  isFixedPrice          Boolean @default(false)
+
   // Wait & Return Details
-  waitingTime    Int      @default(0) // Minutes
-  waitingCost    Float    @default(0.00)
+  waitingTime Int   @default(0) // Minutes
+  waitingCost Float @default(0.00)
 
   // Recurrance
-  isRecurring       Boolean  @default(false)
-  recurrenceRule    String?  // e.g. "DAILY", "WEEKLY", "MON,WED,FRI"
-  recurrenceGroupId String?  // ID to group all created jobs
+  isRecurring       Boolean   @default(false)
+  recurrenceRule    String? // e.g. "DAILY", "WEEKLY", "MON,WED,FRI"
+  recurrenceGroupId String? // ID to group all created jobs
   recurrenceEnd     DateTime?
 
   // Status
-  status         String   @default("PENDING") 
+  status       String  @default("PENDING")
   // PENDING, UNASSIGNED, DISPATCHED, EN_ROUTE, POB, COMPLETED, CANCELLED
-  autoDispatch   Boolean  @default(true) // Manual override for dispatchers
+  autoDispatch Boolean @default(true) // Manual override for dispatchers
 
   // Relations
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id])
 
-  driverId   String?
-  driver     Driver?   @relation(fields: [driverId], references: [id])
+  driverId String?
+  driver   Driver? @relation(fields: [driverId], references: [id])
 
   preAssignedDriverId String?
-  preAssignedDriver   Driver?   @relation("PreAssignedDriver", fields: [preAssignedDriverId], references: [id])
-  
+  preAssignedDriver   Driver? @relation("PreAssignedDriver", fields: [preAssignedDriverId], references: [id])
+
   updatedAt DateTime @updatedAt
 
-  accountId  String?
-  account    Account?  @relation(fields: [accountId], references: [id])
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
 
-  invoiceId  String?
-  invoice    Invoice?  @relation(fields: [invoiceId], references: [id])
-  isBilled   Boolean   @default(false)
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  isBilled  Boolean  @default(false)
 
   @@map("bookings")
   @@schema("public")
 }
 
 model PricingRule {
-  id          String   @id @default(cuid())
-  name        String   // e.g. "Standard Tariff", "Executive Tariff"
-  vehicleType String   @default("Saloon")
-  
-  baseRate    Float    @default(3.00) // Flag fall
-  perMile     Float    @default(2.00) // Rate per mile
-  minFare     Float    @default(5.00)
-  waitingFreq Float    @default(0.00) // Cost per minute of waiting (Wait & Return)
-  
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  
+  id          String @id @default(cuid())
+  name        String // e.g. "Standard Tariff", "Executive Tariff"
+  vehicleType String @default("Saloon")
+
+  baseRate    Float @default(3.00) // Flag fall
+  perMile     Float @default(2.00) // Rate per mile
+  minFare     Float @default(5.00)
+  waitingFreq Float @default(0.00) // Cost per minute of waiting (Wait & Return)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
   @@unique([tenantId, vehicleType])
   @@map("pricing_rules")
   @@schema("public")
 }
 
 model Zone {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   name        String
-  color       String   @default("#3b82f6") // Blue
-  coordinates String   // JSON string: [[lat,lng], [lat,lng], ...]
+  color       String @default("#3b82f6") // Blue
+  coordinates String // JSON string: [[lat,lng], [lat,lng], ...]
 
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   // Queuing System
   driversInQueue ZoneQueue[]
@@ -431,62 +431,62 @@ model Zone {
 }
 
 model FixedPrice {
-  id          String   @id @default(cuid())
-  name        String?  // e.g. "Heathrow T5"
-  
-  pickup      String?  // Partial match
-  dropoff     String?  // Partial match
-  
+  id   String  @id @default(cuid())
+  name String? // e.g. "Heathrow T5"
+
+  pickup  String? // Partial match
+  dropoff String? // Partial match
+
   // Zone Linking (Optional)
-  pickupZoneId  String?
-  pickupZone    Zone?   @relation("PickupZone", fields: [pickupZoneId], references: [id])
-  
+  pickupZoneId String?
+  pickupZone   Zone?   @relation("PickupZone", fields: [pickupZoneId], references: [id])
+
   dropoffZoneId String?
   dropoffZone   Zone?   @relation("DropoffZone", fields: [dropoffZoneId], references: [id])
-  
+
   price       Float
-  vehicleType String   @default("Saloon")
+  vehicleType String @default("Saloon")
 
-  isReverse   Boolean  @default(true) // Also apply for Dropoff -> Pickup
+  isReverse Boolean @default(true) // Also apply for Dropoff -> Pickup
 
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   @@map("fixed_prices")
   @@schema("public")
 }
 
 model Surcharge {
-  id          String   @id @default(cuid())
-  name        String   // e.g. "Christmas Day", "Night Rate"
-  
-  type        String   @default("PERCENT") // PERCENT, FLAT
-  value       Float    // e.g. 50 (for 50%) or 10.00 (flat add)
-  
+  id   String @id @default(cuid())
+  name String // e.g. "Christmas Day", "Night Rate"
+
+  type  String @default("PERCENT") // PERCENT, FLAT
+  value Float // e.g. 50 (for 50%) or 10.00 (flat add)
+
   // Triggers
-  startDate   DateTime? // For specific dates
-  endDate     DateTime? 
-  
-  startTime   String?   // "22:00"
-  endTime     String?   // "06:00"
-  
-  daysOfWeek  String?   // "0,6" for Sun,Sat
-  
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  startDate DateTime? // For specific dates
+  endDate   DateTime?
+
+  startTime String? // "22:00"
+  endTime   String? // "06:00"
+
+  daysOfWeek String? // "0,6" for Sun,Sat
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   @@map("surcharges")
   @@schema("public")
 }
 
 model IncomingCall {
-  id        String   @id @default(cuid())
-  phone     String   // The caller's phone number
-  status    String   @default("RINGING") // RINGING, ANSWERED, DISMISSED
+  id            String  @id @default(cuid())
+  phone         String // The caller's phone number
+  status        String  @default("RINGING") // RINGING, ANSWERED, DISMISSED
   answeredByExt String?
-  
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -496,49 +496,49 @@ model IncomingCall {
 }
 
 model ZoneQueue {
-  id        String   @id @default(cuid())
-  
-  driverId  String
-  driver    Driver   @relation(fields: [driverId], references: [id])
-  
-  zoneId    String
-  zone      Zone     @relation(fields: [zoneId], references: [id])
-  
-  tenantId  String
-  
-  joinedAt  DateTime @default(now())
-  
+  id String @id @default(cuid())
+
+  driverId String
+  driver   Driver @relation(fields: [driverId], references: [id])
+
+  zoneId String
+  zone   Zone   @relation(fields: [zoneId], references: [id])
+
+  tenantId String
+
+  joinedAt DateTime @default(now())
+
   @@unique([driverId]) // A driver can only be in one queue at a time
   @@map("zone_queues")
   @@schema("public")
 }
 
 model Invoice {
-  id            String   @id @default(cuid())
-  invoiceNumber String   // e.g. INV-1002
-  
-  issueDate     DateTime @default(now())
-  dueDate       DateTime
-  
-  status        String   @default("DRAFT") // DRAFT, ISSUED, PAID, OVERDUE, CANCELLED
-  
-  subtotal      Float    @default(0.00)
-  taxTotal      Float    @default(0.00)
-  total         Float    @default(0.00)
-  
-  notes         String?
-  
+  id            String @id @default(cuid())
+  invoiceNumber String // e.g. INV-1002
+
+  issueDate DateTime @default(now())
+  dueDate   DateTime
+
+  status String @default("DRAFT") // DRAFT, ISSUED, PAID, OVERDUE, CANCELLED
+
+  subtotal Float @default(0.00)
+  taxTotal Float @default(0.00)
+  total    Float @default(0.00)
+
+  notes String?
+
   // Relations
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  accountId     String
-  account       Account  @relation(fields: [accountId], references: [id])
-  
-  jobs          Job[]
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  jobs Job[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, invoiceNumber])
   @@map("invoices")
@@ -546,50 +546,50 @@ model Invoice {
 }
 
 model Ticket {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  
-  subject   String
-  status    String   @default("PENDING_AI_REVIEW") // PENDING_AI_REVIEW, ANSWERED, ESCALATED, CLOSED
-  
-  messages  TicketMessage[]
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  subject String
+  status  String @default("PENDING_AI_REVIEW") // PENDING_AI_REVIEW, ANSWERED, ESCALATED, CLOSED
+
+  messages TicketMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("tickets")
   @@schema("public")
 }
 
 model TicketMessage {
-  id        String   @id @default(cuid())
-  ticketId  String
-  ticket    Ticket   @relation(fields: [ticketId], references: [id])
-  
-  senderType  String   // TENANT_USER, AI_AGENT, SYSTEM_ADMIN
-  senderId    String?  // Relation to User if TENANT_USER or SYSTEM_ADMIN
-  user        User?    @relation(fields: [senderId], references: [id])
+  id       String @id @default(cuid())
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
 
-  content     String   @db.Text
-  
-  createdAt   DateTime @default(now())
-  
+  senderType String // TENANT_USER, AI_AGENT, SYSTEM_ADMIN
+  senderId   String? // Relation to User if TENANT_USER or SYSTEM_ADMIN
+  user       User?   @relation(fields: [senderId], references: [id])
+
+  content String @db.Text
+
+  createdAt DateTime @default(now())
+
   @@map("ticket_messages")
   @@schema("public")
 }
 
 model WhatsappSession {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  
-  userPhone String   // Provide conversation isolation by user phone
-  messages  Json     @default("[]") // Array of { role: 'user'|'assistant', content: string }
-  
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  userPhone String // Provide conversation isolation by user phone
+  messages  Json   @default("[]") // Array of { role: 'user'|'assistant', content: string }
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([tenantId, userPhone])
   @@map("whatsapp_sessions")
   @@schema("public")

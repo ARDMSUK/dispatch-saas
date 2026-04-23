@@ -38,6 +38,7 @@ export default function SettingsPage() {
     const [aiMessageCount, setAiMessageCount] = useState(0);
     const [aiMessageLimit, setAiMessageLimit] = useState(100);
     const [twilioFromNumber, setTwilioFromNumber] = useState("");
+    const [consoleLayout, setConsoleLayout] = useState("MODERN");
 
     // SMS Templates State
     const [smsTemplateConfirmation, setSmsTemplateConfirmation] = useState('');
@@ -107,6 +108,7 @@ export default function SettingsPage() {
                 setAiMessageCount(data.aiMessageCount ?? 0);
                 setAiMessageLimit(data.aiMessageLimit ?? 100);
                 setTwilioFromNumber(data.twilioFromNumber || "");
+                setConsoleLayout(data.consoleLayout || "MODERN");
 
                 // Load templates
                 setSmsTemplateConfirmation(data.smsTemplateConfirmation || '');
@@ -172,6 +174,7 @@ export default function SettingsPage() {
                     enableWebBooker,
                     logoUrl,
                     brandColor,
+                    consoleLayout,
                     smsTemplateConfirmation,
                     smsTemplateDriverAssigned,
                     smsTemplateDriverArrived,
@@ -622,6 +625,40 @@ export default function SettingsPage() {
                                 Book Now
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Workspace Preferences */}
+            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-teal-600">
+                    🖥️ Workspace Preferences
+                </h2>
+                <div className="space-y-6">
+                    <p className="text-sm text-slate-500">
+                        Customize the layout and default behaviors of the Dispatch Dashboard.
+                    </p>
+
+                    <div>
+                        <Label className="text-slate-600">Booking Console Layout</Label>
+                        <p className="text-xs text-slate-400 mb-3">
+                            Choose between the Modern card-based layout or the Classic high-density columnar layout.
+                        </p>
+                        <Select value={consoleLayout} onValueChange={setConsoleLayout}>
+                            <SelectTrigger className="w-full md:w-1/2 bg-white border-slate-200 text-slate-900">
+                                <SelectValue placeholder="Select Layout" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border-slate-200 text-slate-900">
+                                <SelectItem value="MODERN">
+                                    <span className="font-medium text-emerald-600">Modern Layout (Default)</span>
+                                    <p className="text-xs text-slate-500 mt-1">Clean, large cards with comprehensive details and dedicated sidebars.</p>
+                                </SelectItem>
+                                <SelectItem value="CLASSIC">
+                                    <span className="font-medium text-blue-600">Classic Layout (Dense)</span>
+                                    <p className="text-xs text-slate-500 mt-1">iCabbi-style horizontal split with high-density columnar job strips.</p>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
             </div>
