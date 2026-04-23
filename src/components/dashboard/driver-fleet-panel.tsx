@@ -56,7 +56,7 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                                         <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
                                             <User className="h-5 w-5 text-slate-400" />
                                         </div>
-                                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${driver.status === 'ONLINE' ? 'bg-emerald-500' :
+                                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${(driver.status === 'ONLINE' || driver.status === 'FREE') ? 'bg-emerald-500' :
                                             driver.status === 'BUSY' ? 'bg-blue-600' : 'bg-red-500'
                                             }`} />
                                     </div>

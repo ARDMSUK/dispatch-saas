@@ -188,7 +188,8 @@ export default function DashboardPage() {
                 if (pos.lat && pos.lng) {
                     map.panTo(pos);
                     map.setZoom(15);
-                    toast.success(`Found ${driver.name} (${driver.callsign})`);
+                    setTrackingDriverId(driver.id); // Start tracking
+                    toast.success(`Tracking ${driver.name} (${driver.callsign})`);
                 }
             } catch (e) {
                 toast.error("Driver location is invalid");
@@ -201,6 +202,20 @@ export default function DashboardPage() {
     // Auto-fit bounds
     useEffect(() => {
         if (!map || drivers.length === 0) return;
+
+        // If we are tracking a specific driver, keep them centered instead of fitting bounds
+        if (trackingDriverId) {
+            const driver = drivers.find(d => d.id === trackingDriverId);
+            if (driver && driver.location) {
+                try {
+                    const pos = JSON.parse(driver.location);
+                    if (pos.lat && pos.lng) {
+                        map.panTo(pos);
+                    }
+                } catch (e) {}
+            }
+            return;
+        }
 
         const bounds = new google.maps.LatLngBounds();
         let hasDriverLoc = false;
@@ -227,7 +242,7 @@ export default function DashboardPage() {
             }
             map.fitBounds(bounds);
         }
-    }, [map, drivers, user]);
+    }, [map, drivers, user, trackingDriverId]);
 
     return (
         <div className="h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden relative">
@@ -284,7 +299,7 @@ export default function DashboardPage() {
                                         position={pos}
                                         icon={{
                                             path: "M 0, 0 m -10, 0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0",
-                                            fillColor: driver.status === 'ONLINE' ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
+                                            fillColor: (driver.status === 'ONLINE' || driver.status === 'FREE') ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
                                             fillOpacity: 1,
                                             strokeWeight: 2,
                                             strokeColor: '#ffffff',
