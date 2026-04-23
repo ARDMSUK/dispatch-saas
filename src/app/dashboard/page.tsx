@@ -171,6 +171,33 @@ export default function DashboardPage() {
         setMap(null);
     }, []);
 
+    // Map Search
+    const [mapSearchTerm, setMapSearchTerm] = useState('');
+
+    const handleSearchMap = () => {
+        if (!map || !mapSearchTerm) return;
+        const driver = drivers.find(d => 
+            d.callsign?.toLowerCase() === mapSearchTerm.toLowerCase() || 
+            d.name?.toLowerCase().includes(mapSearchTerm.toLowerCase()) ||
+            d.callsign?.toLowerCase().includes(mapSearchTerm.toLowerCase())
+        );
+        
+        if (driver && driver.location) {
+            try {
+                const pos = JSON.parse(driver.location);
+                if (pos.lat && pos.lng) {
+                    map.panTo(pos);
+                    map.setZoom(15);
+                    toast.success(`Found ${driver.name} (${driver.callsign})`);
+                }
+            } catch (e) {
+                toast.error("Driver location is invalid");
+            }
+        } else {
+            toast.error("Driver not found or offline");
+        }
+    };
+
     // Auto-fit bounds
     useEffect(() => {
         if (!map || drivers.length === 0) return;
@@ -242,7 +269,6 @@ export default function DashboardPage() {
                         onLoad={onLoad}
                         onUnmount={onUnmount}
                         options={{
-                            styles: DARK_MAP_STYLE,
                             disableDefaultUI: true,
                             zoomControl: true,
                         }}
@@ -273,9 +299,26 @@ export default function DashboardPage() {
                         })}
                     </GoogleMap>
 
-                    {/* Map Info Overlay */}
-                    <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur border border-slate-200 p-2 rounded text-xs font-mono text-slate-500 shadow-xl pointer-events-none">
-                        London Live View
+                    {/* Map Search Overlay */}
+                    <div className="absolute top-4 left-4 right-14 flex gap-2 z-10">
+                        <input
+                            type="text"
+                            placeholder="Search Driver (Callsign or Name)..."
+                            className="flex-1 bg-white border border-slate-200 rounded p-2 text-sm text-slate-900 shadow focus:outline-none"
+                            value={mapSearchTerm}
+                            onChange={e => setMapSearchTerm(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                    handleSearchMap();
+                                }
+                            }}
+                        />
+                        <button 
+                            className="bg-blue-600 text-white px-4 rounded text-sm shadow hover:bg-blue-700"
+                            onClick={handleSearchMap}
+                        >
+                            Find
+                        </button>
                     </div>
                 </div>
 
