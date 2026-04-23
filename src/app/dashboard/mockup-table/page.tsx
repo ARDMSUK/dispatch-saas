@@ -1,10 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { BookingForm } from '@/components/dashboard/booking-form';
 import { DriverFleetPanel } from '@/components/dashboard/driver-fleet-panel';
-import { GoogleMap, MarkerF } from '@react-google-maps/api';
 
 const MOCK_JOBS = [
     { id: 1, time: '09:00', driver: '38', phone: '07745223338', fare: '£45.00', type: 'PRE', pickup: '67 Wooburn Manor Park, Wooburn Green', dest: 'Heathrow Airport Terminal 5' },
@@ -35,6 +33,9 @@ export default function MockupTablePage() {
                 </div>
 
                 <div className="flex-1 overflow-auto p-4 bg-slate-100/50">
+                    <h2 className="text-xl font-bold mb-4">Mockup 1: Classic Dense Table</h2>
+                    <p className="text-sm text-slate-500 mb-6">This mockup mimics the density of classic systems like iCabbi. Every job is exactly one row.</p>
+                    
                     <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -63,40 +64,13 @@ export default function MockupTablePage() {
                             </tbody>
                         </table>
                     </div>
-
-                    <div className="mt-8">
-                        <h3 className="text-sm font-bold text-slate-400 mb-2">Alternative: Compact Horizontal Cards</h3>
-                        <div className="space-y-1">
-                            {MOCK_JOBS.map((job, idx) => (
-                                <div key={idx} className="flex items-center gap-3 bg-white border border-slate-200 p-2 rounded shadow-sm hover:border-blue-300 cursor-pointer">
-                                    <div className="w-12 text-center">
-                                        <div className="text-sm font-black text-blue-600">{job.time}</div>
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex items-center gap-2 text-xs">
-                                        <div className="font-bold text-emerald-600 truncate max-w-[150px]">{job.pickup}</div>
-                                        <span className="text-slate-300">→</span>
-                                        <div className="font-medium text-slate-600 truncate max-w-[150px]">{job.dest}</div>
-                                    </div>
-                                    <div className="w-24 text-xs text-slate-500 font-mono">{job.phone}</div>
-                                    <div className="w-16 text-right font-bold text-slate-800">{job.fare}</div>
-                                    <div className="w-10">
-                                        {job.driver ? (
-                                            <span className="bg-blue-600 text-white font-bold text-[10px] px-1.5 py-0.5 rounded">{job.driver}</span>
-                                        ) : (
-                                            <span className="bg-slate-200 text-slate-400 font-bold text-[10px] px-1.5 py-0.5 rounded">UNASS</span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
             </div>
 
             {/* COL 3: MAP & FLEET */}
             <div className="w-[450px] flex flex-col h-full bg-white z-20 shrink-0">
                 <div className="h-1/2 relative bg-slate-100 border-b border-slate-200 flex items-center justify-center text-slate-400 font-medium">
-                    Map Area
+                    Map Area (Mockup)
                 </div>
                 <div className="h-1/2 flex flex-col overflow-hidden bg-slate-50">
                     <DriverFleetPanel drivers={[]} vehicles={[]} onRefresh={() => {}} />
