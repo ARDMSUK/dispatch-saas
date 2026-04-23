@@ -17,12 +17,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
         const { id } = params;
         const body = await req.json();
-        const { name, role, password, permissions } = body;
+        const { name, role, password, permissions, sipExtension } = body;
 
         const updateData: any = {};
         if (name) updateData.name = name;
         if (role) updateData.role = role;
         if (permissions !== undefined) updateData.permissions = Array.isArray(permissions) ? permissions : [];
+        if (sipExtension !== undefined) updateData.sipExtension = sipExtension || null;
         if (password) {
             updateData.password = await hash(password, 12);
         }
@@ -38,6 +39,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
                 name: true,
                 email: true,
                 role: true,
+                sipExtension: true,
                 permissions: true
             }
         });

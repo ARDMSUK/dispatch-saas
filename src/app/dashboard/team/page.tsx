@@ -18,6 +18,7 @@ interface UserType {
     email: string;
     role: "ADMIN" | "DISPATCHER" | "SUPER_ADMIN";
     permissions?: string[];
+    sipExtension?: string | null;
     createdAt: string;
 }
 
@@ -44,11 +45,12 @@ export default function TeamPage() {
         email: "",
         password: "",
         role: "DISPATCHER" as "ADMIN" | "DISPATCHER",
-        permissions: [] as string[]
+        permissions: [] as string[],
+        sipExtension: ""
     });
 
     const resetForm = () => {
-        setFormData({ id: "", name: "", email: "", password: "", role: "DISPATCHER", permissions: [] });
+        setFormData({ id: "", name: "", email: "", password: "", role: "DISPATCHER", permissions: [], sipExtension: "" });
     };
 
     useEffect(() => {
@@ -111,7 +113,8 @@ export default function TeamPage() {
             email: user.email,
             password: "", // Don't show existing password
             role: user.role === 'SUPER_ADMIN' ? 'ADMIN' : user.role, // Fallback for UI
-            permissions: user.permissions || []
+            permissions: user.permissions || [],
+            sipExtension: user.sipExtension || ""
         });
         setIsDialogOpen(true);
     };
@@ -182,6 +185,17 @@ export default function TeamPage() {
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                     disabled={!!formData.id}
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-500">SIP Extension (Optional)</label>
+                                <Input
+                                    type="text"
+                                    placeholder="e.g. 1001"
+                                    className="bg-slate-200 border-slate-200"
+                                    value={formData.sipExtension}
+                                    onChange={e => setFormData({ ...formData, sipExtension: e.target.value })}
+                                />
+                                <p className="text-xs text-slate-400">Used to route calls from desk phones to this user.</p>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-500">Password {formData.id && "(Leave blank to keep existing)"}</label>
@@ -264,6 +278,7 @@ export default function TeamPage() {
                                     <div className="flex flex-col">
                                         <span className="font-medium text-slate-800">{user.name}</span>
                                         <span className="text-xs text-slate-400">{user.email}</span>
+                                        {user.sipExtension && <span className="text-xs text-blue-600 font-mono mt-0.5">Ext: {user.sipExtension}</span>}
                                     </div>
                                 </TableCell>
                                 <TableCell>
