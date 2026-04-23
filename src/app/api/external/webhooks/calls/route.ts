@@ -27,12 +27,14 @@ async function handleWebhook(req: Request) {
         let eventType = searchParams.get('event') || 'ringing';
         let phone: string | null = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
         let toPhone: string | null = searchParams.get('to') || searchParams.get('called');
+        let answeredByExt: string | null = null;
 
         if (req.method === 'POST') {
             try {
                 const body = await req.json();
                 phone = body.phone || body.caller || body.from || body.caller_id || phone;
                 toPhone = body.to || body.called || toPhone;
+                answeredByExt = body.answered_by ? String(body.answered_by) : null;
 
                 // Support Yay.com specific event types in the JSON payload
                 if (body.type) {
@@ -110,10 +112,10 @@ async function handleWebhook(req: Request) {
         if (eventType === 'answered') {
             await prisma.incomingCall.updateMany({
                 where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
-                data: { status: 'ANSWERED' }
+                data: { status: 'ANSWERED', answeredByExt }
             });
             revalidatePath('/api/dispatch/calls/active');
-            return NextResponse.json({ success: true, action: 'answered', phone: cleanPhone });
+            return NextResponse.json({ success: true, action: 'answered', phone: cleanPhone, answeredByExt });
         }
 
         if (eventType === 'hungup') {

@@ -9,6 +9,7 @@ interface IncomingCall {
     id: string;
     phone: string;
     status: string;
+    answeredByExt?: string | null;
     createdAt: string;
 }
 
@@ -29,7 +30,10 @@ export function CliPopListener() {
                     headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
                 });
                 if (res.ok) {
-                    const calls: IncomingCall[] = await res.json();
+                    const data = await res.json();
+                    // Backward compatibility with older array responses just in case
+                    const calls: IncomingCall[] = Array.isArray(data) ? data : (data.calls || []);
+                    const currentUserExt = data.currentUserExt || null;
 
                     if (calls.length > 0) {
                         // Find the oldest ringing/answered call that we HAVEN'T handled locally yet
@@ -37,22 +41,29 @@ export function CliPopListener() {
 
                         if (unhandledCall) {
                             if (unhandledCall.status === 'ANSWERED') {
-                                // If the backend tells us it was answered (e.g. they picked up the physical phone via Yay)
-                                // We auto-navigate to the booking screen and autofill the number!
+                                // If the backend tells us it was answered
                                 setActiveCall(null);
                                 handledCallIds.current.add(unhandledCall.id);
 
-                                // Best-effort name lookup for the redirect
-                                let finalName = "";
-                                try {
-                                    const custRes = await fetch("/api/customers/lookup?phone=" + encodeURIComponent(unhandledCall.phone));
-                                    if (custRes.ok) {
-                                        const data = await custRes.json();
-                                        if (data.found && data.customer?.name) finalName = data.customer.name;
-                                    }
-                                } catch (e) { }
+                                // Multi-Operator Hunt Group check
+                                const isMyCall = 
+                                    !unhandledCall.answeredByExt || 
+                                    !currentUserExt || 
+                                    unhandledCall.answeredByExt === currentUserExt;
 
-                                router.push(`/dashboard?phone=${encodeURIComponent(unhandledCall.phone)}&name=${encodeURIComponent(finalName)}`);
+                                if (isMyCall) {
+                                    // Best-effort name lookup for the redirect
+                                    let finalName = "";
+                                    try {
+                                        const custRes = await fetch("/api/customers/lookup?phone=" + encodeURIComponent(unhandledCall.phone));
+                                        if (custRes.ok) {
+                                            const custData = await custRes.json();
+                                            if (custData.found && custData.customer?.name) finalName = custData.customer.name;
+                                        }
+                                    } catch (e) { }
+
+                                    router.push(`/dashboard?phone=${encodeURIComponent(unhandledCall.phone)}&name=${encodeURIComponent(finalName)}`);
+                                }
                             } else {
                                 // It's still RINGING, show the popup
                                 if (activeCall?.id !== unhandledCall.id) {
@@ -62,9 +73,9 @@ export function CliPopListener() {
                                     try {
                                         const custRes = await fetch("/api/customers/lookup?phone=" + encodeURIComponent(unhandledCall.phone));
                                         if (custRes.ok) {
-                                            const data = await custRes.json();
-                                            if (data.found && data.customer?.name) {
-                                                setCustomerName(data.customer.name);
+                                            const custData = await custRes.json();
+                                            if (custData.found && custData.customer?.name) {
+                                                setCustomerName(custData.customer.name);
                                             } else {
                                                 setCustomerName(null);
                                             }

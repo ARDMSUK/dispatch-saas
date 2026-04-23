@@ -146,6 +146,7 @@ model User {
   name      String?
   role      String   @default("DISPATCHER") // SUPER_ADMIN, ADMIN, DISPATCHER, DRIVER, B2B_ADMIN
   permissions Json?  // e.g. ["view_reports", "view_pricing"]
+  sipExtension String?
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
@@ -482,6 +483,7 @@ model IncomingCall {
   id        String   @id @default(cuid())
   phone     String   // The caller's phone number
   status    String   @default("RINGING") // RINGING, ANSWERED, DISMISSED
+  answeredByExt String?
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])

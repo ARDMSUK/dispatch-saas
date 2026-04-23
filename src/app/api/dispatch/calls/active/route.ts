@@ -32,7 +32,16 @@ export async function GET(req: Request) {
             }
         });
 
-        return NextResponse.json(activeCalls, {
+        // Fetch current user's SIP extension
+        const user = session?.user?.email ? await prisma.user.findUnique({
+            where: { email: session.user.email },
+            select: { sipExtension: true }
+        }) : null;
+
+        return NextResponse.json({
+            calls: activeCalls,
+            currentUserExt: user?.sipExtension || null
+        }, {
             headers: {
                 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
                 'Pragma': 'no-cache',
