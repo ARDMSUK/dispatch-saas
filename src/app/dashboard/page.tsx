@@ -333,47 +333,44 @@ export default function DashboardPage() {
         />
     );
 
-    if (isClassicLayout) {
-        return (
-            <div className="h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-row font-sans overflow-hidden relative">
-                {/* COL 1: NEW BOOKING (Full Height) */}
-                <div className="w-full max-w-[100vw] lg:w-[380px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shrink-0">
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                        <BookingForm onJobCreated={triggerRefresh} />
-                    </div>
-                </div>
-
-                {/* COL 2: RIGHT SIDE (Fleet, Map, Jobs) */}
-                <div className="hidden lg:flex flex-1 h-full flex-col overflow-hidden bg-slate-100/50">
-                    {/* TOP HALF: FLEET & MAP */}
-                    <div className="flex w-full h-[45vh] border-b border-slate-200 shrink-0 bg-white">
-                        {/* FLEET MANAGEMENT */}
-                        <div className="w-[350px] border-r border-slate-200 bg-slate-50 h-full flex flex-col shrink-0 overflow-y-auto">
-                            {fleetComponent}
-                        </div>
-
-                        {/* MAP */}
-                        <div className="flex-1 bg-slate-100 relative">
-                            {mapComponent}
-                        </div>
-                    </div>
-
-                    {/* BOTTOM HALF: COMPACT CARDS LIST */}
-                    <div className="flex-1 relative z-10 flex flex-col overflow-hidden">
-                        <BookingManagerClassic
-                            onSelectJob={(j) => setSelectedJob(j)}
-                            selectedJobId={selectedJob?.id}
-                            refreshTrigger={refreshTrigger}
-                        />
-                    </div>
+    const classicView = (
+        <div className="hidden lg:flex h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex-row font-sans overflow-hidden relative">
+            {/* COL 1: NEW BOOKING (Full Height) */}
+            <div className="w-[380px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shrink-0">
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                    <BookingForm onJobCreated={triggerRefresh} />
                 </div>
             </div>
-        );
-    }
 
-    // Modern Layout (Default)
-    return (
-        <div className="h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden relative">
+            {/* COL 2: RIGHT SIDE (Fleet, Map, Jobs) */}
+            <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-100/50">
+                {/* TOP HALF: FLEET & MAP */}
+                <div className="flex w-full h-[45vh] border-b border-slate-200 shrink-0 bg-white">
+                    {/* FLEET MANAGEMENT */}
+                    <div className="w-[350px] border-r border-slate-200 bg-slate-50 h-full flex flex-col shrink-0 overflow-y-auto">
+                        {fleetComponent}
+                    </div>
+
+                    {/* MAP */}
+                    <div className="flex-1 bg-slate-100 relative">
+                        {mapComponent}
+                    </div>
+                </div>
+
+                {/* BOTTOM HALF: COMPACT CARDS LIST */}
+                <div className="flex-1 relative z-10 flex flex-col overflow-hidden">
+                    <BookingManagerClassic
+                        onSelectJob={(j) => setSelectedJob(j)}
+                        selectedJobId={selectedJob?.id}
+                        refreshTrigger={refreshTrigger}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+
+    const modernView = (
+        <div className={`h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans overflow-x-hidden overflow-y-auto lg:overflow-hidden relative ${isClassicLayout ? 'lg:hidden' : ''}`}>
 
             {/* 3-COLUMN LAYOUT */}
 
@@ -411,5 +408,12 @@ export default function DashboardPage() {
 
             </div>
         </div>
+    );
+
+    return (
+        <>
+            {isClassicLayout && classicView}
+            {modernView}
+        </>
     );
 }
