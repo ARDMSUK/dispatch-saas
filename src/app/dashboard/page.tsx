@@ -173,6 +173,7 @@ export default function DashboardPage() {
 
     // Map Search
     const [mapSearchTerm, setMapSearchTerm] = useState('');
+    const [trackingDriverId, setTrackingDriverId] = useState<string | null>(null);
 
     const handleSearchMap = () => {
         if (!map || !mapSearchTerm) return;
