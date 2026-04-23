@@ -650,14 +650,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {/* Pickup */}
                     <div className="relative group z-50">
                         <div className="absolute left-3 top-3 text-emerald-500"><Navigation className="h-4 w-4" /></div>
-                        <LocationInput placeholder="Pickup Location (e.g. Heathrow T5)" className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
+                        <LocationInput placeholder="Pickup Location (e.g. Heathrow T5)" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
                     </div>
                     {/* Vias */}
                     {vias.map((via, index) => (
                         <div key={index} className="relative group flex gap-2">
                             <div className="relative flex-1">
                                 <div className="absolute left-3 top-3 text-slate-400"><MapPin className="h-4 w-4" /></div>
-                                <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
+                                <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
                             </div>
                             <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-slate-200" onClick={() => removeVia(index)}><X className="h-4 w-4" /></Button>
                         </div>
@@ -666,7 +666,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {/* Dropoff */}
                     <div className="relative group z-40">
                         <div className="absolute left-3 top-3 text-blue-700"><MapPin className="h-4 w-4" /></div>
-                        <LocationInput placeholder="Destination" className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
+                        <LocationInput placeholder="Destination" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
                     </div>
                     {/* Flight */}
                     {showFlightInput && (
