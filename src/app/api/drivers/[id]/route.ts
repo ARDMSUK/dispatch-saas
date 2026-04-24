@@ -14,6 +14,7 @@ const UpdateDriverSchema = z.object({
     badgeNumber: z.string().optional().or(z.literal('')),
     licenseExpiry: z.string().datetime().optional().or(z.literal('')), // ISO string
     pin: z.string().optional().or(z.literal('')),
+    commissionRate: z.number().optional()
 });
 
 export async function PATCH(
@@ -44,7 +45,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
         }
 
-        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin } = validation.data;
+        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin, commissionRate } = validation.data;
 
         // specific check for callsign uniqueness if it's being updated
         if (callsign && callsign !== existingDriver.callsign) {
@@ -65,7 +66,8 @@ export async function PATCH(
                 email,
                 badgeNumber,
                 licenseExpiry,
-                pin
+                pin,
+                commissionRate
             }
         });
 

@@ -32,7 +32,8 @@ export default function DriversPage() {
         email: "",
         badgeNumber: "",
         licenseExpiry: "",
-        pin: ""
+        pin: "",
+        commissionRate: 20
     });
 
     const fetchDrivers = async () => {
@@ -60,7 +61,7 @@ export default function DriversPage() {
     }, []);
 
     const resetForm = () => {
-        setFormData({ name: "", callsign: "", phone: "", email: "", badgeNumber: "", licenseExpiry: "", pin: "" });
+        setFormData({ name: "", callsign: "", phone: "", email: "", badgeNumber: "", licenseExpiry: "", pin: "", commissionRate: 20 });
         setEditingId(null);
     };
 
@@ -102,7 +103,8 @@ export default function DriversPage() {
             email: driver.email || "",
             badgeNumber: driver.badgeNumber || "",
             licenseExpiry: driver.licenseExpiry || "",
-            pin: driver.pin || ""
+            pin: driver.pin || "",
+            commissionRate: driver.commissionRate || 20
         });
         setIsDialogOpen(true);
     };
@@ -194,12 +196,21 @@ export default function DriversPage() {
                                         />
                                     </div>
                                 </div>
-                                <Input
-                                    placeholder="Login PIN (4 digits)"
-                                    value={formData.pin}
-                                    onChange={e => setFormData({ ...formData, pin: e.target.value })}
-                                    className="bg-white border-slate-200"
-                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        placeholder="Login PIN (4 digits)"
+                                        value={formData.pin}
+                                        onChange={e => setFormData({ ...formData, pin: e.target.value })}
+                                        className="bg-white border-slate-200"
+                                    />
+                                    <Input
+                                        type="number"
+                                        placeholder="Commission Rate (%)"
+                                        value={formData.commissionRate}
+                                        onChange={e => setFormData({ ...formData, commissionRate: parseFloat(e.target.value) })}
+                                        className="bg-white border-slate-200"
+                                    />
+                                </div>
                                 <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-600">
                                     {editingId ? 'Update Driver' : 'Create Driver'}
                                 </Button>

@@ -35,7 +35,8 @@ export async function GET(req: Request) {
             },
             include: {
                 driver: true,
-                account: true
+                account: true,
+                tenant: true
             }
         });
 
@@ -77,17 +78,55 @@ export async function GET(req: Request) {
 
         const timeSeries = Array.from(timeSeriesMap.values());
 
-        // 4. Driver Leaderboard
-        const driverMap = new Map<string, { driverId: string, name: string, callsign: string, revenue: number, jobs: number }>();
+        // 4. Driver Earnings & Settlements
+        const driverMap = new Map<string, any>();
         completedJobs.forEach(job => {
             if (job.driverId && job.driver) {
-                const metrics = driverMap.get(job.driverId) || { driverId: job.driverId, name: job.driver.name, callsign: job.driver.callsign, revenue: 0, jobs: 0 };
-                metrics.revenue += (job.fare || 0);
+                const metrics = driverMap.get(job.driverId) || { 
+                    driverId: job.driverId, 
+                    name: job.driver.name, 
+                    callsign: job.driver.callsign, 
+                    revenue: 0, 
+                    jobs: 0,
+                    commissionRate: job.driver.commissionRate || 20,
+                    platformFee: 0,
+                    netEarnings: 0,
+                    cashCollected: 0,
+                    driverCardCollected: 0,
+                    tenantCardCollected: 0,
+                    settlementBalance: 0
+                };
+
+                const fare = job.fare || 0;
+                metrics.revenue += fare;
                 metrics.jobs += 1;
+                
+                const fee = fare * (metrics.commissionRate / 100);
+                metrics.platformFee += fee;
+                metrics.netEarnings += (fare - fee);
+
+                if (job.paymentType === 'CASH') {
+                    metrics.cashCollected += fare;
+                } else if (job.paymentType === 'CARD') {
+                    if (job.paymentProvider === 'STRIPE' || job.tenant?.paymentRouting === 'CENTRAL') {
+                        metrics.tenantCardCollected += fare;
+                    } else if (job.tenant?.paymentRouting === 'DRIVER') {
+                        metrics.driverCardCollected += fare;
+                    } else {
+                        // Fallback to central
+                        metrics.tenantCardCollected += fare;
+                    }
+                }
+
                 driverMap.set(job.driverId, metrics);
             }
         });
-        const driverPerformance = Array.from(driverMap.values()).sort((a, b) => b.revenue - a.revenue);
+
+        // Calculate final settlement balance: Net Earnings - (Cash + Driver Card)
+        const driverPerformance = Array.from(driverMap.values()).map(m => {
+            m.settlementBalance = m.netEarnings - (m.cashCollected + m.driverCardCollected);
+            return m;
+        }).sort((a, b) => b.revenue - a.revenue);
 
         // 5. Account Leaderboard
         const accountMap = new Map<string, { accountId: string, name: string, code: string, revenue: number, jobs: number }>();

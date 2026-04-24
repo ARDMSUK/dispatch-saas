@@ -21,7 +21,7 @@ interface ReportData {
         totalWaitRevenue: number;
     };
     timeSeries: Array<{ date: string; revenue: number; jobs: number }>;
-    driverPerformance: Array<{ driverId: string; name: string; callsign: string; revenue: number; jobs: number }>;
+    driverPerformance: Array<{ driverId: string; name: string; callsign: string; revenue: number; jobs: number; platformFee: number; netEarnings: number; cashCollected: number; settlementBalance: number }>;
     accountPerformance: Array<{ accountId: string; name: string; code: string; revenue: number; jobs: number }>;
     shiftData: Array<{ hour: number; label: string; jobs: number }>;
     meta: {
@@ -189,7 +189,7 @@ export default function ReportsPage() {
                                 <TrendingUp className="w-4 h-4 mr-2" /> Revenue Overview
                             </TabsTrigger>
                             <TabsTrigger value="drivers" className="py-2 px-6 data-[state=active]:bg-white shadow-sm border border-slate-200 data-[state=active]:text-slate-900 text-slate-500 font-medium">
-                                <Users className="w-4 h-4 mr-2" /> Driver Performance
+                                <Users className="w-4 h-4 mr-2" /> Driver Earnings & Settlements
                             </TabsTrigger>
                             <TabsTrigger value="accounts" className="py-2 px-6 data-[state=active]:bg-white shadow-sm border border-slate-200 data-[state=active]:text-slate-900 text-slate-500 font-medium">
                                 <Building2 className="w-4 h-4 mr-2" /> Account Billing
@@ -267,27 +267,44 @@ export default function ReportsPage() {
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-slate-100 sticky top-0">
                                             <tr>
-                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">Rank</th>
-                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">Driver Name</th>
-                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">Callsign</th>
-                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Completed Jobs</th>
-                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Total Generated</th>
-                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Avg / Job</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200">Driver</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Jobs</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Gross Fares</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Platform Fee</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Net Earnings</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Cash Held</th>
+                                                <th className="py-3 px-4 font-bold text-xs uppercase tracking-wider text-slate-500 border-b border-slate-200 text-right">Settlement Balance</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {data.driverPerformance.map((driver, idx) => (
+                                            {data.driverPerformance.map((driver) => (
                                                 <tr key={driver.driverId} className="border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors">
-                                                    <td className="py-4 px-4 font-mono text-slate-400">#{idx + 1}</td>
-                                                    <td className="py-4 px-4 font-bold text-slate-900">{driver.name}</td>
-                                                    <td className="py-4 px-4 text-slate-500"><span className="bg-slate-200 px-2 py-0.5 rounded text-xs">{driver.callsign}</span></td>
+                                                    <td className="py-4 px-4">
+                                                        <div className="font-bold text-slate-900">{driver.name}</div>
+                                                        <div className="text-xs text-slate-500 mt-1"><span className="bg-slate-200 px-1 py-0.5 rounded">{driver.callsign}</span></div>
+                                                    </td>
                                                     <td className="py-4 px-4 text-right text-indigo-300 font-medium">{driver.jobs}</td>
-                                                    <td className="py-4 px-4 text-right font-bold text-emerald-600">£{driver.revenue.toFixed(2)}</td>
-                                                    <td className="py-4 px-4 text-right text-slate-500 text-sm">£{(driver.revenue / driver.jobs).toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right font-medium text-slate-600">£{driver.revenue.toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right text-rose-500 text-sm">-£{driver.platformFee.toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right font-bold text-emerald-600">£{driver.netEarnings.toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right text-amber-600 font-medium">£{driver.cashCollected.toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right">
+                                                        {driver.settlementBalance > 0 ? (
+                                                            <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-sm font-bold border border-emerald-200">
+                                                                Due: £{driver.settlementBalance.toFixed(2)}
+                                                            </span>
+                                                        ) : driver.settlementBalance < 0 ? (
+                                                            <span className="bg-rose-100 text-rose-800 px-2 py-1 rounded text-sm font-bold border border-rose-200">
+                                                                Owes: £{Math.abs(driver.settlementBalance).toFixed(2)}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-slate-400 font-medium">Settled (0.00)</span>
+                                                        )}
+                                                    </td>
                                                 </tr>
                                             ))}
                                             {data.driverPerformance.length === 0 && (
-                                                <tr><td colSpan={6} className="text-center py-10 text-slate-400">No driver data for this period.</td></tr>
+                                                <tr><td colSpan={7} className="text-center py-10 text-slate-400">No driver data for this period.</td></tr>
                                             )}
                                         </tbody>
                                     </table>

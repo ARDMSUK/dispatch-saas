@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin } = body;
+        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin, commissionRate } = body;
 
         if (!name || !callsign || !phone) {
             return NextResponse.json({ error: "Missing required fields (Name, Callsign, Phone)" }, { status: 400 });
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
                 badgeNumber,
                 licenseExpiry: licenseExpiry ? new Date(licenseExpiry) : null,
                 pin,
+                commissionRate: commissionRate !== undefined ? commissionRate : 20.0,
                 tenantId: session.user.tenantId,
                 status: 'OFF_DUTY',
             }

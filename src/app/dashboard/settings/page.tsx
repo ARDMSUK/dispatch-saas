@@ -52,6 +52,7 @@ export default function SettingsPage() {
     // Integrations State
     const [stripePublishableKey, setStripePublishableKey] = useState('');
     const [stripeSecretKey, setStripeSecretKey] = useState('');
+    const [paymentRouting, setPaymentRouting] = useState('CENTRAL');
 
     // Initial Data
     const [slug, setSlug] = useState('');
@@ -122,6 +123,7 @@ export default function SettingsPage() {
                 // Load Integrations
                 setStripePublishableKey(data.stripePublishableKey || '');
                 setStripeSecretKey(data.stripeSecretKey || '');
+                setPaymentRouting(data.paymentRouting || 'CENTRAL');
             }
         } catch (error) {
             console.error(error);
@@ -180,7 +182,8 @@ export default function SettingsPage() {
                     smsTemplateDriverArrived,
                     twilioFromNumber,
                     stripePublishableKey,
-                    stripeSecretKey
+                    stripeSecretKey,
+                    paymentRouting
                 })
             });
 
@@ -671,6 +674,7 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                     <p className="text-sm text-slate-500">
                         Connect your Stripe account to process in-app payments from the Customer App and Web Booker.
+                        For in-car terminal payments, connect your SumUp or Zettle account.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -698,6 +702,60 @@ export default function SettingsPage() {
                             <p className="text-xs text-slate-400 mt-2">
                                 Used by our backend to process charges securely. Will be encrypted.
                             </p>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-6 mt-6">
+                        <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center gap-2">📱 In-Car Terminals</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between gap-2">
+                                <div>
+                                    <Label className="text-slate-900 font-bold block mb-1">SumUp</Label>
+                                    <p className="text-xs text-slate-500">Process payments using your SumUp Air card reader via the driver app.</p>
+                                </div>
+                                <Button 
+                                    onClick={() => window.location.href = '/api/integrations/sumup/connect'}
+                                    className="bg-blue-600 hover:bg-blue-700 mt-2 w-full"
+                                    disabled={paymentRouting === 'DRIVER'}
+                                >
+                                    Connect SumUp
+                                </Button>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between gap-2">
+                                <div>
+                                    <Label className="text-slate-900 font-bold block mb-1">Zettle</Label>
+                                    <p className="text-xs text-slate-500">Process payments using your Zettle card reader via the driver app.</p>
+                                </div>
+                                <Button 
+                                    onClick={() => window.location.href = '/api/integrations/zettle/connect'}
+                                    className="bg-[#00c8a5] hover:bg-[#009c82] mt-2 text-white w-full"
+                                    disabled={paymentRouting === 'DRIVER'}
+                                >
+                                    Connect Zettle
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 bg-slate-100 p-4 rounded-lg border border-slate-200">
+                            <Label className="text-slate-600 font-medium">Payment Routing Configuration</Label>
+                            <p className="text-xs text-slate-400 mb-3">
+                                Decide whose accounts are used for in-car terminal payments and remote payment links.
+                            </p>
+                            <Select value={paymentRouting} onValueChange={setPaymentRouting}>
+                                <SelectTrigger className="w-full bg-white border-slate-200 text-slate-900">
+                                    <SelectValue placeholder="Select Routing Method" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white border-slate-200 text-slate-900">
+                                    <SelectItem value="CENTRAL">
+                                        <span className="font-medium">Central Account (Company)</span>
+                                        <p className="text-xs text-slate-500 mt-1">Payments are processed through the company's central SumUp/Zettle accounts.</p>
+                                    </SelectItem>
+                                    <SelectItem value="DRIVER">
+                                        <span className="font-medium">Driver Accounts (Individual)</span>
+                                        <p className="text-xs text-slate-500 mt-1">Drivers will connect their own accounts in the Driver App to process payments directly.</p>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>

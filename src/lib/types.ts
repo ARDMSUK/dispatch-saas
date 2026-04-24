@@ -40,6 +40,7 @@ export interface Driver {
     location?: string | null; // JSON
     vehicles?: Vehicle[];
     tenantId: string;
+    commissionRate?: number;
 }
 
 export interface Account {

@@ -58,6 +58,14 @@ model Tenant {
   // Integrations (Encrypted/Stored secure in prod, text for now)
   stripeSecretKey      String?
   stripePublishableKey String?
+  sumupAccessToken     String?
+  sumupRefreshToken    String?
+  sumupTokenExpiry     DateTime?
+  zettleAccessToken    String?
+  zettleRefreshToken   String?
+  zettleTokenExpiry    DateTime?
+
+  paymentRouting       String  @default("CENTRAL") // CENTRAL or DRIVER
 
   twilioAccountSid   String?
   twilioAuthToken    String?
@@ -257,6 +265,9 @@ model Driver {
 
   status String @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
 
+  // Commission (percentage tenant takes)
+  commissionRate Float @default(20.0)
+
   // Real-time tracking
   currentLat         Float?
   currentLng         Float?
@@ -271,6 +282,14 @@ model Driver {
 
   // Queue Position
   zoneQueues ZoneQueue[]
+
+  // Integrations (Driver-level terminals)
+  sumupAccessToken     String?
+  sumupRefreshToken    String?
+  sumupTokenExpiry     DateTime?
+  zettleAccessToken    String?
+  zettleRefreshToken   String?
+  zettleTokenExpiry    DateTime?
 
   expoPushToken String?
 
@@ -347,6 +366,9 @@ model Job {
   fare                  Float? // Quoted/Final Fare
   paymentType           String  @default("CASH") // CASH, CARD, ACCOUNT
   paymentStatus         String  @default("UNPAID") // UNPAID, AUTHORIZED, PAID, REFUNDED
+  paymentProvider       String? // STRIPE, SUMUP, ZETTLE
+  paymentReferenceId    String? // Transaction ID from provider
+  paymentLink           String? // Remote payment link URL
   stripePaymentIntentId String?
   stripeClientSecret    String?
   isFixedPrice          Boolean @default(false)
