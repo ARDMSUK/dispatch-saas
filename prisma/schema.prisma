@@ -113,6 +113,7 @@ model Tenant {
   invoices         Invoice[]
   tickets          Ticket[]
   whatsappSessions WhatsappSession[]
+  documents        Document[]
 
   @@map("companies")
   @@schema("public")
@@ -293,6 +294,12 @@ model Driver {
 
   expoPushToken String?
 
+  documents Document[]
+
+  // Compliance Override
+  complianceOverrideActive Boolean @default(false)
+  complianceOverrideReason String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -315,6 +322,8 @@ model Vehicle {
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  documents Document[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -614,5 +623,29 @@ model WhatsappSession {
 
   @@unique([tenantId, userPhone])
   @@map("whatsapp_sessions")
+  @@schema("public")
+}
+
+model Document {
+  id         String    @id @default(cuid())
+  type       String    // e.g. DRIVING_LICENSE, PCO_BADGE, MOT, INSURANCE
+  fileUrl    String?
+  expiryDate DateTime?
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED, EXPIRED
+  notes      String?
+
+  tenantId   String
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+
+  driverId   String?
+  driver     Driver?   @relation(fields: [driverId], references: [id])
+
+  vehicleId  String?
+  vehicle    Vehicle?  @relation(fields: [vehicleId], references: [id])
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("documents")
   @@schema("public")
 }

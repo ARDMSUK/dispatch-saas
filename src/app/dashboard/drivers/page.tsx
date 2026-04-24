@@ -7,14 +7,15 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Driver } from "@/lib/types";
-import { Plus, Search, Car, Pencil, Trash2, X, MoreHorizontal, Power, CheckCircle, Clock } from "lucide-react";
+import { Driver, Document } from "@/lib/types";
+import { Plus, Search, Car, Pencil, Trash2, X, MoreHorizontal, Power, CheckCircle, Clock, FileText, Upload } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function DriversPage() {
@@ -33,7 +34,9 @@ export default function DriversPage() {
         badgeNumber: "",
         licenseExpiry: "",
         pin: "",
-        commissionRate: 20
+        commissionRate: 20,
+        complianceOverrideActive: false,
+        complianceOverrideReason: ""
     });
 
     const fetchDrivers = async () => {
@@ -61,7 +64,7 @@ export default function DriversPage() {
     }, []);
 
     const resetForm = () => {
-        setFormData({ name: "", callsign: "", phone: "", email: "", badgeNumber: "", licenseExpiry: "", pin: "", commissionRate: 20 });
+        setFormData({ name: "", callsign: "", phone: "", email: "", badgeNumber: "", licenseExpiry: "", pin: "", commissionRate: 20, complianceOverrideActive: false, complianceOverrideReason: "" });
         setEditingId(null);
     };
 
@@ -104,7 +107,9 @@ export default function DriversPage() {
             badgeNumber: driver.badgeNumber || "",
             licenseExpiry: driver.licenseExpiry || "",
             pin: driver.pin || "",
-            commissionRate: driver.commissionRate || 20
+            commissionRate: driver.commissionRate || 20,
+            complianceOverrideActive: driver.complianceOverrideActive || false,
+            complianceOverrideReason: driver.complianceOverrideReason || ""
         });
         setIsDialogOpen(true);
     };
@@ -146,11 +151,16 @@ export default function DriversPage() {
                                 <Plus className="mr-2 h-4 w-4" /> Add Driver
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
+                        <DialogContent className="bg-slate-100 border-slate-200 text-slate-900 max-w-2xl">
                             <DialogHeader>
                                 <DialogTitle>{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4">
+                            <Tabs defaultValue="profile" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="profile">Profile</TabsTrigger>
+                                    <TabsTrigger value="documents" disabled={!editingId}>Compliance</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="profile" className="grid gap-4 py-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         placeholder="Callsign (e.g. 101)"
@@ -211,10 +221,36 @@ export default function DriversPage() {
                                         className="bg-white border-slate-200"
                                     />
                                 </div>
+                                {isAdmin && (
+                                    <div className="p-3 border border-red-200 bg-red-50 rounded-md flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                id="complianceOverride"
+                                                checked={formData.complianceOverrideActive}
+                                                onChange={e => setFormData({ ...formData, complianceOverrideActive: e.target.checked })}
+                                                className="w-4 h-4 cursor-pointer accent-red-600"
+                                            />
+                                            <label htmlFor="complianceOverride" className="text-sm font-bold text-red-700 cursor-pointer">Administrative Compliance Override</label>
+                                        </div>
+                                        {formData.complianceOverrideActive && (
+                                            <Input
+                                                placeholder="Reason for Override (Optional)"
+                                                value={formData.complianceOverrideReason}
+                                                onChange={e => setFormData({ ...formData, complianceOverrideReason: e.target.value })}
+                                                className="bg-white border-red-200"
+                                            />
+                                        )}
+                                    </div>
+                                )}
                                 <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-600">
                                     {editingId ? 'Update Driver' : 'Create Driver'}
                                 </Button>
-                            </div>
+                            </TabsContent>
+                            <TabsContent value="documents">
+                                {editingId && <DriverDocuments driverId={editingId} />}
+                            </TabsContent>
+                            </Tabs>
                         </DialogContent>
                     </Dialog>
                 )}
@@ -348,5 +384,111 @@ function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () =
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
+    );
+}
+
+function DriverDocuments({ driverId }: { driverId: string }) {
+    const [documents, setDocuments] = useState<Document[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [type, setType] = useState('DRIVING_LICENSE');
+    const [file, setFile] = useState<File | null>(null);
+    const [expiryDate, setExpiryDate] = useState('');
+    const [uploading, setUploading] = useState(false);
+
+    const fetchDocs = async () => {
+        try {
+            const res = await fetch(`/api/documents?driverId=${driverId}`);
+            if (res.ok) {
+                setDocuments(await res.json());
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchDocs(); }, [driverId]);
+
+    const handleUpload = async () => {
+        if (!file) return alert("Please select a file");
+        setUploading(true);
+        try {
+            const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                method: 'POST',
+                body: file,
+            });
+            const blob = await response.json();
+            if (blob.error) throw new Error(blob.error);
+
+            const res = await fetch('/api/documents', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, fileUrl: blob.url, expiryDate, driverId })
+            });
+            if (res.ok) {
+                setFile(null);
+                setExpiryDate('');
+                const fileInput = document.getElementById('fileUploadInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+                fetchDocs();
+            }
+        } catch (e: any) {
+            console.error(e);
+            alert("Upload failed: " + e.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="py-4 flex flex-col gap-4">
+            <div className="bg-white p-3 rounded border border-slate-200 flex gap-2 items-end">
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">Doc Type</label>
+                    <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm">
+                        <option value="DRIVING_LICENSE">Driving License</option>
+                        <option value="PCO_BADGE">PCO Badge</option>
+                        <option value="INSURANCE">Insurance</option>
+                    </select>
+                </div>
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">File</label>
+                    <Input id="fileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-white text-xs pt-2 border-slate-200 cursor-pointer" />
+                </div>
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">Expiry</label>
+                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} />
+                </div>
+                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-slate-900 text-white min-w-[100px]">
+                    {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Add</>}
+                </Button>
+            </div>
+            
+            <div className="border border-slate-200 rounded overflow-hidden">
+                <Table>
+                    <TableHeader className="bg-slate-50">
+                        <TableRow>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Expiry</TableHead>
+                            <TableHead>File</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="bg-white">
+                        {loading ? <TableRow><TableCell colSpan={4} className="text-center text-slate-400">Loading...</TableCell></TableRow> :
+                         documents.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-slate-400">No documents found</TableCell></TableRow> :
+                         documents.map(doc => (
+                             <TableRow key={doc.id}>
+                                 <TableCell className="font-medium">{doc.type.replace('_', ' ')}</TableCell>
+                                 <TableCell><Badge variant="outline">{doc.status}</Badge></TableCell>
+                                 <TableCell>{doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}</TableCell>
+                                 <TableCell>{doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline">View</a> : '-'}</TableCell>
+                             </TableRow>
+                         ))}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
     );
 }

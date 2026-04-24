@@ -41,6 +41,8 @@ export interface Driver {
     vehicles?: Vehicle[];
     tenantId: string;
     commissionRate?: number;
+    complianceOverrideActive?: boolean;
+    complianceOverrideReason?: string | null;
 }
 
 export interface Account {
@@ -166,6 +168,21 @@ export interface Job {
     driver?: Driver | null;
     accountId?: string | null;
     account?: Account | null;
-    customer?: Customer | null;
+}
+
+export interface Document {
+    id: string;
+    type: string;
+    fileUrl?: string | null;
+    expiryDate?: string | null;
+    status: "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED" | string;
+    notes?: string | null;
+    tenantId: string;
+    driverId?: string | null;
+    driver?: Driver | null;
+    vehicleId?: string | null;
+    vehicle?: Vehicle | null;
+    createdAt: string;
+    updatedAt: string;
 }
 

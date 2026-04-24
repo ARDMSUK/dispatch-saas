@@ -57,6 +57,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                         <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
                         <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
                         <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
+                        <NavItem href="/dashboard/compliance" icon={FileText} label="Compliance" />
 
                         <div className="my-2 border-t border-slate-200"></div>
                         <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />

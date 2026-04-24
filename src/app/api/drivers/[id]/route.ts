@@ -14,7 +14,9 @@ const UpdateDriverSchema = z.object({
     badgeNumber: z.string().optional().or(z.literal('')),
     licenseExpiry: z.string().datetime().optional().or(z.literal('')), // ISO string
     pin: z.string().optional().or(z.literal('')),
-    commissionRate: z.number().optional()
+    commissionRate: z.number().optional(),
+    complianceOverrideActive: z.boolean().optional(),
+    complianceOverrideReason: z.string().optional().nullable()
 });
 
 export async function PATCH(
@@ -45,7 +47,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
         }
 
-        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin, commissionRate } = validation.data;
+        const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin, commissionRate, complianceOverrideActive, complianceOverrideReason } = validation.data;
 
         // specific check for callsign uniqueness if it's being updated
         if (callsign && callsign !== existingDriver.callsign) {
@@ -57,18 +59,29 @@ export async function PATCH(
             }
         }
 
+        const dataToUpdate: any = {
+            name,
+            callsign,
+            phone,
+            email,
+            badgeNumber,
+            licenseExpiry,
+            pin,
+            commissionRate
+        };
+
+        if (complianceOverrideActive !== undefined) {
+            if (session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN') {
+                dataToUpdate.complianceOverrideActive = complianceOverrideActive;
+                dataToUpdate.complianceOverrideReason = complianceOverrideReason;
+            } else {
+                return NextResponse.json({ error: 'Forbidden: Only admins can override compliance' }, { status: 403 });
+            }
+        }
+
         const updatedDriver = await prisma.driver.update({
             where: { id },
-            data: {
-                name,
-                callsign,
-                phone,
-                email,
-                badgeNumber,
-                licenseExpiry,
-                pin,
-                commissionRate
-            }
+            data: dataToUpdate
         });
 
         return NextResponse.json(updatedDriver);
