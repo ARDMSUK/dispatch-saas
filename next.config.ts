@@ -1,20 +1,26 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+});
 
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    outputFileTracingExcludes: {
-      '/api/**/*': [
-        'node_modules/@swc/core',
-        'node_modules/typescript',
-        'node_modules/prettier',
-        'node_modules/@types',
-        'node_modules/leaflet'
-      ]
-    }
+  turbopack: {},
+  outputFileTracingExcludes: {
+    '/api/**/*': [
+      'node_modules/@swc/core',
+      'node_modules/typescript',
+      'node_modules/prettier',
+      'node_modules/@types',
+      'node_modules/leaflet'
+    ]
   },
+  experimental: {},
   async headers() {
     return [
       {
@@ -51,4 +57,4 @@ const nextConfig: NextConfig = {
   }
 } as any;
 
-export default nextConfig;
+export default withPWA(nextConfig);
