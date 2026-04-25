@@ -131,6 +131,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p>&copy; {new Date().getFullYear()} CABAI Platform. Tenant Portal.</p>
           <div className="flex gap-4">
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             <Link href="/login" className="hover:text-white transition-colors">Support</Link>
             <Link href="/login" className="hover:text-white transition-colors">Billing</Link>
           </div>
