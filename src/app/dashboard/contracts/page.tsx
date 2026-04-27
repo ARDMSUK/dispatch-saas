@@ -1,12 +1,11 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Building2, MapPin, Users, AlertCircle } from "lucide-react";
 
 export default async function SchoolContractsPage() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user) {
         redirect("/login");
     }
@@ -39,11 +38,11 @@ export default async function SchoolContractsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <div className="text-slate-500 text-sm font-medium mb-1">Active Contracts</div>
-                    <div className="text-2xl font-bold text-slate-900">{contracts.filter(c => c.status === 'ACTIVE').length}</div>
+                    <div className="text-2xl font-bold text-slate-900">{contracts.filter((c: any) => c.status === 'ACTIVE').length}</div>
                 </div>
                 <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <div className="text-slate-500 text-sm font-medium mb-1">Total Routes</div>
-                    <div className="text-2xl font-bold text-slate-900">{contracts.reduce((acc, c) => acc + c.routes.length, 0)}</div>
+                    <div className="text-2xl font-bold text-slate-900">{contracts.reduce((acc: number, c: any) => acc + c.routes.length, 0)}</div>
                 </div>
                 <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <div className="text-slate-500 text-sm font-medium mb-1">Compliance Alerts</div>
@@ -82,7 +81,7 @@ export default async function SchoolContractsPage() {
                             </Button>
                         </div>
                     ) : (
-                        contracts.map(contract => (
+                        contracts.map((contract: any) => (
                             <div key={contract.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer group">
                                 <div className="flex gap-4 items-center">
                                     <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
