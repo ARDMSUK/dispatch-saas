@@ -14,17 +14,38 @@ export async function GET(req: Request) {
         const tenantId = session.user.tenantId;
         const { searchParams } = new URL(req.url);
         const accountId = searchParams.get("accountId");
+        const contractId = searchParams.get("contractId");
+        const startDate = searchParams.get("startDate");
+        const endDate = searchParams.get("endDate");
 
-        if (!accountId) {
-            return NextResponse.json({ error: 'Missing accountId parameter' }, { status: 400 });
+        if (!accountId && !contractId) {
+            return NextResponse.json({ error: 'Missing accountId or contractId parameter' }, { status: 400 });
+        }
+
+        const whereClause: any = {
+            tenantId,
+            status: 'COMPLETED',
+            isBilled: false
+        };
+
+        if (accountId) whereClause.accountId = accountId;
+        if (contractId) {
+            // Need to filter jobs that belong to a specific contract
+            // A Job is linked to a contractRoute, which is linked to a contract
+            whereClause.contractRoute = { contractId: contractId };
+        }
+
+        if (startDate && endDate) {
+            whereClause.pickupTime = {
+                gte: new Date(startDate),
+                lte: new Date(endDate)
+            };
         }
 
         const unbilledJobs = await prisma.job.findMany({
-            where: {
-                tenantId,
-                accountId,
-                status: 'COMPLETED',
-                isBilled: false
+            where: whereClause,
+            include: {
+                contractRoute: true
             },
             orderBy: {
                 pickupTime: 'asc'

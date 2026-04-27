@@ -29,9 +29,14 @@ export default async function SchoolContractsPage() {
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">School Contracts</h1>
                     <p className="text-slate-500 mt-1">Manage Local Authority SEN transport and home-to-school routes.</p>
                 </div>
-                <Button className="bg-blue-700 hover:bg-blue-800 text-white shadow-md">
-                    <Plus className="mr-2 h-4 w-4" /> New Contract
-                </Button>
+                <div className="flex items-center gap-3">
+                    <Button variant="outline" className="border-indigo-200 text-indigo-700 bg-indigo-50" asChild>
+                        <a href="/dashboard/contracts/billing">Billing Engine</a>
+                    </Button>
+                    <Button className="bg-blue-700 hover:bg-blue-800 text-white shadow-md">
+                        <Plus className="mr-2 h-4 w-4" /> New Contract
+                    </Button>
+                </div>
             </div>
 
             {/* Quick Stats */}

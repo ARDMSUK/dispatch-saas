@@ -25,9 +25,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             include: {
                 tenant: true,
                 account: true,
+                contract: true,
                 jobs: {
                     orderBy: {
                         pickupTime: 'asc'
+                    },
+                    include: {
+                        contractRoute: true
                     }
                 }
             }

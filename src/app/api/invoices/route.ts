@@ -15,25 +15,32 @@ export async function POST(req: Request) {
         const tenantId = session.user.tenantId;
         const body = await req.json();
 
-        const { accountId, jobIds, dueDate, notes, taxRate = 0.20 } = body;
+        const { accountId, jobIds, dueDate, notes, taxRate = 0.20, contractId, invoicePeriodStart, invoicePeriodEnd } = body;
 
         if (!accountId || !jobIds || !Array.isArray(jobIds) || jobIds.length === 0) {
             return NextResponse.json({ error: 'Invalid payload: Requires accountId and a non-empty array of jobIds' }, { status: 400 });
         }
 
-        // 1. Verify all jobs belong to this tenant, account, and are unbilled & completed
+        const whereClause: any = {
+            id: { in: jobIds },
+            tenantId,
+            status: 'COMPLETED',
+            isBilled: false
+        };
+
+        if (contractId) {
+            whereClause.contractRoute = { contractId: contractId };
+        } else {
+            whereClause.accountId = accountId;
+        }
+
+        // 1. Verify all jobs belong to this tenant, account/contract, and are unbilled & completed
         const jobsToBill = await prisma.job.findMany({
-            where: {
-                id: { in: jobIds },
-                tenantId,
-                accountId,
-                status: 'COMPLETED',
-                isBilled: false
-            }
+            where: whereClause
         });
 
         if (jobsToBill.length !== jobIds.length) {
-            return NextResponse.json({ error: 'Some jobs are either not completed, already billed, or do not belong to this account.' }, { status: 400 });
+            return NextResponse.json({ error: 'Some jobs are either not completed, already billed, or do not match the criteria.' }, { status: 400 });
         }
 
         // 2. Calculate Subtotal
@@ -56,6 +63,9 @@ export async function POST(req: Request) {
                 data: {
                     tenantId,
                     accountId,
+                    contractId: contractId || null,
+                    invoicePeriodStart: invoicePeriodStart ? new Date(invoicePeriodStart) : null,
+                    invoicePeriodEnd: invoicePeriodEnd ? new Date(invoicePeriodEnd) : null,
                     invoiceNumber,
                     issueDate: invoiceDate,
                     dueDate: invoiceDueDate,

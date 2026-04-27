@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
-import { Job, Account, Tenant } from "@/lib/types";
+import { Account } from "@/lib/types";
 import { Printer } from "lucide-react";
 
 interface InvoiceData {
@@ -17,8 +17,11 @@ interface InvoiceData {
     total: number;
     notes: string;
     account: Account;
-    tenant: Tenant;
-    jobs: Job[];
+    tenant: any;
+    contract?: any;
+    invoicePeriodStart?: string;
+    invoicePeriodEnd?: string;
+    jobs: any[];
 }
 
 export default function InvoiceViewer() {
@@ -126,6 +129,27 @@ export default function InvoiceViewer() {
                         </div>
                     </div>
 
+                    {invoice.contract && (
+                        <div className="mb-10 bg-indigo-50/50 p-6 rounded-md border border-indigo-100/50 flex flex-wrap gap-x-12 gap-y-6">
+                            <div>
+                                <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Purchase Order No</h3>
+                                <p className="font-mono text-indigo-900 font-bold">{invoice.contract.purchaseOrderNo || "N/A"}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Contract Ref</h3>
+                                <p className="font-mono text-indigo-900">{invoice.contract.reference}</p>
+                            </div>
+                            {invoice.invoicePeriodStart && invoice.invoicePeriodEnd && (
+                                <div>
+                                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Invoice Period</h3>
+                                    <p className="font-medium text-indigo-900">
+                                        {format(new Date(invoice.invoicePeriodStart), "MMM do")} - {format(new Date(invoice.invoicePeriodEnd), "MMM do, yyyy")}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Line Items Table */}
                     <div className="mb-12">
                         <table className="w-full text-left border-collapse">
@@ -148,6 +172,12 @@ export default function InvoiceViewer() {
                                         <td className="py-4 px-2 font-medium text-neutral-800">{job.passengerName}</td>
                                         <td className="py-4 px-2">
                                             <div className="flex flex-col gap-1 max-w-[250px]">
+                                                {job.contractRoute && (
+                                                    <span className="text-xs font-bold text-indigo-600 uppercase tracking-tight mb-1 flex items-center gap-1">
+                                                        {job.contractRoute.routeNumber && `[${job.contractRoute.routeNumber}] `}
+                                                        {job.contractRoute.name}
+                                                    </span>
+                                                )}
                                                 <span className="truncate text-neutral-700" title={job.pickupAddress}>
                                                     <span className="text-neutral-400 mr-1">A:</span>{job.pickupAddress}
                                                 </span>
