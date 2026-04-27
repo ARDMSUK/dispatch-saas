@@ -52,7 +52,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                     <div className="h-16 flex items-center px-6 border-b border-slate-200">
                         <SheetTitle className="font-bold text-lg tracking-wider text-slate-900">ADMIN MENU</SheetTitle>
                     </div>
-                    <div className="p-4 flex flex-col gap-1">
+                    <div className="p-4 flex flex-col gap-1 overflow-y-auto h-[calc(100vh-4rem)] pb-20 custom-scrollbar">
                         <NavItem href="/dashboard" icon={LayoutDashboard} label="Console" />
                         <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
                         
