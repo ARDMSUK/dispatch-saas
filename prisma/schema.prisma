@@ -582,6 +582,13 @@ model Invoice {
 
   jobs Job[]
 
+  // Local Authority / Contract Billing Fields
+  invoicePeriodStart DateTime?
+  invoicePeriodEnd   DateTime?
+  
+  contractId String?
+  contract   Contract? @relation(fields: [contractId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -691,6 +698,7 @@ model PassengerAssistant {
 model Contract {
   id            String    @id @default(cuid())
   reference     String
+  purchaseOrderNo String? // Required by Local Authority
   name          String
   startDate     DateTime?
   endDate       DateTime?
@@ -706,6 +714,7 @@ model Contract {
   account       Account   @relation(fields: [accountId], references: [id])
 
   routes        ContractRoute[]
+  invoices      Invoice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -718,6 +727,7 @@ model Contract {
 model ContractRoute {
   id            String    @id @default(cuid())
   name          String // e.g. "Morning Run - School X"
+  routeNumber   String? // Required by Local Authority
   
   contractId    String
   contract      Contract  @relation(fields: [contractId], references: [id])

@@ -33,6 +33,7 @@ export async function GET(req: Request) {
         const jobs = await prisma.job.findMany({
             where: {
                 tenantId,
+                contractRouteId: null, // Filter out school contract jobs
                 ...(status ? { status: status.toUpperCase() } : {})
             },
             include: {
