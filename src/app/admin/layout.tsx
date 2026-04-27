@@ -53,6 +53,10 @@ export default async function AdminLayout({
                                 <CreditCard className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
                                 SaaS Plans
                             </Link>
+                            <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-50 hover:bg-slate-900 rounded-lg transition-colors group">
+                                <Building2 className="w-4 h-4 text-slate-500 group-hover:text-blue-400" />
+                                My Tenant Settings
+                            </Link>
                             <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-50 hover:bg-slate-900 rounded-lg transition-colors group">
                                 <Settings className="w-4 h-4 text-slate-500 group-hover:text-slate-400" />
                                 System Settings

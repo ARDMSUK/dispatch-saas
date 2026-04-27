@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { ChevronLeft, Save, Building2, Key, Trash2, Layers, CreditCard, ShieldAl
 export default function TenantConfigPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const { update } = useSession();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [tenant, setTenant] = useState<any>(null);
@@ -103,6 +105,14 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
         return activePlan[featureField] === true;
     };
 
+    const handleImpersonateAndEdit = async () => {
+        await update({
+            impersonateTenantId: tenant.id,
+            impersonateTenantSlug: tenant.slug
+        });
+        router.push("/dashboard/settings");
+    };
+
     return (
         <div className="max-w-5xl mx-auto space-y-6">
             <div className="flex items-center justify-between mb-8">
@@ -115,9 +125,14 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                         <p className="text-slate-500">Tenant Management Console</p>
                     </div>
                 </div>
-                <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-500 min-w-[150px]">
-                    {saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
-                </Button>
+                <div className="flex items-center gap-3">
+                    <Button onClick={handleImpersonateAndEdit} variant="outline" className="border-slate-300">
+                        <Layers className="w-4 h-4 mr-2" /> Edit Dispatch Settings
+                    </Button>
+                    <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-500 min-w-[150px]">
+                        {saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
+                    </Button>
+                </div>
             </div>
 
             <Tabs defaultValue="general" className="w-full">
