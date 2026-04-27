@@ -220,10 +220,30 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         }
     };
 
+    const handleAcceptBooking = async (job: Job) => {
+        try {
+            const res = await fetch(`/api/jobs/${job.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'UNASSIGNED' })
+            });
+            if (res.ok) {
+                toast.success("Booking accepted. Confirmation SMS/Email sent.");
+                handleSendNotification('CONFIRMATION', job.id);
+                fetchJobs();
+            } else {
+                toast.error("Failed to accept booking");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error accepting booking");
+        }
+    };
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING':
+            case 'PENDING': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
             case 'UNASSIGNED': return 'bg-blue-700/10 text-blue-700 border-blue-700/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
@@ -335,7 +355,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex flex-wrap gap-2 items-center flex-1 pr-2">
                         <Badge variant="outline" className={`${getStatusColor(job.status)} font-mono text-[10px] tracking-wider`}>
-                            {job.status}
+                            {job.status === 'UNASSIGNED' ? 'CONFIRMED' : job.status}
                         </Badge>
                         {/* M&G Badge */}
                         {hasMeetGreet && (
@@ -454,6 +474,20 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                             Resend Confirmation
                                         </div>
                                     </Button>
+
+                                    {/* Accept Booking */}
+                                    {job.status === 'PENDING' && (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start h-8 text-xs font-normal"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleAcceptBooking(job);
+                                            }}
+                                        >
+                                            <CheckCircle className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Accept & Confirm
+                                        </Button>
+                                    )}
 
                                     {/* Dispatch Action */}
                                     {job.preAssignedDriver && job.status === 'PENDING' && (

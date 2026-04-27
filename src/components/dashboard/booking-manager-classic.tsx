@@ -220,10 +220,30 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
         }
     };
 
+    const handleAcceptBooking = async (job: Job) => {
+        try {
+            const res = await fetch(`/api/jobs/${job.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'UNASSIGNED' })
+            });
+            if (res.ok) {
+                toast.success("Booking accepted. Confirmation SMS/Email sent.");
+                handleSendNotification('CONFIRMATION', job.id);
+                fetchJobs();
+            } else {
+                toast.error("Failed to accept booking");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error accepting booking");
+        }
+    };
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING':
+            case 'PENDING': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
             case 'UNASSIGNED': return 'bg-blue-700/10 text-blue-700 border-blue-700/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
@@ -342,7 +362,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                 {/* COL: DRIVER & STATUS BADGE */}
                 <div className="w-20 flex flex-col items-center justify-center gap-1.5 border-r border-slate-100 pr-2 h-full">
                     <span className={`font-bold text-[9px] px-1.5 py-0.5 rounded w-full text-center ${getStatusColor(job.status)}`}>
-                        {job.status}
+                        {job.status === 'UNASSIGNED' ? 'CONFIRMED' : job.status}
                     </span>
                     {job.driver ? (
                         <span className="bg-purple-100 text-purple-700 font-bold text-[10px] px-1.5 py-0.5 rounded w-full text-center truncate">DRV: {job.driver.callsign}</span>
@@ -440,6 +460,20 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                         Resend Confirmation
                                     </div>
                                 </Button>
+
+                                {/* Accept Booking */}
+                                {job.status === 'PENDING' && (
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start h-8 text-xs font-normal"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAcceptBooking(job);
+                                        }}
+                                    >
+                                        <CheckCircle className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Accept & Confirm
+                                    </Button>
+                                )}
 
                                 {/* Dispatch Action */}
                                 {job.preAssignedDriver && job.status === 'PENDING' && (
