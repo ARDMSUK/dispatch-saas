@@ -82,6 +82,21 @@ export const EmailService = {
         return this.sendEmail(to, subject, html, companyName, replyTo);
     },
 
+    async sendJobCancelled(booking: any, orgSettings?: any) {
+        const companyName = orgSettings?.name || 'CABAI System';
+        const replyTo = orgSettings?.email;
+        const subject = `Booking Cancelled #${booking.id.toString().padStart(6, '0')}`;
+        const html = EmailTemplates.jobCancelled(booking, companyName);
+        const to = booking.customer?.email || booking.passengerEmail || booking.email;
+
+        if (!to) {
+            console.warn(`[EmailService] No email address found for booking #${booking.id}`);
+            return { success: false, error: 'No email address found' };
+        }
+
+        return this.sendEmail(to, subject, html, companyName, replyTo);
+    },
+
     async sendEmail(to: string, subject: string, html: string, companyName: string = 'CABAI System', replyTo?: string) {
         if (RESEND_API_KEY) {
             // Real Sending Logic

@@ -110,6 +110,20 @@ export const SmsService = {
         return { success: true, skipped: true };
     },
 
+    async sendJobCancelled(booking: any, orgSettings?: any) {
+        if (!booking.passengerPhone) return;
+
+        let message = '';
+        if (orgSettings?.smsTemplateJobCancelled) {
+            message = this.parseTemplate(orgSettings.smsTemplateJobCancelled, booking);
+        } else {
+            const company = orgSettings?.name || 'Dispatch';
+            message = `${company}: We sincerely apologize for the inconvenience, but due to a lack of availability, your booking #${booking.id} cannot be accepted and has been cancelled.`;
+        }
+
+        return this.sendSms(booking.passengerPhone, message);
+    },
+
     async sendSms(to: string, body: string, config?: { accountSid?: string, authToken?: string, fromNumber?: string } | null) {
 
         // Priority: Passed Config > Global Env

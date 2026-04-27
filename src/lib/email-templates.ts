@@ -107,5 +107,21 @@ export const EmailTemplates = {
 
       <p>If you have any feedback or need assistance, please reply to this email.</p>
     </div>
+  `,
+
+  jobCancelled: (booking: any, companyName: string = 'Our Service') => `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Booking Cancelled: #${booking.id.toString().padStart(6, '0')}</h2>
+      <p>Dear ${booking.passengerName},</p>
+      <p>We sincerely apologize for the inconvenience, but due to a lack of availability, we are unable to accept your booking with ${companyName}.</p>
+      
+      <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Pickup:</strong> ${booking.pickupAddress}</p>
+        <p><strong>Date:</strong> ${new Date(booking.pickupTime).toLocaleString()}</p>
+        <p><strong>Status:</strong> Cancelled</p>
+      </div>
+
+      <p>If you have any questions, please reply to this email.</p>
+    </div>
   `
 };

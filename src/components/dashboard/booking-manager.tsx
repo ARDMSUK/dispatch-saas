@@ -156,6 +156,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
                 if (newStatus === 'COMPLETED') {
                     handleSendNotification('JOB_COMPLETED', jobId);
+                } else if (newStatus === 'CANCELLED') {
+                    handleSendNotification('JOB_CANCELLED', jobId);
                 }
 
                 fetchJobs();
@@ -169,7 +171,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     };
 
 
-    const handleSendNotification = async (type: 'CONFIRMATION' | 'DRIVER_ASSIGNED' | 'JOB_COMPLETED', bookingId: number, driverId?: string) => {
+    const handleSendNotification = async (type: 'CONFIRMATION' | 'DRIVER_ASSIGNED' | 'JOB_COMPLETED' | 'JOB_CANCELLED', bookingId: number, driverId?: string) => {
         try {
             const res = await fetch('/api/notifications/send', {
                 method: 'POST',

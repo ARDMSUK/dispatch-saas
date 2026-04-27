@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
 
 export async function POST(req: Request) {
     try {
@@ -33,7 +34,9 @@ export async function POST(req: Request) {
 
         if (type === 'CONFIRMATION') {
             console.log(`[Notification] Sending CONFIRMATION for Booking #${bookingIdInt}`);
-            result = await EmailService.sendBookingConfirmation(booking, tenantSettings);
+            const emailResult = await EmailService.sendBookingConfirmation(booking, tenantSettings);
+            const smsResult = await SmsService.sendBookingConfirmation(booking, tenantSettings);
+            result = { emailResult, smsResult };
         } else if (type === 'DRIVER_ASSIGNED' && driverId) {
             const driver = await prisma.driver.findUnique({
                 where: { id: driverId },
@@ -41,7 +44,9 @@ export async function POST(req: Request) {
             });
             if (driver) {
                 console.log(`[Notification] Sending DRIVER_ASSIGNED for Booking #${bookingIdInt} to Driver ${driver.callsign}`);
-                result = await EmailService.sendDriverAssigned(booking, driver, tenantSettings);
+                const emailResult = await EmailService.sendDriverAssigned(booking, driver, tenantSettings);
+                const smsResult = await SmsService.sendDriverAssigned(booking, driver, tenantSettings);
+                result = { emailResult, smsResult };
             } else {
                 console.error(`[Notification] Driver ${driverId} not found`);
                 return NextResponse.json({ error: "Driver not found" }, { status: 404 });
@@ -49,6 +54,11 @@ export async function POST(req: Request) {
         } else if (type === 'JOB_COMPLETED') {
             console.log(`[Notification] Sending JOB_COMPLETED for Booking #${bookingIdInt}`);
             result = await EmailService.sendJobReceipt(booking, tenantSettings);
+        } else if (type === 'JOB_CANCELLED') {
+            console.log(`[Notification] Sending JOB_CANCELLED for Booking #${bookingIdInt}`);
+            const emailResult = await EmailService.sendJobCancelled(booking, tenantSettings);
+            const smsResult = await SmsService.sendJobCancelled(booking, tenantSettings);
+            result = { emailResult, smsResult };
         }
 
         if (result && !result.success) {
