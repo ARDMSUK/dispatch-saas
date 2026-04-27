@@ -1,1 +1,1 @@
-const { PrismaClient } = require("@prisma/client"); const p = new PrismaClient(); p.job.findUnique({where: {id: 190}, select: {pickupTime: true}}).then(console.log);
+const { PrismaClient } = require("@prisma/client"); const p = new PrismaClient(); p.tenant.findUnique({where: {slug: "beaconsfield"}, select: {consoleLayout: true}}).then(console.log);

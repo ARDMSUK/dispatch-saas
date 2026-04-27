@@ -393,9 +393,33 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                             
                             {/* Live Flight Info */}
                             {job.flightNumber && (
-                                <span className={`px-1.5 py-0.5 border rounded font-mono flex items-center gap-1 whitespace-nowrap ${flights[job.flightNumber] && String(flights[job.flightNumber].status).toLowerCase() === 'cancelled' ? 'bg-red-50 text-red-600 border-red-200' : flights[job.flightNumber] && (new Date(flights[job.flightNumber].estimatedArrival).getTime() > new Date(flights[job.flightNumber].scheduledArrival).getTime() + (15 * 60000)) ? 'bg-orange-50 text-orange-500 border-orange-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
-                                    ✈️ {job.flightNumber}
-                                </span>
+                                <div className="flex flex-wrap items-center gap-1">
+                                    <span className="px-1.5 py-0.5 border rounded font-mono flex items-center gap-1 whitespace-nowrap bg-blue-50 text-blue-600 border-blue-200">
+                                        ✈️ {job.flightNumber}
+                                    </span>
+                                    {flights[job.flightNumber] && (
+                                        (() => {
+                                            const f = flights[job.flightNumber];
+                                            const isDelayed = new Date(f.estimatedArrival).getTime() > new Date(f.scheduledArrival).getTime() + (15 * 60000);
+                                            const landed = f.status === 'landed' || f.actualArrival;
+                                            const cancelled = String(f.status).toLowerCase() === 'cancelled';
+
+                                            const estTime = new Date(f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                            const termGate = [f.terminal ? `T${f.terminal}` : '', f.gate ? `G:${f.gate}` : ''].filter(Boolean).join(' ');
+
+                                            if (cancelled) {
+                                                return <span className="px-1.5 py-0.5 border rounded font-mono bg-red-50 text-red-600 border-red-200 whitespace-nowrap">CANCELLED</span>;
+                                            } else if (landed) {
+                                                return <span className="px-1.5 py-0.5 border rounded font-mono bg-emerald-50 text-emerald-600 border-emerald-200 whitespace-nowrap">LANDED {new Date(f.actualArrival || f.estimatedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {termGate ? `(${termGate})` : ''}</span>;
+                                            } else if (isDelayed) {
+                                                const delayMins = Math.round((new Date(f.estimatedArrival).getTime() - new Date(f.scheduledArrival).getTime()) / 60000);
+                                                return <span className="px-1.5 py-0.5 border rounded font-mono bg-orange-50 text-orange-500 border-orange-200 animate-pulse whitespace-nowrap">DELAYED +{delayMins}m (EST: {estTime}) {termGate ? `(${termGate})` : ''}</span>;
+                                            } else {
+                                                return <span className="px-1.5 py-0.5 border rounded font-mono bg-slate-100 text-slate-500 border-slate-200 whitespace-nowrap">EST: {estTime} {termGate ? `(${termGate})` : ''}</span>;
+                                            }
+                                        })()
+                                    )}
+                                </div>
                             )}
                             
                             {/* Notes parsing */}
