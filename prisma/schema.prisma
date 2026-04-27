@@ -43,6 +43,7 @@ model Tenant {
   hasWebChatAi         Boolean  @default(false)
   hasWhatsAppAi        Boolean  @default(false)
   hasVoiceAi           Boolean  @default(false)
+  hasSchoolContracts   Boolean  @default(false)
   aiMessageCount       Int      @default(0)
   aiMessageLimit       Int      @default(100)
   aiBillingPeriodStart DateTime @default(now())
@@ -115,6 +116,11 @@ model Tenant {
   whatsappSessions WhatsappSession[]
   documents        Document[]
 
+  passengerAssistants PassengerAssistant[]
+  contracts           Contract[]
+  students            Student[]         @relation("TenantStudents")
+  incidentReports     IncidentReport[]  @relation("TenantIncidents")
+
   @@map("companies")
   @@schema("public")
 }
@@ -139,6 +145,7 @@ model SaasPlan {
   incWebChatAi      Boolean @default(false)
   incWhatsAppAi     Boolean @default(false)
   incVoiceAi        Boolean @default(false)
+  incSchoolContracts Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -245,6 +252,7 @@ model Account {
   jobs      Job[] // Jobs booked to this account
   users     User[] // B2B Admin users for this account
   invoices  Invoice[]
+  contracts Contract[] // Local Authority Contracts
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -265,6 +273,9 @@ model Driver {
   pin           String? // Login PIN
 
   status String @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
+
+  gender         String? // MALE, FEMALE
+  employmentType String @default("COMPANY_DRIVER") // COMPANY_DRIVER, OWNER_DRIVER
 
   // Commission (percentage tenant takes)
   commissionRate Float @default(20.0)
@@ -418,6 +429,9 @@ model Job {
   invoiceId String?
   invoice   Invoice? @relation(fields: [invoiceId], references: [id])
   isBilled  Boolean  @default(false)
+
+  contractRouteId String?
+  contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
 
   @@map("bookings")
   @@schema("public")
@@ -647,5 +661,170 @@ model Document {
   updatedAt  DateTime  @updatedAt
 
   @@map("documents")
+  @@schema("public")
+}
+
+model PassengerAssistant {
+  id            String    @id @default(cuid())
+  callsign      String // PA ID or Badge
+  name          String
+  phone         String
+  email         String?
+  gender        String? // MALE, FEMALE
+  status        String @default("OFF_DUTY")
+
+  payRatePerHour Float @default(11.44)
+
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contractRoutes ContractRoute[]
+
+  @@unique([tenantId, callsign])
+  @@map("passenger_assistants")
+  @@schema("public")
+}
+
+model Contract {
+  id            String    @id @default(cuid())
+  reference     String
+  name          String
+  startDate     DateTime?
+  endDate       DateTime?
+  status        String    @default("ACTIVE") // PENDING, ACTIVE, COMPLETED, CANCELLED
+
+  totalValue    Float?
+  notes         String? @db.Text
+
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+
+  accountId     String
+  account       Account   @relation(fields: [accountId], references: [id])
+
+  routes        ContractRoute[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, reference])
+  @@map("contracts")
+  @@schema("public")
+}
+
+model ContractRoute {
+  id            String    @id @default(cuid())
+  name          String // e.g. "Morning Run - School X"
+  
+  contractId    String
+  contract      Contract  @relation(fields: [contractId], references: [id])
+
+  // Requirements
+  requiresWav          Boolean @default(false)
+  requiresPa           Boolean @default(false)
+  requiredDriverGender String? // MALE, FEMALE
+  requiredPaGender     String? // MALE, FEMALE
+
+  // Default Assignments
+  defaultDriverId      String?
+  // We can add default Driver relations if needed
+
+  defaultPaId          String?
+  defaultPa            PassengerAssistant? @relation(fields: [defaultPaId], references: [id])
+
+  stops         RouteStop[]
+  students      Student[]
+  incidents     IncidentReport[]
+  jobs          Job[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contract_routes")
+  @@schema("public")
+}
+
+model RouteStop {
+  id              String    @id @default(cuid())
+  contractRouteId String
+  contractRoute   ContractRoute @relation(fields: [contractRouteId], references: [id])
+
+  address         String
+  lat             Float?
+  lng             Float?
+  type            String @default("PICKUP") // PICKUP, DROPOFF, SCHOOL
+  sequenceIndex   Int @default(0)
+
+  scheduledTime   String? // "07:30"
+
+  @@map("route_stops")
+  @@schema("public")
+}
+
+model Student {
+  id              String    @id @default(cuid())
+  name            String
+  dateOfBirth     DateTime?
+  
+  specialNeeds    String? @db.Text
+  medicalInfo     String? @db.Text
+  riskAssessmentNotes String? @db.Text
+
+  parentContactName   String?
+  parentContactPhone  String?
+
+  contractRouteId String?
+  contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
+
+  meetAndGreets   MeetAndGreet[]
+
+  tenantId        String
+  tenant          Tenant    @relation("TenantStudents", fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("students")
+  @@schema("public")
+}
+
+model MeetAndGreet {
+  id              String    @id @default(cuid())
+  studentId       String
+  student         Student   @relation(fields: [studentId], references: [id])
+
+  completedAt     DateTime?
+  status          String @default("PENDING") // PENDING, COMPLETED
+  notes           String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("meet_and_greets")
+  @@schema("public")
+}
+
+model IncidentReport {
+  id              String    @id @default(cuid())
+  date            DateTime  @default(now())
+  description     String    @db.Text
+  severity        String    @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+
+  resolutionNotes String?   @db.Text
+  status          String    @default("OPEN") // OPEN, INVESTIGATING, CLOSED
+
+  contractRouteId String?
+  contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
+
+  tenantId        String
+  tenant          Tenant    @relation("TenantIncidents", fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("incident_reports")
   @@schema("public")
 }

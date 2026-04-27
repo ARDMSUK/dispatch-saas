@@ -297,7 +297,8 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                     { stateField: 'enableLiveTracking', planField: 'incLiveTracking', label: 'Live Tracking Links' },
                                     { stateField: 'hasWebChatAi', planField: 'incWebChatAi', label: 'AI Web Chat Widget' },
                                     { stateField: 'hasWhatsAppAi', planField: 'incWhatsAppAi', label: 'WhatsApp AI Agent' },
-                                    { stateField: 'hasVoiceAi', planField: 'incVoiceAi', label: 'Voice AI Agent' }
+                                    { stateField: 'hasVoiceAi', planField: 'incVoiceAi', label: 'Voice AI Agent' },
+                                    { stateField: 'hasSchoolContracts', planField: 'incSchoolContracts', label: 'School Contracts Add-on' }
                                 ].map(mod => {
                                     const isPlanGranted = isPlanUnlocked(mod.planField);
                                     const isManuallyGranted = tenant[mod.stateField] === true;

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "next-auth/react";
 
-export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean }) {
+export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating, hasSchoolContracts = false }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean, hasSchoolContracts?: boolean }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
     const { data: session, update } = useSession();
@@ -55,7 +55,21 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                     <div className="p-4 flex flex-col gap-1">
                         <NavItem href="/dashboard" icon={LayoutDashboard} label="Console" />
                         <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
+                        
+                        {hasSchoolContracts && (
+                            <>
+                                <NavItem href="/dashboard/contracts" icon={Building2} label="School Contracts" />
+                            </>
+                        )}
+                        
                         <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
+                        
+                        {hasSchoolContracts && (
+                            <>
+                                <NavItem href="/dashboard/staff/pas" icon={UserIcon} label="Passenger Assistants" />
+                            </>
+                        )}
+                        
                         <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
                         <NavItem href="/dashboard/compliance" icon={FileText} label="Compliance" />
 

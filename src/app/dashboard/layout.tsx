@@ -30,13 +30,22 @@ export default async function DashboardLayout({
 
     const tenant = await prisma.tenant.findUnique({
         where: { id: session.user.tenantId! },
-        select: { subscriptionStatus: true }
+        select: { 
+            subscriptionStatus: true,
+            hasSchoolContracts: true,
+            subscriptionPlan: {
+                select: {
+                    incSchoolContracts: true
+                }
+            }
+        }
     });
 
     const status = tenant?.subscriptionStatus || "TRIALING";
+    const hasSchoolContracts = tenant?.hasSchoolContracts || tenant?.subscriptionPlan?.incSchoolContracts || false;
 
     return (
-        <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role} isImpersonating={isImpersonating}>
+        <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role} isImpersonating={isImpersonating} hasSchoolContracts={hasSchoolContracts}>
             <GoogleMapsLoader>
                 {children}
                 <CliPopListener />
