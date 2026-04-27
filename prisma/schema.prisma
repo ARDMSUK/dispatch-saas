@@ -838,3 +838,24 @@ model IncidentReport {
   @@map("incident_reports")
   @@schema("public")
 }
+
+model FlightCache {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  flightNumber       String
+  dateString         String   // YYYY-MM-DD
+  
+  status             String?
+  scheduledArrival   DateTime?
+  estimatedArrival   DateTime?
+  actualArrival      DateTime?
+  terminal           String?
+  gate               String?
+  airline            String?
+  
+  lastCheckedAt      DateTime @default(now())
+
+  @@unique([tenantId, flightNumber, dateString])
+  @@map("flight_cache")
+  @@schema("public")
+}

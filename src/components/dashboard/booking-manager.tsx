@@ -97,21 +97,24 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     // Fetch Flight Data for active jobs with flight numbers
     useEffect(() => {
         const fetchFlights = async () => {
-            const flightNumbersToFetch = new Set<string>();
+            const flightsToFetch = new Set<string>();
 
             jobs.forEach(job => {
                 // Only fetch flights for jobs that haven't been completed/cancelled
                 if (job.flightNumber && !['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(job.status)) {
-                    flightNumbersToFetch.add(job.flightNumber);
+                    const dateStr = new Date(job.pickupTime).toISOString().split('T')[0];
+                    flightsToFetch.add(`${job.flightNumber}|${dateStr}`);
                 }
             });
 
-            for (const fn of Array.from(flightNumbersToFetch)) {
+            for (const item of Array.from(flightsToFetch)) {
+                const [fn, dateStr] = item.split('|');
+
                 // Skip if we already fetched it recently to save API calls
                 if (flights[fn]) continue;
 
                 try {
-                    const res = await fetch(`/api/flights?flightNumber=${encodeURIComponent(fn)}`);
+                    const res = await fetch(`/api/flights?flightNumber=${encodeURIComponent(fn)}&dateString=${encodeURIComponent(dateStr)}`);
                     if (res.ok) {
                         const data = await res.json();
                         setFlights(prev => ({ ...prev, [fn]: data }));
