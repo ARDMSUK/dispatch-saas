@@ -1,1 +1,1 @@
-const { PrismaClient } = require("@prisma/client"); const p = new PrismaClient(); p.user.findFirst({where: {email: "dmagency@gmail.com"}, include: {tenant: true}}).then(console.log);
+const { PrismaClient } = require("@prisma/client"); const p = new PrismaClient(); p.job.findUnique({where: {id: 190}, select: {pickupTime: true}}).then(console.log);

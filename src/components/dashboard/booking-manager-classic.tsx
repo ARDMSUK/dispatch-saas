@@ -65,7 +65,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
     const [activeTab, setActiveTab] = useState('PENDING_NOW');
 
     // Future Filter State
-    const [futureFilter, setFutureFilter] = useState('TOMORROW');
+    const [futureFilter, setFutureFilter] = useState('ALL');
     const [customStartDate, setCustomStartDate] = useState('');
     const [customEndDate, setCustomEndDate] = useState('');
 
@@ -280,6 +280,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                     if (!isFutureDate) return false;
 
                     // Apply Sub-Filters
+                    if (futureFilter === 'ALL') return true;
                     if (futureFilter === 'TOMORROW') return isTomorrow(pickup);
                     if (futureFilter === 'THIS_WEEK') return isThisWeek(pickup, { weekStartsOn: 1 }); // Monday start
                     if (futureFilter === 'THIS_MONTH') return isSameMonth(pickup, now);
@@ -555,6 +556,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                 <SelectValue placeholder="Period" />
                             </SelectTrigger>
                             <SelectContent>
+                                <SelectItem value="ALL">All Future</SelectItem>
                                 <SelectItem value="TOMORROW">Tomorrow</SelectItem>
                                 <SelectItem value="THIS_WEEK">This Week</SelectItem>
                                 <SelectItem value="THIS_MONTH">This Month</SelectItem>
