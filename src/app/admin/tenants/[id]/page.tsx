@@ -313,7 +313,8 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                     { stateField: 'hasWebChatAi', planField: 'incWebChatAi', label: 'AI Web Chat Widget' },
                                     { stateField: 'hasWhatsAppAi', planField: 'incWhatsAppAi', label: 'WhatsApp AI Agent' },
                                     { stateField: 'hasVoiceAi', planField: 'incVoiceAi', label: 'Voice AI Agent' },
-                                    { stateField: 'hasSchoolContracts', planField: 'incSchoolContracts', label: 'School Contracts Add-on' }
+                                    { stateField: 'hasSchoolContracts', planField: 'incSchoolContracts', label: 'School Contracts Add-on' },
+                                    { stateField: 'hasDataImport', planField: 'incDataImport', label: 'Data Migration Wizard' }
                                 ].map(mod => {
                                     const isPlanGranted = isPlanUnlocked(mod.planField);
                                     const isManuallyGranted = tenant[mod.stateField] === true;

@@ -44,6 +44,7 @@ model Tenant {
   hasWhatsAppAi        Boolean  @default(false)
   hasVoiceAi           Boolean  @default(false)
   hasSchoolContracts   Boolean  @default(false)
+  hasDataImport        Boolean  @default(false)
   aiMessageCount       Int      @default(0)
   aiMessageLimit       Int      @default(100)
   aiBillingPeriodStart DateTime @default(now())
@@ -146,6 +147,7 @@ model SaasPlan {
   incWhatsAppAi     Boolean @default(false)
   incVoiceAi        Boolean @default(false)
   incSchoolContracts Boolean @default(false)
+  incDataImport     Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "next-auth/react";
 
-export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating, hasSchoolContracts = false }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean, hasSchoolContracts?: boolean }) {
+export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating, hasSchoolContracts = false, hasDataImport = false }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean, hasSchoolContracts?: boolean, hasDataImport?: boolean }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
     const { data: session, update } = useSession();
@@ -92,6 +92,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                                 <div className="my-2 border-t border-slate-200"></div>
                                 <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
                                 <NavItem href="/dashboard/settings/ai" icon={Sparkles} label="AI Agents" />
+                                {hasDataImport && <NavItem href="/dashboard/settings/import" icon={FileText} label="Data Migration Hub" />}
                                 <NavItem href="/dashboard/settings/billing" icon={CreditCard} label="SaaS Subscription" />
                                 <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
                             </>
