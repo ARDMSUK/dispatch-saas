@@ -20,7 +20,7 @@ export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
     try {
         const resend = new Resend(key);
         const data = await resend.emails.send({
-            from: 'Dispatch SaaS <no-reply@taximarketingservices.co.uk>',
+            from: 'CABAI <no-reply@cabai.co.uk>',
             to,
             subject,
             html,
