@@ -127,14 +127,39 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full p-6 text-center border-t border-slate-800 bg-black/50 backdrop-blur-md text-slate-500 text-sm mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>&copy; {new Date().getFullYear()} CABAI Platform. Tenant Portal.</p>
-          <div className="flex gap-4">
+      <footer className="relative z-10 w-full p-10 border-t border-slate-800 bg-black/80 backdrop-blur-md text-slate-400 text-sm mt-auto">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-6 w-6 bg-yellow-400 rounded flex items-center justify-center font-bold text-black text-xs">C</div>
+              <span className="text-lg font-bold text-white tracking-tight">CABAI</span>
+            </div>
+            <p className="mb-2 text-slate-300">The premier AI-powered dispatch platform.</p>
+            <p>&copy; {new Date().getFullYear()} CABAI Ltd. All rights reserved.</p>
+          </div>
+          
+          <div>
+            <h4 className="text-white font-bold mb-4">Contact Us</h4>
+            <p className="mb-1">Phone: <a href="tel:02034321381" className="text-yellow-400 hover:text-yellow-300 transition-colors">0203 432 1381</a></p>
+            <p className="mb-1">Email: <a href="mailto:hello@cabai.co.uk" className="text-yellow-400 hover:text-yellow-300 transition-colors">hello@cabai.co.uk</a></p>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4">Registered Address</h4>
+            <address className="not-italic text-slate-300">
+              Cabai Ltd<br />
+              71-75 Shelton Street<br />
+              Covent Garden<br />
+              London, WC2H 9JQ
+            </address>
+          </div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-slate-800/50">
+          <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Support</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Billing</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Operator Login</Link>
           </div>
         </div>
       </footer>
