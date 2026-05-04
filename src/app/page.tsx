@@ -1,165 +1,78 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Car, Shield, Zap, MessageSquare, TrendingUp, Smartphone, CheckCircle2 } from 'lucide-react';
 
-export default function LandingPage() {
+export default function ComingSoonPage() {
   return (
-    <main className="min-h-screen bg-slate-50 relative flex flex-col">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black opacity-95"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10 filter blur-sm"></div>
+    <main className="min-h-screen bg-black relative flex flex-col">
+      {/* Background with abstract gradient */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-[40%] -right-[10%] w-[70%] h-[70%] rounded-full bg-yellow-500/10 blur-[120px]"></div>
+        <div className="absolute -bottom-[40%] -left-[10%] w-[70%] h-[70%] rounded-full bg-slate-800/40 blur-[120px]"></div>
       </div>
 
       {/* Header */}
       <header className="relative z-10 w-full p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-yellow-400 rounded-lg flex items-center justify-center font-bold text-black">C</div>
-          <span className="text-xl font-bold text-white tracking-tight">CABAI Operator Portal</span>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center font-black text-black text-xl shadow-lg shadow-yellow-500/20">C</div>
+          <span className="text-2xl font-black text-white tracking-tight">CABAI</span>
         </div>
-        <nav className="hidden md:flex gap-8 text-sm font-medium text-slate-300">
-          <Link href="#core-features" className="hover:text-white transition-colors">Core Features</Link>
-          <Link href="#premium-upgrades" className="hover:text-yellow-400 transition-colors">Premium Upgrades</Link>
-        </nav>
         <div className="flex gap-4">
           <Link href="/login">
-            <Button variant="outline" className="bg-transparent border-slate-700 text-white hover:bg-slate-800">
-              Sign In
+            <Button variant="outline" className="bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white backdrop-blur-sm transition-all rounded-full px-6">
+              Operator Login
             </Button>
           </Link>
         </div>
       </header>
 
       {/* Hero Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center py-20 px-4">
-        <div className="text-center mb-16 space-y-6 max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-yellow-400 text-sm font-medium mb-4">
-            <Zap className="h-4 w-4" /> Welcome to your Fleet Management Hub
-          </div>
-          <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight leading-tight">
-            Manage your fleet.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">Automate your growth.</span>
-          </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Access your operator console to dispatch drivers, manage vehicle compliance, handle settlements, and explore powerful AI upgrades to scale your operations.
-          </p>
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center py-20 px-4">
+        <div className="text-center space-y-8 max-w-3xl px-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link href="/login">
-              <Button size="lg" className="bg-yellow-400 text-zinc-900 hover:bg-yellow-500 font-bold text-lg px-8 h-14">
-                Access Dashboard <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm font-semibold tracking-wide uppercase">
+            <span>Launching Soon</span>
           </div>
-        </div>
 
-        {/* Core Features */}
-        <div id="core-features" className="w-full max-w-6xl mt-10 scroll-mt-24">
-          <h2 className="text-3xl font-bold text-white text-center mb-10">Your Included Tools</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl backdrop-blur-sm hover:border-slate-700 transition-all">
-              <div className="h-12 w-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4">
-                <Car className="h-6 w-6 text-blue-500" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Live Dispatch</h3>
-              <p className="text-slate-400">Track drivers in real-time, assign jobs manually or via basic auto-dispatch algorithms.</p>
-            </div>
-            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl backdrop-blur-sm hover:border-slate-700 transition-all">
-              <div className="h-12 w-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-emerald-500" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Driver Compliance</h3>
-              <p className="text-slate-400">Manage vehicle documents, MOTs, and driver licenses securely with automated expiry alerts.</p>
-            </div>
-            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl backdrop-blur-sm hover:border-slate-700 transition-all">
-              <div className="h-12 w-12 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-4">
-                <TrendingUp className="h-6 w-6 text-indigo-500" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Driver Settlements</h3>
-              <p className="text-slate-400">Calculate commissions, handle cash/card balancing, and manage payout analytics instantly.</p>
-            </div>
-          </div>
-        </div>
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-[1.1]">
+            The Future of <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500">
+              Mobility
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+            We are building something extraordinary. The smartest dispatch network and booking experience is arriving shortly on iOS and Android.
+          </p>
 
-        {/* Premium Upgrades Teaser */}
-        <div id="premium-upgrades" className="w-full max-w-6xl mt-24 mb-10 scroll-mt-24">
-          <div className="bg-gradient-to-r from-slate-900 to-black border border-yellow-500/30 rounded-3xl p-8 md:p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl"></div>
-            
-            <div className="relative z-10">
-              <div className="inline-block bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm font-semibold mb-6 border border-yellow-500/30">
-                Unlock More Power
+          <div className="pt-8 flex flex-col items-center gap-4">
+            <div className="flex gap-4 opacity-70">
+              <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-3">
+                <span className="text-2xl">🍎</span>
+                <span className="text-white font-medium">App Store</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to automate your booking flow?</h2>
-              <p className="text-lg text-slate-300 max-w-2xl mb-8">
-                Upgrade your tenant package to access cutting-edge AI tools that handle customer queries and take bookings 24/7 without human intervention.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    <MessageSquare className="h-8 w-8 text-yellow-400" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white mb-2">WhatsApp AI Agent</h4>
-                    <p className="text-slate-400">An autonomous AI bot that converses with customers on WhatsApp, gathers journey details, quotes prices, and inserts jobs directly into your dispatch system.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    <Smartphone className="h-8 w-8 text-yellow-400" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white mb-2">White-label Passenger App</h4>
-                    <p className="text-slate-400">Give your customers a branded mobile app experience to book rides, track their driver, and pay securely via Stripe.</p>
-                  </div>
-                </div>
+              <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-3">
+                <span className="text-2xl">🤖</span>
+                <span className="text-white font-medium">Google Play</span>
               </div>
-              
-              <Link href="/login">
-                <Button variant="outline" className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-semibold">
-                  Explore Upgrades in Dashboard
-                </Button>
-              </Link>
             </div>
+            <p className="text-sm text-slate-500 mt-4">Apps currently under review by Apple and Google.</p>
           </div>
+
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full p-10 border-t border-slate-800 bg-black/80 backdrop-blur-md text-slate-400 text-sm mt-auto">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-6 w-6 bg-yellow-400 rounded flex items-center justify-center font-bold text-black text-xs">C</div>
-              <span className="text-lg font-bold text-white tracking-tight">CABAI</span>
-            </div>
-            <p className="mb-2 text-slate-300">The premier AI-powered dispatch platform.</p>
-            <p>&copy; {new Date().getFullYear()} CABAI Ltd. All rights reserved.</p>
+      <footer className="relative z-10 w-full p-8 border-t border-white/5 bg-black/50 backdrop-blur-xl text-slate-500 text-sm mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-center md:text-left">
+            <p className="font-semibold text-slate-300 mb-1">CABAI Ltd</p>
+            <p>71-75 Shelton Street, Covent Garden, London, WC2H 9JQ</p>
+            <p className="mt-2">Phone: <a href="tel:02034321381" className="text-yellow-500/80 hover:text-yellow-400">0203 432 1381</a> | Email: <a href="mailto:hello@cabai.co.uk" className="text-yellow-500/80 hover:text-yellow-400">hello@cabai.co.uk</a></p>
           </div>
           
-          <div>
-            <h4 className="text-white font-bold mb-4">Contact Us</h4>
-            <p className="mb-1">Phone: <a href="tel:02034321381" className="text-yellow-400 hover:text-yellow-300 transition-colors">0203 432 1381</a></p>
-            <p className="mb-1">Email: <a href="mailto:hello@cabai.co.uk" className="text-yellow-400 hover:text-yellow-300 transition-colors">hello@cabai.co.uk</a></p>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-4">Registered Address</h4>
-            <address className="not-italic text-slate-300">
-              Cabai Ltd<br />
-              71-75 Shelton Street<br />
-              Covent Garden<br />
-              London, WC2H 9JQ
-            </address>
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-slate-800/50">
-          <div className="flex gap-6">
+          <div className="flex gap-6 font-medium">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Operator Login</Link>
           </div>
         </div>
       </footer>
