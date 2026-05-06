@@ -76,15 +76,20 @@ async function handleWebhook(req: Request) {
             const cleanToPhone = toPhone.replace(/[^0-9]/g, '');
             if (cleanToPhone.length >= 9) {
                 const tenantsWithPhone = await prisma.tenant.findMany({
-                    where: { phone: { not: null } }
+                    where: {
+                        OR: [
+                            { phone: { not: null } },
+                            { twilioFromNumber: { not: null } }
+                        ]
+                    }
                 });
                 
                 const targetSuffix = cleanToPhone.slice(-10); // Match last 10 digits
                 
                 tenant = tenantsWithPhone.find(t => {
-                    if (!t.phone) return false;
-                    const cleanTenantPhone = t.phone.replace(/[^0-9]/g, '');
-                    return cleanTenantPhone.endsWith(targetSuffix) || targetSuffix.endsWith(cleanTenantPhone);
+                    const matchPhone = t.phone ? t.phone.replace(/[^0-9]/g, '').endsWith(targetSuffix) : false;
+                    const matchTwilio = t.twilioFromNumber ? t.twilioFromNumber.replace(/[^0-9]/g, '').endsWith(targetSuffix) : false;
+                    return matchPhone || matchTwilio;
                 }) || null;
             }
         }
