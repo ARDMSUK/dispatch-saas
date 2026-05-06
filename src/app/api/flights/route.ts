@@ -118,6 +118,30 @@ export async function GET(req: Request) {
                         lastCheckedAt: now
                     }
                 });
+            } else {
+                // If AviationStack returns no data (e.g. flight is in the future and not in free tier),
+                // we MUST cache a placeholder so we don't spam the API and burn the 100 request limit.
+                cache = await prisma.flightCache.upsert({
+                    where: {
+                        tenantId_flightNumber_dateString: {
+                            tenantId: session.user.tenantId,
+                            flightNumber,
+                            dateString: dString
+                        }
+                    },
+                    update: {
+                        lastCheckedAt: now
+                    },
+                    create: {
+                        tenantId: session.user.tenantId,
+                        flightNumber,
+                        dateString: dString,
+                        status: 'scheduled',
+                        scheduledArrival: pickupTime, // fallback to pickup time
+                        estimatedArrival: pickupTime,
+                        lastCheckedAt: now
+                    }
+                });
             }
         } else {
             console.log(`[Flight API] Serving cached data for ${flightNumber}.`);

@@ -1,6 +1,9 @@
 export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: string | null) {
     if (!flightNumber) return null;
 
+    // Strip leading zeros from the numeric part of the flight number (e.g., BA060 -> BA60)
+    const normalizedFlightNumber = flightNumber.replace(/([A-Za-z]{2,3})0+(\d+)/, '$1$2');
+
     // Use AviationStack for real-time data. Use tenant key if available, else fallback to global env
     const API_KEY = tenantApiKey || process.env.AVIATIONSTACK_API_KEY;
 
@@ -10,7 +13,7 @@ export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: str
     }
 
     try {
-        const res = await fetch(`http://api.aviationstack.com/v1/flights?access_key=${API_KEY}&flight_iata=${encodeURIComponent(flightNumber)}&limit=1`, {
+        const res = await fetch(`http://api.aviationstack.com/v1/flights?access_key=${API_KEY}&flight_iata=${encodeURIComponent(normalizedFlightNumber)}&limit=1`, {
             next: { revalidate: 300 } // Cache for 5 mins
         });
 
