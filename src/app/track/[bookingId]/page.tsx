@@ -140,7 +140,7 @@ function TrackingContent() {
                         <Marker
                             position={booking.driver.location}
                             icon={{
-                                url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                             }}
                         />
                     )}

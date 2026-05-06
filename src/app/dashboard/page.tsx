@@ -277,10 +277,10 @@ export default function DashboardPage() {
                                 position={pos}
                                 icon={
                                     (driver.status === 'ONLINE' || driver.status === 'FREE') 
-                                        ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' 
+                                        ? 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' 
                                         : driver.status === 'BUSY' 
-                                        ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' 
-                                        : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                                        ? 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' 
+                                        : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
                                 }
                                 label={{
                                     text: driver.callsign || "",
