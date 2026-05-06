@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { GoogleMapsLoader } from '@/components/dashboard/google-maps-loader';
-import { GoogleMap, MarkerF, DirectionsRendererF } from '@react-google-maps/api';
+import { GoogleMap, MarkerF, DirectionsRenderer } from '@react-google-maps/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Phone, User, Car, MapPin, Clock } from 'lucide-react';
@@ -134,7 +134,7 @@ function TrackingContent() {
                     }}
                     onLoad={map => { mapRef.current = map; }}
                 >
-                    {directions && <DirectionsRendererF directions={directions} options={{ polylineOptions: { strokeColor: '#d4af37', strokeWeight: 4 } }} />}
+                    {directions && <DirectionsRenderer directions={directions} options={{ polylineOptions: { strokeColor: '#d4af37', strokeWeight: 4 } }} />}
 
                     {booking.driver?.location && (
                         <MarkerF
