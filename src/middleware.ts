@@ -29,6 +29,15 @@ export async function middleware(request: NextRequest) {
             currentHost = hostname.replace(`.localhost:3000`, "");
         }
 
+        // Landing Page Routing for Root Path
+        if (url.pathname === "/") {
+            if (currentHost === "app") {
+                return NextResponse.rewrite(new URL(`/operator-landing`, request.url));
+            } else if (currentHost === "www" || currentHost === "cabai.co.uk" || currentHost === "localhost:3000") {
+                return NextResponse.rewrite(new URL(`/consumer-landing`, request.url));
+            }
+        }
+
         // If it's a subdomain (not app, www, the base domain, localhost, and not an API/static route)
         if (
             currentHost !== "app" &&
