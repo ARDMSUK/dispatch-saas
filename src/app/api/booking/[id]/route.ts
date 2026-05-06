@@ -29,6 +29,8 @@ export async function GET(
                         callsign: true, // Lowercase 'callsign' in schema!
                         phone: true,
                         location: true,
+                        currentLat: true,
+                        currentLng: true,
                         vehicles: true, // Plural relation
                     }
                 },
@@ -64,7 +66,9 @@ export async function GET(
                 name: job.driver.name,
                 callSign: job.driver.callsign, // Schema: callsign
                 phone: job.driver.phone,
-                location: parseLocation(job.driver.location),
+                location: (job.driver.currentLat && job.driver.currentLng) 
+                    ? { lat: job.driver.currentLat, lng: job.driver.currentLng } 
+                    : parseLocation(job.driver.location),
                 vehicle: driverVehicle ? {
                     make: driverVehicle.make,
                     model: driverVehicle.model,

@@ -184,14 +184,22 @@ export default function DashboardPage() {
             d.callsign?.toLowerCase().includes(mapSearchTerm.toLowerCase())
         );
         
-        if (driver && driver.location) {
+        if (driver) {
             try {
-                const pos = JSON.parse(driver.location);
-                if (pos.lat && pos.lng) {
+                let pos = null;
+                if (driver.currentLat && driver.currentLng) {
+                    pos = { lat: driver.currentLat, lng: driver.currentLng };
+                } else if (driver.location) {
+                    pos = JSON.parse(driver.location);
+                }
+
+                if (pos && pos.lat && pos.lng) {
                     map.panTo(pos);
                     map.setZoom(15);
                     setTrackingDriverId(driver.id); // Start tracking
                     toast.success(`Tracking ${driver.name} (${driver.callsign})`);
+                } else {
+                     toast.error("Driver location is invalid");
                 }
             } catch (e) {
                 toast.error("Driver location is invalid");
@@ -208,10 +216,16 @@ export default function DashboardPage() {
         // If we are tracking a specific driver, keep them centered instead of fitting bounds
         if (trackingDriverId) {
             const driver = drivers.find(d => d.id === trackingDriverId);
-            if (driver && driver.location) {
+            if (driver) {
                 try {
-                    const pos = JSON.parse(driver.location);
-                    if (pos.lat && pos.lng) {
+                    let pos = null;
+                    if (driver.currentLat && driver.currentLng) {
+                        pos = { lat: driver.currentLat, lng: driver.currentLng };
+                    } else if (driver.location) {
+                        pos = JSON.parse(driver.location);
+                    }
+
+                    if (pos && pos.lat && pos.lng) {
                         map.panTo(pos);
                     }
                 } catch (e) {}
@@ -223,15 +237,19 @@ export default function DashboardPage() {
         let hasDriverLoc = false;
 
         drivers.forEach(d => {
-            if (d.location) {
-                try {
-                    const pos = JSON.parse(d.location);
-                    if (pos.lat && pos.lng) {
-                        bounds.extend(pos);
-                        hasDriverLoc = true;
-                    }
-                } catch (e) { }
-            }
+            try {
+                let pos = null;
+                if (d.currentLat && d.currentLng) {
+                    pos = { lat: d.currentLat, lng: d.currentLng };
+                } else if (d.location) {
+                    pos = JSON.parse(d.location);
+                }
+                
+                if (pos && pos.lat && pos.lng) {
+                    bounds.extend(pos);
+                    hasDriverLoc = true;
+                }
+            } catch (e) { }
         });
 
         // Only fit bounds if we actually have drivers to show.
@@ -268,9 +286,16 @@ export default function DashboardPage() {
             >
                 {/* MARKERS */}
                 {drivers.map(driver => {
-                    if (!driver.location) return null;
                     try {
-                        const pos = JSON.parse(driver.location);
+                        let pos = null;
+                        if (driver.currentLat && driver.currentLng) {
+                            pos = { lat: driver.currentLat, lng: driver.currentLng };
+                        } else if (driver.location) {
+                            pos = JSON.parse(driver.location);
+                        }
+
+                        if (!pos || !pos.lat || !pos.lng) return null;
+
                         return (
                             <MarkerF
                                 key={driver.id}
