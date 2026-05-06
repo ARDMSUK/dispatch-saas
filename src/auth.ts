@@ -121,6 +121,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 delete token.impersonatedTenantSlug;
             }
 
+            // Clear Force Password Reset Flag
+            if (trigger === "update" && session?.forcePasswordReset === false) {
+                token.forcePasswordReset = false;
+            }
+
             return token;
         },
     },

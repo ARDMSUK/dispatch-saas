@@ -45,7 +45,7 @@ export default function ForceResetPage() {
             if (res.ok) {
                 setSuccess(true);
                 // Refresh NextAuth session to drop the forcePasswordReset flag
-                await update();
+                await update({ forcePasswordReset: false });
                 setTimeout(() => {
                     router.push("/dashboard");
                 }, 2000);
