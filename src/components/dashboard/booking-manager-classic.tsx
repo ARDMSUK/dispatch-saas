@@ -458,14 +458,53 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                 {/* COL: FARE & PAYMENT */}
                 <div className="w-20 flex flex-col items-end justify-center pr-2">
                     <div className="font-black text-slate-900 text-base">£{job.fare?.toFixed(2) || '0.00'}</div>
-                    <div className={`font-bold text-[9px] px-1 rounded ${(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') ? 'bg-emerald-100 text-emerald-700' : 'text-slate-400'}`}>
-                        {job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType}
-                        {(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') && ' ✓'}
+                    <div className="mt-0.5">
+                        {(() => {
+                            if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
+                                return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType} ✓</Badge>;
+                            }
+                            if (job.paymentType === 'CARD' || job.paymentType === 'IN_CAR_TERMINAL') {
+                                return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-1 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : 'CARD'}</Badge>;
+                            }
+                            if (job.paymentType === 'ACCOUNT') {
+                                return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1 text-[9px] rounded-sm">ACCOUNT</Badge>;
+                            }
+                            return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none px-1 text-[9px] rounded-sm">CASH</Badge>;
+                        })()}
                     </div>
                 </div>
                 
                 {/* ACTIONS */}
-                <div className="w-6 flex items-center justify-center relative">
+                <div className="flex items-center gap-1 pr-1">
+                    {/* Add Dispatch button for Pending jobs with preassigned driver */}
+                    {job.status === 'PENDING' && job.preAssignedDriver && (
+                        <Button 
+                            size="sm" 
+                            className="h-6 text-[10px] px-2 bg-purple-100 text-purple-700 hover:bg-purple-200 border-none shrink-0"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleManualDispatch(job);
+                            }}
+                        >
+                            <Send className="h-3 w-3 mr-1" />
+                            Dispatch
+                        </Button>
+                    )}
+                    {(job.status === 'PENDING' || job.status === 'UNASSIGNED') && !job.preAssignedDriver && (
+                        <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="h-6 text-[10px] px-2 border-slate-200 text-slate-600 shrink-0"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setDispatchJob(job);
+                                setDispatchOpen(true);
+                            }}
+                        >
+                            Assign
+                        </Button>
+                    )}
+                    
                     <Popover>
                         <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-300 group-hover:text-slate-600 transition-colors">

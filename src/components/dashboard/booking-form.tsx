@@ -12,6 +12,8 @@ type BookingFormProps = {
     onJobCreated: () => void;
 };
 
+import { format, addMinutes, addHours, addDays, setHours, setMinutes } from 'date-fns';
+
 // Helper: Calculate Haversine Distance (Miles)
 function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 3958.8; // Radius of Earth in miles
@@ -97,10 +99,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
     // Timing
     const [pickupTime, setPickupTime] = useState(() => {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() + 10);
-        const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-        return local;
+        return format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm");
     });
 
     // Return Booking
@@ -564,25 +563,20 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <Button
                             variant="outline"
                             className={`h-[42px] px-3 border-slate-200 ${pickupTime.includes('T') ? 'bg-blue-700/10 text-blue-700 border-blue-700/50' : 'bg-slate-100 text-slate-500'}`}
-                            onClick={() => {
-                                const now = new Date();
-                                now.setMinutes(now.getMinutes() + 10); // ASAP = +10 mins
-                                const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-                                setPickupTime(local);
-                            }}
+                            onClick={() => setPickupTime(format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm"))}
                         >
                             ASAP
                         </Button>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                         <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => { const now = new Date(); now.setMinutes(now.getMinutes() + 15); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>ASAP (+15m)</Button>
+                            onClick={() => setPickupTime(format(addMinutes(new Date(), 15), "yyyy-MM-dd'T'HH:mm"))}>ASAP (+15m)</Button>
                         <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => { const now = new Date(); now.setMinutes(now.getMinutes() + 30); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>+30m</Button>
+                            onClick={() => setPickupTime(format(addMinutes(new Date(), 30), "yyyy-MM-dd'T'HH:mm"))}>+30m</Button>
                         <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => { const now = new Date(); now.setHours(now.getHours() + 1); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>+1h</Button>
+                            onClick={() => setPickupTime(format(addHours(new Date(), 1), "yyyy-MM-dd'T'HH:mm"))}>+1h</Button>
                         <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => { const now = new Date(); now.setDate(now.getDate() + 1); now.setHours(9, 0, 0, 0); const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); setPickupTime(local); }}>Tomorrow 9AM</Button>
+                            onClick={() => setPickupTime(format(setMinutes(setHours(addDays(new Date(), 1), 9), 0), "yyyy-MM-dd'T'HH:mm"))}>Tomorrow 9AM</Button>
                     </div>
                 </div>
 
