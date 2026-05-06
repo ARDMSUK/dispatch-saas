@@ -11,8 +11,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { email },
+        const user = await prisma.user.findFirst({
+            where: { 
+                email: {
+                    equals: email,
+                    mode: 'insensitive'
+                }
+            },
             include: { tenant: true }
         });
 
@@ -28,8 +33,13 @@ export async function POST(req: Request) {
         const expiry = new Date();
         expiry.setHours(expiry.getHours() + 1);
 
-        await prisma.user.update({
-            where: { email },
+        await prisma.user.updateMany({
+            where: { 
+                email: {
+                    equals: email,
+                    mode: 'insensitive'
+                }
+            },
             data: {
                 resetToken: rawToken,
                 resetTokenExpiry: expiry

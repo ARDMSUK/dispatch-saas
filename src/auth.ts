@@ -26,8 +26,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const { email, password } = validatedFields.data;
                     const twoFactorToken = credentials.twoFactorToken as string | undefined;
 
-                    const user = await prisma.user.findUnique({
-                        where: { email },
+                    const user = await prisma.user.findFirst({
+                        where: {
+                            email: {
+                                equals: email,
+                                mode: 'insensitive'
+                            }
+                        },
                         include: { tenant: true },
                     });
 
