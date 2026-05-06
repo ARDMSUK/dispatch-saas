@@ -18,9 +18,11 @@ export async function OPTIONS() {
 
 const UpdateJobSchema = z.object({
     status: z.enum([
+        "EN_ROUTE",
         "ARRIVED",
         "POB",
-        "CLEARED"
+        "CLEARED",
+        "UNASSIGNED"
     ])
 });
 
@@ -89,6 +91,24 @@ export async function PATCH(
                 })
             ]);
             updatedJob = job;
+        } else if (realStatus === 'UNASSIGNED') {
+            const [job, driver] = await prisma.$transaction([
+                prisma.job.update({
+                    where: { id: jobId },
+                    data: { status: 'UNASSIGNED', driverId: null },
+                    include: {
+                        driver: {
+                            include: { vehicles: true }
+                        },
+                        customer: true
+                    }
+                }),
+                prisma.driver.update({
+                    where: { id: driverId as string },
+                    data: { status: 'ONLINE' }
+                })
+            ]);
+            updatedJob = job;
         } else {
             updatedJob = await prisma.job.update({
                 where: { id: jobId },
@@ -106,6 +126,22 @@ export async function PATCH(
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: updatedJob.tenantId } });
 
         // --- Notifications ---
+        // Driver Accepted / En Route
+        if (realStatus === 'EN_ROUTE' && updatedJob.driverId && updatedJob.driver) {
+            console.log(`[Mobile API] Job ${jobId} En Route. Sending Notification to Passenger...`);
+            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+            SmsService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+
+            if (updatedJob.customer?.expoPushToken) {
+                sendPushNotification({
+                    to: updatedJob.customer.expoPushToken,
+                    title: 'Your driver is on the way!',
+                    body: `${updatedJob.driver.name} is heading to your pickup location.`,
+                    data: { route: 'tracking', id: jobId }
+                });
+            }
+        }
+
         // Driver Arrived
         if (realStatus === 'ARRIVED' && updatedJob.driverId && updatedJob.driver) {
             console.log(`[Mobile API] Job ${jobId} Arrived. Sending Notification...`);

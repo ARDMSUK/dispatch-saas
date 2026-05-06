@@ -33,7 +33,7 @@ export async function GET(request: Request) {
             where: {
                 driverId: driverId as string,
                 status: {
-                    in: ['DISPATCHED', 'ARRIVED', 'POB']
+                    in: ['DISPATCHED', 'EN_ROUTE', 'ARRIVED', 'POB']
                 }
             },
             include: {

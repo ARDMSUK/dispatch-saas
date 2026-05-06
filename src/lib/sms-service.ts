@@ -18,7 +18,10 @@ export const SmsService = {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
-        const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app';
+        const trackingLink = booking.tenant?.slug 
+            ? `https://${booking.tenant.slug}.cabai.co.uk/track/${booking.id}` 
+            : `${baseUrl}/track/${booking.id}`;
 
         return template
             .replace(/{booking_id}/g, booking.id || '')
@@ -44,7 +47,10 @@ export const SmsService = {
             });
             const company = orgSettings?.name || 'Dispatch';
             const destination = booking.dropoffAddress || booking.dropoff || 'your destination';
-            const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app';
+            const trackingLink = orgSettings?.slug 
+                ? `https://${orgSettings.slug}.cabai.co.uk/track/${booking.id}` 
+                : `${baseUrl}/track/${booking.id}`;
             
             message = `${company}: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${destination}`;
             
@@ -66,7 +72,10 @@ export const SmsService = {
             const vehicle = driver.vehicles?.[0] || driver.vehicle;
             const vehicleDesc = vehicle ? `${vehicle.color} ${vehicle.make} ${vehicle.model} (${vehicle.reg || vehicle.registration})` : 'our car';
             const company = orgSettings?.name || 'Dispatch';
-            const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app';
+            const trackingLink = orgSettings?.slug 
+                ? `https://${orgSettings.slug}.cabai.co.uk/track/${booking.id}` 
+                : `${baseUrl}/track/${booking.id}`;
 
             message = `${company}: Driver Assigned.\n${driver.name} is on the way in ${vehicleDesc}.\nCall: ${driver.phone}`;
 
