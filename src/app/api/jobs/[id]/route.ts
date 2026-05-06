@@ -74,16 +74,71 @@ export async function PATCH(
             ...(validation.data.preAssignedDriverId !== undefined && { preAssignedDriverId: validation.data.preAssignedDriverId }),
         };
 
-        const updatedJob = await prisma.job.update({
-            where: { id: jobId },
-            data: updateData,
-            include: {
-                driver: {
-                    include: { vehicles: true }
-                },
-                customer: true
+        let updatedJob;
+        
+        if ((status === 'COMPLETED' || status === 'CANCELLED' || status === 'NO_SHOW') && updateData.driverId) {
+            const [job, driver] = await prisma.$transaction([
+                prisma.job.update({
+                    where: { id: jobId },
+                    data: updateData,
+                    include: {
+                        driver: {
+                            include: { vehicles: true }
+                        },
+                        customer: true
+                    }
+                }),
+                prisma.driver.update({
+                    where: { id: updateData.driverId },
+                    data: { status: 'ONLINE' }
+                })
+            ]);
+            updatedJob = job;
+        } else if ((status === 'COMPLETED' || status === 'CANCELLED' || status === 'NO_SHOW') && driverId === undefined) {
+            // Need to fetch current driver ID if it wasn't provided in the update
+            const currentJob = await prisma.job.findUnique({ where: { id: jobId } });
+            if (currentJob?.driverId) {
+                const [job, driver] = await prisma.$transaction([
+                    prisma.job.update({
+                        where: { id: jobId },
+                        data: updateData,
+                        include: {
+                            driver: {
+                                include: { vehicles: true }
+                            },
+                            customer: true
+                        }
+                    }),
+                    prisma.driver.update({
+                        where: { id: currentJob.driverId },
+                        data: { status: 'ONLINE' }
+                    })
+                ]);
+                updatedJob = job;
+            } else {
+                updatedJob = await prisma.job.update({
+                    where: { id: jobId },
+                    data: updateData,
+                    include: {
+                        driver: {
+                            include: { vehicles: true }
+                        },
+                        customer: true
+                    }
+                });
             }
-        });
+        } else {
+            updatedJob = await prisma.job.update({
+                where: { id: jobId },
+                data: updateData,
+                include: {
+                    driver: {
+                        include: { vehicles: true }
+                    },
+                    customer: true
+                }
+            });
+        }
 
         // Fetch Tenant Settings to apply custom templates
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: updatedJob.tenantId } });

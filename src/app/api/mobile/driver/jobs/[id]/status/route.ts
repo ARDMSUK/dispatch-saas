@@ -69,16 +69,38 @@ export async function PATCH(
 
         const realStatus = status === 'CLEARED' ? 'COMPLETED' : status;
 
-        const updatedJob = await prisma.job.update({
-            where: { id: jobId },
-            data: { status: realStatus },
-            include: {
-                driver: {
-                    include: { vehicles: true }
-                },
-                customer: true
-            }
-        });
+        let updatedJob;
+
+        if (realStatus === 'COMPLETED' || realStatus === 'CANCELLED' || realStatus === 'NO_SHOW') {
+            const [job, driver] = await prisma.$transaction([
+                prisma.job.update({
+                    where: { id: jobId },
+                    data: { status: realStatus },
+                    include: {
+                        driver: {
+                            include: { vehicles: true }
+                        },
+                        customer: true
+                    }
+                }),
+                prisma.driver.update({
+                    where: { id: driverId as string },
+                    data: { status: 'ONLINE' }
+                })
+            ]);
+            updatedJob = job;
+        } else {
+            updatedJob = await prisma.job.update({
+                where: { id: jobId },
+                data: { status: realStatus },
+                include: {
+                    driver: {
+                        include: { vehicles: true }
+                    },
+                    customer: true
+                }
+            });
+        }
 
         // Fetch Tenant Settings to apply custom templates
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: updatedJob.tenantId } });

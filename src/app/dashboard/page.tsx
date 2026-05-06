@@ -276,13 +276,12 @@ export default function DashboardPage() {
                                 key={driver.id}
                                 position={pos}
                                 icon={{
-                                    // Use standard Google Maps circle path (0)
-                                    path: 0,
-                                    fillColor: (driver.status === 'ONLINE' || driver.status === 'FREE') ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
-                                    fillOpacity: 1,
-                                    strokeWeight: 2,
-                                    strokeColor: '#ffffff',
-                                    scale: 10, // radius of 10
+                                    url: (driver.status === 'ONLINE' || driver.status === 'FREE') 
+                                        ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' 
+                                        : driver.status === 'BUSY' 
+                                        ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' 
+                                        : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                                    scaledSize: typeof window !== 'undefined' && window.google ? new window.google.maps.Size(32, 32) : undefined
                                 }}
                                 label={{
                                     text: driver.callsign || "",
