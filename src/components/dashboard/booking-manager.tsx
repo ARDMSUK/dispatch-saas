@@ -559,6 +559,37 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     </div>
                 </div>
 
+                {/* Quick Actions (Mobile Layout) */}
+                <div className="flex gap-2 mb-3">
+                    {job.status === 'PENDING' && job.preAssignedDriver && (
+                        <Button 
+                            size="sm" 
+                            className="h-7 text-[11px] px-3 bg-purple-100 text-purple-700 hover:bg-purple-200 border-none w-full"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleManualDispatch(job);
+                            }}
+                        >
+                            <Send className="h-3 w-3 mr-1.5" />
+                            Dispatch
+                        </Button>
+                    )}
+                    {(job.status === 'PENDING' || job.status === 'UNASSIGNED') && !job.preAssignedDriver && (
+                        <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="h-7 text-[11px] px-3 border-slate-200 text-slate-600 w-full"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setDispatchJob(job);
+                                setDispatchOpen(true);
+                            }}
+                        >
+                            Assign Driver
+                        </Button>
+                    )}
+                </div>
+
                 <div className="grid grid-cols-12 gap-4">
                     {/* ... existing card content ... */}
                     <div className="col-span-12 md:col-span-5 space-y-2">
@@ -624,9 +655,20 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="col-span-12 md:col-span-3 flex flex-col justify-center items-end border-l border-slate-200 pl-4">
                         <span className="text-xl font-bold text-slate-900">£{job.fare?.toFixed(2) || '0.00'}</span>
                         <span className={`text-[10px] uppercase tracking-wider font-bold ${getVehicleTextColor(job.vehicleType)}`}>{job.vehicleType}</span>
-                        <span className="text-[10px] text-slate-400 mt-1">
-                            {job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType}
-                        </span>
+                        <div className="mt-1">
+                            {(() => {
+                                if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
+                                    return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType} ✓</Badge>;
+                                }
+                                if (job.paymentType === 'CARD' || job.paymentType === 'IN_CAR_TERMINAL') {
+                                    return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-1.5 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : 'CARD'}</Badge>;
+                                }
+                                if (job.paymentType === 'ACCOUNT') {
+                                    return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1.5 text-[9px] rounded-sm">ACCOUNT</Badge>;
+                                }
+                                return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none px-1.5 text-[9px] rounded-sm">CASH</Badge>;
+                            })()}
+                        </div>
                     </div>
                 </div>
             </div>
