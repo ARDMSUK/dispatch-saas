@@ -5,9 +5,8 @@ export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: str
     const API_KEY = tenantApiKey || process.env.AVIATIONSTACK_API_KEY;
 
     if (!API_KEY) {
-        console.warn("[FlightService] No AVIATIONSTACK_API_KEY found, returning mock data");
-        // Mock data logic for testing without an API key
-        return getMockFlightData(flightNumber);
+        console.warn("[FlightService] No AVIATIONSTACK_API_KEY found.");
+        return null;
     }
 
     try {
@@ -17,7 +16,7 @@ export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: str
 
         if (!res.ok) {
             console.error("[FlightService] API error", await res.text());
-            return getMockFlightData(flightNumber);
+            return null;
         }
 
         const data = await res.json();
@@ -25,7 +24,7 @@ export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: str
         // Handle cases where API returns 200 OK but body contains an error (e.g., missing API key)
         if (data.error) {
             console.error("[FlightService] API returned an error:", data.error.message || data.error);
-            return getMockFlightData(flightNumber);
+            return null;
         }
 
         if (data && data.data && data.data.length > 0) {
@@ -42,37 +41,11 @@ export async function fetchFlightStatus(flightNumber: string, tenantApiKey?: str
             };
         }
 
-        console.warn(`[FlightService] No real flight data found for ${flightNumber}. Falling back to mock data.`);
-        // If no data found for some reason, fallback to mock to prevent crashing dashboard
-        return getMockFlightData(flightNumber);
+        console.warn(`[FlightService] No real flight data found for ${flightNumber}.`);
+        return null;
 
     } catch (e) {
         console.error("[FlightService] Failed to fetch flight data", e);
-        return getMockFlightData(flightNumber);
+        return null;
     }
-}
-
-function getMockFlightData(flightNumber: string) {
-    // Generate deterministic mock data based on the flight number
-    const hash = flightNumber.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-    // Base it off current time
-    const now = new Date();
-    const scheduled = new Date(now.getTime() + (1000 * 60 * 60 * 2)); // 2 hours from now
-
-    // Add artificial delay for some flights based on hash
-    const delayMinutes = (hash % 5 === 0) ? 45 : 0;
-    const estimated = new Date(scheduled.getTime() + (delayMinutes * 60000));
-
-    return {
-        status: delayMinutes > 0 ? 'active (delayed)' : 'scheduled',
-        scheduledArrival: scheduled.toISOString(),
-        estimatedArrival: estimated.toISOString(),
-        actualArrival: null,
-        airline: "[MOCK] Mock Airlines",
-        terminal: "5",
-        gate: "A12",
-        baggage: "Carousel 3",
-        _isMock: true
-    };
 }
