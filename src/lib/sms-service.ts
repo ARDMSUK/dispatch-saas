@@ -114,7 +114,8 @@ export const SmsService = {
         const company = orgSettings?.name || 'Dispatch';
         const fare = booking.fare ? `\nFare: £${booking.fare.toFixed(2)}` : '';
         const cxPhone = booking.passengerPhone ? `\nCx Tel: ${booking.passengerPhone}` : '';
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app';
+        const appUrl = orgSettings?.slug ? `https://${orgSettings.slug}.cabai.co.uk` : baseUrl;
         const message = `${company}: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${booking.dropoffAddress || booking.dropoff}${fare}${cxPhone}\nLog in here: ${appUrl}/driver`;
         return this.sendSms(driver.phone, message);
     },

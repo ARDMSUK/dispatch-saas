@@ -113,92 +113,9 @@ function TrackingContent() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-            {/* Left Panel: Status & Info */}
-            <div className="w-full md:w-1/3 p-6 flex flex-col gap-6 border-r border-slate-800/50 z-10 bg-slate-950 shadow-2xl">
-                <div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-gold-400 to-blue-800 bg-clip-text text-transparent mb-2">
-                        Booking Tracker
-                    </h1>
-                    <p className="text-sm text-slate-400">Ref: #{booking.id.toString().padStart(6, '0')}</p>
-                </div>
-
-                {/* Status Card */}
-                <Card className="bg-slate-900/50 border-slate-800">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex justify-between items-center">
-                            Status
-                            <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-lg font-medium text-slate-200">{getStatusText(booking.status)}</p>
-                    </CardContent>
-                </Card>
-
-                {/* Journey Details */}
-                <div className="space-y-4">
-                    <div className="flex gap-3">
-                        <div className="flex flex-col items-center gap-1 mt-1">
-                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                            <div className="w-0.5 h-full bg-slate-800" />
-                            <div className="w-2 h-2 rounded-full bg-gold-500" />
-                        </div>
-                        <div className="flex-1 space-y-6">
-                            <div>
-                                <p className="text-xs text-slate-500 uppercase font-semibold">Pickup</p>
-                                <p className="text-slate-200">{booking.pickup}</p>
-                                <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                                    <Clock className="w-3 h-3" /> {new Date(booking.pickupDate).toLocaleString()}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-slate-500 uppercase font-semibold">Dropoff</p>
-                                <p className="text-slate-200">{booking.dropoff}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Driver Card (if assigned) */}
-                {booking.driver && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                        <Card className="bg-slate-900 border-gold-500/30">
-                            <CardHeader>
-                                <CardTitle className="text-sm uppercase text-slate-500 tracking-wider">Your Driver</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
-                                        <User className="w-6 h-6 text-slate-400" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-lg">{booking.driver.name}</p>
-                                        <p className="text-gold-500 font-mono text-sm">{booking.driver.callSign}</p>
-                                    </div>
-                                    {booking.driver.phone && (
-                                        <Button size="icon" variant="outline" className="ml-auto border-green-500/30 text-green-500 hover:bg-green-500/10">
-                                            <Phone className="w-4 h-4" />
-                                        </Button>
-                                    )}
-                                </div>
-                                {booking.driver.vehicle && (
-                                    <div className="flex items-center gap-3 p-3 bg-slate-950 rounded-lg border border-slate-800">
-                                        <Car className="w-5 h-5 text-slate-400" />
-                                        <div>
-                                            <p className="text-sm font-medium">{booking.driver.vehicle.color} {booking.driver.vehicle.make} {booking.driver.vehicle.model}</p>
-                                            <p className="text-xs text-slate-500 uppercase tracking-widest">{booking.driver.vehicle.registration}</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
-            </div>
-
-            {/* Right Panel: Map */}
-            <div className="flex-1 h-[50vh] md:h-auto bg-slate-900 relative">
+        <div className="relative w-full h-screen bg-slate-950 overflow-hidden">
+            {/* Map Background */}
+            <div className="absolute inset-0 z-0">
                 <GoogleMap
                     mapContainerStyle={{ width: '100%', height: '100%' }}
                     center={center}
@@ -213,7 +130,7 @@ function TrackingContent() {
                             { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                         ],
                         disableDefaultUI: true,
-                        zoomControl: true,
+                        zoomControl: false,
                     }}
                     onLoad={map => { mapRef.current = map; }}
                 >
@@ -223,17 +140,68 @@ function TrackingContent() {
                         <Marker
                             position={booking.driver.location}
                             icon={{
-                                path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                                scale: 6,
-                                fillColor: "#d4af37",
-                                fillOpacity: 1,
-                                strokeWeight: 2,
-                                strokeColor: "#ffffff",
-                                rotation: 0 // Ideally this would be the driver's bearing
+                                url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                             }}
                         />
                     )}
                 </GoogleMap>
+            </div>
+
+            {/* Floating UI Container */}
+            <div className="absolute inset-x-0 bottom-0 z-10 p-4 pb-8 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col gap-4 pointer-events-none">
+                
+                <div className="pointer-events-auto">
+                    <Card className="bg-slate-900/95 border-slate-800 shadow-2xl backdrop-blur-sm">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-lg flex justify-between items-center text-slate-100">
+                                {getStatusText(booking.status)}
+                                <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Driver Info */}
+                            {booking.driver && (
+                                <div className="flex items-center gap-4 bg-slate-950/50 p-3 rounded-lg border border-slate-800">
+                                    <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                                        <User className="w-6 h-6 text-slate-400" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-100">{booking.driver.name}</p>
+                                        <p className="text-gold-500 font-mono text-xs">{booking.driver.callSign} • {booking.driver.vehicle?.color} {booking.driver.vehicle?.make}</p>
+                                        <p className="text-slate-400 text-xs font-mono uppercase">{booking.driver.vehicle?.registration}</p>
+                                    </div>
+                                    {booking.driver.phone && (
+                                        <a href={`tel:${booking.driver.phone}`} className="ml-auto">
+                                            <Button size="icon" variant="outline" className="border-green-500/30 text-green-500 hover:bg-green-500/10 rounded-full h-10 w-10">
+                                                <Phone className="w-4 h-4" />
+                                            </Button>
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Addresses */}
+                            <div className="flex gap-3 text-sm mt-2">
+                                <div className="flex flex-col items-center gap-1 mt-1">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                    <div className="w-0.5 h-6 bg-slate-800" />
+                                    <div className="w-2 h-2 rounded-full bg-gold-500" />
+                                </div>
+                                <div className="flex-1 space-y-3 text-slate-300">
+                                    <p className="truncate">{booking.pickup}</p>
+                                    <p className="truncate">{booking.dropoff}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+            
+            {/* Header Badge */}
+            <div className="absolute top-4 left-4 z-10 pointer-events-auto">
+                <Badge variant="outline" className="bg-slate-950/80 backdrop-blur border-slate-800 text-slate-200 shadow-lg">
+                    Ref: #{booking.id.toString().padStart(6, '0')}
+                </Badge>
             </div>
         </div>
     );

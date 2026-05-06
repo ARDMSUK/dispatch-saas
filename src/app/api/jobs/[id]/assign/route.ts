@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { SmsService } from '@/lib/sms-service';
+import { sendPushNotification } from '@/lib/push-notifications';
 import { auth } from "@/auth";
 
 export async function PATCH(
@@ -53,6 +54,15 @@ export async function PATCH(
         // Notifications
         // 1. Notify Driver of Job Offer
         SmsService.sendJobOfferToDriver(updatedJob, driver, tenantSettings).catch(e => console.error("Failed to SMS Driver", e));
+        
+        if (driver.expoPushToken) {
+            sendPushNotification({
+                to: driver.expoPushToken,
+                title: 'New Job Assigned!',
+                body: `Pickup at ${updatedJob.pickupAddress}. Open app to Accept or Reject.`,
+                data: { route: 'home', jobId: updatedJob.id }
+            });
+        }
 
         return NextResponse.json(updatedJob);
     } catch (error) {
