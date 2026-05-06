@@ -44,7 +44,13 @@ export const SmsService = {
             });
             const company = orgSettings?.name || 'Dispatch';
             const destination = booking.dropoffAddress || booking.dropoff || 'your destination';
+            const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app'}/track/${booking.id}`;
+            
             message = `${company}: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${destination}`;
+            
+            if (orgSettings?.enableLiveTracking !== false) {
+                message += `\nTrack: ${trackingLink}`;
+            }
         }
 
         return this.sendSms(booking.passengerPhone, message);

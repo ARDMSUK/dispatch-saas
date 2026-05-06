@@ -276,13 +276,13 @@ export default function DashboardPage() {
                                 key={driver.id}
                                 position={pos}
                                 icon={{
-                                    path: "M 0, 0 m -10, 0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0",
+                                    // Use standard Google Maps circle path (0)
+                                    path: 0,
                                     fillColor: (driver.status === 'ONLINE' || driver.status === 'FREE') ? '#10b981' : driver.status === 'BUSY' ? '#3b82f6' : '#ef4444',
                                     fillOpacity: 1,
                                     strokeWeight: 2,
                                     strokeColor: '#ffffff',
-                                    scale: 1.2,
-                                    labelOrigin: { x: 0, y: 0 } as any
+                                    scale: 10, // radius of 10
                                 }}
                                 label={{
                                     text: driver.callsign || "",
