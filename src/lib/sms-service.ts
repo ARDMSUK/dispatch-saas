@@ -59,7 +59,13 @@ export const SmsService = {
             }
         }
 
-        return this.sendSms(booking.passengerPhone, message);
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+
+        return this.sendSms(booking.passengerPhone, message, config);
     },
 
     async sendDriverAssigned(booking: any, driver: any, orgSettings?: any) {
@@ -85,7 +91,13 @@ export const SmsService = {
             }
         }
 
-        return this.sendSms(booking.passengerPhone, message);
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+
+        return this.sendSms(booking.passengerPhone, message, config);
     },
 
     async sendDriverArrived(booking: any, driver: any, orgSettings?: any) {
@@ -101,7 +113,13 @@ export const SmsService = {
             message = `${company}: Driver Arrived.\n${driver.name} is waiting outside in ${vehicleDesc}.\nCall: ${driver.phone}`;
         }
 
-        return this.sendSms(booking.passengerPhone, message);
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+
+        return this.sendSms(booking.passengerPhone, message, config);
     },
 
     async sendJobOfferToDriver(booking: any, driver: any, orgSettings?: any) {
@@ -117,7 +135,13 @@ export const SmsService = {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dispatch-saas.vercel.app';
         const appUrl = orgSettings?.slug ? `https://${orgSettings.slug}.cabai.co.uk` : baseUrl;
         const message = `${company}: New Job Assigned.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${booking.dropoffAddress || booking.dropoff}${fare}${cxPhone}\nLog in here: ${appUrl}/driver`;
-        return this.sendSms(driver.phone, message);
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+        
+        return this.sendSms(driver.phone, message, config);
     },
 
     async sendJobReceipt(booking: any) {
@@ -137,7 +161,13 @@ export const SmsService = {
             message = `${company}: We sincerely apologize for the inconvenience, but due to a lack of availability, your booking #${booking.id} cannot be accepted and has been cancelled.`;
         }
 
-        return this.sendSms(booking.passengerPhone, message);
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+
+        return this.sendSms(booking.passengerPhone, message, config);
     },
 
     async sendSms(to: string, body: string, config?: { accountSid?: string, authToken?: string, fromNumber?: string } | null) {
