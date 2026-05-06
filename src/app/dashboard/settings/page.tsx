@@ -53,6 +53,7 @@ export default function SettingsPage() {
     const [stripePublishableKey, setStripePublishableKey] = useState('');
     const [stripeSecretKey, setStripeSecretKey] = useState('');
     const [paymentRouting, setPaymentRouting] = useState('CENTRAL');
+    const [aviationStackApiKey, setAviationStackApiKey] = useState('');
 
     // Initial Data
     const [slug, setSlug] = useState('');
@@ -124,6 +125,7 @@ export default function SettingsPage() {
                 setStripePublishableKey(data.stripePublishableKey || '');
                 setStripeSecretKey(data.stripeSecretKey || '');
                 setPaymentRouting(data.paymentRouting || 'CENTRAL');
+                setAviationStackApiKey(data.aviationStackApiKey || '');
             }
         } catch (error) {
             console.error(error);
@@ -183,7 +185,8 @@ export default function SettingsPage() {
                     twilioFromNumber,
                     stripePublishableKey,
                     stripeSecretKey,
-                    paymentRouting
+                    paymentRouting,
+                    aviationStackApiKey
                 })
             });
 
@@ -795,6 +798,19 @@ export default function SettingsPage() {
                         </div>
                         <p className="text-xs text-rose-500 mt-2 font-medium">
                             Warning: Do not expose this key to the public. It provides direct read/write access to your tenant data.
+                        </p>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-6 mt-6">
+                        <Label className="text-slate-500">AviationStack API Key (Flight Tracking)</Label>
+                        <Input
+                            value={aviationStackApiKey}
+                            onChange={(e) => setAviationStackApiKey(e.target.value)}
+                            placeholder="Enter your personal AviationStack API Key"
+                            className="bg-slate-100 border-slate-200 mt-1 font-mono text-sm w-full md:w-2/3"
+                        />
+                        <p className="text-xs text-slate-400 mt-2">
+                            AviationStack provides 100 free requests/month. Plug your own key here to avoid sharing the global quota. Get one at <a href="https://aviationstack.com" target="_blank" rel="noreferrer" className="text-emerald-500 hover:underline">aviationstack.com</a>.
                         </p>
                     </div>
                 </div>

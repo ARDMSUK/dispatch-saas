@@ -76,7 +76,8 @@ export async function PATCH(req: Request) {
             stripePublishableKey: body.stripePublishableKey !== undefined ? body.stripePublishableKey : undefined,
             stripeSecretKey: body.stripeSecretKey !== undefined ? body.stripeSecretKey : undefined,
             twilioFromNumber: body.twilioFromNumber !== undefined ? body.twilioFromNumber : undefined,
-            paymentRouting: body.paymentRouting !== undefined ? body.paymentRouting : undefined
+            paymentRouting: body.paymentRouting !== undefined ? body.paymentRouting : undefined,
+            aviationStackApiKey: body.aviationStackApiKey !== undefined ? body.aviationStackApiKey : undefined
         };
 
         if ((session.user.role as string) === 'SUPER_ADMIN') {
