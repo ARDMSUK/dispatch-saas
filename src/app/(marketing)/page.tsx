@@ -4,6 +4,8 @@ import { ArrowRight, BarChart3, Globe2, ShieldCheck, Zap } from 'lucide-react';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CorporateHomePage() {
     const host = (await headers()).get('host') || '';
     if (host.startsWith('app.')) {
