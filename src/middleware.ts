@@ -29,12 +29,15 @@ export async function middleware(request: NextRequest) {
             currentHost = hostname.replace(`.localhost:3000`, "");
         }
 
-        // Landing Page Routing for Root Path
-        if (url.pathname === "/") {
-            if (currentHost === "app") {
-                return NextResponse.rewrite(new URL(`/operator-landing`, request.url));
-            } else if (currentHost === "www" || currentHost === "cabai.co.uk" || currentHost === "localhost:3000") {
-                return NextResponse.rewrite(new URL(`/consumer-landing`, request.url));
+        // Landing Page Routing
+        if (currentHost === "app") {
+            if (url.pathname === "/") {
+                return NextResponse.rewrite(new URL(`/login`, request.url));
+            }
+        } else if (currentHost === "www" || currentHost === "cabai.co.uk" || currentHost === "localhost:3000") {
+            // Rewrite ALL non-API paths for the corporate site to the /corporate folder
+            if (!url.pathname.startsWith("/api")) {
+                return NextResponse.rewrite(new URL(`/corporate${url.pathname}`, request.url));
             }
         }
 
