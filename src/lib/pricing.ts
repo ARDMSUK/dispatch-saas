@@ -123,6 +123,10 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     }
 
     // 1. Fixed Price Check
+    let isFixedPrice = false;
+    let fixedPriceAmount = 0;
+    let fixedPriceRuleId = '';
+
     if (pickup && dropoff) {
         try {
             const fixedPrices = await prisma.fixedPrice.findMany({
@@ -149,18 +153,9 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
 
             if (fixedPrices.length > 0) {
                 const match = fixedPrices[0];
-                // Prisma Decimal to number
-                const price = Number(match.price);
-                return {
-                    price: price,
-                    breakdown: {
-                        base: price,
-                        mileage: 0,
-                        surcharges: [],
-                        isFixed: true,
-                        ruleId: match.id
-                    }
-                };
+                isFixedPrice = true;
+                fixedPriceAmount = Number(match.price);
+                fixedPriceRuleId = match.id;
             }
         } catch (e) {
             console.error("Error querying fixed prices", e);
@@ -196,14 +191,20 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     const min = effectiveRule.minFare ?? 5.00;
 
     // 4. Calculate Base Price
-    let total = base + (distanceMiles * rate);
+    let total = 0;
 
-    // --- Wait logic (Wait & Return or standalone) ---
-    if (req.isWaitAndReturn) {
-        // Round Trip Distance
-        const roundTripDistance = distanceMiles * 2;
-        // Recalculate base price for round trip (using base + mileage)
-        total = base + (roundTripDistance * rate);
+    if (isFixedPrice) {
+        total = fixedPriceAmount;
+    } else {
+        total = base + (distanceMiles * rate);
+
+        // --- Wait logic (Wait & Return or standalone) ---
+        if (req.isWaitAndReturn) {
+            // Round Trip Distance
+            const roundTripDistance = distanceMiles * 2;
+            // Recalculate base price for round trip (using base + mileage)
+            total = base + (roundTripDistance * rate);
+        }
     }
 
     // Add Waiting Time Cost (Always if requested + enabled, or if it's Wait & Return)
@@ -215,8 +216,8 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     }
     // ---------------------------
 
-    // Fallback Multiplier if no DB rule found
-    if (effectiveRule.id === 'default') {
+    // Fallback Multiplier if no DB rule found (and not fixed price)
+    if (!isFixedPrice && effectiveRule.id === 'default') {
         if (vehicleType === 'Estate' || vehicleType === 'Executive') total *= 1.2;
         if (vehicleType.includes('MPV') || vehicleType.includes('8-seater')) total *= 1.5;
     }
@@ -319,11 +320,11 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     return {
         price: parseFloat(total.toFixed(2)),
         breakdown: {
-            base: base,
-            mileage: distanceMiles * rate,
+            base: isFixedPrice ? fixedPriceAmount : base,
+            mileage: isFixedPrice ? 0 : distanceMiles * rate,
             surcharges: surcharges,
-            isFixed: false,
-            ruleId: effectiveRule.id
+            isFixed: isFixedPrice,
+            ruleId: isFixedPrice ? fixedPriceRuleId : effectiveRule.id
         }
     };
 }

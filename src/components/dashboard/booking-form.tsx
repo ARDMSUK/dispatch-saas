@@ -771,7 +771,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {paymentType === 'ACCOUNT' && (
                         <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-1">
                             <select
-                                className="w-full bg-indigo-500/10 border border-indigo-500/30 rounded-md py-2.5 px-3 text-sm text-indigo-300 font-bold focus:outline-none focus:border-indigo-400/50 appearance-none"
+                                className="w-full bg-indigo-50 border border-indigo-200 rounded-md py-2.5 px-3 text-sm text-indigo-900 font-bold focus:outline-none focus:border-indigo-400/50 appearance-none"
                                 value={selectedAccountId}
                                 onChange={e => setSelectedAccountId(e.target.value)}
                             >
