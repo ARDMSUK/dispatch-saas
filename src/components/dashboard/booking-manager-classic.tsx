@@ -687,7 +687,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                 )}
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-200/60">
                 {loading ? (
                     <div className="text-center py-20 text-slate-500 animate-pulse">Loading jobs...</div>
                 ) : filterJobs(activeTab).length === 0 ? (

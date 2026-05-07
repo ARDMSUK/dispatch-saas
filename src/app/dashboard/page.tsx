@@ -367,16 +367,16 @@ export default function DashboardPage() {
 
             {/* COL 2: RIGHT SIDE (Fleet, Map, Jobs) */}
             <div className="flex-1 h-full flex flex-col overflow-hidden bg-slate-100/50">
-                {/* TOP HALF: FLEET & MAP */}
+                {/* TOP HALF: MAP & FLEET */}
                 <div className="flex w-full h-[45vh] border-b border-slate-200 shrink-0 bg-white">
-                    {/* FLEET MANAGEMENT */}
-                    <div className="w-[350px] border-r border-slate-200 bg-slate-50 h-full flex flex-col shrink-0 overflow-y-auto">
-                        {fleetComponent}
-                    </div>
-
-                    {/* MAP */}
+                    {/* MAP (Left) */}
                     <div className="flex-1 bg-slate-100 relative">
                         {mapComponent}
+                    </div>
+
+                    {/* FLEET MANAGEMENT (Right) */}
+                    <div className="w-[350px] border-l border-slate-200 bg-slate-50 h-full flex flex-col shrink-0 overflow-y-auto">
+                        {fleetComponent}
                     </div>
                 </div>
 
