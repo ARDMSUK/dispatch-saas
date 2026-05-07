@@ -29,17 +29,17 @@ export default function CorporateHomePage() {
                         
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                             <Button size="lg" className="h-14 bg-yellow-400 hover:bg-yellow-500 text-slate-900 rounded-full px-8 text-lg font-bold" asChild>
-                                <Link href="/corporate/contact">Request a Demo <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                                <Link href="/contact">Request a Demo <ArrowRight className="ml-2 h-5 w-5" /></Link>
                             </Button>
                             <Button size="lg" variant="outline" className="h-14 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-full px-8 text-lg font-bold" asChild>
-                                <Link href="/corporate/features">Explore Platform</Link>
+                                <Link href="/features">Explore Platform</Link>
                             </Button>
                         </div>
                     </div>
                     
                     <div className="relative hidden lg:block">
                         <div className="absolute inset-0 bg-gradient-to-tr from-yellow-400/20 to-transparent blur-3xl -z-10 rounded-full"></div>
-                        <img src="/placeholder-dashboard.jpg" alt="CABAI Dispatch Software Interface" className="rounded-2xl border border-white/10 shadow-2xl bg-slate-800 aspect-video object-cover" />
+                        <img src="/dashboard.png" alt="CABAI Dispatch Software Interface" className="rounded-2xl border border-white/10 shadow-2xl bg-slate-800 aspect-video object-cover" />
                     </div>
                 </div>
             </section>
@@ -115,7 +115,7 @@ export default function CorporateHomePage() {
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">Ready to modernize your fleet?</h2>
                     <p className="text-xl text-slate-800 mb-10 font-semibold">Join the growing network of operators using CABAI to dominate their local markets.</p>
                     <Button size="lg" className="h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-full px-10 text-lg font-bold shadow-xl" asChild>
-                        <Link href="/corporate/contact">Contact Sales Team</Link>
+                        <Link href="/contact">Contact Sales Team</Link>
                     </Button>
                 </div>
             </section>

@@ -46,7 +46,7 @@ export default function CorporatePricingPage() {
                             </ul>
                         </div>
                         <Button className="w-full h-12 rounded-xl bg-slate-900 text-white font-bold" asChild>
-                            <Link href="/corporate/contact">Start 14-Day Free Trial</Link>
+                            <Link href="/contact">Start 14-Day Free Trial</Link>
                         </Button>
                     </div>
 
@@ -86,7 +86,7 @@ export default function CorporatePricingPage() {
                             </ul>
                         </div>
                         <Button className="w-full h-12 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold relative z-10" asChild>
-                            <Link href="/corporate/contact">Contact Sales</Link>
+                            <Link href="/contact">Contact Sales</Link>
                         </Button>
                     </div>
                 </div>

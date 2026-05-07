@@ -13,7 +13,7 @@ export default function CorporateLayout({
             <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Link href="/corporate" className="flex items-center gap-3">
+                        <Link href="/" className="flex items-center gap-3">
                             <div className="h-10 w-10 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-slate-900 text-xl shadow-sm">
                                 <Car className="h-6 w-6" />
                             </div>
@@ -22,10 +22,10 @@ export default function CorporateLayout({
                     </div>
                     
                     <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-                        <Link href="/corporate/about" className="hover:text-yellow-600 transition-colors">About Us</Link>
-                        <Link href="/corporate/features" className="hover:text-yellow-600 transition-colors">Platform Features</Link>
-                        <Link href="/corporate/pricing" className="hover:text-yellow-600 transition-colors">Pricing</Link>
-                        <Link href="/corporate/contact" className="hover:text-yellow-600 transition-colors">Contact</Link>
+                        <Link href="/about" className="hover:text-yellow-600 transition-colors">About Us</Link>
+                        <Link href="/features" className="hover:text-yellow-600 transition-colors">Platform Features</Link>
+                        <Link href="/pricing" className="hover:text-yellow-600 transition-colors">Pricing</Link>
+                        <Link href="/contact" className="hover:text-yellow-600 transition-colors">Contact</Link>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -33,7 +33,7 @@ export default function CorporateLayout({
                             <a href="https://app.cabai.co.uk">Operator Login</a>
                         </Button>
                         <Button className="bg-slate-900 hover:bg-slate-800 text-white rounded-full px-6 shadow-sm font-semibold" asChild>
-                            <Link href="/corporate/contact">Book Demo</Link>
+                            <Link href="/contact">Book Demo</Link>
                         </Button>
                     </div>
                 </div>
@@ -62,18 +62,18 @@ export default function CorporateLayout({
                     <div>
                         <h4 className="text-white font-bold mb-6 uppercase tracking-wide text-sm">Platform</h4>
                         <ul className="space-y-4 text-sm font-medium text-slate-400">
-                            <li><Link href="/corporate/features" className="hover:text-yellow-400 transition-colors">AI Dispatch Engine</Link></li>
-                            <li><Link href="/corporate/features" className="hover:text-yellow-400 transition-colors">WhatsApp AI Booker</Link></li>
-                            <li><Link href="/corporate/features" className="hover:text-yellow-400 transition-colors">Driver Settlements</Link></li>
-                            <li><Link href="/corporate/pricing" className="hover:text-yellow-400 transition-colors">Pricing Plans</Link></li>
+                            <li><Link href="/features" className="hover:text-yellow-400 transition-colors">AI Dispatch Engine</Link></li>
+                            <li><Link href="/features" className="hover:text-yellow-400 transition-colors">WhatsApp AI Booker</Link></li>
+                            <li><Link href="/features" className="hover:text-yellow-400 transition-colors">Driver Settlements</Link></li>
+                            <li><Link href="/pricing" className="hover:text-yellow-400 transition-colors">Pricing Plans</Link></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="text-white font-bold mb-6 uppercase tracking-wide text-sm">Company</h4>
                         <ul className="space-y-4 text-sm font-medium text-slate-400">
-                            <li><Link href="/corporate/about" className="hover:text-yellow-400 transition-colors">About CABAI</Link></li>
-                            <li><Link href="/corporate/contact" className="hover:text-yellow-400 transition-colors">Contact Sales</Link></li>
+                            <li><Link href="/about" className="hover:text-yellow-400 transition-colors">About CABAI</Link></li>
+                            <li><Link href="/contact" className="hover:text-yellow-400 transition-colors">Contact Sales</Link></li>
                             <li><a href="https://app.cabai.co.uk" className="hover:text-yellow-400 transition-colors">Operator Login</a></li>
                         </ul>
                     </div>
