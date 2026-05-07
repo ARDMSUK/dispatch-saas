@@ -98,13 +98,17 @@ export default function CorporateContactPage() {
                             </div>
                         </div>
 
-                        {/* Map Placeholder */}
-                        <div className="w-full h-64 bg-slate-100 rounded-3xl border border-slate-200 overflow-hidden relative flex items-center justify-center">
-                            <div className="absolute inset-0 bg-[url('https://maps.gstatic.com/mapfiles/api-3/images/google_gray.svg')] bg-center bg-cover opacity-20"></div>
-                            <div className="relative z-10 flex flex-col items-center">
-                                <MapPin className="h-10 w-10 text-slate-400 mb-2" />
-                                <span className="text-slate-500 font-bold uppercase tracking-wider text-sm">London HQ</span>
-                            </div>
+                        {/* Map */}
+                        <div className="w-full h-80 bg-slate-100 rounded-3xl border border-slate-200 overflow-hidden relative shadow-md">
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2482.9050201659773!2d-0.12644268407421115!3d51.51494547963638!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487604cc79d5df65%3A0xc3910543e33b6641!2s71-75%20Shelton%20St%2C%20London%20WC2H%209JQ%2C%20UK!5e0!3m2!1sen!2sus!4v1715091763116!5m2!1sen!2sus" 
+                                width="100%" 
+                                height="100%" 
+                                style={{ border: 0 }} 
+                                allowFullScreen={false} 
+                                loading="lazy" 
+                                referrerPolicy="no-referrer-when-downgrade"
+                            ></iframe>
                         </div>
                     </div>
                 </div>
