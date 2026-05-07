@@ -31,12 +31,16 @@ export async function middleware(request: NextRequest) {
 
         // Landing Page Routing
         if (currentHost === "app") {
+            // If they access corporate pages on the app subdomain, redirect them to the main site
+            if (url.pathname.startsWith("/corporate") || url.pathname === "/about" || url.pathname === "/features" || url.pathname === "/pricing" || url.pathname === "/contact") {
+                return NextResponse.redirect(new URL(`https://cabai.co.uk${url.pathname.replace('/corporate', '')}`, request.url));
+            }
             if (url.pathname === "/") {
                 return NextResponse.rewrite(new URL(`/login`, request.url));
             }
         } else if (currentHost === "www" || currentHost === "cabai.co.uk" || currentHost === "localhost:3000") {
             // Rewrite ALL non-API paths for the corporate site to the /corporate folder
-            if (!url.pathname.startsWith("/api")) {
+            if (!url.pathname.startsWith("/api") && !url.pathname.startsWith("/corporate")) {
                 return NextResponse.rewrite(new URL(`/corporate${url.pathname}`, request.url));
             }
         }
