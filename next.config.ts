@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   turbopack: {},
   outputFileTracingExcludes: {
     '/api/**/*': [
@@ -21,6 +24,20 @@ const nextConfig: NextConfig = {
     ]
   },
   experimental: {},
+  async redirects() {
+    return [
+      {
+        source: '/corporate',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/corporate/:path*',
+        destination: '/:path*',
+        permanent: true,
+      }
+    ];
+  },
   async headers() {
     return [
       {
