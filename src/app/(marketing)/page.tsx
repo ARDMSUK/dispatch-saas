@@ -57,16 +57,16 @@ export default async function CorporateHomePage() {
                     <p className="text-center text-sm font-bold uppercase tracking-widest text-slate-500 mb-8">Powering modern fleets across the UK</p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-slate-800">
                         <div>
-                            <div className="text-3xl md:text-4xl font-black text-white mb-2">10M+</div>
-                            <div className="text-slate-400 font-medium">Bookings Processed</div>
+                            <div className="text-3xl md:text-4xl font-black text-white mb-2">&lt; 1s</div>
+                            <div className="text-slate-400 font-medium">Dispatch Speed</div>
                         </div>
                         <div>
                             <div className="text-3xl md:text-4xl font-black text-white mb-2">99.99%</div>
                             <div className="text-slate-400 font-medium">Uptime Guarantee</div>
                         </div>
                         <div>
-                            <div className="text-3xl md:text-4xl font-black text-white mb-2">£50M+</div>
-                            <div className="text-slate-400 font-medium">Fares Settled</div>
+                            <div className="text-3xl md:text-4xl font-black text-white mb-2">100%</div>
+                            <div className="text-slate-400 font-medium">Cloud Native</div>
                         </div>
                         <div>
                             <div className="text-3xl md:text-4xl font-black text-white mb-2">24/7</div>
