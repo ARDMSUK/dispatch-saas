@@ -22,6 +22,7 @@ export default function CorporateLayout({
                     </div>
                     
                     <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                        <Link href="/" className="hover:text-yellow-600 transition-colors">Home</Link>
                         <Link href="/about" className="hover:text-yellow-600 transition-colors">About Us</Link>
                         <Link href="/features" className="hover:text-yellow-600 transition-colors">Platform Features</Link>
                         <Link href="/pricing" className="hover:text-yellow-600 transition-colors">Pricing</Link>
