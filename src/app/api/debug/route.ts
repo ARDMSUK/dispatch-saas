@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
-    const url = new URL(req.url);
     return NextResponse.json({
-        host: req.headers.get('host'),
-        nextUrlHostname: url.hostname,
-        url: req.url,
+        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     });
 }
