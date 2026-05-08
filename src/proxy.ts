@@ -21,10 +21,6 @@ export async function proxy(request: NextRequest) {
         // Subdomain Routing Logic
         let currentHost = hostname.split(':')[0]; // Remove port if any
 
-        if (currentHost === "bourneend.cabai.co.uk") {
-             return NextResponse.json({ success: true, host: currentHost, path: url.pathname });
-        }
-
         if (currentHost.endsWith('.cabai.co.uk')) {
             currentHost = currentHost.replace('.cabai.co.uk', '');
         } else if (currentHost.endsWith('.localhost')) {
