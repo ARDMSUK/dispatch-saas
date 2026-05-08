@@ -43,7 +43,7 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
             if (apiKey) {
                 // Geocode Pickup
                 if (!pickupLat || !pickupLng) {
-                    const pRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(pickup)}&key=${apiKey}`);
+                    const pRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(pickup)}&components=country:GB&key=${apiKey}`);
                     const pData = await pRes.json();
                     if (pData.results?.[0]?.geometry?.location) {
                         pickupLat = pData.results[0].geometry.location.lat;
@@ -53,7 +53,7 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
 
                 // Geocode Dropoff
                 if (!dropoffLat || !dropoffLng) {
-                    const dRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(dropoff)}&key=${apiKey}`);
+                    const dRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(dropoff)}&components=country:GB&key=${apiKey}`);
                     const dData = await dRes.json();
                     if (dData.results?.[0]?.geometry?.location) {
                         dropoffLat = dData.results[0].geometry.location.lat;
@@ -75,14 +75,19 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     let useZonePricing = false;
     let enableDynamicPricing = false;
     let enableWaitCalculations = false;
+    let outOfHoursStart: string | null = null;
+    let outOfHoursEnd: string | null = null;
+
     if (companyId) {
         const tenant = await prisma.tenant.findUnique({
             where: { id: companyId },
-            select: { useZonePricing: true, enableDynamicPricing: true, enableWaitCalculations: true }
+            select: { useZonePricing: true, enableDynamicPricing: true, enableWaitCalculations: true, outOfHoursStart: true, outOfHoursEnd: true }
         });
         if (tenant?.useZonePricing) useZonePricing = true;
         if (tenant?.enableDynamicPricing) enableDynamicPricing = true;
         if (tenant?.enableWaitCalculations) enableWaitCalculations = true;
+        outOfHoursStart = tenant?.outOfHoursStart || null;
+        outOfHoursEnd = tenant?.outOfHoursEnd || null;
     }
 
     // 0.1 Zone Detection (If enabled)
@@ -156,6 +161,27 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
                 isFixedPrice = true;
                 fixedPriceAmount = Number(match.price);
                 fixedPriceRuleId = match.id;
+
+                // Out of Hours check
+                if (outOfHoursStart && outOfHoursEnd && match.outOfHoursPrice !== null) {
+                    const pTime = new Date(pickupTime);
+                    const pHH = pTime.getHours().toString().padStart(2, '0');
+                    const pMM = pTime.getMinutes().toString().padStart(2, '0');
+                    const pTimeString = `${pHH}:${pMM}`;
+                    
+                    let isOutOfHours = false;
+                    if (outOfHoursStart <= outOfHoursEnd) {
+                        isOutOfHours = (pTimeString >= outOfHoursStart && pTimeString <= outOfHoursEnd);
+                    } else {
+                        // Overnight (e.g. 23:00 to 06:00)
+                        isOutOfHours = (pTimeString >= outOfHoursStart || pTimeString <= outOfHoursEnd);
+                    }
+                    
+                    if (isOutOfHours) {
+                        fixedPriceAmount = Number(match.outOfHoursPrice);
+                        console.log(`[Pricing] Applied Out-of-Hours Fixed Price: £${fixedPriceAmount} (Time: ${pTimeString}, Range: ${outOfHoursStart}-${outOfHoursEnd})`);
+                    }
+                }
             }
         } catch (e) {
             console.error("Error querying fixed prices", e);
