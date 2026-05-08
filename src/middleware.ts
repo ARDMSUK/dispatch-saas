@@ -58,7 +58,10 @@ export async function middleware(request: NextRequest) {
             return response;
         }
 
-        return await updateSession(request)
+        const finalResponse = await updateSession(request);
+        finalResponse.headers.set('x-debug-hostname-final', hostname);
+        finalResponse.headers.set('x-debug-currenthost-final', currentHost);
+        return finalResponse;
     } catch (e) {
         console.error("Middleware Failed:", e);
         return NextResponse.next();
