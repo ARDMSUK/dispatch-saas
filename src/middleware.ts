@@ -21,13 +21,9 @@ export async function middleware(request: NextRequest) {
 
         // Subdomain Routing Logic
         // Determine the current host without port (for localhost testing)
-        let currentHost = hostname;
-        
-        if (process.env.NODE_ENV === "production" || process.env.VERCEL === "1") {
-            currentHost = hostname.replace(`.cabai.co.uk`, "");
-        } else {
-            currentHost = hostname.replace(`.localhost:3000`, "");
-        }
+        let currentHost = hostname
+            .replace(`.cabai.co.uk`, "")
+            .replace(`.localhost:3000`, "");
 
         // Landing Page Routing
         if (currentHost === "app") {
