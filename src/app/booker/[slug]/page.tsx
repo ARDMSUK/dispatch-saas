@@ -55,13 +55,34 @@ export default function BookerPage() {
     // Google Maps Autocomplete Hooks
     const pickupSearch = usePlacesAutocomplete({ 
         requestOptions: { componentRestrictions: { country: "gb" } },
-        debounce: 300
+        debounce: 300,
+        initOnMount: false
     }) as any;
     
     const dropoffSearch = usePlacesAutocomplete({ 
         requestOptions: { componentRestrictions: { country: "gb" } },
-        debounce: 300
+        debounce: 300,
+        initOnMount: false
     }) as any;
+
+    const [scriptLoaded, setScriptLoaded] = useState(false);
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.google) {
+            setScriptLoaded(true);
+            pickupSearch.init();
+            dropoffSearch.init();
+        } else {
+            const interval = setInterval(() => {
+                if (typeof window !== "undefined" && window.google) {
+                    setScriptLoaded(true);
+                    pickupSearch.init();
+                    dropoffSearch.init();
+                    clearInterval(interval);
+                }
+            }, 500);
+            return () => clearInterval(interval);
+        }
+    }, [pickupSearch.init, dropoffSearch.init]);
 
     useEffect(() => {
         const fetchTenantInfo = async () => {
