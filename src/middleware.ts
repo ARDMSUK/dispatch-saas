@@ -20,10 +20,17 @@ export async function middleware(request: NextRequest) {
         }
 
         // Subdomain Routing Logic
-        // Determine the current host without port (for localhost testing)
-        let currentHost = hostname
-            .replace(`.cabai.co.uk`, "")
-            .replace(`.localhost:3000`, "");
+        let currentHost = hostname.split(':')[0]; // Remove port if any
+
+        if (currentHost === "bourneend.cabai.co.uk") {
+             return NextResponse.json({ success: true, host: currentHost, path: url.pathname });
+        }
+
+        if (currentHost.endsWith('.cabai.co.uk')) {
+            currentHost = currentHost.replace('.cabai.co.uk', '');
+        } else if (currentHost.endsWith('.localhost')) {
+            currentHost = currentHost.replace('.localhost', '');
+        }
 
         // Landing Page Routing
         if (currentHost === "app") {
