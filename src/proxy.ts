@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     try {
         const url = request.nextUrl;
         const hostname = request.headers.get("host") || "";
@@ -11,12 +11,11 @@ export async function middleware(request: NextRequest) {
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
         if (!supabaseUrl || !key) {
-            console.error("CRITICAL: Missing Supabase Env Vars in Middleware", {
+            console.warn("Middleware Warning: Missing Supabase Env Vars", {
                 hasUrl: !!supabaseUrl,
                 hasKey: !!key
             });
-            // Don't crash, just let it pass
-            return NextResponse.next();
+            // Proceed anyway so routing logic is not bypassed
         }
 
         // Subdomain Routing Logic
