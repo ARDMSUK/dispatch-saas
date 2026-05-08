@@ -50,7 +50,12 @@ export async function middleware(request: NextRequest) {
             !url.pathname.startsWith("/login")
         ) {
             // Rewrite the request to /booker/[subdomain]
-            return NextResponse.rewrite(new URL(`/booker/${currentHost}${url.pathname}`, request.url));
+            const rewriteUrl = new URL(`/booker/${currentHost}${url.pathname}`, request.url);
+            const response = NextResponse.rewrite(rewriteUrl);
+            response.headers.set('x-debug-hostname', hostname);
+            response.headers.set('x-debug-currenthost', currentHost);
+            response.headers.set('x-debug-rewrite-url', rewriteUrl.toString());
+            return response;
         }
 
         return await updateSession(request)
