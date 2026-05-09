@@ -65,18 +65,31 @@ export default function BookerPage() {
         initOnMount: false
     }) as any;
 
-    const { isLoaded: isGoogleLoaded } = useJsApiLoader({
-        id: 'google-map-script',
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-        libraries: ["places", "geometry"] as any,
-    });
-
     useEffect(() => {
-        if (isGoogleLoaded) {
-            pickupSearch.init();
-            dropoffSearch.init();
+        let interval: NodeJS.Timeout;
+        const checkGoogle = () => {
+            if (typeof window !== "undefined" && window.google && window.google.maps && window.google.maps.places) {
+                pickupSearch.init();
+                dropoffSearch.init();
+                if (interval) clearInterval(interval);
+                return true;
+            }
+            return false;
+        };
+        
+        if (!checkGoogle()) {
+            // If it's not loaded yet, inject the script manually
+            if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+                const script = document.createElement("script");
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+            interval = setInterval(checkGoogle, 500);
         }
-    }, [isGoogleLoaded]);
+        return () => { if (interval) clearInterval(interval); };
+    }, []);
 
     useEffect(() => {
         const fetchTenantInfo = async () => {
@@ -328,12 +341,13 @@ export default function BookerPage() {
                                                     <MapPin className="w-5 h-5" />
                                                 </div>
                                                 <Input
-                                                    placeholder="Pickup location"
+                                                    placeholder={pickupSearch.ready ? "Pickup location" : "Loading maps..."}
                                                     value={pickupSearch.value}
+                                                    disabled={!pickupSearch.ready}
                                                     onChange={(e) => { pickupSearch.setValue(e.target.value); setFormData({ ...formData, pickup: e.target.value }) }}
-                                                    className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
+                                                    className={`h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner ${!pickupSearch.ready ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 />
-                                                {pickupSearch.status === "OK" && (
+                                                {pickupSearch.ready && pickupSearch.status === "OK" && (
                                                     <motion.ul 
                                                         initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                                                         className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl max-h-60 overflow-auto ring-1 ring-black/50 divide-y divide-white/5"
@@ -353,7 +367,7 @@ export default function BookerPage() {
                                                         ))}
                                                     </motion.ul>
                                                 )}
-                                                {pickupSearch.status !== "OK" && pickupSearch.value.length > 0 && (
+                                                {pickupSearch.ready && pickupSearch.status !== "OK" && pickupSearch.status !== "" && pickupSearch.value.length > 0 && (
                                                     <div className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl p-4 text-center text-sm text-slate-400">
                                                         {pickupSearch.status === "ZERO_RESULTS" ? "No locations found." : pickupSearch.status === "REQUEST_DENIED" ? "API Key Error." : "Searching..."}
                                                     </div>
@@ -367,12 +381,13 @@ export default function BookerPage() {
                                                     <Flag className="w-5 h-5" />
                                                 </div>
                                                 <Input
-                                                    placeholder="Where to?"
+                                                    placeholder={dropoffSearch.ready ? "Where to?" : "Loading maps..."}
                                                     value={dropoffSearch.value}
+                                                    disabled={!dropoffSearch.ready}
                                                     onChange={(e) => { dropoffSearch.setValue(e.target.value); setFormData({ ...formData, dropoff: e.target.value }) }}
-                                                    className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
+                                                    className={`h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner ${!dropoffSearch.ready ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 />
-                                                {dropoffSearch.status === "OK" && (
+                                                {dropoffSearch.ready && dropoffSearch.status === "OK" && (
                                                     <motion.ul 
                                                         initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                                                         className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl max-h-60 overflow-auto ring-1 ring-black/50 divide-y divide-white/5"
@@ -382,7 +397,7 @@ export default function BookerPage() {
                                                                 className="p-4 hover:bg-white/5 cursor-pointer text-sm text-slate-200 transition-colors flex items-center gap-3"
                                                                 onClick={() => {
                                                                     dropoffSearch.setValue(description, false);
-                                                                    setFormData({ ...formData, dropoff: description });
+                                                                    setFormData({ ...formData, dropoff: dropoffSearch.value });
                                                                     dropoffSearch.clearSuggestions();
                                                                 }}
                                                             >
@@ -392,7 +407,7 @@ export default function BookerPage() {
                                                         ))}
                                                     </motion.ul>
                                                 )}
-                                                {dropoffSearch.status !== "OK" && dropoffSearch.value.length > 0 && (
+                                                {dropoffSearch.ready && dropoffSearch.status !== "OK" && dropoffSearch.status !== "" && dropoffSearch.value.length > 0 && (
                                                     <div className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl p-4 text-center text-sm text-slate-400">
                                                         {dropoffSearch.status === "ZERO_RESULTS" ? "No locations found." : dropoffSearch.status === "REQUEST_DENIED" ? "API Key Error." : "Searching..."}
                                                     </div>
