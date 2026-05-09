@@ -51,6 +51,19 @@ export default function BookerPage() {
     const [logoUrl, setLogoUrl] = useState('');
     const [companyName, setCompanyName] = useState('Book Your Ride');
 
+    // Load Google Maps Script
+    useEffect(() => {
+        if (typeof window !== "undefined" && !window.google) {
+            if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+                const script = document.createElement("script");
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+        }
+    }, []);
+
 
 
     useEffect(() => {
