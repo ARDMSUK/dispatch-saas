@@ -39,6 +39,10 @@ model Tenant {
   enableWavOptions       Boolean @default(false)
   consoleLayout          String  @default("MODERN") // MODERN, CLASSIC
 
+  // Out of Hours settings
+  outOfHoursStart String? // e.g. "23:00"
+  outOfHoursEnd   String? // e.g. "06:00"
+
   // AI & Add-on Features
   hasWebChatAi         Boolean  @default(false)
   hasWhatsAppAi        Boolean  @default(false)
@@ -491,8 +495,9 @@ model FixedPrice {
   dropoffZoneId String?
   dropoffZone   Zone?   @relation("DropoffZone", fields: [dropoffZoneId], references: [id])
 
-  price       Float
-  vehicleType String @default("Saloon")
+  price           Float
+  outOfHoursPrice Float?
+  vehicleType     String @default("Saloon")
 
   isReverse Boolean @default(true) // Also apply for Dropoff -> Pickup
 

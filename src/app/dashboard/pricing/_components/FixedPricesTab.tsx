@@ -22,6 +22,7 @@ export default function FixedPricesTab() {
         pickup: "",
         dropoff: "",
         price: "" as any,
+        outOfHoursPrice: "" as any,
         vehicleType: "Saloon",
         isReverse: true
     });
@@ -48,7 +49,8 @@ export default function FixedPricesTab() {
         try {
             const payload = {
                 ...formData,
-                price: parseFloat(formData.price)
+                price: parseFloat(formData.price),
+                outOfHoursPrice: formData.outOfHoursPrice ? parseFloat(formData.outOfHoursPrice) : null
             };
             const res = await fetch("/api/pricing/fixed", {
                 method: "POST",
@@ -58,7 +60,7 @@ export default function FixedPricesTab() {
 
             if (res.ok) {
                 setIsDialogOpen(false);
-                setFormData({ name: "", pickup: "", dropoff: "", price: "", vehicleType: "Saloon", isReverse: true });
+                setFormData({ name: "", pickup: "", dropoff: "", price: "", outOfHoursPrice: "", vehicleType: "Saloon", isReverse: true });
                 toast.success("Fixed price created");
                 fetchPrices();
             } else {
@@ -139,6 +141,13 @@ export default function FixedPricesTab() {
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
                                 />
+                                <Input
+                                    type="number"
+                                    placeholder="Out of Hours (£)"
+                                    className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                    value={formData.outOfHoursPrice}
+                                    onChange={e => setFormData({ ...formData, outOfHoursPrice: e.target.value })}
+                                />
                                 <Select value={formData.vehicleType} onValueChange={(val) => setFormData({ ...formData, vehicleType: val })}>
                                     <SelectTrigger className="bg-white border-slate-200 text-slate-900">
                                         <SelectValue placeholder="Vehicle" />
@@ -179,6 +188,7 @@ export default function FixedPricesTab() {
                             <TableHead className="text-slate-500">Name</TableHead>
                             <TableHead className="text-slate-500">Route</TableHead>
                             <TableHead className="text-slate-500">Price</TableHead>
+                            <TableHead className="text-slate-500">OOH Price</TableHead>
                             <TableHead className="text-slate-500">Vehicle</TableHead>
                             <TableHead className="text-slate-500">Reverse?</TableHead>
                             <TableHead className="text-slate-500 w-[50px]"></TableHead>
@@ -201,6 +211,7 @@ export default function FixedPricesTab() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="font-bold text-emerald-600">£{fp.price.toFixed(2)}</TableCell>
+                                    <TableCell className="font-bold text-indigo-600">{fp.outOfHoursPrice ? `£${fp.outOfHoursPrice.toFixed(2)}` : '-'}</TableCell>
                                     <TableCell className="text-slate-500">{fp.vehicleType}</TableCell>
                                     <TableCell className="text-slate-500">{fp.isReverse ? 'Yes' : 'No'}</TableCell>
                                     <TableCell>

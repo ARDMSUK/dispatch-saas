@@ -31,6 +31,8 @@ export default function SettingsPage() {
     const [enableLiveTracking, setEnableLiveTracking] = useState(true);
     const [enableDynamicPricing, setEnableDynamicPricing] = useState(false);
     const [enableWaitCalculations, setEnableWaitCalculations] = useState(false);
+    const [outOfHoursStart, setOutOfHoursStart] = useState("");
+    const [outOfHoursEnd, setOutOfHoursEnd] = useState("");
     const [enableWebBooker, setEnableWebBooker] = useState(false);
     const [tenantSlug, setTenantSlug] = useState("");
     const [hasWebChatAi, setHasWebChatAi] = useState(false);
@@ -103,6 +105,8 @@ export default function SettingsPage() {
                 setEnableLiveTracking(data.enableLiveTracking ?? true);
                 setEnableDynamicPricing(data.enableDynamicPricing ?? false);
                 setEnableWaitCalculations(data.enableWaitCalculations ?? false);
+                setOutOfHoursStart(data.outOfHoursStart || "");
+                setOutOfHoursEnd(data.outOfHoursEnd || "");
                 setEnableWebBooker(data.enableWebBooker ?? false);
                 setTenantSlug(data.slug || "");
                 setHasWebChatAi(data.hasWebChatAi ?? false);
@@ -175,6 +179,8 @@ export default function SettingsPage() {
                     enableLiveTracking,
                     enableDynamicPricing,
                     enableWaitCalculations,
+                    outOfHoursStart,
+                    outOfHoursEnd,
                     enableWebBooker,
                     logoUrl,
                     brandColor,
@@ -403,6 +409,32 @@ export default function SettingsPage() {
                                 <p className="text-sm text-slate-400">
                                     Include driver wait times into the quoted price based on the selected vehicle tier&#39;s waiting rate.
                                 </p>
+                            </div>
+                        </div>
+                        <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 mt-4">
+                            <Label className="text-slate-600 font-medium">Global Out of Hours Window</Label>
+                            <p className="text-xs text-slate-400 mb-3">
+                                Define the time window for out-of-hours pricing (e.g. 23:00 to 06:00). Fixed routes can use these to apply alternative pricing automatically.
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label className="text-xs text-slate-500">Start Time</Label>
+                                    <Input
+                                        type="time"
+                                        value={outOfHoursStart}
+                                        onChange={(e) => setOutOfHoursStart(e.target.value)}
+                                        className="bg-white border-slate-200 mt-1"
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs text-slate-500">End Time</Label>
+                                    <Input
+                                        type="time"
+                                        value={outOfHoursEnd}
+                                        onChange={(e) => setOutOfHoursEnd(e.target.value)}
+                                        className="bg-white border-slate-200 mt-1"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

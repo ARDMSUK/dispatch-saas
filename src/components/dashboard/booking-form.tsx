@@ -87,15 +87,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     }, [searchParams, router]);
 
     useEffect(() => {
-        if (paymentType === 'ACCOUNT') {
-            fetch('/api/accounts')
-                .then(res => res.json())
-                .then(data => {
-                    if (Array.isArray(data)) setAccounts(data);
-                })
-                .catch(err => console.error(err));
-        }
-    }, [paymentType]);
+        fetch('/api/accounts')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setAccounts(data);
+            })
+            .catch(err => console.error(err));
+    }, []);
 
     // Timing
     const [pickupTime, setPickupTime] = useState(() => {

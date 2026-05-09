@@ -48,7 +48,7 @@ export async function POST(req: Request) {
            }
         */
 
-        const { name, pickup, dropoff, price, vehicleType, isReverse } = body;
+        const { name, pickup, dropoff, price, outOfHoursPrice, vehicleType, isReverse } = body;
 
         const fixedPrice = await prisma.fixedPrice.create({
             data: {
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
                 pickup,
                 dropoff,
                 price: parseFloat(price),
+                outOfHoursPrice: outOfHoursPrice ? parseFloat(outOfHoursPrice) : null,
                 vehicleType: vehicleType || 'Saloon',
                 isReverse: isReverse ?? true
             }

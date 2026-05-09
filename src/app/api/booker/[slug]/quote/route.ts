@@ -98,6 +98,6 @@ export async function POST(
 
     } catch (error) {
         console.error('Error calculating public quote:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders });
+        return NextResponse.json({ error: 'Internal server error: ' + (error as any).message }, { status: 500, headers: corsHeaders });
     }
 }

@@ -676,8 +676,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     };
 
     return (
-        <div className="h-full flex flex-col bg-white">
-            <div className="p-4 border-b border-slate-200 space-y-3">
+        <div className="h-full flex flex-col bg-slate-50">
+            <div className="p-4 border-b border-slate-200 space-y-3 bg-white">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <div className="flex items-center gap-2 pb-2">
                         <div className="flex-1 overflow-x-auto scrollbar-none">
