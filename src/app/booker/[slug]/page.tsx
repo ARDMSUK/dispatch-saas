@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Navigation2, CheckCircle2, MapPin, Flag, Calendar, Car, User, Phone, Plane, MessageSquare, ArrowRight, ArrowLeft, Mail, Briefcase, Users } from "lucide-react";
-import usePlacesAutocomplete, { getGeocode, getLatLng } from "use-places-autocomplete";
+import { LocationInput } from "@/components/dashboard/location-input";
 import { motion, AnimatePresence } from "framer-motion";
-import { useJsApiLoader } from "@react-google-maps/api";
 
 export default function BookerPage() {
     const params = useParams();
@@ -52,44 +51,7 @@ export default function BookerPage() {
     const [logoUrl, setLogoUrl] = useState('');
     const [companyName, setCompanyName] = useState('Book Your Ride');
 
-    // Google Maps Autocomplete Hooks
-    const pickupSearch = usePlacesAutocomplete({ 
-        requestOptions: { componentRestrictions: { country: "gb" } },
-        debounce: 300,
-        initOnMount: false
-    }) as any;
-    
-    const dropoffSearch = usePlacesAutocomplete({ 
-        requestOptions: { componentRestrictions: { country: "gb" } },
-        debounce: 300,
-        initOnMount: false
-    }) as any;
 
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        const checkGoogle = () => {
-            if (typeof window !== "undefined" && window.google && window.google.maps && window.google.maps.places) {
-                pickupSearch.init();
-                dropoffSearch.init();
-                if (interval) clearInterval(interval);
-                return true;
-            }
-            return false;
-        };
-        
-        if (!checkGoogle()) {
-            // If it's not loaded yet, inject the script manually
-            if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
-                const script = document.createElement("script");
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`;
-                script.async = true;
-                script.defer = true;
-                document.head.appendChild(script);
-            }
-            interval = setInterval(checkGoogle, 500);
-        }
-        return () => { if (interval) clearInterval(interval); };
-    }, []);
 
     useEffect(() => {
         const fetchTenantInfo = async () => {
@@ -335,83 +297,41 @@ export default function BookerPage() {
                                         exit="exit"
                                         className="space-y-5"
                                     >
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 relative">
+                                            {/* Pickup Input */}
                                             <div className="relative group">
-                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-white transition-colors">
+                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 group-focus-within:text-emerald-300 transition-colors z-10">
                                                     <MapPin className="w-5 h-5" />
                                                 </div>
-                                                <Input
-                                                    placeholder={pickupSearch.ready ? "Pickup location" : "Loading maps..."}
-                                                    value={pickupSearch.value}
-                                                    disabled={!pickupSearch.ready}
-                                                    onChange={(e) => { pickupSearch.setValue(e.target.value); setFormData({ ...formData, pickup: e.target.value }) }}
-                                                    className={`h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner ${!pickupSearch.ready ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                <LocationInput
+                                                    placeholder="Pickup location"
+                                                    value={formData.pickup}
+                                                    onChange={(val) => setFormData({ ...formData, pickup: val })}
+                                                    onLocationSelect={(loc) => {
+                                                        setFormData(prev => ({ ...prev, pickup: loc.address }));
+                                                        setQuote(null);
+                                                    }}
+                                                    className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner w-full"
                                                 />
-                                                {pickupSearch.ready && pickupSearch.status === "OK" && (
-                                                    <motion.ul 
-                                                        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                                                        className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl max-h-60 overflow-auto ring-1 ring-black/50 divide-y divide-white/5"
-                                                    >
-                                                        {pickupSearch.data.map(({ place_id, description }: any) => (
-                                                            <li key={place_id}
-                                                                className="p-4 hover:bg-white/5 cursor-pointer text-sm text-slate-200 transition-colors flex items-center gap-3"
-                                                                onClick={() => {
-                                                                    pickupSearch.setValue(description, false);
-                                                                    setFormData({ ...formData, pickup: description });
-                                                                    pickupSearch.clearSuggestions();
-                                                                }}
-                                                            >
-                                                                <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                                                                <span className="truncate">{description}</span>
-                                                            </li>
-                                                        ))}
-                                                    </motion.ul>
-                                                )}
-                                                {pickupSearch.ready && pickupSearch.status !== "OK" && pickupSearch.status !== "" && pickupSearch.value.length > 0 && (
-                                                    <div className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl p-4 text-center text-sm text-slate-400">
-                                                        {pickupSearch.status === "ZERO_RESULTS" ? "No locations found." : pickupSearch.status === "REQUEST_DENIED" ? "API Key Error." : "Searching..."}
-                                                    </div>
-                                                )}
                                             </div>
 
                                             <div className="pl-6 border-l-2 border-dashed border-white/10 ml-6 py-2 -my-2 h-6"></div>
 
+                                            {/* Dropoff Input */}
                                             <div className="relative group">
-                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-white transition-colors">
+                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 group-focus-within:text-rose-300 transition-colors z-10">
                                                     <Flag className="w-5 h-5" />
                                                 </div>
-                                                <Input
-                                                    placeholder={dropoffSearch.ready ? "Where to?" : "Loading maps..."}
-                                                    value={dropoffSearch.value}
-                                                    disabled={!dropoffSearch.ready}
-                                                    onChange={(e) => { dropoffSearch.setValue(e.target.value); setFormData({ ...formData, dropoff: e.target.value }) }}
-                                                    className={`h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner ${!dropoffSearch.ready ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                <LocationInput
+                                                    placeholder="Where to?"
+                                                    value={formData.dropoff}
+                                                    onChange={(val) => setFormData({ ...formData, dropoff: val })}
+                                                    onLocationSelect={(loc) => {
+                                                        setFormData(prev => ({ ...prev, dropoff: loc.address }));
+                                                        setQuote(null);
+                                                    }}
+                                                    className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner w-full"
                                                 />
-                                                {dropoffSearch.ready && dropoffSearch.status === "OK" && (
-                                                    <motion.ul 
-                                                        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                                                        className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl max-h-60 overflow-auto ring-1 ring-black/50 divide-y divide-white/5"
-                                                    >
-                                                        {dropoffSearch.data.map(({ place_id, description }: any) => (
-                                                            <li key={place_id}
-                                                                className="p-4 hover:bg-white/5 cursor-pointer text-sm text-slate-200 transition-colors flex items-center gap-3"
-                                                                onClick={() => {
-                                                                    dropoffSearch.setValue(description, false);
-                                                                    setFormData({ ...formData, dropoff: dropoffSearch.value });
-                                                                    dropoffSearch.clearSuggestions();
-                                                                }}
-                                                            >
-                                                                <Flag className="w-4 h-4 text-slate-400 shrink-0" />
-                                                                <span className="truncate">{description}</span>
-                                                            </li>
-                                                        ))}
-                                                    </motion.ul>
-                                                )}
-                                                {dropoffSearch.ready && dropoffSearch.status !== "OK" && dropoffSearch.status !== "" && dropoffSearch.value.length > 0 && (
-                                                    <div className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl p-4 text-center text-sm text-slate-400">
-                                                        {dropoffSearch.status === "ZERO_RESULTS" ? "No locations found." : dropoffSearch.status === "REQUEST_DENIED" ? "API Key Error." : "Searching..."}
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
 

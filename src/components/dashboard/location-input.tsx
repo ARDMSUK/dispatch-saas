@@ -190,26 +190,26 @@ export function LocationInput({
                 onBlur={() => setTimeout(() => setOpen(false), 200)}
                 placeholder={placeholder}
                 disabled={disabled || !ready}
-                className={cn(className)}
+                className={cn(className, "dark:bg-black/40 dark:border-white/10 dark:text-white dark:placeholder:text-slate-500")}
             />
             
             {open && (
-                <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 border border-slate-200 shadow-2xl rounded-md overflow-hidden">
-                    <Command shouldFilter={false} className="bg-slate-100 w-full max-h-80 overflow-y-auto overflow-x-hidden">
+                <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 dark:bg-[#1e1e24] border border-slate-200 dark:border-white/10 shadow-2xl rounded-md overflow-hidden">
+                    <Command shouldFilter={false} className="bg-slate-100 dark:bg-[#1e1e24] w-full max-h-80 overflow-y-auto overflow-x-hidden">
                         <CommandList>
                             {/* FREQUENT LOCATIONS */}
                             {filteredFrequent.length > 0 && (
-                                <CommandGroup heading="Most Used" className="text-emerald-500">
+                                <CommandGroup heading="Most Used" className="text-emerald-500 dark:text-emerald-400">
                                     {filteredFrequent.map((item, i) => (
                                         <CommandItem
                                             key={`freq-${i}`}
                                             value={item.address}
                                             onSelect={() => handleFrequentSelect(item.address)}
-                                            className="cursor-pointer p-2 text-slate-900 bg-emerald-500/10 hover:bg-emerald-500/20 mb-1 rounded-sm border border-emerald-500/20"
+                                            className="cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-emerald-500/10 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 mb-1 rounded-sm border border-emerald-500/20"
                                         >
-                                            <MapPin className="mr-2 h-4 w-4 text-emerald-500" />
+                                            <MapPin className="mr-2 h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                                             <span className="font-medium truncate">{item.address}</span>
-                                            <span className="ml-auto text-[10px] text-slate-400 bg-slate-100 px-1 rounded">{item.count}</span>
+                                            <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-1 rounded">{item.count}</span>
                                         </CommandItem>
                                     ))}
                                 </CommandGroup>
@@ -217,15 +217,15 @@ export function LocationInput({
 
                             {/* CUSTOM SHORTCUTS */}
                             {customSuggestions.length > 0 && (
-                                <CommandGroup heading="Quick Matches" className="text-blue-700">
+                                <CommandGroup heading="Quick Matches" className="text-blue-700 dark:text-blue-400">
                                     {customSuggestions.map((item) => (
                                         <CommandItem
                                             key={item.id}
                                             value={item.label}
                                             onSelect={() => handleCustomSelect(item)}
-                                            className="cursor-pointer p-2 text-slate-900 bg-blue-700/10 hover:bg-blue-700/20 mb-1 rounded-sm border border-blue-700/20"
+                                            className="cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-blue-700/10 hover:bg-blue-700/20 dark:hover:bg-blue-500/20 mb-1 rounded-sm border border-blue-700/20 dark:border-blue-500/30"
                                         >
-                                            <Plane className="mr-2 h-4 w-4 text-blue-700" />
+                                            <Plane className="mr-2 h-4 w-4 text-blue-700 dark:text-blue-400" />
                                             <span className="font-bold">{item.label}</span>
                                         </CommandItem>
                                     ))}
@@ -234,18 +234,18 @@ export function LocationInput({
 
                             {/* GOOGLE RESULTS */}
                             {status === "OK" && (
-                                <CommandGroup heading="Google Locations">
+                                <CommandGroup heading="Google Locations" className="dark:text-slate-400">
                                     {data.map(({ place_id, description, structured_formatting }) => (
                                         <CommandItem
                                             key={place_id}
                                             value={description}
                                             onSelect={handleSelect}
-                                            className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-blue-700 cursor-pointer p-2 text-slate-900"
+                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-blue-700 dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
                                         >
-                                            <MapPin className="mr-2 h-4 w-4 opacity-50" />
+                                            <MapPin className="mr-2 h-4 w-4 opacity-50 dark:opacity-70" />
                                             <span className="truncate">
                                                 <span className="font-medium">{structured_formatting.main_text}</span>
-                                                <span className="ml-2 text-xs text-muted-foreground">{structured_formatting.secondary_text}</span>
+                                                <span className="ml-2 text-xs text-muted-foreground dark:text-slate-400">{structured_formatting.secondary_text}</span>
                                             </span>
                                             {value === description && <Check className="ml-auto h-4 w-4 opacity-50" />}
                                         </CommandItem>
@@ -254,7 +254,7 @@ export function LocationInput({
                             )}
 
                             {status !== "OK" && inputValue.length > 0 && customSuggestions.length === 0 && (
-                                <div className="py-6 text-center text-sm text-muted-foreground">
+                                <div className="py-6 text-center text-sm text-muted-foreground dark:text-slate-400">
                                     {status === "ZERO_RESULTS" ? "No locations found." : "Typing..."}
                                 </div>
                             )}
