@@ -292,7 +292,7 @@ export default function BookerPage() {
                                                 <LocationInput
                                                     placeholder="Pickup location"
                                                     value={formData.pickup}
-                                                    onChange={(val) => setFormData({ ...formData, pickup: val })}
+                                                    onChange={(val) => setFormData(prev => ({ ...prev, pickup: val }))}
                                                     onLocationSelect={(loc) => {
                                                         setFormData(prev => ({ ...prev, pickup: loc.address, pickupLat: loc.lat, pickupLng: loc.lng }));
                                                         setQuote(null);
@@ -311,7 +311,7 @@ export default function BookerPage() {
                                                 <LocationInput
                                                     placeholder="Where to?"
                                                     value={formData.dropoff}
-                                                    onChange={(val) => setFormData({ ...formData, dropoff: val })}
+                                                    onChange={(val) => setFormData(prev => ({ ...prev, dropoff: val }))}
                                                     onLocationSelect={(loc) => {
                                                         setFormData(prev => ({ ...prev, dropoff: loc.address, dropoffLat: loc.lat, dropoffLng: loc.lng }));
                                                         setQuote(null);

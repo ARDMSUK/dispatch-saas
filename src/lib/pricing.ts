@@ -212,9 +212,9 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     };
 
     // 3. Calculate
-    const base = effectiveRule.baseRate ?? 3.00;
-    const rate = effectiveRule.perMile ?? 2.00;
-    const min = effectiveRule.minFare ?? 5.00;
+    const base = effectiveRule.baseRate ? Number(effectiveRule.baseRate) : 3.00;
+    const rate = effectiveRule.perMile ? Number(effectiveRule.perMile) : 2.00;
+    const min = effectiveRule.minFare ? Number(effectiveRule.minFare) : 5.00;
 
     // 4. Calculate Base Price
     let total = 0;
