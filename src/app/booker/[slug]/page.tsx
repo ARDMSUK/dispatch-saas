@@ -31,6 +31,10 @@ export default function BookerPage() {
     const [formData, setFormData] = useState({
         pickup: "",
         dropoff: "",
+        pickupLat: undefined as number | undefined,
+        pickupLng: undefined as number | undefined,
+        dropoffLat: undefined as number | undefined,
+        dropoffLng: undefined as number | undefined,
         pickupTime: "",
         vehicleType: "Saloon",
         passengerName: "",
@@ -92,32 +96,16 @@ export default function BookerPage() {
 
         setLoading(true);
         try {
-            // Geocode
-            let pLat, pLng, dLat, dLng;
-            try {
-                const pGeo = await getGeocode({ address: formData.pickup });
-                if (pGeo && pGeo.length > 0) {
-                    const { lat: plt, lng: plg } = await getLatLng(pGeo[0]);
-                    pLat = plt; pLng = plg;
-                }
-
-                const dGeo = await getGeocode({ address: formData.dropoff });
-                if (dGeo && dGeo.length > 0) {
-                    const { lat: dlt, lng: dlg } = await getLatLng(dGeo[0]);
-                    dLat = dlt; dLng = dlg;
-                }
-            } catch (e) {
-                console.warn("Client geocoding failed, falling back to server...", e);
-            }
-
             const res = await fetch(`/api/booker/${slug}/quote`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     pickup: formData.pickup,
                     dropoff: formData.dropoff,
-                    pickupLat: pLat, pickupLng: pLng,
-                    dropoffLat: dLat, dropoffLng: dLng,
+                    pickupLat: formData.pickupLat,
+                    pickupLng: formData.pickupLng,
+                    dropoffLat: formData.dropoffLat,
+                    dropoffLng: formData.dropoffLng,
                     pickupTime: new Date(formData.pickupTime).toISOString(),
                     vehicleType: formData.vehicleType
                 })
@@ -146,28 +134,13 @@ export default function BookerPage() {
         }
         setLoading(true);
         try {
-            let pLat, pLng, dLat, dLng;
-            try {
-                const pGeo = await getGeocode({ address: formData.pickup });
-                if (pGeo && pGeo.length > 0) {
-                    const { lat: plt, lng: plg } = await getLatLng(pGeo[0]);
-                    pLat = plt; pLng = plg;
-                }
-
-                const dGeo = await getGeocode({ address: formData.dropoff });
-                if (dGeo && dGeo.length > 0) {
-                    const { lat: dlt, lng: dlg } = await getLatLng(dGeo[0]);
-                    dLat = dlt; dLng = dlg;
-                }
-            } catch (e) { }
-
             const res = await fetch(`/api/booker/${slug}/book`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...formData,
-                    pickupLat: pLat, pickupLng: pLng,
-                    dropoffLat: dLat, dropoffLng: dLng,
+                    pickupLat: formData.pickupLat, pickupLng: formData.pickupLng,
+                    dropoffLat: formData.dropoffLat, dropoffLng: formData.dropoffLng,
                     pickupTime: new Date(formData.pickupTime).toISOString()
                 })
             });
@@ -321,7 +294,7 @@ export default function BookerPage() {
                                                     value={formData.pickup}
                                                     onChange={(val) => setFormData({ ...formData, pickup: val })}
                                                     onLocationSelect={(loc) => {
-                                                        setFormData(prev => ({ ...prev, pickup: loc.address }));
+                                                        setFormData(prev => ({ ...prev, pickup: loc.address, pickupLat: loc.lat, pickupLng: loc.lng }));
                                                         setQuote(null);
                                                     }}
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner w-full"
@@ -340,7 +313,7 @@ export default function BookerPage() {
                                                     value={formData.dropoff}
                                                     onChange={(val) => setFormData({ ...formData, dropoff: val })}
                                                     onLocationSelect={(loc) => {
-                                                        setFormData(prev => ({ ...prev, dropoff: loc.address }));
+                                                        setFormData(prev => ({ ...prev, dropoff: loc.address, dropoffLat: loc.lat, dropoffLng: loc.lng }));
                                                         setQuote(null);
                                                     }}
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner w-full"
