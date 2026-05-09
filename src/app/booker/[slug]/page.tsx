@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Loader2, Navigation2, CheckCircle2, MapPin, Flag, Calendar, Car, User, Phone, Plane, MessageSquare, ArrowRight, ArrowLeft, Mail, Briefcase, Users } from "lucide-react";
 import usePlacesAutocomplete, { getGeocode, getLatLng } from "use-places-autocomplete";
 import { motion, AnimatePresence } from "framer-motion";
-import { GoogleMapsLoader } from "@/components/dashboard/google-maps-loader";
+import { useJsApiLoader } from "@react-google-maps/api";
 
 export default function BookerPage() {
     const params = useParams();
@@ -65,24 +65,18 @@ export default function BookerPage() {
         initOnMount: false
     }) as any;
 
-    const [scriptLoaded, setScriptLoaded] = useState(false);
+    const { isLoaded: isGoogleLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        libraries: ["places", "geometry"] as any,
+    });
+
     useEffect(() => {
-        if (typeof window !== "undefined" && window.google) {
-            setScriptLoaded(true);
+        if (isGoogleLoaded) {
             pickupSearch.init();
             dropoffSearch.init();
-        } else {
-            const interval = setInterval(() => {
-                if (typeof window !== "undefined" && window.google) {
-                    setScriptLoaded(true);
-                    pickupSearch.init();
-                    dropoffSearch.init();
-                    clearInterval(interval);
-                }
-            }, 500);
-            return () => clearInterval(interval);
         }
-    }, [pickupSearch.init, dropoffSearch.init]);
+    }, [isGoogleLoaded]);
 
     useEffect(() => {
         const fetchTenantInfo = async () => {
@@ -211,7 +205,6 @@ export default function BookerPage() {
     };
 
     return (
-        <GoogleMapsLoader>
             <div className={`min-h-screen w-full flex ${isEmbed ? 'bg-transparent' : 'bg-[#0a0a0c]'}`} style={{ '--primary-brand': brandColor } as React.CSSProperties}>
                 
                 {/* Left Branding Pane (Hidden on Mobile) */}
@@ -360,6 +353,11 @@ export default function BookerPage() {
                                                         ))}
                                                     </motion.ul>
                                                 )}
+                                                {pickupSearch.status !== "OK" && pickupSearch.value.length > 0 && (
+                                                    <div className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl p-4 text-center text-sm text-slate-400">
+                                                        {pickupSearch.status === "ZERO_RESULTS" ? "No locations found." : pickupSearch.status === "REQUEST_DENIED" ? "API Key Error." : "Searching..."}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="pl-6 border-l-2 border-dashed border-white/10 ml-6 py-2 -my-2 h-6"></div>
@@ -393,6 +391,11 @@ export default function BookerPage() {
                                                             </li>
                                                         ))}
                                                     </motion.ul>
+                                                )}
+                                                {dropoffSearch.status !== "OK" && dropoffSearch.value.length > 0 && (
+                                                    <div className="absolute z-50 w-full bg-[#1e1e24] border border-white/10 rounded-xl mt-2 shadow-2xl p-4 text-center text-sm text-slate-400">
+                                                        {dropoffSearch.status === "ZERO_RESULTS" ? "No locations found." : dropoffSearch.status === "REQUEST_DENIED" ? "API Key Error." : "Searching..."}
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>
@@ -638,6 +641,5 @@ export default function BookerPage() {
                     </div>
                 </div>
             </div>
-        </GoogleMapsLoader>
     );
 }
