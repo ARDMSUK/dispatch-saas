@@ -95,6 +95,31 @@ export default function BookerPage() {
         }
 
         setLoading(true);
+        let distanceMiles = 0;
+        try {
+            if (typeof window !== 'undefined' && window.google && window.google.maps) {
+                const directionsService = new google.maps.DirectionsService();
+                const origin = formData.pickupLat && formData.pickupLng ? { lat: formData.pickupLat, lng: formData.pickupLng } : formData.pickup;
+                const destination = formData.dropoffLat && formData.dropoffLng ? { lat: formData.dropoffLat, lng: formData.dropoffLng } : formData.dropoff;
+
+                const result = await directionsService.route({
+                    origin: origin,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.DRIVING
+                });
+
+                if (result.routes[0] && result.routes[0].legs) {
+                    let totalMeters = 0;
+                    result.routes[0].legs.forEach(leg => {
+                        totalMeters += leg.distance?.value || 0;
+                    });
+                    distanceMiles = totalMeters / 1609.34;
+                }
+            }
+        } catch (error) {
+            console.warn("Google Maps Distance failed, falling back to server-side calculation.", error);
+        }
+
         try {
             const res = await fetch(`/api/booker/${slug}/quote`, {
                 method: "POST",
@@ -107,7 +132,8 @@ export default function BookerPage() {
                     dropoffLat: formData.dropoffLat,
                     dropoffLng: formData.dropoffLng,
                     pickupTime: new Date(formData.pickupTime).toISOString(),
-                    vehicleType: formData.vehicleType
+                    vehicleType: formData.vehicleType,
+                    distanceMiles: distanceMiles > 0 ? distanceMiles : undefined
                 })
             });
 
@@ -237,7 +263,7 @@ export default function BookerPage() {
                         </div>
                     )}
 
-                    <div className={`relative z-10 w-full max-w-xl mx-auto overflow-hidden transition-all duration-500 ${isEmbed ? 'bg-transparent' : 'bg-[#151518]/70 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl shadow-black/50 p-6 sm:p-10'}`}>
+                    <div className={`relative z-10 w-full max-w-xl mx-auto overflow-y-auto overflow-x-hidden max-h-[90vh] transition-all duration-500 ${isEmbed ? 'bg-transparent' : 'bg-[#151518]/70 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl shadow-black/50 p-6 sm:p-10'}`}>
                         
                         {/* Mobile Header (Hidden on Desktop) */}
                         {!isEmbed && (
@@ -487,14 +513,14 @@ export default function BookerPage() {
                                         <div className="pt-2">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div
-                                                    onClick={() => setFormData({ ...formData, paymentType: 'CASH' })}
+                                                    onClick={() => setFormData(prev => ({ ...prev, paymentType: 'CASH' }))}
                                                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col items-center justify-center gap-1 ${formData.paymentType === 'CASH' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-black/40 border-white/10 text-slate-400 hover:bg-white/10'}`}
                                                 >
                                                     <span className="font-bold tracking-wider">CASH</span>
                                                     <span className="text-[10px] opacity-70 uppercase">Pay Driver</span>
                                                 </div>
                                                 <div
-                                                    onClick={() => setFormData({ ...formData, paymentType: 'CARD' })}
+                                                    onClick={() => setFormData(prev => ({ ...prev, paymentType: 'CARD' }))}
                                                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col items-center justify-center gap-1 ${formData.paymentType === 'CARD' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-black/40 border-white/10 text-slate-400 hover:bg-white/10'}`}
                                                 >
                                                     <span className="font-bold tracking-wider">CARD</span>
