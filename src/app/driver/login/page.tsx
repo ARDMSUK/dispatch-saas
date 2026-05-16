@@ -81,7 +81,8 @@ export default function DriverLoginPage() {
     }
 
     return (
-        <div className="flex flex-col min-h-[100dvh] max-w-md mx-auto bg-white p-6 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col min-h-screen bg-white pb-[40vh]">
+            <div className="max-w-md mx-auto w-full p-6">
 
             {/* Header */}
             <div className="flex flex-col items-center justify-center pt-10 pb-6 space-y-4">
@@ -182,8 +183,9 @@ export default function DriverLoginPage() {
                 </div>
             )}
 
-            <div className="text-center py-4 text-[10px] text-zinc-700">
+            <div className="text-center py-4 text-[10px] text-zinc-700 mt-auto">
                 v1.0.0 &bull; Secure Connection
+            </div>
             </div>
         </div>
     );
