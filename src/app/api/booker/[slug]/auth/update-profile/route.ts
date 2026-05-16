@@ -3,9 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
     req: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
+        const { slug } = await params;
         const { phone, firstName, lastName, email } = await req.json();
 
         if (!phone || !firstName || !lastName) {
@@ -13,7 +14,7 @@ export async function POST(
         }
 
         const tenant = await prisma.tenant.findUnique({
-            where: { slug: params.slug },
+            where: { slug: slug },
             select: { id: true }
         });
 

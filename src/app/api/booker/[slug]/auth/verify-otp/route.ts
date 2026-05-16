@@ -4,9 +4,10 @@ import crypto from 'crypto';
 
 export async function POST(
     req: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
+        const { slug } = await params;
         const { phone, code, hash, expires } = await req.json();
 
         if (!phone || !code || !hash || !expires) {
@@ -29,7 +30,7 @@ export async function POST(
 
         // If valid, find or create the Customer for this tenant
         const tenant = await prisma.tenant.findUnique({
-            where: { slug: params.slug },
+            where: { slug: slug },
             select: { id: true }
         });
 

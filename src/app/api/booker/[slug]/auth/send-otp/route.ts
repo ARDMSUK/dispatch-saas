@@ -5,9 +5,10 @@ import crypto from 'crypto';
 
 export async function POST(
     req: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
+        const { slug } = await params;
         const { phone } = await req.json();
 
         if (!phone) {
@@ -15,7 +16,7 @@ export async function POST(
         }
 
         const tenant = await prisma.tenant.findUnique({
-            where: { slug: params.slug },
+            where: { slug: slug },
             select: { 
                 name: true,
                 twilioAccountSid: true, 
