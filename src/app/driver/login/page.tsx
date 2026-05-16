@@ -81,7 +81,7 @@ export default function DriverLoginPage() {
     }
 
     return (
-        <div className="flex flex-col h-screen max-w-md mx-auto bg-white p-6">
+        <div className="flex flex-col min-h-[100dvh] max-w-md mx-auto bg-white p-6 overflow-y-auto custom-scrollbar">
 
             {/* Header */}
             <div className="flex flex-col items-center justify-center pt-10 pb-6 space-y-4">
@@ -96,7 +96,7 @@ export default function DriverLoginPage() {
 
             {/* Step 1: Callsign */}
             {step === 'CALLSIGN' && (
-                <form onSubmit={handleCallsignSubmit} className="flex-1 flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                <form onSubmit={handleCallsignSubmit} className="flex-1 flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 mb-20">
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-xs uppercase font-bold text-slate-400 ml-1">Company Code</label>
@@ -132,7 +132,7 @@ export default function DriverLoginPage() {
 
             {/* Step 2: PIN Pad */}
             {step === 'PIN' && (
-                <div className="flex-1 flex flex-col h-full animate-in fade-in zoom-in-95">
+                <div className="flex-1 flex flex-col justify-end pb-8 animate-in fade-in zoom-in-95">
                     <div className="mb-8 text-center">
                         <p className="text-slate-500 mb-4">Enter PIN for <span className="text-slate-900 font-bold">{callsign}</span></p>
                         <div className="flex justify-center gap-4">

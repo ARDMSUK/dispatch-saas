@@ -71,7 +71,7 @@ model Tenant {
   zettleRefreshToken   String?
   zettleTokenExpiry    DateTime?
 
-  paymentRouting       String  @default("CENTRAL") // CENTRAL or DRIVER
+  paymentRouting String @default("CENTRAL") // CENTRAL or DRIVER
 
   twilioAccountSid   String?
   twilioAuthToken    String?
@@ -123,8 +123,9 @@ model Tenant {
 
   passengerAssistants PassengerAssistant[]
   contracts           Contract[]
-  students            Student[]         @relation("TenantStudents")
-  incidentReports     IncidentReport[]  @relation("TenantIncidents")
+  students            Student[]            @relation("TenantStudents")
+  incidentReports     IncidentReport[]     @relation("TenantIncidents")
+  DriverMessage       DriverMessage[]
 
   @@map("companies")
   @@schema("public")
@@ -139,19 +140,19 @@ model SaasPlan {
   stripePriceId   String?
 
   // Features Unlocked
-  incZonePricing    Boolean @default(false)
-  incDynamicPricing Boolean @default(false)
-  incAutoDispatch   Boolean @default(false)
-  incWaitReturn     Boolean @default(false)
-  incWebBooker      Boolean @default(false)
-  incB2bPortal      Boolean @default(false)
-  incWavOptions     Boolean @default(false)
-  incLiveTracking   Boolean @default(true)
-  incWebChatAi      Boolean @default(false)
-  incWhatsAppAi     Boolean @default(false)
-  incVoiceAi        Boolean @default(false)
+  incZonePricing     Boolean @default(false)
+  incDynamicPricing  Boolean @default(false)
+  incAutoDispatch    Boolean @default(false)
+  incWaitReturn      Boolean @default(false)
+  incWebBooker       Boolean @default(false)
+  incB2bPortal       Boolean @default(false)
+  incWavOptions      Boolean @default(false)
+  incLiveTracking    Boolean @default(true)
+  incWebChatAi       Boolean @default(false)
+  incWhatsAppAi      Boolean @default(false)
+  incVoiceAi         Boolean @default(false)
   incSchoolContracts Boolean @default(false)
-  incDataImport     Boolean @default(false)
+  incDataImport      Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -281,7 +282,7 @@ model Driver {
   status String @default("OFF_DUTY") // FREE, BUSY, AWAY, OFF_DUTY
 
   gender         String? // MALE, FEMALE
-  employmentType String @default("COMPANY_DRIVER") // COMPANY_DRIVER, OWNER_DRIVER
+  employmentType String  @default("COMPANY_DRIVER") // COMPANY_DRIVER, OWNER_DRIVER
 
   // Commission (percentage tenant takes)
   commissionRate Float @default(20.0)
@@ -302,12 +303,12 @@ model Driver {
   zoneQueues ZoneQueue[]
 
   // Integrations (Driver-level terminals)
-  sumupAccessToken     String?
-  sumupRefreshToken    String?
-  sumupTokenExpiry     DateTime?
-  zettleAccessToken    String?
-  zettleRefreshToken   String?
-  zettleTokenExpiry    DateTime?
+  sumupAccessToken   String?
+  sumupRefreshToken  String?
+  sumupTokenExpiry   DateTime?
+  zettleAccessToken  String?
+  zettleRefreshToken String?
+  zettleTokenExpiry  DateTime?
 
   expoPushToken String?
 
@@ -317,8 +318,9 @@ model Driver {
   complianceOverrideActive Boolean @default(false)
   complianceOverrideReason String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  DriverMessage DriverMessage[]
 
   @@unique([tenantId, callsign])
   @@map("drivers")
@@ -437,7 +439,8 @@ model Job {
   isBilled  Boolean  @default(false)
 
   contractRouteId String?
-  contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
+  contractRoute   ContractRoute?  @relation(fields: [contractRouteId], references: [id])
+  DriverMessage   DriverMessage[]
 
   @@map("bookings")
   @@schema("public")
@@ -592,7 +595,7 @@ model Invoice {
   // Local Authority / Contract Billing Fields
   invoicePeriodStart DateTime?
   invoicePeriodEnd   DateTime?
-  
+
   contractId String?
   contract   Contract? @relation(fields: [contractId], references: [id])
 
@@ -638,6 +641,27 @@ model TicketMessage {
   @@schema("public")
 }
 
+model DriverMessage {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  driverId String
+  driver   Driver @relation(fields: [driverId], references: [id])
+
+  jobId Int?
+  job   Job? @relation(fields: [jobId], references: [id])
+
+  content String  @db.Text
+  sender  String  @default("DRIVER") // DRIVER, BASE
+  isRead  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@map("driver_messages")
+  @@schema("public")
+}
+
 model WhatsappSession {
   id       String @id @default(cuid())
   tenantId String
@@ -656,41 +680,41 @@ model WhatsappSession {
 
 model Document {
   id         String    @id @default(cuid())
-  type       String    // e.g. DRIVING_LICENSE, PCO_BADGE, MOT, INSURANCE
+  type       String // e.g. DRIVING_LICENSE, PCO_BADGE, MOT, INSURANCE
   fileUrl    String?
   expiryDate DateTime?
   status     String    @default("PENDING") // PENDING, APPROVED, REJECTED, EXPIRED
   notes      String?
 
-  tenantId   String
-  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  driverId   String?
-  driver     Driver?   @relation(fields: [driverId], references: [id])
+  driverId String?
+  driver   Driver? @relation(fields: [driverId], references: [id])
 
-  vehicleId  String?
-  vehicle    Vehicle?  @relation(fields: [vehicleId], references: [id])
+  vehicleId String?
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("documents")
   @@schema("public")
 }
 
 model PassengerAssistant {
-  id            String    @id @default(cuid())
-  callsign      String // PA ID or Badge
-  name          String
-  phone         String
-  email         String?
-  gender        String? // MALE, FEMALE
-  status        String @default("OFF_DUTY")
+  id       String  @id @default(cuid())
+  callsign String // PA ID or Badge
+  name     String
+  phone    String
+  email    String?
+  gender   String? // MALE, FEMALE
+  status   String  @default("OFF_DUTY")
 
   payRatePerHour Float @default(11.44)
 
-  tenantId      String
-  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -703,25 +727,25 @@ model PassengerAssistant {
 }
 
 model Contract {
-  id            String    @id @default(cuid())
-  reference     String
+  id              String    @id @default(cuid())
+  reference       String
   purchaseOrderNo String? // Required by Local Authority
-  name          String
-  startDate     DateTime?
-  endDate       DateTime?
-  status        String    @default("ACTIVE") // PENDING, ACTIVE, COMPLETED, CANCELLED
+  name            String
+  startDate       DateTime?
+  endDate         DateTime?
+  status          String    @default("ACTIVE") // PENDING, ACTIVE, COMPLETED, CANCELLED
 
-  totalValue    Float?
-  notes         String? @db.Text
+  totalValue Float?
+  notes      String? @db.Text
 
-  tenantId      String
-  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  accountId     String
-  account       Account   @relation(fields: [accountId], references: [id])
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
 
-  routes        ContractRoute[]
-  invoices      Invoice[]
+  routes   ContractRoute[]
+  invoices Invoice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -732,12 +756,12 @@ model Contract {
 }
 
 model ContractRoute {
-  id            String    @id @default(cuid())
-  name          String // e.g. "Morning Run - School X"
-  routeNumber   String? // Required by Local Authority
-  
-  contractId    String
-  contract      Contract  @relation(fields: [contractId], references: [id])
+  id          String  @id @default(cuid())
+  name        String // e.g. "Morning Run - School X"
+  routeNumber String? // Required by Local Authority
+
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id])
 
   // Requirements
   requiresWav          Boolean @default(false)
@@ -746,16 +770,16 @@ model ContractRoute {
   requiredPaGender     String? // MALE, FEMALE
 
   // Default Assignments
-  defaultDriverId      String?
+  defaultDriverId String?
   // We can add default Driver relations if needed
 
-  defaultPaId          String?
-  defaultPa            PassengerAssistant? @relation(fields: [defaultPaId], references: [id])
+  defaultPaId String?
+  defaultPa   PassengerAssistant? @relation(fields: [defaultPaId], references: [id])
 
-  stops         RouteStop[]
-  students      Student[]
-  incidents     IncidentReport[]
-  jobs          Job[]
+  stops     RouteStop[]
+  students  Student[]
+  incidents IncidentReport[]
+  jobs      Job[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -765,41 +789,41 @@ model ContractRoute {
 }
 
 model RouteStop {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   contractRouteId String
   contractRoute   ContractRoute @relation(fields: [contractRouteId], references: [id])
 
-  address         String
-  lat             Float?
-  lng             Float?
-  type            String @default("PICKUP") // PICKUP, DROPOFF, SCHOOL
-  sequenceIndex   Int @default(0)
+  address       String
+  lat           Float?
+  lng           Float?
+  type          String @default("PICKUP") // PICKUP, DROPOFF, SCHOOL
+  sequenceIndex Int    @default(0)
 
-  scheduledTime   String? // "07:30"
+  scheduledTime String? // "07:30"
 
   @@map("route_stops")
   @@schema("public")
 }
 
 model Student {
-  id              String    @id @default(cuid())
-  name            String
-  dateOfBirth     DateTime?
-  
-  specialNeeds    String? @db.Text
-  medicalInfo     String? @db.Text
+  id          String    @id @default(cuid())
+  name        String
+  dateOfBirth DateTime?
+
+  specialNeeds        String? @db.Text
+  medicalInfo         String? @db.Text
   riskAssessmentNotes String? @db.Text
 
-  parentContactName   String?
-  parentContactPhone  String?
+  parentContactName  String?
+  parentContactPhone String?
 
   contractRouteId String?
   contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
 
-  meetAndGreets   MeetAndGreet[]
+  meetAndGreets MeetAndGreet[]
 
-  tenantId        String
-  tenant          Tenant    @relation("TenantStudents", fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation("TenantStudents", fields: [tenantId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -809,13 +833,13 @@ model Student {
 }
 
 model MeetAndGreet {
-  id              String    @id @default(cuid())
-  studentId       String
-  student         Student   @relation(fields: [studentId], references: [id])
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
 
-  completedAt     DateTime?
-  status          String @default("PENDING") // PENDING, COMPLETED
-  notes           String? @db.Text
+  completedAt DateTime?
+  status      String    @default("PENDING") // PENDING, COMPLETED
+  notes       String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -825,19 +849,19 @@ model MeetAndGreet {
 }
 
 model IncidentReport {
-  id              String    @id @default(cuid())
-  date            DateTime  @default(now())
-  description     String    @db.Text
-  severity        String    @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  description String   @db.Text
+  severity    String   @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
 
-  resolutionNotes String?   @db.Text
-  status          String    @default("OPEN") // OPEN, INVESTIGATING, CLOSED
+  resolutionNotes String? @db.Text
+  status          String  @default("OPEN") // OPEN, INVESTIGATING, CLOSED
 
   contractRouteId String?
   contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
 
-  tenantId        String
-  tenant          Tenant    @relation("TenantIncidents", fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation("TenantIncidents", fields: [tenantId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -847,20 +871,20 @@ model IncidentReport {
 }
 
 model FlightCache {
-  id                 String   @id @default(cuid())
-  tenantId           String
-  flightNumber       String
-  dateString         String   // YYYY-MM-DD
-  
-  status             String?
-  scheduledArrival   DateTime?
-  estimatedArrival   DateTime?
-  actualArrival      DateTime?
-  terminal           String?
-  gate               String?
-  airline            String?
-  
-  lastCheckedAt      DateTime @default(now())
+  id           String @id @default(cuid())
+  tenantId     String
+  flightNumber String
+  dateString   String // YYYY-MM-DD
+
+  status           String?
+  scheduledArrival DateTime?
+  estimatedArrival DateTime?
+  actualArrival    DateTime?
+  terminal         String?
+  gate             String?
+  airline          String?
+
+  lastCheckedAt DateTime @default(now())
 
   @@unique([tenantId, flightNumber, dateString])
   @@map("flight_cache")

@@ -48,6 +48,7 @@ interface Job {
     commission?: number;
     driverPayment?: number;
     driverPaymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
+    emergencyActive?: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -354,7 +355,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 }}
                 className={`
                     group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer mb-2
-                    ${selectedJobId === job.id ? 'bg-blue-700/10 border-blue-700/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
+                    ${job.emergencyActive ? 'bg-red-600 animate-pulse border-red-800 text-white' : selectedJobId === job.id ? 'bg-blue-700/10 border-blue-700/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
                 `}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -362,6 +363,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         <Badge variant="outline" className={`${getStatusColor(job.status)} font-mono text-[10px] tracking-wider`}>
                             {job.status === 'UNASSIGNED' ? 'CONFIRMED' : job.status}
                         </Badge>
+                        {job.emergencyActive && (
+                            <Badge variant="outline" className="bg-red-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1 flex items-center gap-1 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                                <AlertCircle className="w-4 h-4 animate-bounce" /> PANIC ALERT
+                            </Badge>
+                        )}
                         {/* M&G Badge */}
                         {hasMeetGreet && (
                             <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-mono text-[10px]">
