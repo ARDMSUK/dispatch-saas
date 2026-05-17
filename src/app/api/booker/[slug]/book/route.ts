@@ -144,8 +144,8 @@ export async function POST(
             publishableKey
         }, { headers: corsHeaders });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating public booking:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders });
+        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500, headers: corsHeaders });
     }
 }
