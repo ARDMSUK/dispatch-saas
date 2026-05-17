@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/session';
+import { auth } from '@/auth';
 
 export async function GET(req: Request) {
   try {
-    const user = await getCurrentUser();
+    const session = await auth();
+    const user = session?.user;
     if (!user) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
@@ -41,7 +42,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const user = await getCurrentUser();
+    const session = await auth();
+    const user = session?.user;
     if (!user) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
