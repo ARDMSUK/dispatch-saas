@@ -225,9 +225,7 @@ export default function BookerPage() {
                             {logoUrl ? (
                                 <img src={logoUrl} alt={companyName} className="h-12 object-contain drop-shadow-xl" />
                             ) : (
-                                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-2xl ring-1 ring-white/20" style={{ backgroundColor: brandColor }}>
-                                    <Navigation2 className="w-6 h-6 text-white" />
-                                </div>
+                                <img src="/logo-full.png" alt={companyName} className="h-12 object-contain drop-shadow-xl bg-white p-2 rounded-xl" />
                             )}
                             <h2 className="text-2xl font-bold tracking-tight text-white">{companyName}</h2>
                         </div>
@@ -271,9 +269,7 @@ export default function BookerPage() {
                                  {logoUrl ? (
                                     <img src={logoUrl} alt={companyName} className="h-16 object-contain mx-auto mb-4 drop-shadow-xl" />
                                 ) : (
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl ring-1 ring-white/20" style={{ backgroundColor: brandColor }}>
-                                        <Navigation2 className="w-8 h-8 text-white" />
-                                    </div>
+                                    <img src="/logo-full.png" alt={companyName} className="h-16 object-contain mx-auto mb-4 drop-shadow-xl bg-white p-2 rounded-2xl" />
                                 )}
                                 <h2 className="text-2xl font-bold tracking-tight text-white">{companyName}</h2>
                             </div>

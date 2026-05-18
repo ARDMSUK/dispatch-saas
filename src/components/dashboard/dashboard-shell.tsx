@@ -142,8 +142,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                             <Menu className="h-5 w-5" />
                         </Button>
                         <div className="flex items-center gap-2">
-                            <div className="bg-blue-700 h-6 w-6 rounded flex items-center justify-center font-bold text-black text-xs">D</div>
-                            <span className="font-bold tracking-wide text-sm hidden md:inline">CAB<span className="text-blue-700">AI</span></span>
+                            <img src="/logo-full.png" alt="CabAI" className="h-7 md:h-8 object-contain" />
                         </div>
                     </div>
 
