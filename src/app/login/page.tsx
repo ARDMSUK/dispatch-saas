@@ -71,10 +71,7 @@ export default function LoginPage() {
             <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 xl:px-32 relative z-10 bg-white">
                 <div className="w-full max-w-sm mx-auto">
                     <div className="flex items-center gap-3 mb-12">
-                        <div className="h-10 w-10 bg-yellow-400 rounded-xl flex items-center justify-center text-slate-900 shadow-sm">
-                            <Car className="h-6 w-6" />
-                        </div>
-                        <span className="text-2xl font-black tracking-tight text-slate-900">CABAI</span>
+                        <img src="/logo-full.png" alt="CABAI" className="h-10 object-contain" />
                     </div>
 
                     <div className="mb-8">

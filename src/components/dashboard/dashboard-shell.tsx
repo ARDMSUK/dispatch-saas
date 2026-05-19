@@ -142,7 +142,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                             <Menu className="h-5 w-5" />
                         </Button>
                         <div className="flex items-center gap-2">
-                            <img src="/logo-full.png" alt="CabAI" className="h-7 md:h-8 object-contain" />
+                            <img src="/logo-full.png" alt="CabAI" className="h-10 md:h-12 object-contain" />
                         </div>
                     </div>
 
