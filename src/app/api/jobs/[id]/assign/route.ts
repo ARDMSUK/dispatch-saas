@@ -17,7 +17,12 @@ export async function PATCH(
         }
 
         const jobId = parseInt(id);
-        const { driverId } = await req.json();
+        const { driverId, currentVersion } = await req.json();
+
+        const job = await prisma.job.findUnique({ where: { id: jobId } });
+        if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+        
+        const expectedVersion = currentVersion || job.version;
 
         // 1. Validate Driver Status
         const driver = await prisma.driver.findUnique({
@@ -36,10 +41,11 @@ export async function PATCH(
         // 2. Transaction: Update Job + Update Driver Status
         const [updatedJob] = await prisma.$transaction([
             prisma.job.update({
-                where: { id: jobId },
+                where: { id: jobId, version: expectedVersion },
                 data: {
                     driverId,
-                    status: 'DISPATCHED'
+                    status: 'DISPATCHED',
+                    version: { increment: 1 }
                 },
                 include: { customer: true }
             }),
@@ -65,7 +71,10 @@ export async function PATCH(
         }
 
         return NextResponse.json(updatedJob);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            return NextResponse.json({ error: 'Job was already modified or taken by someone else' }, { status: 409 });
+        }
         console.error("Assign failed", error);
         return NextResponse.json({ error: 'Assignment Failed' }, { status: 500 });
     }

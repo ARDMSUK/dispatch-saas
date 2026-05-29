@@ -324,6 +324,7 @@ model Driver {
   DriverMessage DriverMessage[]
 
   @@unique([tenantId, callsign])
+  @@index([tenantId, status])
   @@map("drivers")
   @@schema("public")
 }
@@ -416,6 +417,7 @@ model Job {
   status       String  @default("PENDING")
   // PENDING, UNASSIGNED, DISPATCHED, EN_ROUTE, POB, COMPLETED, CANCELLED
   autoDispatch Boolean @default(true) // Manual override for dispatchers
+  version      Int     @default(1) // OCC lock
 
   // Relations
   tenantId String
@@ -444,6 +446,7 @@ model Job {
   DriverMessage   DriverMessage[]
 
   @@map("bookings")
+  @@index([tenantId, status, pickupTime])
   @@schema("public")
 }
 
