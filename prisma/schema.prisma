@@ -48,6 +48,7 @@ model Tenant {
   hasWebChatAi         Boolean  @default(false)
   hasWhatsAppAi        Boolean  @default(false)
   hasVoiceAi           Boolean  @default(false)
+  enableVoiceAi        Boolean  @default(false)
   hasSchoolContracts   Boolean  @default(false)
   hasDataImport        Boolean  @default(false)
   aiMessageCount       Int      @default(0)

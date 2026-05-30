@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Bot, MessageSquare, QrCode, Power, Settings2, Activity } from "lucide-react";
+import { Bot, MessageSquare, QrCode, Power, Settings2, Activity, Phone, Copy } from "lucide-react";
 import Image from "next/image";
 
 export default function TenantAIPage() {
@@ -14,6 +14,9 @@ export default function TenantAIPage() {
     const [instanceId, setInstanceId] = useState<string | null>(null);
 
     const [hasWebChat, setHasWebChat] = useState(false);
+    const [hasVoiceAi, setHasVoiceAi] = useState(false);
+    const [enableVoiceAi, setEnableVoiceAi] = useState(false);
+    const [tenantId, setTenantId] = useState<string | null>(null);
 
     // Initial Fetch for Tenant AI State
     useEffect(() => {
@@ -27,9 +30,40 @@ export default function TenantAIPage() {
                 if (data && data.hasWebChatAi !== undefined) {
                     setHasWebChat(data.hasWebChatAi);
                 }
+                if (data && data.hasVoiceAi !== undefined) {
+                    setHasVoiceAi(data.hasVoiceAi);
+                }
+                if (data && data.enableVoiceAi !== undefined) {
+                    setEnableVoiceAi(data.enableVoiceAi);
+                }
+                if (data && data.id) {
+                    setTenantId(data.id);
+                }
             })
             .catch(() => console.error("Failed to fetch tenant AI settings"));
     }, []);
+
+    const toggleVoiceAi = async () => {
+        const newValue = !enableVoiceAi;
+        setLoading(true);
+        try {
+            const res = await fetch('/api/settings/organization', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enableVoiceAi: newValue })
+            });
+            if (res.ok) {
+                setEnableVoiceAi(newValue);
+                toast.success(`Voice AI agent has been ${newValue ? 'enabled' : 'disabled'}.`);
+            } else {
+                toast.error("Failed to update Voice AI settings.");
+            }
+        } catch (error) {
+            toast.error("Network error saving settings.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const requestWhatsAppQR = async () => {
         setLoading(true);
@@ -63,7 +97,7 @@ export default function TenantAIPage() {
                 <p className="text-slate-500">Manage your autonomous agents and configure integrations to live messaging platforms.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* WHATSAPP AGENT CARD */}
                 <Card className="border-emerald-200 bg-emerald-50/10">
@@ -186,6 +220,78 @@ export default function TenantAIPage() {
                         <Button variant="outline" className="w-full text-slate-500 border-dashed" disabled>
                             <Settings2 className="w-4 h-4 mr-2" /> Modify Chat Rules
                         </Button>
+                    </CardContent>
+                </Card>
+
+                {/* VOICE AI AGENT CARD */}
+                <Card className={`border-slate-200 overflow-hidden relative ${!hasVoiceAi ? 'opacity-80' : ''}`}>
+                    <CardHeader className="pb-4 border-b border-slate-100">
+                        <div className="flex justify-between items-start">
+                            <CardTitle className="flex items-center gap-2 text-indigo-700">
+                                <Phone className="w-5 h-5" />
+                                Voice AI Agent
+                            </CardTitle>
+                            {!hasVoiceAi ? (
+                                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
+                                    Not Subscribed
+                                </span>
+                            ) : enableVoiceAi ? (
+                                <span className="flex items-center gap-1 text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full border border-emerald-200">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Listening
+                                </span>
+                            ) : (
+                                <span className="text-xs font-medium bg-slate-100 text-slate-500 px-2 py-1 rounded-full border">
+                                    Paused
+                                </span>
+                            )}
+                        </div>
+                        <CardDescription className="pt-2">
+                            Deploy an autonomous phone-booking voice assistant. It estimates fares, schedules bookings, and answers FAQs.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6 space-y-4">
+                        {!hasVoiceAi ? (
+                            <div className="bg-slate-50 border rounded-xl p-4 text-center space-y-2">
+                                <p className="text-xs text-slate-500">
+                                    This module is locked for your organization. Contact your administrator to add Voice AI support to your subscription.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <Button 
+                                    onClick={toggleVoiceAi} 
+                                    disabled={loading}
+                                    className={`w-full font-semibold transition-all ${enableVoiceAi ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
+                                >
+                                    {loading ? "Saving Settings..." : enableVoiceAi ? "Pause Voice Assistant" : "Activate Voice Assistant"}
+                                </Button>
+
+                                {enableVoiceAi && tenantId && (
+                                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 space-y-2">
+                                        <label className="text-[10px] uppercase font-bold text-slate-500 block">Vapi Webhook Server URL</label>
+                                        <div className="flex gap-2 items-center">
+                                            <input 
+                                                readOnly 
+                                                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/voice/bookings?tenantId=${tenantId}`}
+                                                className="w-full bg-white border border-slate-200 text-[10px] font-mono p-1 rounded truncate text-slate-600"
+                                            />
+                                            <Button 
+                                                variant="outline" 
+                                                className="h-6 w-12 text-[10px] p-0" 
+                                                onClick={() => {
+                                                    if (typeof window !== 'undefined') {
+                                                        navigator.clipboard.writeText(`${window.location.origin}/api/voice/bookings?tenantId=${tenantId}`);
+                                                        toast.success("Webhook URL copied to clipboard");
+                                                    }
+                                                }}
+                                            >
+                                                Copy
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

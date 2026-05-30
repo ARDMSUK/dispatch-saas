@@ -20,6 +20,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid Tenant ID" }, { status: 404 });
         }
 
+        // Validate that Voice AI is unlocked (hasVoiceAi) and toggled on (enableVoiceAi)
+        if (!tenant.hasVoiceAi || !tenant.enableVoiceAi) {
+            return NextResponse.json({ error: "Voice AI is disabled or not included in subscription for this tenant" }, { status: 403 });
+        }
+
         const body = await req.json();
         const toolCalls = body.message?.toolCalls;
 
