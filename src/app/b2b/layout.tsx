@@ -21,23 +21,23 @@ export default async function B2BLayout({
             <aside className="w-64 border-r border-slate-200 bg-white flex flex-col items-start px-4 py-6 justify-between shadow-2xl z-10 shrink-0">
                 <div className="w-full space-y-6">
                     {/* Header */}
-                    <div className="flex flex-col gap-1 px-2 border-b border-zinc-900 pb-4">
+                    <div className="flex flex-col gap-1 px-2 border-b border-slate-200 pb-4">
                         <div className="flex items-center gap-2">
                             <Building2 className="w-6 h-6 text-indigo-600" />
-                            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-gray-100 to-gray-400 bg-clip-text text-transparent">Corporate Portal</span>
+                            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">Corporate Portal</span>
                         </div>
-                        <span className="text-xs text-slate-400 truncate max-w-[200px]">Account: {session.user.name}</span>
+                        <span className="text-xs text-slate-500 truncate max-w-[200px]">Account: {session.user.name}</span>
                     </div>
 
                     {/* Navigation Items */}
                     <nav className="flex w-full flex-col gap-1">
                         <Link href="/b2b">
-                            <span className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-200/50 transition-colors">
+                            <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 transition-colors">
                                 <Calendar className="w-4 h-4" /> Bookings
                             </span>
                         </Link>
                         <Link href="/b2b/ledger">
-                            <span className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-200/50 transition-colors">
+                            <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 transition-colors">
                                 <FileText className="w-4 h-4" /> Account Ledger
                             </span>
                         </Link>
@@ -45,12 +45,12 @@ export default async function B2BLayout({
                 </div>
 
                 {/* Footer Section (Logout) */}
-                <div className="px-2 w-full pt-4 border-t border-zinc-900">
+                <div className="px-2 w-full pt-4 border-t border-slate-200">
                     <form action="/api/auth/signout" method="POST">
                         <Button
-                            variant="ghost"
-                            className="w-full flex items-center justify-start gap-3 rounded-md text-sm text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-colors px-3 h-10"
-                            type="submit"
+                             variant="ghost"
+                             className="w-full flex items-center justify-start gap-3 rounded-md text-sm text-slate-500 hover:text-red-600 hover:bg-red-50/80 transition-colors px-3 h-10"
+                             type="submit"
                         >
                             <LogOut className="w-4 h-4" />
                             Sign out

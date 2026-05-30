@@ -44,12 +44,14 @@ export async function middleware(request: NextRequest) {
             currentHost !== "app" &&
             currentHost !== "www" &&
             currentHost !== "cabai.co.uk" &&
+            currentHost !== "localhost" &&
             currentHost !== "localhost:3000" &&
             currentHost !== hostname && // Ensure it actually was a subdomain
             !url.pathname.startsWith("/api") &&
             !url.pathname.startsWith("/_next") &&
             !url.pathname.startsWith("/dashboard") &&
-            !url.pathname.startsWith("/login")
+            !url.pathname.startsWith("/login") &&
+            !url.pathname.startsWith("/b2b")
         ) {
             // Rewrite the request to /booker/[subdomain]
             let rewritePath = `/booker/${currentHost}${url.pathname}`;

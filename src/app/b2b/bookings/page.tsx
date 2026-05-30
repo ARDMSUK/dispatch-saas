@@ -207,20 +207,20 @@ export default function B2BBookings() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
                 </div>
             ) : bookings.length === 0 ? (
-                <Card className="bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm">
+                <Card className="glass-panel">
                     <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                             <Car className="w-8 h-8 text-slate-500" />
                         </div>
-                        <h3 className="text-xl font-medium text-slate-600">No active bookings</h3>
+                        <h3 className="text-xl font-medium text-slate-700">No active bookings</h3>
                         <p className="text-slate-400 mt-2 max-w-sm">You don't have any upcoming trips scheduled. Click "New Booking" to arrange travel.</p>
                     </CardContent>
                 </Card>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {bookings.map(job => (
-                        <Card key={job.id} className="bg-zinc-900/60 border-zinc-800/80 backdrop-blur-sm overflow-hidden flex flex-col hover:border-zinc-700 transition-colors">
-                            <div className="px-4 py-3 border-b border-slate-200 flex justify-between items-center bg-zinc-950/30">
+                        <Card key={job.id} className="glass-panel overflow-hidden flex flex-col hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-300">
+                            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <Badge variant="outline" className={`font-mono ${getStatusColor(job.status)}`}>
                                     {job.status}
                                 </Badge>
@@ -228,51 +228,51 @@ export default function B2BBookings() {
                             </div>
                             <CardContent className="p-5 flex-1 flex flex-col gap-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="mt-1 bg-slate-200 p-2 rounded-md">
+                                    <div className="mt-1 bg-indigo-50/80 p-2 rounded-md">
                                         <CalendarClock className="w-4 h-4 text-indigo-600" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-semibold text-slate-800">
+                                        <span className="text-xs font-medium text-slate-400">
                                             {format(new Date(job.pickupTime), 'E, MMM do yyyy')}
                                         </span>
-                                        <span className="text-2xl font-bold text-slate-900 tracking-tight">
+                                        <span className="text-xl font-bold text-slate-800 tracking-tight">
                                             {format(new Date(job.pickupTime), 'HH:mm')}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-3 relative pt-2">
-                                    <div className="absolute left-3 top-5 bottom-4 w-px bg-slate-200 -z-10"></div>
+                                    <div className="absolute left-3 top-5 bottom-4 w-px bg-slate-200/60 -z-10"></div>
 
                                     <div className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center z-10 shrink-0">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                        <div className="w-6 h-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center z-10 shrink-0">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                                         </div>
                                         <div className="flex flex-col justify-start pt-0.5">
-                                            <span className="text-sm text-slate-600 font-medium leading-tight">{job.pickupAddress}</span>
+                                            <span className="text-sm text-slate-700 font-semibold leading-tight">{job.pickupAddress}</span>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center z-10 shrink-0">
-                                            <MapPin className="w-3 h-3 text-red-400" />
+                                        <div className="w-6 h-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center z-10 shrink-0">
+                                            <MapPin className="w-3 h-3 text-rose-500" />
                                         </div>
                                         <div className="flex flex-col justify-start pt-0.5">
-                                            <span className="text-sm text-slate-500 leading-tight">{job.dropoffAddress}</span>
+                                            <span className="text-sm text-slate-600 leading-tight">{job.dropoffAddress}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-auto pt-4 border-t border-zinc-800/80 flex justify-between items-center">
+                                <div className="mt-auto pt-4 border-t border-slate-100 flex justify-between items-center">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Passenger</span>
-                                        <span className="text-sm font-medium text-slate-600">{job.passengerName}</span>
+                                        <span className="text-sm font-semibold text-slate-700">{job.passengerName}</span>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Badge variant="secondary" className="bg-slate-200 text-slate-500 border-slate-300 hover:bg-slate-200">
+                                        <Badge variant="secondary" className="bg-slate-100 text-slate-600 border border-slate-200/50 hover:bg-slate-200/60">
                                             <Users className="w-3 h-3 mr-1" /> {job.passengers}
                                         </Badge>
-                                        <Badge variant="secondary" className="bg-slate-200 text-slate-500 border-slate-300 font-mono hover:bg-slate-200">
+                                        <Badge variant="secondary" className="bg-slate-100 text-slate-600 border border-slate-200/50 font-mono hover:bg-slate-200/60">
                                             {job.vehicleType}
                                         </Badge>
                                     </div>

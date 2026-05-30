@@ -118,11 +118,11 @@ export default function B2BLedger() {
 
                 {/* INVOICES TAB */}
                 <TabsContent value="invoices" className="flex-1 mt-0">
-                    <Card className="h-full overflow-hidden bg-zinc-900/60 border-zinc-800/80 backdrop-blur-sm shadow-xl">
+                    <Card className="h-full overflow-hidden glass-panel shadow-xl">
                         <div className="overflow-auto max-h-full">
                             <Table>
-                                <TableHeader className="bg-white/80 sticky top-0 z-10">
-                                    <TableRow className="border-slate-200 hover:bg-transparent">
+                                <TableHeader className="bg-slate-50/80 sticky top-0 z-10 border-b border-slate-200">
+                                    <TableRow className="border-slate-100 hover:bg-transparent">
                                         <TableHead className="text-slate-500">Invoice Ref</TableHead>
                                         <TableHead className="text-slate-500">Issue Date</TableHead>
                                         <TableHead className="text-slate-500">Due Date</TableHead>
@@ -152,14 +152,14 @@ export default function B2BLedger() {
                                         </TableRow>
                                     ) : (
                                         filteredInvoices.map((inv) => (
-                                            <TableRow key={inv.id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group">
-                                                <TableCell className="font-mono text-slate-600 font-bold">
+                                            <TableRow key={inv.id} className="border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                                                <TableCell className="font-mono text-slate-700 font-bold">
                                                     {inv.invoiceNumber}
                                                 </TableCell>
-                                                <TableCell className="text-slate-500">
+                                                <TableCell className="text-slate-600">
                                                     {format(new Date(inv.issueDate), 'MMM do, yyyy')}
                                                 </TableCell>
-                                                <TableCell className="text-slate-500">
+                                                <TableCell className="text-slate-600">
                                                     {format(new Date(inv.dueDate), 'MMM do, yyyy')}
                                                 </TableCell>
                                                 <TableCell className="text-right font-mono font-bold text-slate-900">
@@ -167,18 +167,18 @@ export default function B2BLedger() {
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     {inv.status === 'PAID' ? (
-                                                        <Badge className="bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 hover:bg-emerald-500/30">SETTLED</Badge>
+                                                        <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">SETTLED</Badge>
                                                     ) : inv.status === 'OVERDUE' ? (
-                                                        <Badge className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30">OVERDUE</Badge>
+                                                        <Badge className="bg-red-50 text-red-700 border border-red-200 hover:bg-red-100">OVERDUE</Badge>
                                                     ) : (
-                                                        <Badge className="bg-blue-700/20 text-blue-700 border border-blue-700/30 hover:bg-blue-700/30">PENDING</Badge>
+                                                        <Badge className="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">PENDING</Badge>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-8 text-indigo-600 hover:text-indigo-300 hover:bg-indigo-900/20"
+                                                        className="h-8 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
                                                         onClick={() => window.open(`/shared/invoice/${inv.id}`, '_blank')}
                                                     >
                                                         <ExternalLink className="w-4 h-4 mr-1" /> View PDF
@@ -195,11 +195,11 @@ export default function B2BLedger() {
 
                 {/* UNBILLED TRIPS TAB */}
                 <TabsContent value="unbilled" className="flex-1 mt-0">
-                    <Card className="h-full overflow-hidden bg-zinc-900/60 border-zinc-800/80 backdrop-blur-sm shadow-xl">
+                    <Card className="h-full overflow-hidden glass-panel shadow-xl">
                         <div className="overflow-auto max-h-full">
                             <Table>
-                                <TableHeader className="bg-white/80 sticky top-0 z-10">
-                                    <TableRow className="border-slate-200 hover:bg-transparent">
+                                <TableHeader className="bg-slate-50/80 sticky top-0 z-10 border-b border-slate-200">
+                                    <TableRow className="border-slate-100 hover:bg-transparent">
                                         <TableHead className="w-[120px] text-slate-500">Date</TableHead>
                                         <TableHead className="text-slate-500">Reference</TableHead>
                                         <TableHead className="text-slate-500">Passenger</TableHead>
@@ -229,8 +229,8 @@ export default function B2BLedger() {
                                         </TableRow>
                                     ) : (
                                         filteredJobs.map((job) => (
-                                            <TableRow key={job.id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group opacity-75">
-                                                <TableCell className="font-medium text-slate-600">
+                                            <TableRow key={job.id} className="border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                                                <TableCell className="font-medium text-slate-700">
                                                     <div className="flex flex-col">
                                                         <span>{format(new Date(job.pickupTime), 'MMM do, yyyy')}</span>
                                                         <span className="text-xs text-slate-400">{format(new Date(job.pickupTime), 'HH:mm')}</span>
@@ -240,15 +240,15 @@ export default function B2BLedger() {
                                                     TRIP-{job.id}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <span className="font-medium text-slate-800">{job.passengerName}</span>
+                                                    <span className="font-semibold text-slate-700">{job.passengerName}</span>
                                                 </TableCell>
                                                 <TableCell className="hidden md:table-cell">
                                                     <div className="flex flex-col max-w-[250px]">
-                                                        <span className="text-xs text-slate-500 truncate w-full" title={job.pickupAddress}>
+                                                        <span className="text-xs text-slate-600 truncate w-full" title={job.pickupAddress}>
                                                             <span className="text-emerald-500 mr-1">●</span>{job.pickupAddress}
                                                         </span>
-                                                        <span className="text-xs text-slate-400 truncate w-full mt-1" title={job.dropoffAddress}>
-                                                            <span className="text-red-500 mr-1">●</span>{job.dropoffAddress}
+                                                        <span className="text-xs text-slate-500 truncate w-full mt-1" title={job.dropoffAddress}>
+                                                            <span className="text-rose-500 mr-1">●</span>{job.dropoffAddress}
                                                         </span>
                                                     </div>
                                                 </TableCell>
@@ -256,7 +256,7 @@ export default function B2BLedger() {
                                                     {job.notes || '-'}
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <span className="font-bold text-slate-900">
+                                                    <span className="font-bold text-slate-800">
                                                         £{(job.fare || 0).toFixed(2)}
                                                     </span>
                                                 </TableCell>
