@@ -27,14 +27,15 @@ async function handleWebhook(req: Request) {
         let eventType = searchParams.get('event') || 'ringing';
         let phone: string | null = searchParams.get('phone') || searchParams.get('caller') || searchParams.get('callerid');
         let toPhone: string | null = searchParams.get('to') || searchParams.get('called');
-        let answeredByExt: string | null = null;
+        let answeredByExt: string | null = searchParams.get('answered_by') || searchParams.get('answeredBy') || searchParams.get('ext');
+        let body: any = null;
 
         if (req.method === 'POST') {
             try {
-                const body = await req.json();
+                body = await req.json();
                 phone = body.phone || body.caller || body.from || body.caller_id || phone;
                 toPhone = body.to || body.called || toPhone;
-                answeredByExt = body.answered_by ? String(body.answered_by) : null;
+                answeredByExt = body.answered_by ? String(body.answered_by) : (body.ext ? String(body.ext) : answeredByExt);
 
                 // Support Yay.com specific event types in the JSON payload
                 if (body.type) {
@@ -124,12 +125,35 @@ async function handleWebhook(req: Request) {
         }
 
         if (eventType === 'hungup') {
-            await prisma.incomingCall.updateMany({
-                where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
-                data: { status: 'DISMISSED' }
+            const recordingUrl = body?.recording_url || body?.recording || searchParams.get('recording') || searchParams.get('recording_url') || null;
+            const durationStr = body?.duration || searchParams.get('duration');
+            const duration = durationStr ? parseInt(String(durationStr), 10) : null;
+
+            // Find the most recent active (RINGING or ANSWERED) call
+            const activeCall = await prisma.incomingCall.findFirst({
+                where: {
+                    tenantId: tenant.id,
+                    phone: cleanPhone,
+                    status: { in: ['RINGING', 'ANSWERED'] }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
             });
+
+            if (activeCall) {
+                const nextStatus = activeCall.status === 'RINGING' ? 'DISMISSED' : 'ANSWERED';
+                await prisma.incomingCall.update({
+                    where: { id: activeCall.id },
+                    data: {
+                        status: nextStatus,
+                        recordingUrl,
+                        duration
+                    }
+                });
+            }
             revalidatePath('/api/dispatch/calls/active');
-            return NextResponse.json({ success: true, action: 'cleared', phone: cleanPhone });
+            return NextResponse.json({ success: true, action: 'hungup', phone: cleanPhone, recordingUrl, duration });
         }
 
         // 4. Prevent duplicate "ringing" states by dismissing any stale calls for this number

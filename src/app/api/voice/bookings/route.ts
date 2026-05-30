@@ -26,10 +26,55 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
+        const messageType = body.message?.type;
+
+        if (messageType === 'end-of-call-report') {
+            const callData = body.message?.call;
+            const recordingUrl = callData?.recordingUrl || null;
+            const duration = callData?.duration ? Math.round(Number(callData.duration)) : null;
+            const transcript = callData?.transcript || null;
+            const summary = callData?.summary || null;
+            const phone = callData?.customer?.number || body.message?.customer?.number || callData?.phoneNumber || null;
+
+            if (phone) {
+                const cleanPhone = phone.replace(/[^0-9+]/g, '');
+                const phoneSuffix = cleanPhone.replace(/[^0-9]/g, '').slice(-10);
+
+                const recentJob = await prisma.job.findFirst({
+                    where: {
+                        tenantId: tenant.id,
+                        passengerPhone: { endsWith: phoneSuffix }
+                    },
+                    orderBy: {
+                        bookedAt: 'desc'
+                    }
+                });
+
+                const incomingCall = await prisma.incomingCall.create({
+                    data: {
+                        tenantId: tenant.id,
+                        phone: cleanPhone,
+                        status: 'ANSWERED',
+                        answeredByExt: 'Voice AI',
+                        recordingUrl,
+                        duration,
+                        transcript,
+                        summary,
+                        bookingId: recentJob ? recentJob.id : null
+                    }
+                });
+
+                console.log(`[VAPI END OF CALL] Logged voice AI call ${incomingCall.id} for phone ${cleanPhone}, linked to job: ${recentJob?.id || 'None'}`);
+                return NextResponse.json({ success: true, callId: incomingCall.id, bookingId: recentJob?.id || null });
+            }
+
+            return NextResponse.json({ success: true, message: "No customer phone found in report" });
+        }
+
         const toolCalls = body.message?.toolCalls;
 
         if (!toolCalls || !Array.isArray(toolCalls)) {
-            return NextResponse.json({ error: "Invalid request format: message.toolCalls is missing" }, { status: 400 });
+            return NextResponse.json({ success: true, message: "Ignored event type or toolCalls missing" });
         }
 
         const results = [];

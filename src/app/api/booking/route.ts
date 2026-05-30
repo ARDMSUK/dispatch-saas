@@ -5,6 +5,7 @@ import { calculatePrice } from '@/lib/pricing';
 import { EmailService } from '@/lib/email-service';
 import { SmsService } from '@/lib/sms-service';
 import { DispatchEngine } from '@/lib/dispatch-engine';
+import { linkRecentCallToBooking } from '@/lib/call-matching';
 
 // POST /api/booking (Public)
 export async function POST(req: Request) {
@@ -148,6 +149,11 @@ export async function POST(req: Request) {
                     parentJobId: job.id
                 }
             });
+        }
+
+        // Link recent call if exists
+        if (job && body.passengerPhone) {
+            await linkRecentCallToBooking(job.id, body.passengerPhone, tenantId);
         }
 
         // 5. Notifications & Dispatch

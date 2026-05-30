@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { EmailService } from '@/lib/email-service';
 import { SmsService } from '@/lib/sms-service';
 import { DispatchEngine } from '@/lib/dispatch-engine';
+import { linkRecentCallToBooking } from '@/lib/call-matching';
 
 export const dynamic = 'force-dynamic';
 
@@ -306,6 +307,11 @@ export async function POST(request: Request) {
                     parentJobId: newJob!.id
                 }
             });
+        }
+
+        // Link recent call if exists
+        if (newJob && body.passengerPhone) {
+            await linkRecentCallToBooking(newJob.id, body.passengerPhone, tenantId);
         }
 
         // 6. Send Confirmation Email (Async, don't block response)

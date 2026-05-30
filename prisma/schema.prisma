@@ -448,6 +448,7 @@ model Job {
   contractRouteId String?
   contractRoute   ContractRoute?  @relation(fields: [contractRouteId], references: [id])
   DriverMessage   DriverMessage[]
+  calls           IncomingCall[]
 
   @@map("bookings")
   @@index([tenantId, status, pickupTime])
@@ -548,6 +549,14 @@ model IncomingCall {
   phone         String // The caller's phone number
   status        String  @default("RINGING") // RINGING, ANSWERED, DISMISSED
   answeredByExt String?
+
+  recordingUrl  String?
+  duration      Int?
+  transcript    String?  @db.Text
+  summary       String?  @db.Text
+
+  bookingId     Int?
+  booking       Job?     @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
