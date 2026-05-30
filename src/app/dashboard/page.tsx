@@ -144,41 +144,52 @@ export default function DashboardPage() {
 
     // WebSocket real-time subscription for driver coordinates
     useEffect(() => {
-        const supabase = createClient();
-        const channel = supabase.channel('drivers-location');
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        if (!url || !key) {
+            console.warn("[Dashboard WebSockets] Supabase URL or Anon Key is missing. Real-time driver location tracking is disabled.");
+            return;
+        }
 
-        channel.on('broadcast', { event: 'location' }, (payload: any) => {
-            const data = payload.payload;
-            if (data && data.driverId) {
-                setDrivers(prevDrivers => {
-                    return prevDrivers.map(d => {
-                        if (d.id === data.driverId) {
-                            return {
-                                ...d,
-                                currentLat: data.lat,
-                                currentLng: data.lng,
-                                location: JSON.stringify({
-                                    lat: data.lat,
-                                    lng: data.lng,
-                                    heading: data.heading,
-                                    speed: data.speed,
-                                    timestamp: data.timestamp
-                                })
-                            };
-                        }
-                        return d;
+        try {
+            const supabase = createClient();
+            const channel = supabase.channel('drivers-location');
+
+            channel.on('broadcast', { event: 'location' }, (payload: any) => {
+                const data = payload.payload;
+                if (data && data.driverId) {
+                    setDrivers(prevDrivers => {
+                        return prevDrivers.map(d => {
+                            if (d.id === data.driverId) {
+                                  return {
+                                      ...d,
+                                      currentLat: data.lat,
+                                      currentLng: data.lng,
+                                      location: JSON.stringify({
+                                          lat: data.lat,
+                                          lng: data.lng,
+                                          heading: data.heading,
+                                          speed: data.speed,
+                                          timestamp: data.timestamp
+                                      })
+                                  };
+                            }
+                            return d;
+                        });
                     });
-                });
-            }
-        });
+                }
+            });
 
-        channel.subscribe((status) => {
-            console.log(`[Supabase Dashboard] Realtime subscription status: ${status}`);
-        });
+            channel.subscribe((status) => {
+                console.log(`[Supabase Dashboard] Realtime subscription status: ${status}`);
+            });
 
-        return () => {
-            supabase.removeChannel(channel);
-        };
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        } catch (err) {
+            console.error("[Dashboard WebSockets] Failed to subscribe to location updates:", err);
+        }
     }, []);
 
     const handleAssignDriver = async (driverId: string) => {
