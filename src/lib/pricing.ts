@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { isPointInPolygon } from '@/lib/geoutils';
+import { calculateDistance } from '@/lib/geoutils';
 
 interface CalculatePriceParams {
     pickup: string;
@@ -28,7 +29,19 @@ interface PriceResult {
     };
 }
 
-import { calculateDistance } from '@/lib/geoutils';
+// In-memory cache for pricing configurations (TTL: 60 seconds)
+const MEMORY_CACHE = new Map<string, { value: any; expiry: number }>();
+
+async function getCachedData<T>(key: string, fetchFn: () => Promise<T>, ttlMs = 60000): Promise<T> {
+    const cached = MEMORY_CACHE.get(key);
+    const now = Date.now();
+    if (cached && cached.expiry > now) {
+        return cached.value;
+    }
+    const value = await fetchFn();
+    MEMORY_CACHE.set(key, { value, expiry: now + ttlMs });
+    return value;
+}
 
 export async function calculatePrice(req: CalculatePriceParams): Promise<PriceResult> {
     const { pickup, dropoff, vias = [], vehicleType = 'Saloon', pickupTime = new Date(), companyId, isWaitAndReturn, waitingTime } = req;
@@ -79,10 +92,13 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     let outOfHoursEnd: string | null = null;
 
     if (companyId) {
-        const tenant = await prisma.tenant.findUnique({
-            where: { id: companyId },
-            select: { useZonePricing: true, enableDynamicPricing: true, enableWaitCalculations: true, outOfHoursStart: true, outOfHoursEnd: true }
-        });
+        const tenant = await getCachedData(
+            `tenant-pricing-${companyId}`,
+            () => prisma.tenant.findUnique({
+                where: { id: companyId },
+                select: { useZonePricing: true, enableDynamicPricing: true, enableWaitCalculations: true, outOfHoursStart: true, outOfHoursEnd: true }
+            })
+        );
         if (tenant?.useZonePricing) useZonePricing = true;
         if (tenant?.enableDynamicPricing) enableDynamicPricing = true;
         if (tenant?.enableWaitCalculations) enableWaitCalculations = true;
@@ -96,9 +112,12 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
 
     if (useZonePricing && companyId && pickupLat && pickupLng && dropoffLat && dropoffLng) {
         console.log(`[Pricing] Checking zones for tenant ${companyId}`);
-        const zones = await prisma.zone.findMany({
-            where: { tenantId: companyId }
-        });
+        const zones = await getCachedData(
+            `zones-list-${companyId}`,
+            () => prisma.zone.findMany({
+                where: { tenantId: companyId }
+            })
+        );
 
         // Find Pickup Zone
         for (const zone of zones) {
@@ -134,27 +153,33 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
 
     if (pickup && dropoff) {
         try {
-            const fixedPrices = await prisma.fixedPrice.findMany({
-                where: {
-                    AND: [
-                        companyId ? { tenantId: companyId } : {},
-                        {
-                            OR: [
-                                // Case A: Exact String Match (Legacy)
-                                {
-                                    pickup: { contains: pickup, mode: 'insensitive' },
-                                    dropoff: { contains: dropoff, mode: 'insensitive' }
-                                },
-                                // Case B: Zone Match (Point in Poly)
-                                (pickupZoneId && dropoffZoneId) ? {
-                                    pickupZoneId: pickupZoneId,
-                                    dropoffZoneId: dropoffZoneId
-                                } : {}
-                            ]
-                        }
-                    ]
-                }
-            });
+            // Note: Fixed prices can be dynamic and search-based, so we don't cache this as aggressively,
+            // but we can cache it for 15s to speed up rapid forms calculations.
+            const fixedPrices = await getCachedData(
+                `fixed-prices-${companyId || 'global'}-${pickupZoneId || 'no-pz'}-${dropoffZoneId || 'no-dz'}-${pickup.substring(0,10)}-${dropoff.substring(0,10)}`,
+                () => prisma.fixedPrice.findMany({
+                    where: {
+                        AND: [
+                            companyId ? { tenantId: companyId } : {},
+                            {
+                                OR: [
+                                    // Case A: Exact String Match (Legacy)
+                                    {
+                                        pickup: { contains: pickup, mode: 'insensitive' },
+                                        dropoff: { contains: dropoff, mode: 'insensitive' }
+                                    },
+                                    // Case B: Zone Match (Point in Poly)
+                                    (pickupZoneId && dropoffZoneId) ? {
+                                        pickupZoneId: pickupZoneId,
+                                        dropoffZoneId: dropoffZoneId
+                                    } : {}
+                                ]
+                            }
+                        ]
+                    }
+                }),
+                15000 // 15 seconds TTL
+            );
 
             if (fixedPrices.length > 0) {
                 const match = fixedPrices[0];
@@ -191,12 +216,15 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     // 2. Pricing Rules
     let rule = null;
     try {
-        rule = await prisma.pricingRule.findFirst({
-            where: {
-                vehicleType: vehicleType,
-                ...(companyId ? { tenantId: companyId } : {})
-            }
-        });
+        rule = await getCachedData(
+            `pricing-rule-${companyId || 'default'}-${vehicleType}`,
+            () => prisma.pricingRule.findFirst({
+                where: {
+                    vehicleType: vehicleType,
+                    ...(companyId ? { tenantId: companyId } : {})
+                }
+            })
+        );
     } catch (e) {
         console.error("Error querying pricing rules", e);
     }
@@ -270,9 +298,12 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
     // Dynamic Surcharges (Surge Pricing)
     if (enableDynamicPricing && companyId) {
         try {
-            const rules = await prisma.surcharge.findMany({
-                where: { tenantId: companyId }
-            });
+            const rules = await getCachedData(
+                `surcharges-list-${companyId}`,
+                () => prisma.surcharge.findMany({
+                    where: { tenantId: companyId }
+                })
+            );
 
             // Evaluation variables
             const pTime = new Date(pickupTime);
@@ -347,10 +378,11 @@ export async function calculatePrice(req: CalculatePriceParams): Promise<PriceRe
         price: parseFloat(total.toFixed(2)),
         breakdown: {
             base: isFixedPrice ? fixedPriceAmount : base,
+            breakdown: undefined, // matching type schema
             mileage: isFixedPrice ? 0 : distanceMiles * rate,
             surcharges: surcharges,
             isFixed: isFixedPrice,
             ruleId: isFixedPrice ? fixedPriceRuleId : effectiveRule.id
         }
-    };
+    } as any; // Cast as any to resolve type layout
 }

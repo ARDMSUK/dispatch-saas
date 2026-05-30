@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, MarkerF } from '@react-google-maps/api';
 import { toast } from 'sonner';
+import { createClient } from '@/utils/supabase/client';
 
 import { BookingForm } from '@/components/dashboard/booking-form';
 import { BookingManager } from '@/components/dashboard/booking-manager';
@@ -140,6 +141,45 @@ export default function DashboardPage() {
 
         return () => clearInterval(interval);
     }, [refreshTrigger]);
+
+    // WebSocket real-time subscription for driver coordinates
+    useEffect(() => {
+        const supabase = createClient();
+        const channel = supabase.channel('drivers-location');
+
+        channel.on('broadcast', { event: 'location' }, (payload: any) => {
+            const data = payload.payload;
+            if (data && data.driverId) {
+                setDrivers(prevDrivers => {
+                    return prevDrivers.map(d => {
+                        if (d.id === data.driverId) {
+                            return {
+                                ...d,
+                                currentLat: data.lat,
+                                currentLng: data.lng,
+                                location: JSON.stringify({
+                                    lat: data.lat,
+                                    lng: data.lng,
+                                    heading: data.heading,
+                                    speed: data.speed,
+                                    timestamp: data.timestamp
+                                })
+                            };
+                        }
+                        return d;
+                    });
+                });
+            }
+        });
+
+        channel.subscribe((status) => {
+            console.log(`[Supabase Dashboard] Realtime subscription status: ${status}`);
+        });
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     const handleAssignDriver = async (driverId: string) => {
         if (!selectedJob) return;

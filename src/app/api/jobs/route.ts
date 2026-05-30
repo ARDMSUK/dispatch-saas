@@ -36,10 +36,45 @@ export async function GET(req: Request) {
                 contractRouteId: null, // Filter out school contract jobs
                 ...(status ? { status: status.toUpperCase() } : {})
             },
-            include: {
-                customer: true,
-                driver: true,
-                preAssignedDriver: true
+            select: {
+                id: true,
+                pickupAddress: true,
+                dropoffAddress: true,
+                passengerName: true,
+                passengerPhone: true,
+                pickupTime: true,
+                fare: true,
+                status: true,
+                paymentType: true,
+                passengers: true,
+                luggage: true,
+                vehicleType: true,
+                notes: true,
+                flightNumber: true,
+                isReturn: true,
+                waitingTime: true,
+                emergencyActive: true,
+                customer: {
+                    select: {
+                        name: true,
+                        phone: true
+                    }
+                },
+                driver: {
+                    select: {
+                        id: true,
+                        name: true,
+                        callsign: true,
+                        phone: true
+                    }
+                },
+                preAssignedDriver: {
+                    select: {
+                        id: true,
+                        name: true,
+                        callsign: true
+                    }
+                }
             },
             orderBy: { pickupTime: 'desc' },
             take: 50

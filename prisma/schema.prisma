@@ -3,13 +3,14 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  previewFeatures = ["multiSchema", "postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  schemas  = ["public", "auth"]
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  schemas    = ["public", "auth"]
+  extensions = [postgis]
 }
 
 model Tenant {
@@ -293,6 +294,7 @@ model Driver {
   currentLng         Float?
   lastLocationUpdate DateTime?
   location           String? // JSON string for now: {lat, lng}
+  coords             Unsupported("geography(Point, 4326)")?
 
   tenantId        String
   tenant          Tenant    @relation(fields: [tenantId], references: [id])
@@ -473,6 +475,7 @@ model Zone {
   name        String
   color       String @default("#3b82f6") // Blue
   coordinates String // JSON string: [[lat,lng], [lat,lng], ...]
+  boundary    Unsupported("geography(Polygon, 4326)")?
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
