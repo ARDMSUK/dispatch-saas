@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         const accountId = session.user.accountId;
 
         const body = await req.json();
-        const validation = BookingSchema.safeParse(body);
+        const validation = BookingSchema.omit({ tenantId: true }).safeParse(body);
 
         if (!validation.success) {
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });

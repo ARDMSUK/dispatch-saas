@@ -168,6 +168,8 @@ export interface Job {
     driver?: Driver | null;
     accountId?: string | null;
     account?: Account | null;
+    isBilled?: boolean;
+    paymentStatus?: string;
 }
 
 export interface Document {
