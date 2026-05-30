@@ -3,6 +3,7 @@ import { EmailService } from '@/lib/email-service';
 import { SmsService } from '@/lib/sms-service';
 import { Driver, Job } from '@prisma/client';
 import { calculateDistance, isPointInPolygon } from '@/lib/geoutils';
+import { getMapboxMatrix } from '@/lib/mapbox';
 
 export class DispatchEngine {
 
@@ -107,7 +108,7 @@ export class DispatchEngine {
                 }
             }
 
-            const driver = this.findBestDriver(
+            const driver = await this.findBestDriver(
                 job,
                 driverLocations,
                 assignedDriverIds,
@@ -130,14 +131,14 @@ export class DispatchEngine {
         return report;
     }
 
-    private static findBestDriver(
+    private static async findBestDriver(
         job: Job,
         drivers: (Driver & { parsedLat?: number, parsedLng?: number, zoneQueues?: any[] })[],
         excludedIds: Set<string>,
         jobZoneId: string | null,
         zones: any[],
         dispatchAlgorithm: string
-    ): Driver | null {
+    ): Promise<Driver | null> {
         const candidates = drivers.filter(d => !excludedIds.has(d.id));
 
         if (candidates.length === 0) return null;
@@ -198,6 +199,45 @@ export class DispatchEngine {
 
         // 3. Nearest Calculation (CLOSEST or fallback)
         if (job.pickupLat && job.pickupLng) {
+            const mapboxToken = process.env.MAPBOX_ACCESS_TOKEN;
+            if (mapboxToken) {
+                const validCoordsDrivers = zoneCandidates.filter(d => d.parsedLat !== undefined && d.parsedLng !== undefined && d.parsedLat !== null && d.parsedLng !== null);
+                
+                if (validCoordsDrivers.length > 0) {
+                    // mapbox allows up to 25 coordinates total (1 destination + 24 sources).
+                    // sort by straight distance first, then grab top 24
+                    let targetDrivers = validCoordsDrivers.map(d => ({
+                        ...d,
+                        straightDist: calculateDistance(d.parsedLat!, d.parsedLng!, job.pickupLat!, job.pickupLng!)
+                    })).sort((a, b) => a.straightDist - b.straightDist);
+
+                    if (targetDrivers.length > 24) {
+                        targetDrivers = targetDrivers.slice(0, 24);
+                    }
+
+                    const matrixInputs = targetDrivers.map(d => ({
+                        id: d.id,
+                        lat: d.parsedLat!,
+                        lng: d.parsedLng!
+                    }));
+
+                    const matrixResults = await getMapboxMatrix(job.pickupLat!, job.pickupLng!, matrixInputs);
+
+                    if (matrixResults) {
+                        const sortedByEta = targetDrivers.sort((a, b) => {
+                            const durationA = matrixResults[a.id]?.duration ?? 999999;
+                            const durationB = matrixResults[b.id]?.duration ?? 999999;
+                            return durationA - durationB;
+                        });
+                        console.log(`[MAPBOX MATRIX DISPATCH] Sorted candidates for Job ${job.id} using driving ETAs:`, 
+                            sortedByEta.map(d => `${d.callsign} (${Math.round((matrixResults[d.id]?.duration ?? 0)/60)}m)`).join(', ')
+                        );
+                        return sortedByEta[0];
+                    }
+                }
+            }
+
+            // Fallback to straight-line distance
             const sorted = zoneCandidates.sort((a, b) => {
                 const distA = this.getDriverDistance(a, job.pickupLat!, job.pickupLng!);
                 const distB = this.getDriverDistance(b, job.pickupLat!, job.pickupLng!);
