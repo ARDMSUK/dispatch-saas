@@ -162,6 +162,20 @@ STEP 3: ONLY IF they explicitly say yes and authorize the booking, call the "cre
                                 required: ["passengerName", "passengerEmail", "passengerPhone", "pickupLocation", "dropoffLocation", "pickupTime", "passengers", "luggage", "isReturn", "fare"]
                             }
                         }
+                    },
+                    {
+                        type: "function" as const,
+                        function: {
+                            name: "lookup_faq",
+                            description: "Searches the taxi company's policies, terms, rules, baby seat availability, child options, and meeting spots.",
+                            parameters: {
+                                type: "object",
+                                properties: {
+                                    query: { type: "string", description: "Search term or question keywords." }
+                                },
+                                required: ["query"]
+                            }
+                        }
                     }
                 ];
 
@@ -256,6 +270,34 @@ STEP 3: ONLY IF they explicitly say yes and authorize the booking, call the "cre
                                     role: "tool",
                                     tool_call_id: toolCall.id,
                                     content: "Booking successfully created with status PENDING."
+                                });
+                            }
+                            else if (toolCall.type === 'function' && toolCall.function?.name === 'lookup_faq') {
+                                const args = JSON.parse(toolCall.function.arguments);
+                                const rawFaqs = await prisma.tenantFaq.findMany({
+                                    where: { tenantId: tenant.id }
+                                });
+                                
+                                const queryLower = args.query.toLowerCase();
+                                const matches = rawFaqs.filter(faq => {
+                                    const q = faq.question.toLowerCase();
+                                    const a = faq.answer.toLowerCase();
+                                    return q.includes(queryLower) || a.includes(queryLower) || 
+                                           queryLower.split(' ').some((word: string) => word.length > 3 && (q.includes(word) || a.includes(word)));
+                                });
+                                
+                                let content = "";
+                                if (matches.length > 0) {
+                                    content = `Found relevant company information:\n` + 
+                                        matches.slice(0, 3).map(m => `Q: ${m.question}\nA: ${m.answer}`).join("\n---\n");
+                                } else {
+                                    content = "No direct match found in database for this query. Answer using general helpful knowledge, or tell the passenger a dispatcher will clarify if highly specific.";
+                                }
+                                
+                                openAiMessages.push({
+                                    role: "tool",
+                                    tool_call_id: toolCall.id,
+                                    content
                                 });
                             }
                         } catch (e: any) {

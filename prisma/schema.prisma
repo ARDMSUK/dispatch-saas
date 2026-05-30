@@ -121,6 +121,7 @@ model Tenant {
   tickets          Ticket[]
   whatsappSessions WhatsappSession[]
   documents        Document[]
+  faqs             TenantFaq[]
 
   passengerAssistants PassengerAssistant[]
   contracts           Contract[]
@@ -682,6 +683,20 @@ model WhatsappSession {
 
   @@unique([tenantId, userPhone])
   @@map("whatsapp_sessions")
+  @@schema("public")
+}
+
+model TenantFaq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, question])
+  @@map("tenant_faqs")
   @@schema("public")
 }
 
