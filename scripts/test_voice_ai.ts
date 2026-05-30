@@ -14,7 +14,21 @@ async function testVoiceAi() {
 
     const voiceApiUrl = `http://localhost:3000/api/voice/bookings?tenantId=${tenant.id}`;
 
-    // A. TEST calculate_quote
+    // Store original settings to restore later
+    const originalHasVoiceAi = tenant.hasVoiceAi;
+    const originalEnableVoiceAi = tenant.enableVoiceAi;
+
+    // Temporarily unlock and enable Voice AI on the tenant for the test run
+    await prisma.tenant.update({
+        where: { id: tenant.id },
+        data: {
+            hasVoiceAi: true,
+            enableVoiceAi: true
+        }
+    });
+
+    try {
+        // A. TEST calculate_quote
     console.log("\n[A] Testing 'calculate_quote' tool call...");
     const quotePayload = {
         message: {
@@ -155,6 +169,17 @@ async function testVoiceAi() {
 
     console.log("✅ create_booking test passed!");
     console.log("\n--- VOICE AI WEBHOOK TESTS COMPLETED SUCCESSFULLY ---");
+
+    } finally {
+        console.log("Restoring original tenant settings...");
+        await prisma.tenant.update({
+            where: { id: tenant.id },
+            data: {
+                hasVoiceAi: originalHasVoiceAi,
+                enableVoiceAi: originalEnableVoiceAi
+            }
+        });
+    }
 }
 
 testVoiceAi()
