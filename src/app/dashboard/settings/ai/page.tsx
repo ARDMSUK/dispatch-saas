@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Bot, MessageSquare, QrCode, Power, Settings2, Activity, Phone, Copy } from "lucide-react";
+import { Bot, MessageSquare, QrCode, Power, Settings2, Activity, Phone, Copy, Trash2, FileText } from "lucide-react";
 import Image from "next/image";
 
 export default function TenantAIPage() {
@@ -17,6 +17,11 @@ export default function TenantAIPage() {
     const [hasVoiceAi, setHasVoiceAi] = useState(false);
     const [enableVoiceAi, setEnableVoiceAi] = useState(false);
     const [tenantId, setTenantId] = useState<string | null>(null);
+
+    const [faqs, setFaqs] = useState<any[]>([]);
+    const [newQuestion, setNewQuestion] = useState("");
+    const [newAnswer, setNewAnswer] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     // Initial Fetch for Tenant AI State
     useEffect(() => {
@@ -41,7 +46,63 @@ export default function TenantAIPage() {
                 }
             })
             .catch(() => console.error("Failed to fetch tenant AI settings"));
+
+        fetchFaqs();
     }, []);
+
+    const fetchFaqs = () => {
+        fetch('/api/settings/faq')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setFaqs(data);
+                }
+            })
+            .catch(() => console.error("Failed to fetch FAQs"));
+    };
+
+    const handleAddFaq = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newQuestion || !newAnswer) return;
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/settings/faq', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: newQuestion, answer: newAnswer })
+            });
+            if (res.ok) {
+                toast.success("FAQ added successfully");
+                setNewQuestion("");
+                setNewAnswer("");
+                fetchFaqs();
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Failed to add FAQ");
+            }
+        } catch {
+            toast.error("Network error");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDeleteFaq = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this FAQ entry?")) return;
+        try {
+            const res = await fetch(`/api/settings/faq?id=${id}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                toast.success("FAQ deleted successfully");
+                fetchFaqs();
+            } else {
+                toast.error("Failed to delete FAQ");
+            }
+        } catch {
+            toast.error("Network error");
+        }
+    };
 
     const toggleVoiceAi = async () => {
         const newValue = !enableVoiceAi;
@@ -296,6 +357,80 @@ export default function TenantAIPage() {
                 </Card>
 
             </div>
+
+            {/* FAQ / KNOWLEDGE BASE SECTION */}
+            <Card className="border-slate-200 bg-white">
+                <CardHeader>
+                    <CardTitle className="text-slate-900 flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-indigo-600" />
+                        AI Knowledge Base (FAQ System)
+                    </CardTitle>
+                    <CardDescription>
+                        Define custom company policies, pricing rules, or services. The WhatsApp and Voice AI agents query this database dynamically to answer customer questions.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {/* Add FAQ Form */}
+                    <form onSubmit={handleAddFaq} className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2 col-span-1 md:col-span-2">
+                            <h4 className="font-semibold text-slate-800 text-sm">Add New Q&A Entry</h4>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-slate-500">Question</label>
+                            <input 
+                                value={newQuestion}
+                                onChange={e => setNewQuestion(e.target.value)}
+                                placeholder="e.g. Do you provide child seats?"
+                                className="w-full bg-white border border-slate-200 text-sm p-2 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-slate-500">Answer</label>
+                            <textarea 
+                                value={newAnswer}
+                                onChange={e => setNewAnswer(e.target.value)}
+                                placeholder="e.g. Yes, we provide baby/booster seats on request..."
+                                className="w-full bg-white border border-slate-200 text-sm p-2 rounded-lg text-slate-800 h-[38px] min-h-[38px] max-h-[150px] resize-y focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                required
+                            />
+                        </div>
+                        <div className="col-span-1 md:col-span-2 flex justify-end">
+                            <Button type="submit" disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
+                                {submitting ? "Adding..." : "Add Q&A Entry"}
+                            </Button>
+                        </div>
+                    </form>
+
+                    {/* FAQ List */}
+                    <div className="space-y-3">
+                        <h4 className="font-semibold text-slate-800 text-sm">Active Knowledge Base Entries ({faqs.length})</h4>
+                        {faqs.length === 0 ? (
+                            <p className="text-sm text-slate-400 italic">No FAQ entries added yet. Add policies above to train your AI agents.</p>
+                        ) : (
+                            <div className="border rounded-xl overflow-hidden divide-y bg-slate-50/20">
+                                {faqs.map(faq => (
+                                    <div key={faq.id} className="p-4 bg-white hover:bg-slate-50/50 flex justify-between gap-4 items-start transition-all">
+                                        <div className="space-y-1">
+                                            <p className="font-semibold text-slate-800 text-sm">Q: {faq.question}</p>
+                                            <p className="text-slate-500 text-sm">A: {faq.answer}</p>
+                                        </div>
+                                        <Button 
+                                            type="button"
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => handleDeleteFaq(faq.id)}
+                                            className="text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors p-2"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }
