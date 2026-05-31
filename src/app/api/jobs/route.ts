@@ -182,6 +182,7 @@ export async function POST(request: Request) {
         const commonJobData = {
             tenantId,
             customerId,
+            bookedById: session.user.id || null,
             passengerName: body.passengerName || "Unknown",
             passengerPhone: body.passengerPhone || "Unknown",
             passengers: body.passengers ? parseInt(body.passengers) : 1,

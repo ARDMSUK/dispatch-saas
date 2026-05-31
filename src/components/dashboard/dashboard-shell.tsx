@@ -71,7 +71,12 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                 <div className="my-2 border-t border-border"></div>
             )}
 
-            {hasPermission('view_reports') && <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />}
+            {hasPermission('view_reports') && (
+                <>
+                    <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />
+                    <NavItem href="/dashboard/reports/operator" icon={Phone} label="Call Center Floor" />
+                </>
+            )}
             {hasPermission('manage_pricing') && <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />}
             {hasPermission('manage_zones') && <NavItem href="/dashboard/zones" icon={Map} label="Zones" />}
             {hasPermission('manage_accounts') && <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />}

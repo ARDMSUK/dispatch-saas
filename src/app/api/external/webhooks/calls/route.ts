@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
+import { broadcastOperatorPresence } from '@/lib/supabase-broadcast';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,10 +117,60 @@ async function handleWebhook(req: Request) {
         // 3. Handle Answered or Hangup Events
 
         if (eventType === 'answered') {
-            await prisma.incomingCall.updateMany({
+            const ringingCall = await prisma.incomingCall.findFirst({
                 where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
-                data: { status: 'ANSWERED', answeredByExt }
+                orderBy: { createdAt: 'desc' }
             });
+
+            let answeredById = null;
+            let answeredUser = null;
+
+            if (answeredByExt) {
+                answeredUser = await prisma.user.findFirst({
+                    where: { tenantId: tenant.id, sipExtension: answeredByExt }
+                });
+                if (answeredUser) {
+                    answeredById = answeredUser.id;
+                    await prisma.user.update({
+                        where: { id: answeredUser.id },
+                        data: {
+                            presenceStatus: 'BUSY',
+                            lastPresenceUpdate: new Date()
+                        }
+                    });
+
+                    await broadcastOperatorPresence({
+                        userId: answeredUser.id,
+                        name: answeredUser.name,
+                        sipExtension: answeredUser.sipExtension,
+                        status: 'BUSY',
+                        activeCallPhone: cleanPhone
+                    });
+                }
+            }
+
+            if (ringingCall) {
+                await prisma.incomingCall.update({
+                    where: { id: ringingCall.id },
+                    data: {
+                        status: 'ANSWERED',
+                        answeredByExt,
+                        answeredById,
+                        answeredAt: new Date()
+                    }
+                });
+            } else {
+                await prisma.incomingCall.updateMany({
+                    where: { tenantId: tenant.id, phone: cleanPhone, status: 'RINGING' },
+                    data: {
+                        status: 'ANSWERED',
+                        answeredByExt,
+                        answeredById,
+                        answeredAt: new Date()
+                    }
+                });
+            }
+
             revalidatePath('/api/dispatch/calls/active');
             return NextResponse.json({ success: true, action: 'answered', phone: cleanPhone, answeredByExt });
         }
@@ -129,7 +180,6 @@ async function handleWebhook(req: Request) {
             const durationStr = body?.duration || searchParams.get('duration');
             const duration = durationStr ? parseInt(String(durationStr), 10) : null;
 
-            // Find the most recent active (RINGING or ANSWERED) call
             const activeCall = await prisma.incomingCall.findFirst({
                 where: {
                     tenantId: tenant.id,
@@ -143,7 +193,7 @@ async function handleWebhook(req: Request) {
 
             if (activeCall) {
                 const nextStatus = activeCall.status === 'RINGING' ? 'DISMISSED' : 'ANSWERED';
-                await prisma.incomingCall.update({
+                const updatedCall = await prisma.incomingCall.update({
                     where: { id: activeCall.id },
                     data: {
                         status: nextStatus,
@@ -151,6 +201,48 @@ async function handleWebhook(req: Request) {
                         duration
                     }
                 });
+
+                if (updatedCall.answeredById) {
+                    const activeUser = await prisma.user.findUnique({
+                        where: { id: updatedCall.answeredById }
+                    });
+
+                    if (activeUser && activeUser.presenceStatus === 'BUSY') {
+                        await prisma.user.update({
+                            where: { id: activeUser.id },
+                            data: {
+                                presenceStatus: 'ONLINE',
+                                lastPresenceUpdate: new Date()
+                            }
+                        });
+
+                        await broadcastOperatorPresence({
+                            userId: activeUser.id,
+                            name: activeUser.name,
+                            sipExtension: activeUser.sipExtension,
+                            status: 'ONLINE'
+                        });
+                    }
+                } else if (answeredByExt) {
+                    const activeUser = await prisma.user.findFirst({
+                        where: { tenantId: tenant.id, sipExtension: answeredByExt }
+                    });
+                    if (activeUser && activeUser.presenceStatus === 'BUSY') {
+                        await prisma.user.update({
+                            where: { id: activeUser.id },
+                            data: {
+                                presenceStatus: 'ONLINE',
+                                lastPresenceUpdate: new Date()
+                            }
+                        });
+                        await broadcastOperatorPresence({
+                            userId: activeUser.id,
+                            name: activeUser.name,
+                            sipExtension: activeUser.sipExtension,
+                            status: 'ONLINE'
+                        });
+                    }
+                }
             }
             revalidatePath('/api/dispatch/calls/active');
             return NextResponse.json({ success: true, action: 'hungup', phone: cleanPhone, recordingUrl, duration });

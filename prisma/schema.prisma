@@ -189,6 +189,11 @@ model User {
 
   forcePasswordReset Boolean @default(false)
 
+  presenceStatus     String          @default("OFFLINE") // ONLINE, AWAY, BUSY, OFFLINE
+  lastPresenceUpdate DateTime?
+  bookedJobs         Job[]           @relation("BookedBy")
+  answeredCalls      IncomingCall[]  @relation("AnsweredBy")
+
   ticketMessages TicketMessage[]
 
   createdAt DateTime @default(now())
@@ -430,6 +435,9 @@ model Job {
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id])
 
+  bookedById String?
+  bookedBy   User?   @relation("BookedBy", fields: [bookedById], references: [id])
+
   driverId String?
   driver   Driver? @relation(fields: [driverId], references: [id])
 
@@ -549,6 +557,9 @@ model IncomingCall {
   phone         String // The caller's phone number
   status        String  @default("RINGING") // RINGING, ANSWERED, DISMISSED
   answeredByExt String?
+  answeredAt    DateTime?
+  answeredById  String?
+  answeredBy    User?     @relation("AnsweredBy", fields: [answeredById], references: [id])
 
   recordingUrl  String?
   duration      Int?

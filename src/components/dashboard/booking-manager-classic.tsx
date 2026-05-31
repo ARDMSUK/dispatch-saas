@@ -388,7 +388,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                         <MapPin className="h-3 w-3 text-blue-600 shrink-0" />
                         <span className="font-medium text-slate-600 truncate">{job.dropoffAddress}</span>
                     </div>
-                    {(job.notes || job.flightNumber || hasMeetGreet || job.returnBooking || job.waitingTime) && (
+                    {(job.notes || job.flightNumber || hasMeetGreet || job.returnBooking || (job.waitingTime && job.waitingTime > 0)) ? (
                         <div className="flex items-center gap-2 text-[10px] mt-0.5 overflow-hidden">
                             {hasMeetGreet && <span className="bg-indigo-50 text-indigo-600 px-1 py-0.5 border border-indigo-100 rounded font-bold whitespace-nowrap">M&G</span>}
                             {job.returnBooking && <span className="bg-indigo-50 text-indigo-600 px-1 py-0.5 border border-indigo-100 rounded font-bold whitespace-nowrap">RETURN</span>}
@@ -433,7 +433,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                 </span>
                             )}
                         </div>
-                    )}
+                    ) : null}
                 </div>
 
                 {/* COL: PASSENGER */}
