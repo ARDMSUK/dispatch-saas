@@ -223,7 +223,7 @@ export default function SettingsPage() {
                     <Button
                         onClick={handleSave}
                         disabled={saving}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-slate-900"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                     >
                         {saving ? 'Saving...' : 'Save Changes'}
                     </Button>
@@ -484,7 +484,7 @@ export default function SettingsPage() {
                                     className="w-full h-24 bg-slate-50 border border-slate-200 text-green-400 font-mono text-sm p-3 rounded resize-none"
                                 />
                                 <Button
-                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 h-8"
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 text-white h-8"
                                     onClick={() => {
                                         navigator.clipboard.writeText(`<iframe src="${window.location.origin}/booker/${tenantSlug}" width="100%" height="700px" style="border:none; border-radius:12px; overflow:hidden;" title="Book a Taxi"></iframe>`);
                                         toast.success("Embed code copied!");
@@ -540,7 +540,7 @@ export default function SettingsPage() {
                                             value={`<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget.js" data-api-key="${apiKey}" data-color="${brandColor || '#1d4ed8'}"></script>`}
                                         />
                                         <Button
-                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-slate-900 font-medium"
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-white font-medium"
                                             onClick={() => {
                                                 if (typeof window !== 'undefined') {
                                                     navigator.clipboard.writeText(`<script src="${window.location.origin}/widget.js" data-api-key="${apiKey}" data-color="${brandColor || '#1d4ed8'}"></script>`);
@@ -585,7 +585,7 @@ export default function SettingsPage() {
                                                 className="w-full bg-slate-50 border border-slate-200 text-indigo-600 font-mono text-xs p-2 rounded truncate pr-20"
                                             />
                                             <Button
-                                                className="absolute top-1 right-1 h-6 text-xs bg-slate-200 hover:bg-zinc-700 text-slate-900"
+                                                className="absolute top-1 right-1 h-6 text-xs bg-slate-200 hover:bg-slate-300 text-slate-900 font-medium"
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(`${window.location.origin}/api/twilio/whatsapp`);
                                                     toast.success("Webhook URL copied");
@@ -817,7 +817,7 @@ export default function SettingsPage() {
                             />
                             <Button
                                 variant="secondary"
-                                className="bg-slate-200 hover:bg-zinc-700 text-slate-900"
+                                className="bg-slate-200 hover:bg-slate-300 text-slate-900 font-medium"
                                 onClick={() => {
                                     if (apiKey) {
                                         navigator.clipboard.writeText(apiKey);

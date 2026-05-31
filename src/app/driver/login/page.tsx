@@ -117,7 +117,7 @@ export default function DriverLoginPage() {
                             />
                         </div>
                     </div>
-                    <Button type="submit" className="h-14 text-lg font-bold bg-blue-700 hover:bg-blue-600 text-black w-full shadow-lg shadow-amber-900/20">
+                    <Button type="submit" className="h-14 text-lg font-bold bg-blue-700 hover:bg-blue-600 text-white w-full shadow-lg shadow-amber-900/20">
                         CONTINUE
                     </Button>
 

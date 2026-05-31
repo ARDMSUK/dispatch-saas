@@ -33,9 +33,9 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;
         return (
-            <Link href={href} onClick={() => setIsSidebarOpen(false)} className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive ? 'bg-blue-700/10 text-blue-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'}`}>
-                <Icon className="h-4 w-4" />
-                <span className="text-sm font-medium">{label}</span>
+            <Link href={href} onClick={() => setIsSidebarOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 ${isActive ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/80'}`}>
+                <Icon className="h-4.5 w-4.5 shrink-0" />
+                <span className="text-sm font-medium tracking-wide">{label}</span>
             </Link>
         );
     };
@@ -45,87 +45,105 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
         window.location.href = '/login';
     };
 
+    const NavLinks = () => (
+        <>
+            <NavItem href="/dashboard" icon={LayoutDashboard} label="Console" />
+            <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
+            
+            {hasSchoolContracts && (
+                <NavItem href="/dashboard/contracts" icon={Building2} label="School Contracts" />
+            )}
+            
+            <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
+            
+            {hasSchoolContracts && (
+                <NavItem href="/dashboard/staff/pas" icon={UserIcon} label="Passenger Assistants" />
+            )}
+            
+            <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
+            <NavItem href="/dashboard/compliance" icon={FileText} label="Compliance" />
+
+            <div className="my-2 border-t border-border"></div>
+            <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />
+
+            {/* Granular Feature Access */}
+            {(hasPermission('view_reports') || hasPermission('manage_pricing') || hasPermission('manage_zones') || hasPermission('manage_accounts') || hasPermission('manage_billing')) && (
+                <div className="my-2 border-t border-border"></div>
+            )}
+
+            {hasPermission('view_reports') && <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />}
+            {hasPermission('manage_pricing') && <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />}
+            {hasPermission('manage_zones') && <NavItem href="/dashboard/zones" icon={Map} label="Zones" />}
+            {hasPermission('manage_accounts') && <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />}
+            {hasPermission('manage_billing') && <NavItem href="/dashboard/invoices" icon={CreditCard} label="Billing & Invoicing" />}
+
+            {isAdmin && (
+                <>
+                    <div className="my-2 border-t border-border"></div>
+                    <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
+                    <NavItem href="/dashboard/settings/ai" icon={Sparkles} label="AI Agents" />
+                    {hasDataImport && <NavItem href="/dashboard/settings/import" icon={FileText} label="Data Migration Hub" />}
+                    <NavItem href="/dashboard/settings/billing" icon={CreditCard} label="SaaS Subscription" />
+                    <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
+                </>
+            )}
+
+            {userRole === 'SUPER_ADMIN' && (
+                <>
+                    <div className="my-2 border-t border-border"></div>
+                    <div className="px-3 py-1 text-xs font-bold text-muted-foreground uppercase tracking-wider">Super Admin</div>
+                    <NavItem href="/admin/tenants" icon={Building2} label="Multi-Tenant Config" />
+                </>
+            )}
+
+            <div className="my-2 border-t border-border"></div>
+            <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-red-500 hover:text-red-600 hover:bg-red-500/10 w-full text-left cursor-pointer"
+            >
+                <LogOut className="h-4.5 w-4.5" />
+                <span className="text-sm font-medium">Log Out</span>
+            </button>
+        </>
+    );
+
     return (
-        <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans">
+        <div className="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
+            {/* Desktop Persistent Sidebar */}
+            <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border shrink-0">
+                <div className="h-20 flex flex-col justify-center px-6 border-b border-border bg-card">
+                    <div className="flex items-center gap-2">
+                        <img src="/logo-full.png" alt="CabAI" className="h-9 object-contain dark:brightness-110" />
+                    </div>
+                    <span className="text-[9px] font-semibold text-muted-foreground mt-1 leading-tight tracking-wide">
+                        Taxi Booking & Dispatch Software powered by AI
+                    </span>
+                </div>
+                <div className="p-4 flex flex-col gap-1 overflow-y-auto h-[calc(100vh-5rem)] pb-10 custom-scrollbar bg-card">
+                    <NavLinks />
+                </div>
+            </aside>
+
+            {/* Mobile Sheet/Drawer */}
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-                <SheetContent side="left" className="w-64 bg-slate-100 border-r border-slate-200 p-0">
-                    <div className="h-16 flex items-center px-6 border-b border-slate-200">
-                        <SheetTitle className="font-bold text-lg tracking-wider text-slate-900">ADMIN MENU</SheetTitle>
+                <SheetContent side="left" className="w-64 bg-card border-r border-border p-0">
+                    <div className="h-16 flex items-center px-6 border-b border-border">
+                        <SheetTitle className="font-bold text-lg tracking-wider text-foreground">ADMIN MENU</SheetTitle>
                     </div>
                     <div className="p-4 flex flex-col gap-1 overflow-y-auto h-[calc(100vh-4rem)] pb-20 custom-scrollbar">
-                        <NavItem href="/dashboard" icon={LayoutDashboard} label="Console" />
-                        <NavItem href="/dashboard/bookings" icon={FileText} label="All Bookings" />
-                        
-                        {hasSchoolContracts && (
-                            <>
-                                <NavItem href="/dashboard/contracts" icon={Building2} label="School Contracts" />
-                            </>
-                        )}
-                        
-                        <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
-                        
-                        {hasSchoolContracts && (
-                            <>
-                                <NavItem href="/dashboard/staff/pas" icon={UserIcon} label="Passenger Assistants" />
-                            </>
-                        )}
-                        
-                        <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
-                        <NavItem href="/dashboard/compliance" icon={FileText} label="Compliance" />
-
-                        <div className="my-2 border-t border-slate-200"></div>
-                        <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />
-
-                        {/* Granular Feature Access */}
-                        {(hasPermission('view_reports') || hasPermission('manage_pricing') || hasPermission('manage_zones') || hasPermission('manage_accounts') || hasPermission('manage_billing')) && (
-                            <div className="my-2 border-t border-slate-200"></div>
-                        )}
-
-                        {hasPermission('view_reports') && <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />}
-                        {hasPermission('manage_pricing') && <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />}
-                        {hasPermission('manage_zones') && <NavItem href="/dashboard/zones" icon={Map} label="Zones" />}
-                        {hasPermission('manage_accounts') && <NavItem href="/dashboard/accounts" icon={Building2} label="Corporate Accounts" />}
-                        {hasPermission('manage_billing') && <NavItem href="/dashboard/invoices" icon={CreditCard} label="Billing & Invoicing" />}
-
-                        {isAdmin && (
-                            <>
-                                <div className="my-2 border-t border-slate-200"></div>
-                                <NavItem href="/dashboard/settings" icon={Settings} label="Settings" />
-                                <NavItem href="/dashboard/settings/ai" icon={Sparkles} label="AI Agents" />
-                                {hasDataImport && <NavItem href="/dashboard/settings/import" icon={FileText} label="Data Migration Hub" />}
-                                <NavItem href="/dashboard/settings/billing" icon={CreditCard} label="SaaS Subscription" />
-                                <NavItem href="/dashboard/team" icon={Users} label="Team & Access" />
-                            </>
-                        )}
-
-                        {userRole === 'SUPER_ADMIN' && (
-                            <>
-                                <div className="my-2 border-t border-slate-200"></div>
-                                <div className="px-3 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Super Admin</div>
-                                <NavItem href="/admin/tenants" icon={Building2} label="Multi-Tenant Config" />
-                            </>
-                        )}
-
-                        <div className="my-2 border-t border-slate-200"></div>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-red-400 hover:text-red-300 hover:bg-slate-200 w-full text-left"
-                        >
-                            <LogOut className="h-4 w-4" />
-                            <span className="text-sm font-medium">Log Out</span>
-                        </button>
+                        <NavLinks />
                     </div>
                 </SheetContent>
             </Sheet>
 
             {/* MAIN AREA */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
                 {isImpersonating && (
-                    <div className="bg-blue-700 text-black px-4 py-1 text-xs font-bold text-center flex items-center justify-center gap-2">
+                    <div className="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-bold text-center flex items-center justify-center gap-2 z-50 shrink-0">
                         <span>VIEWING AS {tenantSlug.toUpperCase()}</span>
                         <Button
                             variant="link"
-                            className="h-auto p-0 text-black underline hover:no-underline"
+                            className="h-auto p-0 text-slate-950 font-extrabold underline hover:no-underline"
                             onClick={async () => {
                                 await update({ stopImpersonation: true });
                                 window.location.href = "/admin/tenants";
@@ -136,12 +154,12 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                     </div>
                 )}
                 {/* GLOBAL HEADER */}
-                <header className="h-14 border-b border-slate-200 flex items-center justify-between px-4 bg-slate-100 backdrop-blur-md z-50 shrink-0">
+                <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-card/95 backdrop-blur-md z-50 shrink-0">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="text-slate-500 hover:text-slate-900">
+                        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-muted-foreground hover:text-foreground">
                             <Menu className="h-5 w-5" />
                         </Button>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 lg:hidden">
                             <img src="/logo-full.png" alt="CabAI" className="h-10 md:h-12 object-contain" />
                         </div>
                     </div>
@@ -156,26 +174,26 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-slate-200 border border-slate-200 flex items-center justify-center p-0 hover:bg-zinc-700">
+                                <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-accent border border-border flex items-center justify-center p-0 hover:bg-accent/80">
                                     <span className="text-xs font-bold">{userName.charAt(0)}</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-slate-100 border-slate-200 text-slate-900" align="end" forceMount>
+                            <DropdownMenuContent className="w-56 bg-popover border-border text-popover-foreground" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-medium leading-none">{userName}</p>
-                                        <p className="text-xs leading-none text-slate-500">{tenantSlug}</p>
+                                        <p className="text-xs leading-none text-muted-foreground">{tenantSlug}</p>
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuSeparator className="bg-white/10" />
-                                <DropdownMenuItem asChild className="cursor-pointer focus:bg-blue-700/10 focus:text-blue-700">
+                                <DropdownMenuSeparator className="bg-border" />
+                                <DropdownMenuItem asChild className="cursor-pointer focus:bg-accent focus:text-accent-foreground">
                                     <Link href="/dashboard/profile">
                                         <UserIcon className="mr-2 h-4 w-4" />
                                         <span>My Profile & Security</span>
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-white/10" />
-                                <DropdownMenuItem onClick={handleLogout} className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer">
+                                <DropdownMenuSeparator className="bg-border" />
+                                <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-600 focus:bg-red-500/10 cursor-pointer">
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>Log out</span>
                                 </DropdownMenuItem>
@@ -185,7 +203,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                 </header>
 
                 {/* CONTENT */}
-                <main className="flex-1 overflow-hidden relative">
+                <main className="flex-1 overflow-hidden relative bg-background">
                     {children}
                 </main>
             </div>
