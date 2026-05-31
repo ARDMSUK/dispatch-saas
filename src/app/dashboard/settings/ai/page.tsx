@@ -19,6 +19,8 @@ export default function TenantAIPage() {
     const [hasAiCopilot, setHasAiCopilot] = useState(false);
     const [enableAiCopilot, setEnableAiCopilot] = useState(false);
     const [tenantId, setTenantId] = useState<string | null>(null);
+    const [apiKey, setApiKey] = useState<string | null>(null);
+    const [brandColor, setBrandColor] = useState<string>("#4f46e5");
 
     const [faqs, setFaqs] = useState<any[]>([]);
     const [newQuestion, setNewQuestion] = useState("");
@@ -56,6 +58,12 @@ export default function TenantAIPage() {
                 }
                 if (data && data.id) {
                     setTenantId(data.id);
+                }
+                if (data && data.apiKey) {
+                    setApiKey(data.apiKey);
+                }
+                if (data && data.brandColor) {
+                    setBrandColor(data.brandColor);
                 }
             })
             .catch(() => console.error("Failed to fetch tenant AI settings"));
@@ -326,33 +334,66 @@ export default function TenantAIPage() {
                     </CardContent>
                 </Card>
 
-                {/* WEB CHAT AI CARD (PLACEHOLDER) */}
-                <Card className="border-slate-200 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-slate-50 z-10 opacity-60 pointer-events-none"></div>
-                    <CardHeader className="pb-4 border-b border-slate-100 relative z-20">
+                {/* WEB CHAT AI CARD */}
+                <Card className={`overflow-hidden relative transition-all duration-300 ${hasWebChat ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-200'}`}>
+                    <CardHeader className={`pb-4 border-b ${hasWebChat ? 'border-indigo-100' : 'border-slate-100'}`}>
                         <div className="flex justify-between items-start">
-                            <CardTitle className="flex items-center gap-2 text-indigo-700">
+                            <CardTitle className={`flex items-center gap-2 ${hasWebChat ? 'text-indigo-800' : 'text-slate-700'}`}>
                                 <Bot className="w-5 h-5" />
-                                Web Chat Widget
+                                Web Chat AI Agent
                             </CardTitle>
                             {hasWebChat ? (
-                                <span className="text-xs font-medium bg-slate-100 text-slate-500 px-2 py-1 rounded-full border">
-                                    Configured
+                                <span className="flex items-center gap-1 text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full border border-emerald-200">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
                                 </span>
                             ) : (
                                 <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
-                                    Setup Required
+                                    Not Subscribed
                                 </span>
                             )}
                         </div>
-                        <CardDescription className="pt-2">
-                            The iframe booking assistant directly embedded onto your company's website.
+                        <CardDescription className={hasWebChat ? 'text-indigo-700/70 pt-2' : 'pt-2'}>
+                            Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6 relative z-20 opacity-70">
-                        <Button variant="outline" className="w-full text-slate-500 border-dashed" disabled>
-                            <Settings2 className="w-4 h-4 mr-2" /> Modify Chat Rules
-                        </Button>
+                    <CardContent className="pt-6 space-y-4">
+                        {hasWebChat ? (
+                            <div className="space-y-4">
+                                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 space-y-2">
+                                    <label className="text-[10px] uppercase font-bold text-slate-500 block">HTML Embed Code</label>
+                                    <div className="flex gap-2 items-start">
+                                        <textarea 
+                                            readOnly 
+                                            value={`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget?key=${apiKey || 'YOUR_API_KEY'}&color=${encodeURIComponent(brandColor)}" style="border:none; width:380px; height:600px; position:fixed; bottom:20px; right:20px; z-index:99999;" allow="geolocation"></iframe>`}
+                                            className="w-full bg-white border border-slate-200 text-[10px] font-mono p-2 rounded h-20 resize-none text-slate-600 focus:outline-none"
+                                        />
+                                        <Button 
+                                            variant="outline" 
+                                            className="h-20 w-16 text-xs flex flex-col items-center justify-center gap-1 border-slate-200 hover:bg-slate-100 transition-colors shrink-0"
+                                            onClick={() => {
+                                                if (typeof window !== 'undefined') {
+                                                    const code = `<iframe src="${window.location.origin}/widget?key=${apiKey || 'YOUR_API_KEY'}&color=${encodeURIComponent(brandColor)}" style="border:none; width:380px; height:600px; position:fixed; bottom:20px; right:20px; z-index:99999;" allow="geolocation"></iframe>`;
+                                                    navigator.clipboard.writeText(code);
+                                                    toast.success("Embed code copied to clipboard!");
+                                                }
+                                            }}
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                            <span>Copy</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-slate-500 leading-relaxed">
+                                    Copy and paste this HTML code before the closing <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[10px]">&lt;/body&gt;</code> tag on your website to display the floating AI Booking Agent widget.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="bg-slate-50 border rounded-xl p-4 text-center space-y-2">
+                                <p className="text-xs text-slate-500">
+                                    This module is locked for your organization. Contact your administrator to add Web Chat AI support to your subscription.
+                                </p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
