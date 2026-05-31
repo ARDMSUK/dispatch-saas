@@ -245,10 +245,8 @@ export default function BookerPage() {
                         
                         {/* Content */}
                         <div className="relative z-10 flex items-center gap-4">
-                            {logoUrl ? (
+                            {logoUrl && (
                                 <img src={logoUrl} alt={companyName} className="h-12 object-contain drop-shadow-xl" />
-                            ) : (
-                                <img src="/logo-full.png" alt={companyName} className="h-12 object-contain drop-shadow-xl bg-white p-2 rounded-xl" />
                             )}
                             <h2 className="text-2xl font-bold tracking-tight text-white">{companyName}</h2>
                         </div>
@@ -289,11 +287,9 @@ export default function BookerPage() {
                         {/* Mobile Header (Hidden on Desktop) */}
                         {!isEmbed && (
                             <div className="lg:hidden text-center mb-8">
-                                 {logoUrl ? (
+                                 {logoUrl && (
                                     <img src={logoUrl} alt={companyName} className="h-16 object-contain mx-auto mb-4 drop-shadow-xl" />
-                                ) : (
-                                    <img src="/logo-full.png" alt={companyName} className="h-16 object-contain mx-auto mb-4 drop-shadow-xl bg-white p-2 rounded-2xl" />
-                                )}
+                                 )}
                                 <h2 className="text-2xl font-bold tracking-tight text-white">{companyName}</h2>
                             </div>
                         )}
