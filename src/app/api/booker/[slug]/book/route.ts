@@ -40,7 +40,7 @@ export async function POST(
             passengerName,
             passengerPhone,
             passengerEmail,
-            vehicleClass,
+            vehicleType,
             scheduledTime,
             requiresWav,
             price,
@@ -86,6 +86,7 @@ export async function POST(
         const job = await prisma.job.create({
             data: {
                 tenantId: tenant.id,
+                customerId: customer.id,
                 status: 'PENDING',
                 pickupAddress: pickup,
                 dropoffAddress: dropoff,
@@ -94,13 +95,16 @@ export async function POST(
                 scheduledTime: scheduledTime ? new Date(scheduledTime) : undefined,
                 passengerName,
                 passengerPhone,
-                vehicleType: vehicleClass || 'Saloon',
+                passengerEmail: passengerEmail || null,
+                vehicleType: vehicleType || 'Saloon',
                 requiresWav: requiresWav || false,
                 fare: parseFloat(price) || 0.0,
                 notes: notes || 'Booked via Web/App',
                 flightNumber,
                 isReturn: isWaitAndReturn || false,
-                waitingTime: waitingTime || 0
+                waitingTime: waitingTime || 0,
+                paymentType: paymentType || 'CASH',
+                paymentStatus: 'UNPAID'
             }
         });
 

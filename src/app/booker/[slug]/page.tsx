@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Loader2, Navigation2, CheckCircle2, MapPin, Flag, Calendar, Car, User, Phone, Plane, MessageSquare, ArrowRight, ArrowLeft, Mail, Briefcase, Users } from "lucide-react";
 import { LocationInput } from "@/components/dashboard/location-input";
 import { motion, AnimatePresence } from "framer-motion";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 export default function BookerPage() {
     const params = useParams();
@@ -18,6 +20,19 @@ export default function BookerPage() {
     const [loading, setLoading] = useState(false);
     const [bookingComplete, setBookingComplete] = useState(false);
     const [isEmbed, setIsEmbed] = useState(false);
+
+    // Stripe Integration States
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [publishableKey, setPublishableKey] = useState<string | null>(null);
+    const [stripePromise, setStripePromise] = useState<any>(null);
+    const [createdJobId, setCreatedJobId] = useState<string | null>(null);
+    const [showStripePay, setShowStripePay] = useState(false);
+
+    useEffect(() => {
+        if (publishableKey) {
+            setStripePromise(loadStripe(publishableKey));
+        }
+    }, [publishableKey]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -165,6 +180,7 @@ export default function BookerPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...formData,
+                    price: quote,
                     pickupLat: formData.pickupLat, pickupLng: formData.pickupLng,
                     dropoffLat: formData.dropoffLat, dropoffLng: formData.dropoffLng,
                     pickupTime: new Date(formData.pickupTime).toISOString()
@@ -173,8 +189,15 @@ export default function BookerPage() {
 
             const data = await res.json();
             if (res.ok) {
-                setBookingComplete(true);
-                toast.success("Booking Confirmed!");
+                if (formData.paymentType === 'CARD' && data.clientSecret && data.publishableKey) {
+                    setClientSecret(data.clientSecret);
+                    setPublishableKey(data.publishableKey);
+                    setCreatedJobId(data.bookingId);
+                    setShowStripePay(true);
+                } else {
+                    setBookingComplete(true);
+                    toast.success("Booking Confirmed!");
+                }
             } else {
                 toast.error(data.error || "Failed to confirm booking.");
             }
@@ -185,7 +208,7 @@ export default function BookerPage() {
         }
     };
 
-    const containerVariants = {
+    const containerVariants: any = {
         hidden: { opacity: 0, x: 20 },
         visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" } },
         exit: { opacity: 0, x: -20, transition: { duration: 0.3, ease: "easeIn" } }
@@ -277,17 +300,18 @@ export default function BookerPage() {
 
                         <div className="mb-8">
                             <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
-                                {step === 1 ? 'Where to?' : step === 2 ? 'Passenger Details' : 'Booking Confirmed'}
+                                {showStripePay ? 'Secure Payment' : step === 1 ? 'Where to?' : step === 2 ? 'Passenger Details' : 'Booking Confirmed'}
                             </h3>
-                            {step === 1 && <p className="text-slate-400 text-sm">Enter your trip details to get an instant quote.</p>}
-                            {step === 2 && <p className="text-slate-400 text-sm">Just a few more details to secure your ride.</p>}
+                            {showStripePay && <p className="text-slate-400 text-sm">Please enter your card details below to complete pre-payment.</p>}
+                            {step === 1 && !showStripePay && <p className="text-slate-400 text-sm">Enter your trip details to get an instant quote.</p>}
+                            {step === 2 && !showStripePay && <p className="text-slate-400 text-sm">Just a few more details to secure your ride.</p>}
                             
                             {/* Progress Indicator */}
                             {!bookingComplete && (
                                 <div className="flex gap-2 mt-6">
                                     <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? 'opacity-100' : 'opacity-20'} transition-all duration-500`} style={{ backgroundColor: brandColor }}></div>
-                                    <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? 'opacity-100' : 'bg-white/10'} transition-all duration-500`} style={{ backgroundColor: step >= 2 ? brandColor : undefined }}></div>
-                                    <div className={`h-1.5 flex-1 rounded-full bg-white/10 transition-all duration-500`}></div>
+                                    <div className={`h-1.5 flex-1 rounded-full ${(step >= 2 || showStripePay) ? 'opacity-100' : 'bg-white/10'} transition-all duration-500`} style={{ backgroundColor: (step >= 2 || showStripePay) ? brandColor : undefined }}></div>
+                                    <div className={`h-1.5 flex-1 rounded-full ${showStripePay ? 'opacity-100' : 'bg-white/10'} transition-all duration-500`} style={{ backgroundColor: showStripePay ? brandColor : undefined }}></div>
                                 </div>
                             )}
                         </div>
@@ -296,7 +320,7 @@ export default function BookerPage() {
                             <AnimatePresence mode="wait">
                                 
                                 {/* STEP 1: QUOTE FORM */}
-                                {step === 1 && !bookingComplete && (
+                                {step === 1 && !bookingComplete && !showStripePay && (
                                     <motion.div
                                         key="step1"
                                         variants={containerVariants}
@@ -390,7 +414,7 @@ export default function BookerPage() {
                                 )}
 
                                 {/* STEP 2: PASSENGER DETAILS */}
-                                {step === 2 && !bookingComplete && (
+                                {step === 2 && !bookingComplete && !showStripePay && (
                                     <motion.div
                                         key="step2"
                                         variants={containerVariants}
@@ -544,6 +568,68 @@ export default function BookerPage() {
                                     </motion.div>
                                 )}
 
+                                {/* STRIPE PAYMENT STEP */}
+                                {showStripePay && !bookingComplete && (
+                                    <motion.div
+                                        key="stripe-pay"
+                                        variants={containerVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                        className="space-y-4 text-white"
+                                    >
+                                        {stripePromise && clientSecret ? (
+                                            <Elements
+                                                stripe={stripePromise}
+                                                options={{
+                                                    clientSecret,
+                                                    appearance: {
+                                                        theme: 'night',
+                                                        variables: { colorPrimary: '#10b981', colorBackground: '#151518', colorText: '#ffffff' }
+                                                    }
+                                                }}
+                                            >
+                                                <StripeCheckoutForm
+                                                    amount={quote || 0}
+                                                    onSuccess={async (paymentIntentId) => {
+                                                        setLoading(true);
+                                                        try {
+                                                            const res = await fetch(`/api/booker/${slug}/book/confirm-payment`, {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ jobId: createdJobId, paymentIntentId })
+                                                            });
+                                                            const data = await res.json();
+                                                            if (res.ok && data.success) {
+                                                                setShowStripePay(false);
+                                                                setBookingComplete(true);
+                                                                toast.success("Payment Confirmed & Job Booked!");
+                                                            } else {
+                                                                toast.error(data.error || "Failed to confirm payment with dispatch console.");
+                                                            }
+                                                        } catch (e) {
+                                                            toast.error("Connection error during payment confirmation.");
+                                                        } finally {
+                                                            setLoading(false);
+                                                        }
+                                                    }}
+                                                    onError={(err) => {
+                                                        toast.error(err);
+                                                    }}
+                                                    onCancel={() => {
+                                                        setShowStripePay(false);
+                                                    }}
+                                                />
+                                            </Elements>
+                                        ) : (
+                                            <div className="py-12 flex flex-col items-center justify-center text-emerald-500 gap-3">
+                                                <Loader2 className="h-8 w-8 animate-spin" />
+                                                <p className="text-sm text-slate-400">Loading secure checkout...</p>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+
                                 {/* SUCCESS SCREEN */}
                                 {bookingComplete && (
                                     <motion.div
@@ -567,7 +653,9 @@ export default function BookerPage() {
                                         </p>
 
                                         <div className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 mb-8">
-                                            <p className="text-sm text-slate-400 uppercase tracking-wider font-bold mb-1">To Pay Driver</p>
+                                            <p className="text-sm text-slate-400 uppercase tracking-wider font-bold mb-1">
+                                                {formData.paymentType === 'CARD' ? 'Paid Securely' : 'To Pay Driver'}
+                                            </p>
                                             <p className="text-3xl font-black text-white">£{quote?.toFixed(2)}</p>
                                         </div>
 
@@ -584,5 +672,80 @@ export default function BookerPage() {
                     </div>
                 </div>
             </div>
+    );
+}
+
+interface StripeCheckoutFormProps {
+    amount: number;
+    onSuccess: (paymentIntentId: string) => void;
+    onError: (error: string) => void;
+    onCancel: () => void;
+}
+
+function StripeCheckoutForm({ amount, onSuccess, onError, onCancel }: StripeCheckoutFormProps) {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState<string | null>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!stripe || !elements) return;
+
+        setIsLoading(true);
+        setMessage(null);
+
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: `${window.location.origin}/booker/callback`,
+            },
+            redirect: 'if_required'
+        });
+
+        if (error) {
+            setMessage(error.message || "Payment failed");
+            onError(error.message || "Payment failed");
+            setIsLoading(false);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            onSuccess(paymentIntent.id);
+        } else {
+            setMessage("Payment in unexpected state");
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
+                <div className="flex justify-between items-center mb-4 text-sm">
+                    <span className="text-slate-400">Total to Pay</span>
+                    <span className="text-2xl font-bold text-white">£{amount.toFixed(2)}</span>
+                </div>
+
+                <PaymentElement
+                    options={{
+                        layout: 'accordion',
+                        defaultValues: {
+                            billingDetails: {
+                                name: 'Valued Customer'
+                            }
+                        }
+                    }}
+                />
+            </div>
+
+            {message && <div className="text-rose-400 text-sm bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">{message}</div>}
+
+            <div className="flex gap-4">
+                <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="flex-1 bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 h-14 rounded-2xl">
+                    Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading || !stripe || !elements} className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold h-14 rounded-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)]">
+                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Pay £" + amount.toFixed(2)}
+                </Button>
+            </div>
+        </form>
     );
 }

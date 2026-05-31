@@ -39,7 +39,7 @@ async function main() {
         body: JSON.stringify(quotePayload)
     });
 
-    const quoteRes = await QuoteHandler(quoteReq, { params: { slug: tenant.slug } });
+    const quoteRes = await QuoteHandler(quoteReq, { params: Promise.resolve({ slug: tenant.slug }) });
     const quoteData = await quoteRes.json();
 
     console.log("Quote Response status:", quoteRes.status);
@@ -64,7 +64,7 @@ async function main() {
         body: JSON.stringify(bookPayload)
     });
 
-    const bookRes = await BookHandler(bookReq, { params: { slug: tenant.slug } });
+    const bookRes = await BookHandler(bookReq, { params: Promise.resolve({ slug: tenant.slug }) });
     const bookData = await bookRes.json();
 
     console.log("Book Response status:", bookRes.status);
