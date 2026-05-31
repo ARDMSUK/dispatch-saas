@@ -208,56 +208,61 @@ export default function SettingsPage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-slate-400">Loading settings...</div>;
+    if (loading) return <div className="p-8 text-muted-foreground">Loading settings...</div>;
 
     return (
-        <div className="p-6 text-slate-900 max-w-4xl mx-auto overflow-y-auto h-full pb-20">
-            <h1 className="text-3xl font-bold mb-8">Settings</h1>
+        <div className="p-6 bg-background text-foreground max-w-4xl mx-auto overflow-y-auto h-full pb-32">
+            <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+                    <p className="text-sm text-muted-foreground mt-1">Configure your fleet settings, dispatch preferences, integrations, and templates.</p>
+                </div>
+                <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-6 shadow-sm hidden sm:inline-flex"
+                >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                </Button>
+            </div>
 
             {/* Organization Section */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <h2 className="text-xl font-semibold flex items-center gap-2 text-foreground">
                         🏢 Organization Details
                     </h2>
-                    <Button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                    >
-                        {saving ? 'Saving...' : 'Save Changes'}
-                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <Label className="text-slate-500">Company Name</Label>
+                        <Label className="text-muted-foreground font-medium">Company Name</Label>
                         <Input
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                     </div>
 
                     <div>
-                        <Label className="text-slate-500">Email Address</Label>
+                        <Label className="text-muted-foreground font-medium">Email Address</Label>
                         <Input
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                     </div>
                     <div>
-                        <Label className="text-slate-500">Telephone Number</Label>
+                        <Label className="text-muted-foreground font-medium">Telephone Number</Label>
                         <Input
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                     </div>
 
                     <div className="md:col-span-2 relative">
-                        <Label className="text-slate-500">Operating Address</Label>
+                        <Label className="text-muted-foreground font-medium">Operating Address</Label>
                         <Input
                             value={value}
                             onChange={(e) => {
@@ -266,37 +271,37 @@ export default function SettingsPage() {
                             }}
                             disabled={!ready}
                             placeholder="Search for your office address..."
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                         {/* Autocomplete Suggestions */}
                         {status === "OK" && (
-                            <ul className="absolute z-50 w-full bg-slate-100 border border-slate-200 rounded-md mt-1 shadow-xl max-h-60 overflow-auto">
+                            <ul className="absolute z-50 w-full bg-popover border border-border rounded-md mt-1 shadow-xl max-h-60 overflow-auto">
                                 {data.map(({ place_id, description }) => (
                                     <li
                                         key={place_id}
                                         onClick={() => handleAddressSelect(description)}
-                                        className="px-4 py-2 hover:bg-slate-200 cursor-pointer text-sm text-slate-600"
+                                        className="px-4 py-2 hover:bg-accent cursor-pointer text-sm text-popover-foreground"
                                     >
                                         {description}
                                     </li>
                                 ))}
                             </ul>
                         )}
-                        <p className="text-xs text-slate-400 mt-2">
+                        <p className="text-xs text-muted-foreground mt-2">
                             This address will be used to center the Dispatch Map.
-                            {lat && lng && <span className="text-emerald-500 ml-2">✓ Coordinates Found</span>}
+                            {lat && lng && <span className="text-emerald-500 dark:text-emerald-400 ml-2 font-medium">✓ Coordinates Found</span>}
                         </p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-500 mb-1">Company Slug</label>
-                        <div className="font-mono text-sm bg-slate-100 px-3 py-2 rounded border border-slate-200 inline-block text-slate-400 w-full cursor-not-allowed">
+                        <label className="block text-sm font-medium text-muted-foreground mb-1">Company Slug</label>
+                        <div className="font-mono text-sm bg-muted px-3 py-2 rounded border border-border inline-block text-muted-foreground w-full cursor-not-allowed">
                             {slug}
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-500 mb-1">API Key</label>
-                        <div className="font-mono text-sm bg-slate-100 px-3 py-2 rounded border border-slate-200 flex items-center justify-between group text-slate-400 cursor-not-allowed">
+                        <label className="block text-sm font-medium text-muted-foreground mb-1">API Key</label>
+                        <div className="font-mono text-sm bg-muted px-3 py-2 rounded border border-border flex items-center justify-between group text-muted-foreground cursor-not-allowed">
                             <span className="truncate">{apiKey}</span>
                         </div>
                     </div>
@@ -304,54 +309,54 @@ export default function SettingsPage() {
             </div>
 
             {/* Advanced Dispatch & Routing Section */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-600">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     🛣️ Advanced Dispatch & Routing
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
-                        By default, the system uses <strong className="text-slate-900">Manual Dispatching</strong> where operators assign jobs to drivers. You can opt-in to our advanced Auto-Dispatch engine to automate this based on selected algorithms.
+                    <p className="text-sm text-muted-foreground">
+                        By default, the system uses <strong className="text-foreground">Manual Dispatching</strong> where operators assign jobs to drivers. You can opt-in to our advanced Auto-Dispatch engine to automate this based on selected algorithms.
                     </p>
 
-                    <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
+                    <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg border border-border">
                         <Checkbox
                             id="autoDispatch"
                             checked={autoDispatch}
                             onCheckedChange={(checked) => setAutoDispatch(checked === true)}
-                            className="border-emerald-500/50 data-[state=checked]:bg-emerald-600 data-[state=checked]:text-white"
+                            className="border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                         />
                         <div className="grid gap-1.5 leading-none">
                             <label
                                 htmlFor="autoDispatch"
-                                className="text-sm font-medium leading-none cursor-pointer text-slate-900"
+                                className="text-sm font-medium leading-none cursor-pointer text-foreground"
                             >
                                 Enable Auto-Dispatch Engine
                             </label>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-muted-foreground">
                                 Automatically assign pending jobs to available drivers without human intervention.
                             </p>
                         </div>
                     </div>
 
                     {autoDispatch && (
-                        <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 space-y-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="bg-muted/30 p-4 rounded-lg border border-border space-y-4 animate-in fade-in slide-in-from-top-1">
                             <div>
-                                <Label className="text-slate-600">Dispatch Algorithm</Label>
-                                <p className="text-xs text-slate-400 mb-3">
+                                <Label className="text-muted-foreground font-medium">Dispatch Algorithm</Label>
+                                <p className="text-xs text-muted-foreground mb-3">
                                     Select the logic the engine will use to decide which driver gets the job.
                                 </p>
                                 <Select value={dispatchAlgorithm} onValueChange={setDispatchAlgorithm}>
-                                    <SelectTrigger className="w-full bg-slate-100 border-slate-200 text-slate-900">
+                                    <SelectTrigger className="w-full bg-background border-input text-foreground">
                                         <SelectValue placeholder="Select Algorithm" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-100 border-slate-200 text-slate-900">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground">
                                         <SelectItem value="CLOSEST">
-                                            <span className="font-medium">Closest Driver (GPS Distance)</span>
-                                            <p className="text-xs text-slate-500 mt-1">Assigns to the nearest driver by direct line-of-sight.</p>
+                                            <span className="font-medium text-foreground">Closest Driver (GPS Distance)</span>
+                                            <p className="text-xs text-muted-foreground mt-1">Assigns to the nearest driver by direct line-of-sight.</p>
                                         </SelectItem>
                                         <SelectItem value="LONGEST_WAITING">
-                                            <span className="font-medium">Zone Queueing (Longest Waiting)</span>
-                                            <p className="text-xs text-slate-500 mt-1">First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.</p>
+                                            <span className="font-medium text-foreground">Zone Queueing (Longest Waiting)</span>
+                                            <p className="text-xs text-muted-foreground mt-1">First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.</p>
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -362,77 +367,77 @@ export default function SettingsPage() {
             </div>
 
             {/* Complex Fares & Pricing Section */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-purple-400">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     💳 Complex Fares & Pricing
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Configure advanced billing features like surge multipliers and automated penalty fees. Leave these disabled for standard fixed or mileage-based pricing.
                     </p>
 
                     <div className="grid grid-cols-1 gap-4">
-                        <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
+                        <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg border border-border">
                             <Checkbox
                                 id="enableDynamicPricing"
                                 checked={enableDynamicPricing}
                                 onCheckedChange={(checked) => setEnableDynamicPricing(checked === true)}
-                                className="border-purple-500/50 data-[state=checked]:bg-purple-600 data-[state=checked]:text-white"
+                                className="border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                             />
                             <div className="grid gap-1.5 leading-none">
                                 <label
                                     htmlFor="enableDynamicPricing"
-                                    className="text-sm font-medium leading-none cursor-pointer text-slate-900"
+                                    className="text-sm font-medium leading-none cursor-pointer text-foreground"
                                 >
                                     Enable Dynamic Pricing (Surge)
                                 </label>
-                                <p className="text-sm text-slate-400">
+                                <p className="text-sm text-muted-foreground">
                                     Automatically apply percentage or flat multipliers to fares based on active Surcharge rules (Time of day, Day of week, etc).
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
+                        <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg border border-border">
                             <Checkbox
                                 id="enableWaitCalculations"
                                 checked={enableWaitCalculations}
                                 onCheckedChange={(checked) => setEnableWaitCalculations(checked === true)}
-                                className="border-purple-500/50 data-[state=checked]:bg-purple-600 data-[state=checked]:text-white"
+                                className="border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                             />
                             <div className="grid gap-1.5 leading-none">
                                 <label
                                     htmlFor="enableWaitCalculations"
-                                    className="text-sm font-medium leading-none cursor-pointer text-slate-900"
+                                    className="text-sm font-medium leading-none cursor-pointer text-foreground"
                                 >
                                     Automate Wait Time Calculations
                                 </label>
-                                <p className="text-sm text-slate-400">
+                                <p className="text-sm text-muted-foreground">
                                     Include driver wait times into the quoted price based on the selected vehicle tier&#39;s waiting rate.
                                 </p>
                             </div>
                         </div>
-                        <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 mt-4">
-                            <Label className="text-slate-600 font-medium">Global Out of Hours Window</Label>
-                            <p className="text-xs text-slate-400 mb-3">
+                        <div className="bg-muted/30 p-4 rounded-lg border border-border mt-4">
+                            <Label className="text-foreground font-semibold">Global Out of Hours Window</Label>
+                            <p className="text-xs text-muted-foreground mb-3">
                                 Define the time window for out-of-hours pricing (e.g. 23:00 to 06:00). Fixed routes can use these to apply alternative pricing automatically.
                             </p>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label className="text-xs text-slate-500">Start Time</Label>
+                                    <Label className="text-xs text-muted-foreground">Start Time</Label>
                                     <Input
                                         type="time"
                                         value={outOfHoursStart}
                                         onChange={(e) => setOutOfHoursStart(e.target.value)}
-                                        className="bg-white border-slate-200 mt-1"
+                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                                     />
                                 </div>
                                 <div>
-                                    <Label className="text-xs text-slate-500">End Time</Label>
+                                    <Label className="text-xs text-muted-foreground">End Time</Label>
                                     <Input
                                         type="time"
                                         value={outOfHoursEnd}
                                         onChange={(e) => setOutOfHoursEnd(e.target.value)}
-                                        className="bg-white border-slate-200 mt-1"
+                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                                     />
                                 </div>
                             </div>
@@ -442,49 +447,49 @@ export default function SettingsPage() {
             </div>
 
             {/* Web Integration / Booker */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-blue-600">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     🌍 Web Integration
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Allow customers to book directly from your own website using our standalone secure booking form.
                     </p>
 
-                    <div className="flex items-center space-x-3 bg-slate-100 p-4 rounded-lg border border-slate-200">
+                    <div className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg border border-border">
                         <Checkbox
                             id="enableWebBooker"
                             checked={enableWebBooker}
                             onCheckedChange={(checked) => setEnableWebBooker(checked === true)}
-                            className="border-blue-500/50 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
+                            className="border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                         />
                         <div className="grid gap-1.5 leading-none">
                             <label
                                 htmlFor="enableWebBooker"
-                                className="text-sm font-medium leading-none cursor-pointer text-slate-900"
+                                className="text-sm font-medium leading-none cursor-pointer text-foreground"
                             >
                                 Enable Standalone Web Booker
                             </label>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-muted-foreground">
                                 Unlocks the public `/booker` route for your tenant account.
                             </p>
                         </div>
                     </div>
 
                     {enableWebBooker && tenantSlug && (
-                        <div className="mt-4 bg-white p-4 rounded-lg border border-slate-200 relative">
-                            <Label className="text-slate-500 mb-2 block">Iframe Embed Code</Label>
-                            <p className="text-xs text-slate-400 mb-3">
+                        <div className="mt-4 bg-muted/30 p-4 rounded-lg border border-border relative">
+                            <Label className="text-muted-foreground mb-2 block font-medium">Iframe Embed Code</Label>
+                            <p className="text-xs text-muted-foreground mb-3">
                                 Copy and paste this code into a "Custom HTML" block on your website (e.g., WordPress, Wix, Squarespace) to embed the booking form.
                             </p>
                             <div className="relative group">
                                 <textarea
                                     readOnly
                                     value={`<iframe src="${window.location.origin}/booker/${tenantSlug}" width="100%" height="700px" style="border:none; border-radius:12px; overflow:hidden;" title="Book a Taxi"></iframe>`}
-                                    className="w-full h-24 bg-slate-50 border border-slate-200 text-green-400 font-mono text-sm p-3 rounded resize-none"
+                                    className="w-full h-24 bg-background border border-border text-emerald-600 dark:text-emerald-400 font-mono text-sm p-3 rounded resize-none"
                                 />
                                 <Button
-                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 text-white h-8"
+                                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-primary-foreground hover:bg-primary/90 h-8"
                                     onClick={() => {
                                         navigator.clipboard.writeText(`<iframe src="${window.location.origin}/booker/${tenantSlug}" width="100%" height="700px" style="border:none; border-radius:12px; overflow:hidden;" title="Book a Taxi"></iframe>`);
                                         toast.success("Embed code copied!");
@@ -500,47 +505,46 @@ export default function SettingsPage() {
 
             {/* AI Integrations */}
             {(hasWebChatAi || hasWhatsAppAi) && (
-                <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
+                <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <h2 className="text-xl font-semibold flex items-center gap-2 text-indigo-600">
+                        <h2 className="text-xl font-semibold flex items-center gap-2 text-foreground">
                             🤖 AI Integrations
                         </h2>
                         {typeof aiMessageCount === 'number' && typeof aiMessageLimit === 'number' && (
-                            <div className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 flex items-center gap-2">
+                            <div className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border flex items-center gap-2">
                                 <span>Monthly Usage:</span>
                                 <div>
-                                    <span className={aiMessageCount >= aiMessageLimit ? "text-rose-600" : "text-emerald-600"}>
+                                    <span className={aiMessageCount >= aiMessageLimit ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}>
                                         {aiMessageCount}
                                     </span>
-                                    <span className="text-slate-400 mx-1">/</span>
-                                    <span className="text-slate-500">{aiMessageLimit}</span>
+                                    <span className="text-muted-foreground mx-1">/</span>
+                                    <span className="text-muted-foreground">{aiMessageLimit}</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {hasWebChatAi && (
-                        <div className="mb-8 border-b border-slate-200 pb-8">
-                            <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center gap-2">🌐 Web Chat Widget</h3>
+                        <div className="mb-8 border-b border-border pb-8">
+                            <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">🌐 Web Chat Widget</h3>
                             <div className="space-y-6">
-                                <p className="text-sm text-slate-500">
+                                <p className="text-sm text-muted-foreground">
                                     Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
                                 </p>
 
-                                <div className="mt-4 bg-white p-4 rounded-lg border border-slate-200 relative">
-                                    <Label className="text-slate-500 mb-2 block">Iframe Embed Code</Label>
-                                    <Label className="text-slate-500 mb-2 block">Script Embed Code</Label>
-                                    <p className="text-xs text-slate-400 mb-3">
+                                <div className="mt-4 bg-muted/30 p-4 rounded-lg border border-border relative">
+                                    <Label className="text-muted-foreground mb-2 block font-medium">Script Embed Code</Label>
+                                    <p className="text-xs text-muted-foreground mb-3">
                                         Copy and paste this code near the bottom of your website's &lt;body&gt; tag.
                                     </p>
                                     <div className="relative group">
                                         <Input
                                             readOnly
-                                            className="font-mono text-xs bg-slate-50 border-slate-200 text-slate-800 break-all h-24"
+                                            className="font-mono text-xs bg-background border-input text-foreground break-all h-24"
                                             value={`<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget.js" data-api-key="${apiKey}" data-color="${brandColor || '#1d4ed8'}"></script>`}
                                         />
                                         <Button
-                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600 hover:bg-indigo-700 h-8 text-white font-medium"
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-primary-foreground hover:bg-primary/90 h-8 font-medium"
                                             onClick={() => {
                                                 if (typeof window !== 'undefined') {
                                                     navigator.clipboard.writeText(`<script src="${window.location.origin}/widget.js" data-api-key="${apiKey}" data-color="${brandColor || '#1d4ed8'}"></script>`);
@@ -551,7 +555,7 @@ export default function SettingsPage() {
                                             Copy Code
                                         </Button>
                                     </div>
-                                    <p className="text-xs text-rose-500 mt-2 font-medium">
+                                    <p className="text-xs text-rose-500 dark:text-rose-400 mt-2 font-medium">
                                         Important: This snippet includes your secret API Key. Do not share it unnecessarily, though it's required for the web client to function.
                                     </p>
                                 </div>
@@ -561,31 +565,31 @@ export default function SettingsPage() {
 
                     {hasWhatsAppAi && (
                         <div>
-                            <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center gap-2">📱 WhatsApp AI Agent</h3>
+                            <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">📱 WhatsApp AI Agent</h3>
                             <div className="space-y-4">
-                                <p className="text-sm text-slate-500">
+                                <p className="text-sm text-muted-foreground">
                                     Your WhatsApp Business number is connected and managed by our platform. Customers who message this number will talk directly to the AI to book rides.
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="bg-white p-4 rounded-lg border border-slate-200">
-                                        <Label className="text-slate-500 block mb-2">Connected WhatsApp Number</Label>
+                                    <div className="bg-muted/30 p-4 rounded-lg border border-border">
+                                        <Label className="text-muted-foreground block mb-2">Connected WhatsApp Number</Label>
                                         <Input
                                             value={twilioFromNumber}
                                             onChange={(e) => setTwilioFromNumber(e.target.value)}
                                             placeholder="e.g. +447... or +14155238886"
-                                            className="bg-slate-100 border-slate-200 font-mono text-emerald-600"
+                                            className="bg-background border-input font-mono text-emerald-600 dark:text-emerald-400"
                                         />
                                     </div>
-                                    <div className="bg-white p-4 rounded-lg border border-slate-200">
-                                        <Label className="text-slate-500 block mb-2">Twilio Webhook URL</Label>
+                                    <div className="bg-muted/30 p-4 rounded-lg border border-border">
+                                        <Label className="text-muted-foreground block mb-2">Twilio Webhook URL</Label>
                                         <div className="relative group">
                                             <input
                                                 readOnly
                                                 value={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/twilio/whatsapp`}
-                                                className="w-full bg-slate-50 border border-slate-200 text-indigo-600 font-mono text-xs p-2 rounded truncate pr-20"
+                                                className="w-full bg-background border border-input text-primary font-mono text-xs p-2 rounded truncate pr-20 cursor-not-allowed"
                                             />
                                             <Button
-                                                className="absolute top-1 right-1 h-6 text-xs bg-slate-200 hover:bg-slate-300 text-slate-900 font-medium"
+                                                className="absolute top-1 right-1 h-6 text-xs bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium"
                                                 onClick={() => {
                                                     navigator.clipboard.writeText(`${window.location.origin}/api/twilio/whatsapp`);
                                                     toast.success("Webhook URL copied");
@@ -594,7 +598,7 @@ export default function SettingsPage() {
                                                 Copy
                                             </Button>
                                         </div>
-                                        <p className="text-[10px] text-slate-400 mt-2 leading-tight">
+                                        <p className="text-[10px] text-muted-foreground mt-2 leading-tight">
                                             Set this as the incoming message Webhook in your Twilio Console.
                                         </p>
                                     </div>
@@ -606,55 +610,55 @@ export default function SettingsPage() {
             )}
 
             {/* Visual Branding */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-pink-400">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     ✨ Visual Branding
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Customize how your company appears to your customers on the Web Booker and inside HTML email receipts.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <Label className="text-slate-500">Public Logo URL</Label>
+                            <Label className="text-muted-foreground font-medium">Public Logo URL</Label>
                             <Input
                                 value={logoUrl}
                                 onChange={(e) => setLogoUrl(e.target.value)}
                                 placeholder="https://yourwebsite.com/logo.png"
-                                className="bg-slate-100 border-slate-200 mt-1"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                             />
-                            <p className="text-xs text-slate-400 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                                 Provide a direct link to your company logo (PNG or SVG recommended).
                             </p>
                         </div>
                         <div>
-                            <Label className="text-slate-500">Primary Brand Color</Label>
+                            <Label className="text-muted-foreground font-medium">Primary Brand Color</Label>
                             <div className="flex items-center gap-3 mt-1">
                                 <Input
                                     type="color"
                                     value={brandColor}
                                     onChange={(e) => setBrandColor(e.target.value)}
-                                    className="w-12 h-10 p-1 bg-slate-100 border-slate-200 cursor-pointer"
+                                    className="w-12 h-10 p-1 bg-background border-input cursor-pointer"
                                 />
                                 <Input
                                     type="text"
                                     value={brandColor}
                                     onChange={(e) => setBrandColor(e.target.value)}
-                                    className="bg-slate-100 border-slate-200 font-mono uppercase"
+                                    className="bg-background border-input font-mono uppercase"
                                     placeholder="#F59E0B"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-4 p-6 border border-slate-200 rounded-lg bg-white">
-                        <Label className="text-slate-400 mb-4 block">Live Preview</Label>
-                        <div className="flex items-center justify-between p-4 bg-white rounded-md max-w-sm">
+                    <div className="mt-4 p-6 border border-border rounded-lg bg-muted/50">
+                        <Label className="text-muted-foreground mb-4 block font-medium">Live Preview</Label>
+                        <div className="flex items-center justify-between p-4 bg-background border border-border rounded-md max-w-sm">
                             {logoUrl ? (
                                 <img src={logoUrl} alt="Company Logo" className="h-8 object-contain" />
                             ) : (
-                                <span className="font-bold text-black text-lg">{companyName || "Your Company"}</span>
+                                <span className="font-bold text-foreground text-lg">{companyName || "Your Company"}</span>
                             )}
                             <div
                                 className="px-4 py-2 rounded text-slate-900 text-sm font-medium"
@@ -668,32 +672,32 @@ export default function SettingsPage() {
             </div>
 
             {/* Workspace Preferences */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-teal-600">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     🖥️ Workspace Preferences
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Customize the layout and default behaviors of the Dispatch Dashboard.
                     </p>
 
                     <div>
-                        <Label className="text-slate-600">Booking Console Layout</Label>
-                        <p className="text-xs text-slate-400 mb-3">
+                        <Label className="text-muted-foreground font-medium">Booking Console Layout</Label>
+                        <p className="text-xs text-muted-foreground mb-3">
                             Choose between the Modern card-based layout or the Classic high-density columnar layout.
                         </p>
                         <Select value={consoleLayout} onValueChange={setConsoleLayout}>
-                            <SelectTrigger className="w-full md:w-1/2 bg-white border-slate-200 text-slate-900">
+                            <SelectTrigger className="w-full md:w-1/2 bg-background border-input text-foreground">
                                 <SelectValue placeholder="Select Layout" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white border-slate-200 text-slate-900">
+                            <SelectContent className="bg-popover border-border text-popover-foreground">
                                 <SelectItem value="MODERN">
-                                    <span className="font-medium text-emerald-600">Modern Layout (Default)</span>
-                                    <p className="text-xs text-slate-500 mt-1">Clean, large cards with comprehensive details and dedicated sidebars.</p>
+                                    <span className="font-medium text-emerald-600 dark:text-emerald-400">Modern Layout (Default)</span>
+                                    <p className="text-xs text-muted-foreground mt-1">Clean, large cards with comprehensive details and dedicated sidebars.</p>
                                 </SelectItem>
                                 <SelectItem value="CLASSIC">
-                                    <span className="font-medium text-blue-600">Classic Layout (Dense)</span>
-                                    <p className="text-xs text-slate-500 mt-1">iCabbi-style horizontal split with high-density columnar job strips.</p>
+                                    <span className="font-medium text-blue-600 dark:text-blue-400">Classic Layout (Dense)</span>
+                                    <p className="text-xs text-muted-foreground mt-1">iCabbi-style horizontal split with high-density columnar job strips.</p>
                                 </SelectItem>
                             </SelectContent>
                         </Select>
@@ -702,68 +706,68 @@ export default function SettingsPage() {
             </div>
 
             {/* Payment Integrations */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-indigo-500">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     💳 Payment Integrations
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Connect your Stripe account to process in-app payments from the Customer App and Web Booker.
                         For in-car terminal payments, connect your SumUp or Zettle account.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <Label className="text-slate-500">Stripe Publishable Key</Label>
+                            <Label className="text-muted-foreground font-medium">Stripe Publishable Key</Label>
                             <Input
                                 value={stripePublishableKey}
                                 onChange={(e) => setStripePublishableKey(e.target.value)}
                                 placeholder="pk_live_..."
-                                className="bg-slate-100 border-slate-200 mt-1 font-mono text-sm"
+                                className="bg-background border-input mt-1 font-mono text-sm text-foreground"
                             />
-                            <p className="text-xs text-slate-400 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                                 Used safely by the frontend to initiate payments.
                             </p>
                         </div>
                         <div>
-                            <Label className="text-slate-500">Stripe Secret Key</Label>
+                            <Label className="text-muted-foreground font-medium">Stripe Secret Key</Label>
                             <Input
                                 type="password"
                                 value={stripeSecretKey}
                                 onChange={(e) => setStripeSecretKey(e.target.value)}
                                 placeholder="sk_live_..."
-                                className="bg-slate-100 border-slate-200 mt-1 font-mono text-sm"
+                                className="bg-background border-input mt-1 font-mono text-sm text-foreground"
                             />
-                            <p className="text-xs text-slate-400 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                                 Used by our backend to process charges securely. Will be encrypted.
                             </p>
                         </div>
                     </div>
 
-                    <div className="border-t border-slate-200 pt-6 mt-6">
-                        <h3 className="text-lg font-medium text-slate-900 mb-4 flex items-center gap-2">📱 In-Car Terminals</h3>
+                    <div className="border-t border-border pt-6 mt-6">
+                        <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">📱 In-Car Terminals</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between gap-2">
+                            <div className="bg-muted/30 p-4 rounded-lg border border-border flex flex-col justify-between gap-2">
                                 <div>
-                                    <Label className="text-slate-900 font-bold block mb-1">SumUp</Label>
-                                    <p className="text-xs text-slate-500">Process payments using your SumUp Air card reader via the driver app.</p>
+                                    <Label className="text-foreground font-bold block mb-1">SumUp</Label>
+                                    <p className="text-xs text-muted-foreground">Process payments using your SumUp Air card reader via the driver app.</p>
                                 </div>
                                 <Button 
                                     onClick={() => window.location.href = '/api/integrations/sumup/connect'}
-                                    className="bg-blue-600 hover:bg-blue-700 mt-2 w-full"
+                                    className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
                                     disabled={paymentRouting === 'DRIVER'}
                                 >
                                     Connect SumUp
                                 </Button>
                             </div>
-                            <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between gap-2">
+                            <div className="bg-muted/30 p-4 rounded-lg border border-border flex flex-col justify-between gap-2">
                                 <div>
-                                    <Label className="text-slate-900 font-bold block mb-1">Zettle</Label>
-                                    <p className="text-xs text-slate-500">Process payments using your Zettle card reader via the driver app.</p>
+                                    <Label className="text-foreground font-bold block mb-1">Zettle</Label>
+                                    <p className="text-xs text-muted-foreground">Process payments using your Zettle card reader via the driver app.</p>
                                 </div>
                                 <Button 
                                     onClick={() => window.location.href = '/api/integrations/zettle/connect'}
-                                    className="bg-[#00c8a5] hover:bg-[#009c82] mt-2 text-white w-full"
+                                    className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
                                     disabled={paymentRouting === 'DRIVER'}
                                 >
                                     Connect Zettle
@@ -771,23 +775,23 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className="mt-6 bg-slate-100 p-4 rounded-lg border border-slate-200">
-                            <Label className="text-slate-600 font-medium">Payment Routing Configuration</Label>
-                            <p className="text-xs text-slate-400 mb-3">
+                        <div className="mt-6 bg-muted/30 p-4 rounded-lg border border-border">
+                            <Label className="text-foreground font-medium">Payment Routing Configuration</Label>
+                            <p className="text-xs text-muted-foreground mb-3">
                                 Decide whose accounts are used for in-car terminal payments and remote payment links.
                             </p>
                             <Select value={paymentRouting} onValueChange={setPaymentRouting}>
-                                <SelectTrigger className="w-full bg-white border-slate-200 text-slate-900">
+                                <SelectTrigger className="w-full bg-background border-input text-foreground">
                                     <SelectValue placeholder="Select Routing Method" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-white border-slate-200 text-slate-900">
+                                <SelectContent className="bg-popover border-border text-popover-foreground">
                                     <SelectItem value="CENTRAL">
-                                        <span className="font-medium">Central Account (Company)</span>
-                                        <p className="text-xs text-slate-500 mt-1">Payments are processed through the company's central SumUp/Zettle accounts.</p>
+                                        <span className="font-medium text-foreground">Central Account (Company)</span>
+                                        <p className="text-xs text-muted-foreground mt-1">Payments are processed through the company's central SumUp/Zettle accounts.</p>
                                     </SelectItem>
                                     <SelectItem value="DRIVER">
-                                        <span className="font-medium">Driver Accounts (Individual)</span>
-                                        <p className="text-xs text-slate-500 mt-1">Drivers will connect their own accounts in the Driver App to process payments directly.</p>
+                                        <span className="font-medium text-foreground">Driver Accounts (Individual)</span>
+                                        <p className="text-xs text-muted-foreground mt-1">Drivers will connect their own accounts in the Driver App to process payments directly.</p>
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -797,27 +801,27 @@ export default function SettingsPage() {
             </div>
 
             {/* Developer API */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-emerald-600">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     💻 Developer API
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Use this secured token to build custom integrations (e.g., Zapier, Custom Apps) by sending HTTP requests directly to the `{window.location.host}/api/v1/bookings` ingestion endpoints.
                     </p>
 
                     <div>
-                        <Label className="text-slate-500">Secret API Key</Label>
+                        <Label className="text-muted-foreground font-medium">Secret API Key</Label>
                         <div className="flex items-center gap-3 mt-1">
                             <Input
                                 value={apiKey || '••••••••••••••••••••••••••••••••'}
                                 readOnly
-                                className="bg-slate-100 border-slate-200 font-mono text-slate-600 w-full md:w-2/3"
+                                className="bg-background border-input font-mono text-muted-foreground w-full md:w-2/3"
                                 type="password"
                             />
                             <Button
                                 variant="secondary"
-                                className="bg-slate-200 hover:bg-slate-300 text-slate-900 font-medium"
+                                className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium"
                                 onClick={() => {
                                     if (apiKey) {
                                         navigator.clipboard.writeText(apiKey);
@@ -828,78 +832,94 @@ export default function SettingsPage() {
                                 Copy Keystring
                             </Button>
                         </div>
-                        <p className="text-xs text-rose-500 mt-2 font-medium">
+                        <p className="text-xs text-rose-500 dark:text-rose-400 mt-2 font-medium">
                             Warning: Do not expose this key to the public. It provides direct read/write access to your tenant data.
                         </p>
                     </div>
 
-                    <div className="border-t border-slate-200 pt-6 mt-6">
-                        <Label className="text-slate-500">AviationStack API Key (Flight Tracking)</Label>
+                    <div className="border-t border-border pt-6 mt-6">
+                        <Label className="text-muted-foreground font-medium">AviationStack API Key (Flight Tracking)</Label>
                         <Input
                             value={aviationStackApiKey}
                             onChange={(e) => setAviationStackApiKey(e.target.value)}
                             placeholder="Enter your personal AviationStack API Key"
-                            className="bg-slate-100 border-slate-200 mt-1 font-mono text-sm w-full md:w-2/3"
+                            className="bg-background border-input mt-1 font-mono text-sm text-foreground w-full md:w-2/3"
                         />
-                        <p className="text-xs text-slate-400 mt-2">
-                            AviationStack provides 100 free requests/month. Plug your own key here to avoid sharing the global quota. Get one at <a href="https://aviationstack.com" target="_blank" rel="noreferrer" className="text-emerald-500 hover:underline">aviationstack.com</a>.
+                        <p className="text-xs text-muted-foreground mt-2">
+                            AviationStack provides 100 free requests/month. Plug your own key here to avoid sharing the global quota. Get one at <a href="https://aviationstack.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">aviationstack.com</a>.
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* Communication Templates */}
-            <div className="bg-slate-100 p-6 rounded-xl border border-slate-200 mb-6 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
+            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
                     💬 Communication Templates
                 </h2>
                 <div className="space-y-6">
-                    <p className="text-sm text-slate-500 mb-4">
+                    <p className="text-sm text-muted-foreground mb-4">
                         Variables available: {'{booking_id}, {pickup_time}, {pickup_address}, {dropoff_address}, {driver_name}, {driver_phone}, {vehicle_details}'}
                     </p>
 
                     <div>
-                        <Label className="text-slate-500">Booking Confirmation SMS</Label>
+                        <Label className="text-muted-foreground font-medium">Booking Confirmation SMS</Label>
                         <Textarea
                             value={smsTemplateConfirmation}
                             onChange={(e) => setSmsTemplateConfirmation(e.target.value)}
                             placeholder="Company: Booking #{booking_id} Confirmed.\nPickup: {pickup_time}\nFrom: {pickup_address}"
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                     </div>
 
                     <div>
-                        <Label className="text-slate-500">Driver Assigned SMS</Label>
+                        <Label className="text-muted-foreground font-medium">Driver Assigned SMS</Label>
                         <Textarea
                             value={smsTemplateDriverAssigned}
                             onChange={(e) => setSmsTemplateDriverAssigned(e.target.value)}
                             placeholder="Company: Driver Assigned.\n{driver_name} is on the way in {vehicle_details}.\nCall: {driver_phone}"
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                     </div>
 
                     <div>
-                        <Label className="text-slate-500">Driver Arrived SMS</Label>
+                        <Label className="text-muted-foreground font-medium">Driver Arrived SMS</Label>
                         <Textarea
                             value={smsTemplateDriverArrived}
                             onChange={(e) => setSmsTemplateDriverArrived(e.target.value)}
                             placeholder="Company: Driver Arrived.\n{driver_name} is waiting outside in {vehicle_details}.\nCall: {driver_phone}"
-                            className="bg-slate-100 border-slate-200 mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
                         />
                     </div>
-                    <p className="text-xs text-slate-400 mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                         Leave blank to use the default system messages.
                     </p>
                 </div>
             </div>
 
-
             {/* Read Only Info */}
-            <div className="bg-zinc-900/30 p-6 rounded-xl border border-slate-200">
-                <p className="text-sm text-slate-400 text-center">
+            <div className="bg-muted/30 p-6 rounded-xl border border-border mb-6">
+                <p className="text-sm text-muted-foreground text-center">
                     System Version 1.0.0 | Dispatch SaaS
                 </p>
             </div>
-        </div >
+
+            {/* Sticky Save Bar */}
+            <div className="sticky bottom-0 bg-background/95 border-t border-border -mx-6 px-6 py-4 flex justify-between items-center z-40 backdrop-blur-sm shadow-lg mt-6">
+                <span className="text-sm text-muted-foreground font-medium hidden sm:inline">
+                    You have unsaved configuration changes.
+                </span>
+                <span className="text-sm text-muted-foreground font-medium inline sm:hidden">
+                    Settings Panel
+                </span>
+                <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 w-full sm:w-auto shadow-md transition-all duration-200"
+                >
+                    {saving ? 'Saving...' : 'Save Settings'}
+                </Button>
+            </div>
+        </div>
     );
 }
