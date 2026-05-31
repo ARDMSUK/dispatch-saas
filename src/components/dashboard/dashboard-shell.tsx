@@ -1,7 +1,7 @@
 /* eslint-disable */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "next-auth/react";
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
 
 export function DashboardShell({ children, userName, tenantSlug, userRole, isImpersonating, hasSchoolContracts = false, hasDataImport = false }: { children: React.ReactNode, userName: string, tenantSlug: string, userRole: string, isImpersonating?: boolean, hasSchoolContracts?: boolean, hasDataImport?: boolean }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,6 +31,40 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const activeUser = session?.user as any;
     const userPermissions: string[] = activeUser?.permissions || [];
     const hasPermission = (permission_id: string) => isAdmin || userPermissions.includes(permission_id);
+    const tenantId = activeUser?.tenantId;
+
+    useEffect(() => {
+        if (!tenantId) return;
+
+        try {
+            const supabase = createClient();
+            const channel = supabase.channel(`operator-alerts-${tenantId}`);
+
+            channel.on('broadcast', { event: 'new-alert' }, (payload: any) => {
+                const data = payload.payload;
+                if (data) {
+                    toast.info(`⚠️ AI Alert: ${data.message}`, {
+                        duration: 8000,
+                        action: data.bookingId ? {
+                            label: 'View Booking',
+                            onClick: () => {
+                                // Navigate to bookings search
+                                window.location.href = `/dashboard/bookings?search=${data.bookingId}`;
+                            }
+                        } : undefined
+                    });
+                }
+            });
+
+            channel.subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        } catch (err) {
+            console.error('[Dashboard Alerts WebSockets] Setup failed:', err);
+        }
+    }, [tenantId]);
 
     const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
         const isActive = pathname === href;

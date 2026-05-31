@@ -33,6 +33,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 incWhatsAppAi: body.incWhatsAppAi,
                 incVoiceAi: body.incVoiceAi,
                 incTapToPay: body.incTapToPay,
+                incAiCopilot: body.incAiCopilot,
             }
         });
 

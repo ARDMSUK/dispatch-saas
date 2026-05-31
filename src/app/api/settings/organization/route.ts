@@ -71,6 +71,7 @@ export async function PATCH(req: Request) {
             enableWaitCalculations: typeof body.enableWaitCalculations === 'boolean' ? body.enableWaitCalculations : undefined,
             enableWebBooker: typeof body.enableWebBooker === 'boolean' ? body.enableWebBooker : undefined,
             enableVoiceAi: typeof body.enableVoiceAi === 'boolean' ? body.enableVoiceAi : undefined,
+            enableAiCopilot: typeof body.enableAiCopilot === 'boolean' ? body.enableAiCopilot : undefined,
             logoUrl: body.logoUrl !== undefined ? body.logoUrl : undefined,
             brandColor: body.brandColor !== undefined ? body.brandColor : undefined,
             consoleLayout: body.consoleLayout !== undefined ? body.consoleLayout : undefined,

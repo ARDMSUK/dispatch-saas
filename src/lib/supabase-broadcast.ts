@@ -48,3 +48,48 @@ export async function broadcastOperatorPresence(payload: {
         console.error('[Supabase Broadcast] Failed to send presence change:', error);
     }
 }
+
+export async function broadcastOperatorAlert(payload: {
+    tenantId: string;
+    alertType: 'modification-request' | 'delay-inquiry';
+    message: string;
+    bookingId?: string | null;
+    passengerPhone?: string | null;
+}) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.warn('[Supabase Broadcast] URL or Anon Key is missing.');
+        return;
+    }
+
+    try {
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        const channel = supabase.channel(`operator-alerts-${payload.tenantId}`);
+
+        return new Promise<void>((resolve) => {
+            channel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    try {
+                        await channel.send({
+                            type: 'broadcast',
+                            event: 'new-alert',
+                            payload: {
+                                ...payload,
+                                timestamp: new Date().toISOString()
+                            }
+                        });
+                    } catch (err) {
+                        console.error('[Supabase Broadcast] Error sending alert:', err);
+                    } finally {
+                        supabase.removeChannel(channel);
+                        resolve();
+                    }
+                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                    supabase.removeChannel(channel);
+                    resolve();
+                }
+            });
+        });
+    } catch (error) {
+        console.error('[Supabase Broadcast] Failed to send alert:', error);
+    }
+}

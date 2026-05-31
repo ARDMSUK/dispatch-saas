@@ -49,6 +49,8 @@ model Tenant {
   hasWhatsAppAi        Boolean  @default(false)
   hasVoiceAi           Boolean  @default(false)
   enableVoiceAi        Boolean  @default(false)
+  hasAiCopilot         Boolean  @default(false)
+  enableAiCopilot      Boolean  @default(false)
   hasSchoolContracts   Boolean  @default(false)
   hasDataImport        Boolean  @default(false)
   hasTapToPay          Boolean  @default(false)
@@ -158,6 +160,7 @@ model SaasPlan {
   incSchoolContracts Boolean @default(false)
   incDataImport      Boolean @default(false)
   incTapToPay        Boolean @default(false)
+  incAiCopilot       Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

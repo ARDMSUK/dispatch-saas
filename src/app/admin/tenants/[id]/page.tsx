@@ -313,6 +313,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                     { stateField: 'hasWebChatAi', planField: 'incWebChatAi', label: 'AI Web Chat Widget' },
                                     { stateField: 'hasWhatsAppAi', planField: 'incWhatsAppAi', label: 'WhatsApp AI Agent' },
                                     { stateField: 'hasVoiceAi', planField: 'incVoiceAi', label: 'Voice AI Agent' },
+                                    { stateField: 'hasAiCopilot', planField: 'incAiCopilot', label: 'AI Booking Status & Modifications (AI Copilot)' },
                                     { stateField: 'hasSchoolContracts', planField: 'incSchoolContracts', label: 'School Contracts Add-on' },
                                     { stateField: 'hasDataImport', planField: 'incDataImport', label: 'Data Migration Wizard' },
                                     { stateField: 'hasTapToPay', planField: 'incTapToPay', label: 'Tap to Pay (NFC Payment)' }

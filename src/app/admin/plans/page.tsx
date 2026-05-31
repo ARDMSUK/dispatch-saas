@@ -26,6 +26,7 @@ interface SaasPlan {
     incWhatsAppAi: boolean;
     incVoiceAi: boolean;
     incTapToPay: boolean;
+    incAiCopilot: boolean;
 }
 
 export default function SaaSPlansPage() {
@@ -72,6 +73,7 @@ export default function SaaSPlansPage() {
             incWhatsAppAi: false,
             incVoiceAi: false,
             incTapToPay: false,
+            incAiCopilot: false,
         });
         setIsEditing(true);
     };
@@ -215,6 +217,7 @@ export default function SaaSPlansPage() {
                                         { field: 'incWebChatAi', label: 'AI Web Chat' },
                                         { field: 'incWhatsAppAi', label: 'AI WhatsApp Agent' },
                                         { field: 'incVoiceAi', label: 'AI Voice Phone Agent' },
+                                        { field: 'incAiCopilot', label: 'AI Booking Status & Modifications (AI Copilot)' },
                                         { field: 'incTapToPay', label: 'Tap to Pay (NFC Payment)' }
                                     ].map(mod => (
                                         <div key={mod.field} className="flex items-start space-x-3 p-3 border rounded-md hover:bg-slate-50 transition-colors">
@@ -285,7 +288,7 @@ export default function SaaSPlansPage() {
                                         {plan.incWebChatAi && <span className="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded-md border border-purple-100">AI Chat</span>}
                                         {/* Summarize rest to prevent massive cards */}
                                         <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-md">
-                                            + {[plan.incZonePricing, plan.incDynamicPricing, plan.incWaitReturn, plan.incWavOptions, plan.incLiveTracking, plan.incWhatsAppAi, plan.incVoiceAi, plan.incTapToPay].filter(Boolean).length} more features
+                                            + {[plan.incZonePricing, plan.incDynamicPricing, plan.incWaitReturn, plan.incWavOptions, plan.incLiveTracking, plan.incWhatsAppAi, plan.incVoiceAi, plan.incTapToPay, plan.incAiCopilot].filter(Boolean).length} more features
                                         </span>
                                     </div>
                                 </div>

@@ -49,6 +49,7 @@ export async function POST(req: Request) {
                 incWhatsAppAi: body.incWhatsAppAi || false,
                 incVoiceAi: body.incVoiceAi || false,
                 incTapToPay: body.incTapToPay || false,
+                incAiCopilot: body.incAiCopilot || false,
             }
         });
 

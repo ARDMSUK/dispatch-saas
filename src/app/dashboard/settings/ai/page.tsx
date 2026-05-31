@@ -16,6 +16,8 @@ export default function TenantAIPage() {
     const [hasWebChat, setHasWebChat] = useState(false);
     const [hasVoiceAi, setHasVoiceAi] = useState(false);
     const [enableVoiceAi, setEnableVoiceAi] = useState(false);
+    const [hasAiCopilot, setHasAiCopilot] = useState(false);
+    const [enableAiCopilot, setEnableAiCopilot] = useState(false);
     const [tenantId, setTenantId] = useState<string | null>(null);
 
     const [faqs, setFaqs] = useState<any[]>([]);
@@ -45,6 +47,12 @@ export default function TenantAIPage() {
                 }
                 if (data && data.enableVoiceAi !== undefined) {
                     setEnableVoiceAi(data.enableVoiceAi);
+                }
+                if (data && data.hasAiCopilot !== undefined) {
+                    setHasAiCopilot(data.hasAiCopilot);
+                }
+                if (data && data.enableAiCopilot !== undefined) {
+                    setEnableAiCopilot(data.enableAiCopilot);
                 }
                 if (data && data.id) {
                     setTenantId(data.id);
@@ -167,6 +175,28 @@ export default function TenantAIPage() {
             setLoading(false);
         }
     };
+ 
+    const toggleAiCopilot = async () => {
+        const newValue = !enableAiCopilot;
+        setLoading(true);
+        try {
+            const res = await fetch('/api/settings/organization', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enableAiCopilot: newValue })
+            });
+            if (res.ok) {
+                setEnableAiCopilot(newValue);
+                toast.success(`AI Copilot has been ${newValue ? 'enabled' : 'disabled'}.`);
+            } else {
+                toast.error("Failed to update AI Copilot settings.");
+            }
+        } catch (error) {
+            toast.error("Network error saving settings.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const requestWhatsAppQR = async () => {
         setLoading(true);
@@ -200,7 +230,7 @@ export default function TenantAIPage() {
                 <p className="text-slate-500">Manage your autonomous agents and configure integrations to live messaging platforms.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 {/* WHATSAPP AGENT CARD */}
                 <Card className="border-emerald-200 bg-emerald-50/10">
@@ -393,6 +423,53 @@ export default function TenantAIPage() {
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* AI COPILOT CARD */}
+                <Card className={`border-slate-200 overflow-hidden relative ${!hasAiCopilot ? 'opacity-80' : ''}`}>
+                    <CardHeader className="pb-4 border-b border-slate-100">
+                        <div className="flex justify-between items-start">
+                            <CardTitle className="flex items-center gap-2 text-indigo-700">
+                                <Bot className="w-5 h-5 text-indigo-600" />
+                                AI Copilot
+                            </CardTitle>
+                            {!hasAiCopilot ? (
+                                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
+                                    Not Subscribed
+                                </span>
+                            ) : enableAiCopilot ? (
+                                <span className="flex items-center gap-1 text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full border border-emerald-200">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active
+                                </span>
+                            ) : (
+                                <span className="text-xs font-medium bg-slate-100 text-slate-500 px-2 py-1 rounded-full border">
+                                    Paused
+                                </span>
+                            )}
+                        </div>
+                        <CardDescription className="pt-2">
+                            Enables Voice and WhatsApp AI to fetch real-time ETAs/driver details and coordinate booking modifications.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6 space-y-4">
+                        {!hasAiCopilot ? (
+                            <div className="bg-slate-50 border rounded-xl p-4 text-center space-y-2">
+                                <p className="text-xs text-slate-500">
+                                    This module is locked for your organization. Contact your administrator to add AI Copilot support.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <Button 
+                                    onClick={toggleAiCopilot} 
+                                    disabled={loading}
+                                    className={`w-full font-semibold transition-all ${enableAiCopilot ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
+                                >
+                                    {loading ? "Saving Settings..." : enableAiCopilot ? "Pause AI Copilot" : "Activate AI Copilot"}
+                                </Button>
                             </div>
                         )}
                     </CardContent>
