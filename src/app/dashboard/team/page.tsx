@@ -146,78 +146,78 @@ export default function TeamPage() {
     );
 
     return (
-        <div className="h-full flex flex-col p-4 bg-white gap-4 text-slate-900">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+        <div className="h-full flex flex-col p-6 bg-background text-foreground gap-4 overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Team & Access</h1>
-                    <p className="text-slate-400 text-sm">Manage staff access and roles.</p>
+                    <h1 className="text-2xl font-bold text-foreground tracking-tight">Team & Access</h1>
+                    <p className="text-muted-foreground text-sm">Manage staff access and roles.</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={(open) => {
                     setIsDialogOpen(open);
                     if (!open) resetForm();
                 }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-700 text-black hover:bg-blue-600 font-bold" onClick={resetForm}>
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium" onClick={resetForm}>
                             <Plus className="mr-2 h-4 w-4" /> Add Member
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
+                    <DialogContent className="bg-card border-border text-foreground">
                         <DialogHeader>
-                            <DialogTitle>{formData.id ? "Edit Team Member" : "Add New Team Member"}</DialogTitle>
+                            <DialogTitle className="text-foreground">{formData.id ? "Edit Team Member" : "Add New Team Member"}</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-500">Full Name</label>
+                                <label className="text-sm font-medium text-muted-foreground">Full Name</label>
                                 <Input
                                     placeholder="e.g. John Doe"
-                                    className="bg-slate-200 border-slate-200"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-500">Email Address</label>
+                                <label className="text-sm font-medium text-muted-foreground">Email Address</label>
                                 <Input
                                     type="email"
                                     placeholder="john@example.com"
-                                    className="bg-slate-200 border-slate-200"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                     disabled={!!formData.id}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-500">SIP Extension (Optional)</label>
+                                <label className="text-sm font-medium text-muted-foreground">SIP Extension (Optional)</label>
                                 <Input
                                     type="text"
                                     placeholder="e.g. 1001"
-                                    className="bg-slate-200 border-slate-200"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.sipExtension}
                                     onChange={e => setFormData({ ...formData, sipExtension: e.target.value })}
                                 />
-                                <p className="text-xs text-slate-400">Used to route calls from desk phones to this user.</p>
+                                <p className="text-xs text-muted-foreground">Used to route calls from desk phones to this user.</p>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-500">Password {formData.id && "(Leave blank to keep existing)"}</label>
+                                <label className="text-sm font-medium text-muted-foreground">Password {formData.id && "(Leave blank to keep existing)"}</label>
                                 <Input
                                     type="password"
                                     placeholder="••••••••"
-                                    className="bg-slate-200 border-slate-200"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-500">Role</label>
+                                <label className="text-sm font-medium text-muted-foreground">Role</label>
                                 <select
-                                    className="w-full h-10 rounded-md border border-slate-200 bg-slate-200 px-3 py-2 text-sm text-slate-900"
+                                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                                     value={formData.role}
                                     onChange={e => setFormData({ ...formData, role: e.target.value as any })}
                                 >
                                     <option value="DISPATCHER">Dispatcher (Staff)</option>
                                     <option value="ADMIN">Admin (Manager)</option>
                                 </select>
-                                <p className="text-xs text-slate-400">
+                                <p className="text-xs text-muted-foreground">
                                     {['ADMIN', 'SUPER_ADMIN'].includes(formData.role)
                                         ? "Full access to settings, pricing, and team management."
                                         : "Can create bookings and view drivers/vehicles only."}
@@ -225,14 +225,14 @@ export default function TeamPage() {
                             </div>
 
                             {formData.role === 'DISPATCHER' && (
-                                <div className="space-y-3 pt-2 border-t border-slate-200 mt-2">
-                                    <label className="text-sm font-medium text-slate-500">Extra Permissions</label>
+                                <div className="space-y-3 pt-2 border-t border-border mt-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Extra Permissions</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         {AVAILABLE_PERMISSIONS.map(perm => (
-                                            <label key={perm.id} className="flex items-center space-x-2 text-sm text-slate-600 cursor-pointer">
+                                            <label key={perm.id} className="flex items-center space-x-2 text-sm text-foreground cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="rounded border-slate-300 bg-slate-200 text-blue-700 focus:ring-blue-700/20"
+                                                    className="rounded border-input bg-background text-primary focus:ring-ring"
                                                     checked={formData.permissions.includes(perm.id)}
                                                     onChange={(e) => {
                                                         const newPerms = e.target.checked
@@ -245,11 +245,11 @@ export default function TeamPage() {
                                             </label>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-slate-400 italic">These allow specific access without granting full Admin rights.</p>
+                                    <p className="text-xs text-muted-foreground italic">These allow specific access without granting full Admin rights.</p>
                                 </div>
                             )}
 
-                            <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-600 mt-2">
+                            <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium mt-2">
                                 {formData.id ? "Update Account" : "Create Account"}
                             </Button>
                         </div>
@@ -257,40 +257,40 @@ export default function TeamPage() {
                 </Dialog>
             </div>
 
-            <Card className="overflow-hidden bg-zinc-900/20 border-slate-200">
+            <Card className="overflow-hidden bg-card border border-border shadow-sm rounded-lg">
                 <Table>
-                    <TableHeader className="bg-slate-100">
-                        <TableRow className="border-slate-200 hover:bg-transparent">
-                            <TableHead className="text-slate-500">User</TableHead>
-                            <TableHead className="text-slate-500">Role</TableHead>
-                            <TableHead className="text-slate-500">Joined</TableHead>
-                            <TableHead className="text-right text-slate-500">Actions</TableHead>
+                    <TableHeader className="bg-muted/50 border-b border-border">
+                        <TableRow className="border-border hover:bg-transparent">
+                            <TableHead className="text-muted-foreground font-semibold">User</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Role</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Joined</TableHead>
+                            <TableHead className="text-right text-muted-foreground font-semibold">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center py-8 text-slate-400">Loading team...</TableCell>
+                                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Loading team...</TableCell>
                             </TableRow>
                         ) : filteredUsers.map((user) => (
-                            <TableRow key={user.id} className="border-slate-200 hover:bg-slate-200">
+                            <TableRow key={user.id} className="border-border hover:bg-muted/50 transition-colors">
                                 <TableCell>
                                     <div className="flex flex-col">
-                                        <span className="font-medium text-slate-800">{user.name}</span>
-                                        <span className="text-xs text-slate-400">{user.email}</span>
-                                        {user.sipExtension && <span className="text-xs text-blue-600 font-mono mt-0.5">Ext: {user.sipExtension}</span>}
+                                        <span className="font-medium text-foreground">{user.name}</span>
+                                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                                        {user.sipExtension && <span className="text-xs text-primary font-mono mt-0.5">Ext: {user.sipExtension}</span>}
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1 items-start">
-                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-blue-700 text-blue-700' : 'border-zinc-500 text-slate-400'}>
+                                        <Badge variant="outline" className={['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? 'border-primary text-primary' : 'border-border text-muted-foreground'}>
                                             {['ADMIN', 'SUPER_ADMIN'].includes(user.role) ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
                                             {user.role === 'SUPER_ADMIN' ? 'Admin' : (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
                                         </Badge>
                                         {user.role === 'DISPATCHER' && user.permissions && user.permissions.length > 0 && (
                                             <div className="flex flex-wrap gap-1 mt-1">
                                                 {user.permissions.map(p => (
-                                                    <span key={p} className="text-[10px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">
+                                                    <span key={p} className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded border border-border">
                                                         {AVAILABLE_PERMISSIONS.find(ap => ap.id === p)?.label || p}
                                                     </span>
                                                 ))}
@@ -298,7 +298,7 @@ export default function TeamPage() {
                                         )}
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-sm text-slate-400">
+                                <TableCell className="text-sm text-muted-foreground">
                                     {new Date(user.createdAt).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -306,7 +306,7 @@ export default function TeamPage() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="text-slate-500 hover:text-slate-900"
+                                            className="text-muted-foreground hover:text-foreground hover:bg-muted"
                                             onClick={() => handleEdit(user)}
                                         >
                                             <Pencil className="w-4 h-4" />
@@ -315,7 +315,7 @@ export default function TeamPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
                                                 onClick={() => handleDelete(user.id, user.name)}
                                             >
                                                 <Trash2 className="w-4 h-4" />

@@ -138,22 +138,22 @@ export default function DriversPage() {
     const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     return (
-        <div className="h-full flex flex-col p-4 bg-slate-100 gap-4 text-slate-900">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+        <div className="h-full flex flex-col p-6 bg-background text-foreground gap-4 overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Fleet Management</h1>
-                    <p className="text-slate-400 text-sm">Manage your drivers and their availability.</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Fleet Management</h1>
+                    <p className="text-muted-foreground text-sm">Manage your drivers and their availability.</p>
                 </div>
                 {isAdmin && (
                     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                         <DialogTrigger asChild>
-                            <Button className="bg-blue-700 text-black hover:bg-blue-600 font-bold">
+                            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                                 <Plus className="mr-2 h-4 w-4" /> Add Driver
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-slate-100 border-slate-200 text-slate-900 max-w-2xl">
+                        <DialogContent className="bg-card border-border text-foreground max-w-2xl">
                             <DialogHeader>
-                                <DialogTitle>{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
+                                <DialogTitle className="text-foreground">{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
                             </DialogHeader>
                             <Tabs defaultValue="profile" className="w-full">
                                 <TabsList className="grid w-full grid-cols-2">
@@ -166,13 +166,13 @@ export default function DriversPage() {
                                         placeholder="Callsign (e.g. 101)"
                                         value={formData.callsign}
                                         onChange={e => setFormData({ ...formData, callsign: e.target.value })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                     <Input
                                         placeholder="Full Name"
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -180,13 +180,13 @@ export default function DriversPage() {
                                         placeholder="Phone Number"
                                         value={formData.phone}
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                     <Input
                                         placeholder="Email Address (Optional)"
                                         value={formData.email}
                                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -194,7 +194,7 @@ export default function DriversPage() {
                                         placeholder="Badge Number"
                                         value={formData.badgeNumber}
                                         onChange={e => setFormData({ ...formData, badgeNumber: e.target.value })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                     <div className="space-y-1">
                                         <Input
@@ -202,7 +202,7 @@ export default function DriversPage() {
                                             placeholder="License Expiry"
                                             value={formData.licenseExpiry ? formData.licenseExpiry.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, licenseExpiry: new Date(e.target.value).toISOString() })}
-                                            className="bg-white border-slate-200"
+                                            className="bg-background border-input text-foreground"
                                         />
                                     </div>
                                 </div>
@@ -211,14 +211,14 @@ export default function DriversPage() {
                                         placeholder="Login PIN (4 digits)"
                                         value={formData.pin}
                                         onChange={e => setFormData({ ...formData, pin: e.target.value })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                     <Input
                                         type="number"
                                         placeholder="Commission Rate (%)"
                                         value={formData.commissionRate}
                                         onChange={e => setFormData({ ...formData, commissionRate: parseFloat(e.target.value) })}
-                                        className="bg-white border-slate-200"
+                                        className="bg-background border-input text-foreground"
                                     />
                                 </div>
                                 {isAdmin && (
@@ -243,7 +243,7 @@ export default function DriversPage() {
                                         )}
                                     </div>
                                 )}
-                                <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-600">
+                                <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                                     {editingId ? 'Update Driver' : 'Create Driver'}
                                 </Button>
                             </TabsContent>
@@ -261,25 +261,25 @@ export default function DriversPage() {
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
                     <Input
                         placeholder="Search drivers..."
-                        className="pl-8 bg-slate-100 border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                        className="pl-8 bg-background border-input text-foreground placeholder:text-muted-foreground"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <div className="rounded-md border border-slate-200 overflow-hidden bg-slate-100">
+            <div className="rounded-md border border-border overflow-hidden bg-card shadow-sm">
                 <Table>
-                    <TableHeader className="bg-slate-100 border-b border-slate-200">
-                        <TableRow className="hover:bg-zinc-900 border-slate-200">
-                            <TableHead className="w-[100px] text-slate-500">Callsign</TableHead>
-                            <TableHead className="text-slate-500">Name</TableHead>
-                            <TableHead className="text-slate-500">Status</TableHead>
-                            <TableHead className="text-slate-500">Contact</TableHead>
-                            <TableHead className="text-slate-500">Vehicle</TableHead>
-                            <TableHead className="text-slate-500">Badge</TableHead>
-                            <TableHead className="text-slate-500">Expiry</TableHead>
-                            {isAdmin && <TableHead className="text-right text-slate-500">Actions</TableHead>}
+                    <TableHeader className="bg-muted/50 border-b border-border">
+                        <TableRow className="border-border hover:bg-transparent">
+                            <TableHead className="w-[100px] text-muted-foreground font-semibold">Callsign</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Name</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Status</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Contact</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Vehicle</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Badge</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Expiry</TableHead>
+                            {isAdmin && <TableHead className="text-right text-muted-foreground font-semibold">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -293,32 +293,32 @@ export default function DriversPage() {
                             </TableRow>
                         ) : (
                             filteredDrivers.map((driver) => (
-                                <TableRow key={driver.id} className="hover:bg-slate-200 border-slate-200 group transition-colors">
-                                    <TableCell className="font-bold font-mono text-lg text-blue-700">{driver.callsign}</TableCell>
-                                    <TableCell className="font-medium text-slate-900">{driver.name}</TableCell>
+                                <TableRow key={driver.id} className="hover:bg-muted/50 border-border group transition-colors">
+                                    <TableCell className="font-bold font-mono text-lg text-primary">{driver.callsign}</TableCell>
+                                    <TableCell className="font-medium text-foreground">{driver.name}</TableCell>
                                     <TableCell>
                                         <DriverStatusCell driver={driver} onUpdate={fetchDrivers} />
                                     </TableCell>
-                                    <TableCell className="text-sm text-slate-600">{driver.phone}</TableCell>
+                                    <TableCell className="text-sm text-muted-foreground">{driver.phone}</TableCell>
                                     <TableCell>
                                         {driver.vehicles?.[0] ? (
-                                            <div className="flex items-center gap-2 text-sm text-indigo-300">
+                                            <div className="flex items-center gap-2 text-sm text-primary">
                                                 <Car className="h-3 w-3" />
-                                                <span>{driver.vehicles[0].reg} <span className="text-slate-400">({driver.vehicles[0].make})</span></span>
+                                                <span>{driver.vehicles[0].reg} <span className="text-muted-foreground">({driver.vehicles[0].make})</span></span>
                                             </div>
-                                        ) : <span className="text-slate-500 text-xs italic">Unassigned</span>}
+                                        ) : <span className="text-muted-foreground text-xs italic">Unassigned</span>}
                                     </TableCell>
-                                    <TableCell className="text-sm font-mono text-slate-500">{driver.badgeNumber || '-'}</TableCell>
-                                    <TableCell className="text-xs text-slate-500">
+                                    <TableCell className="text-sm font-mono text-muted-foreground">{driver.badgeNumber || '-'}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">
                                         {driver.licenseExpiry ? new Date(driver.licenseExpiry).toLocaleDateString() : '-'}
                                     </TableCell>
                                     {isAdmin && (
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-200" onClick={() => handleEdit(driver)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => handleEdit(driver)}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-500/10" onClick={() => handleDelete(driver.id)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => handleDelete(driver.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -372,14 +372,14 @@ function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () =
                     </Badge>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-slate-100 border-slate-200 text-slate-900">
+            <DropdownMenuContent align="start" className="bg-popover border-border text-popover-foreground">
                 <DropdownMenuItem onClick={() => updateStatus('FREE')} className="text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-400">
                     <CheckCircle className="mr-2 h-4 w-4" /> Set FREE
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => updateStatus('BUSY')} className="text-blue-700 focus:bg-blue-700/10 focus:text-blue-600">
                     <Clock className="mr-2 h-4 w-4" /> Set BUSY
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => updateStatus('OFF_DUTY')} className="text-slate-400 focus:bg-zinc-800 focus:text-zinc-400">
+                <DropdownMenuItem onClick={() => updateStatus('OFF_DUTY')} className="text-muted-foreground focus:bg-accent focus:text-accent-foreground">
                     <Power className="mr-2 h-4 w-4" /> Set OFF DUTY
                 </DropdownMenuItem>
             </DropdownMenuContent>
@@ -443,47 +443,47 @@ function DriverDocuments({ driverId }: { driverId: string }) {
 
     return (
         <div className="py-4 flex flex-col gap-4">
-            <div className="bg-white p-3 rounded border border-slate-200 flex gap-2 items-end">
+            <div className="bg-card p-4 rounded border border-border flex gap-2 items-end">
                 <div className="flex-1">
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">Doc Type</label>
-                    <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 text-sm">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Doc Type</label>
+                    <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
                         <option value="DRIVING_LICENSE">Driving License</option>
                         <option value="PCO_BADGE">PCO Badge</option>
                         <option value="INSURANCE">Insurance</option>
                     </select>
                 </div>
                 <div className="flex-1">
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">File</label>
-                    <Input id="fileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-white text-xs pt-2 border-slate-200 cursor-pointer" />
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">File</label>
+                    <Input id="fileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-background text-xs pt-2 border-input cursor-pointer text-foreground" />
                 </div>
                 <div className="flex-1">
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">Expiry</label>
-                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} />
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Expiry</label>
+                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground" />
                 </div>
-                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-slate-900 text-white min-w-[100px]">
+                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
                     {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Add</>}
                 </Button>
             </div>
             
-            <div className="border border-slate-200 rounded overflow-hidden">
+            <div className="border border-border rounded overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-slate-50">
-                        <TableRow>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Expiry</TableHead>
-                            <TableHead>File</TableHead>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="border-border">
+                            <TableHead className="text-muted-foreground font-semibold">Type</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Status</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Expiry</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">File</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody className="bg-white">
-                        {loading ? <TableRow><TableCell colSpan={4} className="text-center text-slate-400">Loading...</TableCell></TableRow> :
-                         documents.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-slate-400">No documents found</TableCell></TableRow> :
+                    <TableBody className="bg-card">
+                        {loading ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Loading...</TableCell></TableRow> :
+                         documents.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No documents found</TableCell></TableRow> :
                          documents.map(doc => (
-                             <TableRow key={doc.id}>
-                                 <TableCell className="font-medium">{doc.type.replace('_', ' ')}</TableCell>
-                                 <TableCell><Badge variant="outline">{doc.status}</Badge></TableCell>
-                                 <TableCell>{doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}</TableCell>
-                                 <TableCell>{doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline">View</a> : '-'}</TableCell>
+                             <TableRow key={doc.id} className="border-border hover:bg-muted/50">
+                                 <TableCell className="font-medium text-foreground">{doc.type.replace('_', ' ')}</TableCell>
+                                 <TableCell><Badge variant="outline" className="border-border text-foreground">{doc.status}</Badge></TableCell>
+                                 <TableCell className="text-muted-foreground">{doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}</TableCell>
+                                 <TableCell>{doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline font-semibold">View</a> : '-'}</TableCell>
                              </TableRow>
                          ))}
                     </TableBody>

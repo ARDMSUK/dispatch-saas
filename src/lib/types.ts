@@ -111,6 +111,7 @@ export interface FixedPrice {
     pickup?: string | null;
     dropoff?: string | null;
     price: number;
+    outOfHoursPrice?: number | null;
     vehicleType: string;
     isReverse: boolean;
 }

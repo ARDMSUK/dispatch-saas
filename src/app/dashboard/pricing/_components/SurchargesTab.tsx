@@ -106,30 +106,30 @@ export default function SurchargesTab() {
 
     return (
         <div className="mt-4 flex flex-col gap-4">
-            <div className="flex justify-end bg-slate-100 p-4 rounded-lg shadow-sm border border-slate-200">
+            <div className="flex justify-end bg-card p-4 rounded-lg shadow-sm border border-border text-card-foreground">
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-700 text-black hover:bg-blue-800">
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                             <Plus className="mr-2 h-4 w-4" /> Add Surcharge
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
+                    <DialogContent className="bg-popover border-border text-popover-foreground">
                         <DialogHeader>
                             <DialogTitle>Add Surcharge Rule</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <Input
                                 placeholder="Name (e.g. Christmas Day)"
-                                className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                             />
                             <div className="grid grid-cols-2 gap-4">
                                 <Select value={formData.type} onValueChange={(val) => setFormData({ ...formData, type: val })}>
-                                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                                    <SelectTrigger className="bg-background border-input text-foreground">
                                         <SelectValue placeholder="Type" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-100 border-slate-200 text-slate-900">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground">
                                         <SelectItem value="PERCENT">Percentage (%)</SelectItem>
                                         <SelectItem value="FLAT">Flat Amount (£)</SelectItem>
                                     </SelectContent>
@@ -137,42 +137,42 @@ export default function SurchargesTab() {
                                 <Input
                                     type="number"
                                     placeholder="Value (e.g. 50)"
-                                    className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.value}
                                     onChange={e => setFormData({ ...formData, value: e.target.value })}
                                 />
                             </div>
 
-                            <div className="space-y-2 border-t border-slate-200 pt-2">
-                                <label className="text-sm font-medium text-slate-500">Time Range (Daily)</label>
+                            <div className="space-y-2 border-t border-border pt-2">
+                                <label className="text-sm font-medium text-muted-foreground">Time Range (Daily)</label>
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         type="time"
-                                        className="bg-white border-slate-200 text-slate-900"
+                                        className="bg-background border-input text-foreground"
                                         value={formData.startTime}
                                         onChange={e => setFormData({ ...formData, startTime: e.target.value })}
                                     />
                                     <Input
                                         type="time"
-                                        className="bg-white border-slate-200 text-slate-900"
+                                        className="bg-background border-input text-foreground"
                                         value={formData.endTime}
                                         onChange={e => setFormData({ ...formData, endTime: e.target.value })}
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-2 border-t border-slate-200 pt-2">
-                                <label className="text-sm font-medium text-slate-500">Date Range (Optional)</label>
+                            <div className="space-y-2 border-t border-border pt-2">
+                                <label className="text-sm font-medium text-muted-foreground">Date Range (Optional)</label>
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         type="date"
-                                        className="bg-white border-slate-200 text-slate-900"
+                                        className="bg-background border-input text-foreground"
                                         value={formData.startDate}
                                         onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                                     />
                                     <Input
                                         type="date"
-                                        className="bg-white border-slate-200 text-slate-900"
+                                        className="bg-background border-input text-foreground"
                                         value={formData.endDate}
                                         onChange={e => setFormData({ ...formData, endDate: e.target.value })}
                                     />
@@ -181,43 +181,43 @@ export default function SurchargesTab() {
 
                             <Input
                                 placeholder="Days (comma sep: 0=Sun, 6=Sat)"
-                                className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                 value={formData.daysOfWeek}
                                 onChange={e => setFormData({ ...formData, daysOfWeek: e.target.value })}
                             />
 
-                            <Button onClick={handleCreate} className="w-full bg-blue-700 text-black hover:bg-blue-800">Create Surcharge</Button>
+                            <Button onClick={handleCreate} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">Create Surcharge</Button>
                         </div>
                     </DialogContent>
                 </Dialog>
             </div>
 
-            <div className="bg-slate-100 rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-white">
-                        <TableRow className="hover:bg-zinc-900/50 border-slate-200">
-                            <TableHead className="text-slate-500">Name</TableHead>
-                            <TableHead className="text-slate-500">Value</TableHead>
-                            <TableHead className="text-slate-500">Type</TableHead>
-                            <TableHead className="text-slate-500">Triggers</TableHead>
-                            <TableHead className="text-slate-500 w-[50px]"></TableHead>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="border-border hover:bg-muted/50">
+                            <TableHead className="text-muted-foreground font-medium">Name</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Value</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Type</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Triggers</TableHead>
+                            <TableHead className="text-muted-foreground font-medium w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
-                            <TableRow><TableCell colSpan={5} className="text-center py-6 text-slate-400">Loading...</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">Loading...</TableCell></TableRow>
                         ) : surcharges.length === 0 ? (
-                            <TableRow><TableCell colSpan={5} className="text-center py-6 text-slate-400">No surcharges found</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">No surcharges found</TableCell></TableRow>
                         ) : (
                             surcharges.map((s) => (
-                                <TableRow key={s.id} className="border-slate-200 hover:bg-slate-200/50">
-                                    <TableCell className="font-medium text-slate-900">{s.name}</TableCell>
-                                    <TableCell className="font-bold text-blue-700">
+                                <TableRow key={s.id} className="border-border hover:bg-muted/50 text-foreground transition-colors">
+                                    <TableCell className="font-medium text-foreground">{s.name}</TableCell>
+                                    <TableCell className="font-bold text-primary dark:text-blue-400">
                                         {s.type === 'PERCENT' ? `+${s.value}%` : `+£${s.value.toFixed(2)}`}
                                     </TableCell>
-                                    <TableCell><Badge variant="outline" className="border-white/20 text-slate-600">{s.type}</Badge></TableCell>
+                                    <TableCell><Badge variant="outline" className="border-border text-muted-foreground bg-muted/50">{s.type}</Badge></TableCell>
                                     <TableCell>
-                                        <div className="flex flex-col gap-1 text-xs text-slate-500">
+                                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                                             {(s.startTime || s.endTime) && (
                                                 <div className="flex items-center gap-1"><Clock className="h-3 w-3" /> {s.startTime} - {s.endTime}</div>
                                             )}
@@ -232,7 +232,7 @@ export default function SurchargesTab() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-950/20" onClick={() => handleDelete(s.id)}>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(s.id)}>
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </TableCell>

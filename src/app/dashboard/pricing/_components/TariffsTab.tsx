@@ -93,16 +93,16 @@ export default function TariffsTab() {
     };
 
     return (
-        <Card className="mt-4 bg-slate-100 border-slate-200">
+        <Card className="mt-4 bg-card border-border text-card-foreground">
             <CardContent className="pt-6">
                 <div className="grid gap-6 max-w-xl">
                     <div className="space-y-2">
-                        <Label className="text-slate-500">Vehicle Type</Label>
+                        <Label className="text-muted-foreground">Vehicle Type</Label>
                         <Select value={vehicleType} onValueChange={handleTypeChange}>
-                            <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                            <SelectTrigger className="bg-background border-input text-foreground">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-100 border-slate-200 text-slate-900">
+                            <SelectContent className="bg-popover border-border text-popover-foreground">
                                 <SelectItem value="Saloon">Saloon</SelectItem>
                                 <SelectItem value="Estate">Estate</SelectItem>
                                 <SelectItem value="Executive">Executive</SelectItem>
@@ -112,26 +112,26 @@ export default function TariffsTab() {
                                 <SelectItem value="Coach">Coach</SelectItem>
                             </SelectContent>
                         </Select>
-                        <p className="text-xs text-slate-400">Configure rates for this specific vehicle type.</p>
+                        <p className="text-xs text-muted-foreground">Configure rates for this specific vehicle type.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label className="text-slate-500">Base Rate (Flag Fall) (£)</Label>
+                            <Label className="text-muted-foreground">Base Rate (Flag Fall) (£)</Label>
                             <Input
                                 type="number"
                                 step="0.10"
-                                className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                 value={data.baseRate}
                                 onChange={e => setData({ ...data, baseRate: parseFloat(e.target.value) })}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-slate-500">Rate Per Mile (£)</Label>
+                            <Label className="text-muted-foreground">Rate Per Mile (£)</Label>
                             <Input
                                 type="number"
                                 step="0.10"
-                                className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                 value={data.perMile}
                                 onChange={e => setData({ ...data, perMile: parseFloat(e.target.value) })}
                             />
@@ -139,28 +139,28 @@ export default function TariffsTab() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-slate-500">Minimum Fare (£)</Label>
+                        <Label className="text-muted-foreground">Minimum Fare (£)</Label>
                         <Input
                             type="number"
                             step="0.50"
-                            className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                             value={data.minFare}
                             onChange={e => setData({ ...data, minFare: parseFloat(e.target.value) })}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-slate-500">Waiting Time Rate (£ per min)</Label>
+                        <Label className="text-muted-foreground">Waiting Time Rate (£ per min)</Label>
                         <Input
                             type="number"
                             step="0.10"
-                            className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                             value={data.waitingFreq || 0}
                             onChange={e => setData({ ...data, waitingFreq: parseFloat(e.target.value) })}
                         />
                     </div>
 
-                    <Button onClick={handleSave} disabled={loading} className="bg-blue-700 text-black hover:bg-blue-800">
+                    <Button onClick={handleSave} disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                         {loading ? 'Saving...' : 'Save Tariff Settings'}
                     </Button>
                 </div>

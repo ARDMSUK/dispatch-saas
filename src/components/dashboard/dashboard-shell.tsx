@@ -109,22 +109,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
 
     return (
         <div className="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
-            {/* Desktop Persistent Sidebar */}
-            <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border shrink-0">
-                <div className="h-20 flex flex-col justify-center px-6 border-b border-border bg-card">
-                    <div className="flex items-center gap-2">
-                        <img src="/logo-full.png" alt="CabAI" className="h-9 object-contain dark:brightness-110" />
-                    </div>
-                    <span className="text-[9px] font-semibold text-muted-foreground mt-1 leading-tight tracking-wide">
-                        Taxi Booking & Dispatch Software powered by AI
-                    </span>
-                </div>
-                <div className="p-4 flex flex-col gap-1 overflow-y-auto h-[calc(100vh-5rem)] pb-10 custom-scrollbar bg-card">
-                    <NavLinks />
-                </div>
-            </aside>
-
-            {/* Mobile Sheet/Drawer */}
+            {/* Sheet/Drawer for all devices */}
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetContent side="left" className="w-64 bg-card border-r border-border p-0">
                     <div className="h-16 flex items-center px-6 border-b border-border">
@@ -156,10 +141,10 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                 {/* GLOBAL HEADER */}
                 <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-card/95 backdrop-blur-md z-50 shrink-0">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-muted-foreground hover:text-foreground">
+                        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="text-muted-foreground hover:text-foreground">
                             <Menu className="h-5 w-5" />
                         </Button>
-                        <div className="flex items-center gap-2 lg:hidden">
+                        <div className="flex items-center gap-2">
                             <img src="/logo-full.png" alt="CabAI" className="h-10 md:h-12 object-contain" />
                         </div>
                     </div>

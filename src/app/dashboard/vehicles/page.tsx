@@ -150,37 +150,37 @@ export default function VehiclesPage() {
     const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     return (
-        <div className="h-full flex flex-col p-4 bg-white gap-4">
+        <div className="h-full flex flex-col p-6 bg-background text-foreground gap-4 overflow-y-auto">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-900">Vehicle Management</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Vehicle Management</h1>
                 {isAdmin && (
                     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                         <DialogTrigger asChild>
-                            <Button className="bg-white text-black hover:bg-zinc-200">
+                            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                                 <Plus className="mr-2 h-4 w-4" /> Add Vehicle
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
+                        <DialogContent className="bg-card border-border text-foreground">
                             <DialogHeader>
-                                <DialogTitle className="text-slate-900">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
+                                <DialogTitle className="text-foreground">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4">
+                             <div className="grid gap-4 py-4">
                                 <Input
                                     placeholder="Registration (License Plate)"
-                                    className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.reg}
                                     onChange={e => setFormData({ ...formData, reg: e.target.value })}
                                 />
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         placeholder="Make (e.g. Toyota)"
-                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
+                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                         value={formData.make}
                                         onChange={e => setFormData({ ...formData, make: e.target.value })}
                                     />
                                     <Input
                                         placeholder="Model (e.g. Prius)"
-                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
+                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                         value={formData.model}
                                         onChange={e => setFormData({ ...formData, model: e.target.value })}
                                     />
@@ -188,12 +188,12 @@ export default function VehiclesPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         placeholder="Color"
-                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500"
+                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                         value={formData.color}
                                         onChange={e => setFormData({ ...formData, color: e.target.value })}
                                     />
                                     <select
-                                        className="flex h-9 w-full rounded-md border border-slate-200 bg-slate-200 px-3 py-1 text-sm text-slate-900 shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-ring"
                                         value={formData.type}
                                         onChange={e => setFormData({ ...formData, type: e.target.value })}
                                     >
@@ -209,9 +209,9 @@ export default function VehiclesPage() {
 
                                 {/* Driver Assignment */}
                                 <div className="space-y-1">
-                                    <label className="text-xs text-slate-400 ml-1">Assigned Driver</label>
+                                    <label className="text-xs text-muted-foreground ml-1">Assigned Driver</label>
                                     <select
-                                        className="flex h-9 w-full rounded-md border border-slate-200 bg-slate-200 px-3 py-1 text-sm text-slate-900 shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-zinc-700"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-ring"
                                         value={formData.driverId}
                                         onChange={e => setFormData({ ...formData, driverId: e.target.value })}
                                     >
@@ -227,14 +227,14 @@ export default function VehiclesPage() {
                                 <div className="space-y-1">
                                     <Input
                                         type="date"
-                                        className="bg-slate-200 border-slate-200 text-slate-900 placeholder:text-zinc-500 block w-full"
+                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground block w-full"
                                         placeholder="MOT/License Expiry"
                                         value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
                                         onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
                                     />
-                                    <span className="text-[10px] text-slate-400 ml-1">MOT/License Expiry</span>
+                                    <span className="text-[10px] text-muted-foreground ml-1">MOT/License Expiry</span>
                                 </div>
-                                <Button onClick={handleSave} className="w-full bg-blue-700 text-black hover:bg-blue-800">
+                                <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                                     {editingId ? 'Update Vehicle' : 'Create Vehicle'}
                                 </Button>
                             </div>
@@ -245,28 +245,28 @@ export default function VehiclesPage() {
 
             <div className="flex gap-2 mb-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search vehicles..."
-                        className="pl-8 bg-slate-100 border-slate-200 text-slate-900 placeholder:text-zinc-500"
+                        className="pl-8 bg-background border-input text-foreground placeholder:text-muted-foreground"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <Card className="flex-1 overflow-hidden bg-zinc-900/20 border-slate-200">
+            <Card className="flex-1 overflow-hidden bg-card border border-border shadow-sm rounded-lg">
                 <div className="overflow-auto max-h-full">
                     <Table>
-                        <TableHeader className="bg-slate-100 sticky top-0">
-                            <TableRow className="hover:bg-transparent border-slate-200">
-                                <TableHead className="w-[100px] text-slate-500">Registration</TableHead>
-                                <TableHead className="text-slate-500">Make/Model</TableHead>
-                                <TableHead className="text-slate-500">Type</TableHead>
-                                <TableHead className="text-slate-500">Color</TableHead>
-                                <TableHead className="text-slate-500">Expiry</TableHead>
-                                <TableHead className="text-slate-500">Driver</TableHead>
-                                {isAdmin && <TableHead className="text-right text-slate-500">Actions</TableHead>}
+                        <TableHeader className="bg-muted/50 border-b border-border sticky top-0">
+                            <TableRow className="hover:bg-transparent border-border">
+                                <TableHead className="w-[100px] text-muted-foreground font-semibold">Registration</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Make/Model</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Type</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Color</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Expiry</TableHead>
+                                <TableHead className="text-muted-foreground font-semibold">Driver</TableHead>
+                                {isAdmin && <TableHead className="text-right text-muted-foreground font-semibold">Actions</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -280,30 +280,30 @@ export default function VehiclesPage() {
                                 </TableRow>
                             ) : (
                                 filteredVehicles.map((vehicle) => (
-                                    <TableRow key={vehicle.id} className="hover:bg-slate-200 border-slate-200 group transition-colors">
-                                        <TableCell className="font-bold font-mono text-lg text-slate-800">{vehicle.reg}</TableCell>
-                                        <TableCell className="font-medium text-slate-600">{vehicle.make} {vehicle.model}</TableCell>
+                                    <TableRow key={vehicle.id} className="hover:bg-muted/50 border-border group transition-colors">
+                                        <TableCell className="font-bold font-mono text-lg text-foreground">{vehicle.reg}</TableCell>
+                                        <TableCell className="font-medium text-foreground">{vehicle.make} {vehicle.model}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={getVehicleBadgeStyle(vehicle.type)}>{vehicle.type}</Badge>
                                         </TableCell>
-                                        <TableCell className="text-slate-500">{vehicle.color}</TableCell>
-                                        <TableCell className="text-xs text-slate-400">
+                                        <TableCell className="text-muted-foreground">{vehicle.color}</TableCell>
+                                        <TableCell className="text-xs text-muted-foreground">
                                             {vehicle.expiryDate ? new Date(vehicle.expiryDate).toLocaleDateString() : '-'}
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">
+                                        <TableCell className="text-sm text-muted-foreground">
                                             {vehicle.driver?.callsign ? (
-                                                <Badge variant="secondary" className="bg-slate-200 text-slate-600 border-slate-300">
+                                                <Badge variant="secondary" className="bg-muted text-muted-foreground border-border">
                                                     {vehicle.driver.callsign}
                                                 </Badge>
-                                            ) : <span className="text-zinc-700">-</span>}
+                                            ) : <span className="text-muted-foreground italic text-xs">-</span>}
                                         </TableCell>
                                         {isAdmin && (
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => handleEdit(vehicle)}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => handleEdit(vehicle)}>
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => handleDelete(vehicle.id)}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => handleDelete(vehicle.id)}>
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </div>

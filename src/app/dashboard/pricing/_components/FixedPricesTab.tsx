@@ -92,43 +92,43 @@ export default function FixedPricesTab() {
 
     return (
         <div className="mt-4 flex flex-col gap-4">
-            <div className="flex justify-between items-center bg-slate-100 p-4 rounded-lg shadow-sm border border-slate-200">
+            <div className="flex justify-between items-center bg-card p-4 rounded-lg shadow-sm border border-border text-card-foreground">
                 <div className="relative w-72">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search routes..."
-                        className="pl-8 bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                        className="pl-8 bg-background border-input text-foreground placeholder:text-muted-foreground"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-700 text-black hover:bg-blue-800">
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                             <Plus className="mr-2 h-4 w-4" /> Add Fixed Price
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-slate-100 border-slate-200 text-slate-900">
+                    <DialogContent className="bg-popover border-border text-popover-foreground">
                         <DialogHeader>
                             <DialogTitle>Add Fixed Price Route</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <Input
                                 placeholder="Route Name (e.g. Heathrow T5)"
-                                className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                             />
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     placeholder="Pickup (e.g. OX1)"
-                                    className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.pickup}
                                     onChange={e => setFormData({ ...formData, pickup: e.target.value })}
                                 />
                                 <Input
                                     placeholder="Dropoff (e.g. Heathrow)"
-                                    className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.dropoff}
                                     onChange={e => setFormData({ ...formData, dropoff: e.target.value })}
                                 />
@@ -137,22 +137,22 @@ export default function FixedPricesTab() {
                                 <Input
                                     type="number"
                                     placeholder="Price (£)"
-                                    className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
                                 />
                                 <Input
                                     type="number"
                                     placeholder="Out of Hours (£)"
-                                    className="bg-white border-slate-200 text-slate-900 placeholder:text-zinc-600"
+                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                                     value={formData.outOfHoursPrice}
                                     onChange={e => setFormData({ ...formData, outOfHoursPrice: e.target.value })}
                                 />
                                 <Select value={formData.vehicleType} onValueChange={(val) => setFormData({ ...formData, vehicleType: val })}>
-                                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                                    <SelectTrigger className="bg-background border-input text-foreground">
                                         <SelectValue placeholder="Vehicle" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-100 border-slate-200 text-slate-900">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground">
                                         <SelectItem value="Saloon">Saloon</SelectItem>
                                         <SelectItem value="Estate">Estate</SelectItem>
                                         <SelectItem value="Executive">Executive</SelectItem>
@@ -166,56 +166,56 @@ export default function FixedPricesTab() {
                                     id="reverse"
                                     checked={formData.isReverse}
                                     onCheckedChange={(checked: boolean) => setFormData({ ...formData, isReverse: checked })}
-                                    className="border-white/20 data-[state=checked]:bg-blue-700 data-[state=checked]:text-black"
+                                    className="border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                                 />
                                 <label
                                     htmlFor="reverse"
-                                    className="text-sm font-medium leading-none text-slate-500 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    className="text-sm font-medium leading-none text-muted-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                 >
                                     Apply logic in reverse direction too?
                                 </label>
                             </div>
-                            <Button onClick={handleCreate} className="w-full bg-blue-700 text-black hover:bg-blue-800">Create Route</Button>
+                            <Button onClick={handleCreate} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">Create Route</Button>
                         </div>
                     </DialogContent>
                 </Dialog>
             </div>
 
-            <div className="bg-slate-100 rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-white">
-                        <TableRow className="hover:bg-zinc-900/50 border-slate-200">
-                            <TableHead className="text-slate-500">Name</TableHead>
-                            <TableHead className="text-slate-500">Route</TableHead>
-                            <TableHead className="text-slate-500">Price</TableHead>
-                            <TableHead className="text-slate-500">OOH Price</TableHead>
-                            <TableHead className="text-slate-500">Vehicle</TableHead>
-                            <TableHead className="text-slate-500">Reverse?</TableHead>
-                            <TableHead className="text-slate-500 w-[50px]"></TableHead>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="border-border hover:bg-muted/50">
+                            <TableHead className="text-muted-foreground font-medium">Name</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Route</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Price</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">OOH Price</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Vehicle</TableHead>
+                            <TableHead className="text-muted-foreground font-medium">Reverse?</TableHead>
+                            <TableHead className="text-muted-foreground font-medium w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
-                            <TableRow><TableCell colSpan={6} className="text-center py-6 text-slate-400">Loading...</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={7} className="text-center py-6 text-muted-foreground">Loading...</TableCell></TableRow>
                         ) : prices.length === 0 ? (
-                            <TableRow><TableCell colSpan={6} className="text-center py-6 text-slate-400">No fixed prices found</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={7} className="text-center py-6 text-muted-foreground">No fixed prices found</TableCell></TableRow>
                         ) : (
                             prices.map((fp) => (
-                                <TableRow key={fp.id} className="border-slate-200 hover:bg-slate-200/50">
-                                    <TableCell className="font-medium text-slate-900">{fp.name}</TableCell>
+                                <TableRow key={fp.id} className="border-border hover:bg-muted/50 text-foreground transition-colors">
+                                    <TableCell className="font-medium text-foreground">{fp.name}</TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <span className="font-mono bg-white px-1 rounded border border-slate-200">{fp.pickup}</span>
-                                            <ArrowLeftRight className="h-3 w-3 text-slate-400" />
-                                            <span className="font-mono bg-white px-1 rounded border border-slate-200">{fp.dropoff}</span>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <span className="font-mono bg-muted px-1.5 py-0.5 rounded border border-border text-foreground">{fp.pickup}</span>
+                                            <ArrowLeftRight className="h-3 w-3 text-muted-foreground" />
+                                            <span className="font-mono bg-muted px-1.5 py-0.5 rounded border border-border text-foreground">{fp.dropoff}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-bold text-emerald-600">£{fp.price.toFixed(2)}</TableCell>
-                                    <TableCell className="font-bold text-indigo-600">{fp.outOfHoursPrice ? `£${fp.outOfHoursPrice.toFixed(2)}` : '-'}</TableCell>
-                                    <TableCell className="text-slate-500">{fp.vehicleType}</TableCell>
-                                    <TableCell className="text-slate-500">{fp.isReverse ? 'Yes' : 'No'}</TableCell>
+                                    <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">£{fp.price.toFixed(2)}</TableCell>
+                                    <TableCell className="font-bold text-indigo-600 dark:text-indigo-400">{fp.outOfHoursPrice ? `£${fp.outOfHoursPrice.toFixed(2)}` : '-'}</TableCell>
+                                    <TableCell className="text-muted-foreground">{fp.vehicleType}</TableCell>
+                                    <TableCell className="text-muted-foreground">{fp.isReverse ? 'Yes' : 'No'}</TableCell>
                                     <TableCell>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-950/20" onClick={() => handleDelete(fp.id)}>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(fp.id)}>
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </TableCell>

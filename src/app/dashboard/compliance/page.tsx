@@ -84,66 +84,66 @@ export default function ComplianceDashboard() {
     );
 
     return (
-        <div className="h-full flex flex-col p-4 bg-slate-100 gap-4 text-slate-900">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+        <div className="h-full flex flex-col p-6 bg-background text-foreground gap-4 overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Compliance Dashboard</h1>
-                    <p className="text-slate-500 text-sm">Manage driver and vehicle document compliance.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Compliance Dashboard</h1>
+                    <p className="text-muted-foreground text-sm">Manage driver and vehicle document compliance.</p>
                 </div>
             </div>
 
             <div className="flex gap-2">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search by driver, vehicle, or document type..."
-                        className="pl-8 bg-white border-slate-200 text-slate-900"
+                        className="pl-8 bg-background border-input text-foreground placeholder:text-muted-foreground"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <div className="rounded-md border border-slate-200 overflow-hidden bg-white">
+            <div className="rounded-md border border-border overflow-hidden bg-card shadow-sm">
                 <Table>
-                    <TableHeader className="bg-slate-50 border-b border-slate-200">
-                        <TableRow className="hover:bg-slate-50">
-                            <TableHead className="text-slate-500 w-[200px]">Entity</TableHead>
-                            <TableHead className="text-slate-500">Document Type</TableHead>
-                            <TableHead className="text-slate-500">Status</TableHead>
-                            <TableHead className="text-slate-500">Expiry Date</TableHead>
-                            <TableHead className="text-slate-500">File</TableHead>
-                            <TableHead className="text-right text-slate-500">Actions</TableHead>
+                    <TableHeader className="bg-muted/50 border-b border-border">
+                        <TableRow className="hover:bg-transparent border-border">
+                            <TableHead className="text-muted-foreground font-semibold w-[200px]">Entity</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Document Type</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Status</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Expiry Date</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">File</TableHead>
+                            <TableHead className="text-right text-muted-foreground font-semibold">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-12 text-slate-400">Loading documents...</TableCell>
+                                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">Loading documents...</TableCell>
                             </TableRow>
                         ) : filteredDocs.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-12 text-slate-400">No documents found.</TableCell>
+                                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">No documents found.</TableCell>
                             </TableRow>
                         ) : (
                             filteredDocs.map((doc) => (
-                                <TableRow key={doc.id} className="hover:bg-slate-50">
+                                <TableRow key={doc.id} className="hover:bg-muted/50 border-border transition-colors">
                                     <TableCell>
                                         {doc.driver ? (
                                             <div className="flex items-center gap-2">
-                                                <ShieldCheck className="w-4 h-4 text-blue-500" />
-                                                <span className="font-medium">{doc.driver.name}</span>
+                                                <ShieldCheck className="w-4 h-4 text-primary" />
+                                                <span className="font-medium text-foreground">{doc.driver.name}</span>
                                             </div>
                                         ) : doc.vehicle ? (
                                             <div className="flex items-center gap-2">
-                                                <Car className="w-4 h-4 text-indigo-500" />
-                                                <span className="font-medium">{doc.vehicle.reg}</span>
+                                                <Car className="w-4 h-4 text-primary" />
+                                                <span className="font-medium text-foreground">{doc.vehicle.reg}</span>
                                             </div>
                                         ) : (
-                                            <span className="text-slate-400">Unknown</span>
+                                            <span className="text-muted-foreground">Unknown</span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="font-medium text-slate-700">
+                                    <TableCell className="font-medium text-foreground">
                                         {doc.type.replace('_', ' ')}
                                     </TableCell>
                                     <TableCell>
@@ -152,27 +152,27 @@ export default function ComplianceDashboard() {
                                             {doc.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-sm text-slate-600">
+                                    <TableCell className="text-sm text-muted-foreground">
                                         {doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}
                                     </TableCell>
                                     <TableCell>
                                         {doc.fileUrl ? (
-                                            <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline text-sm">
+                                            <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary hover:underline text-sm font-semibold">
                                                 <FileText className="w-4 h-4" /> View File
                                             </a>
                                         ) : (
-                                            <span className="text-slate-400 text-sm">No File</span>
+                                            <span className="text-muted-foreground text-sm italic">No File</span>
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             {doc.status === 'PENDING' && (
                                                 <>
-                                                    <Button size="sm" variant="outline" className="h-8 border-emerald-200 text-emerald-600 hover:bg-emerald-50" onClick={() => updateStatus(doc.id, 'APPROVED')}>Approve</Button>
-                                                    <Button size="sm" variant="outline" className="h-8 border-red-200 text-red-600 hover:bg-red-50" onClick={() => updateStatus(doc.id, 'REJECTED')}>Reject</Button>
+                                                    <Button size="sm" variant="outline" className="h-8 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400" onClick={() => updateStatus(doc.id, 'APPROVED')}>Approve</Button>
+                                                    <Button size="sm" variant="outline" className="h-8 border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400" onClick={() => updateStatus(doc.id, 'REJECTED')}>Reject</Button>
                                                 </>
                                             )}
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500" onClick={() => deleteDocument(doc.id)}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10" onClick={() => deleteDocument(doc.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
