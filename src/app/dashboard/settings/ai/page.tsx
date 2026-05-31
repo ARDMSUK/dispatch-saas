@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Bot, MessageSquare, QrCode, Power, Settings2, Activity, Phone, Copy, Trash2, FileText } from "lucide-react";
+import { Bot, MessageSquare, QrCode, Power, Settings2, Activity, Phone, Copy, Trash2, FileText, Edit2 } from "lucide-react";
 import Image from "next/image";
 
 export default function TenantAIPage() {
@@ -22,6 +22,11 @@ export default function TenantAIPage() {
     const [newQuestion, setNewQuestion] = useState("");
     const [newAnswer, setNewAnswer] = useState("");
     const [submitting, setSubmitting] = useState(false);
+
+    // Inline FAQ Editing state
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingQuestion, setEditingQuestion] = useState("");
+    const [editingAnswer, setEditingAnswer] = useState("");
 
     // Initial Fetch for Tenant AI State
     useEffect(() => {
@@ -101,6 +106,43 @@ export default function TenantAIPage() {
             }
         } catch {
             toast.error("Network error");
+        }
+    };
+
+    const startEditing = (faq: any) => {
+        setEditingId(faq.id);
+        setEditingQuestion(faq.question);
+        setEditingAnswer(faq.answer);
+    };
+
+    const cancelEditing = () => {
+        setEditingId(null);
+        setEditingQuestion("");
+        setEditingAnswer("");
+    };
+
+    const handleEditFaq = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingId || !editingQuestion || !editingAnswer) return;
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/settings/faq', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: editingId, question: editingQuestion, answer: editingAnswer })
+            });
+            if (res.ok) {
+                toast.success("FAQ updated successfully");
+                cancelEditing();
+                fetchFaqs();
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Failed to update FAQ");
+            }
+        } catch {
+            toast.error("Network error");
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -410,20 +452,77 @@ export default function TenantAIPage() {
                         ) : (
                             <div className="border rounded-xl overflow-hidden divide-y bg-slate-50/20">
                                 {faqs.map(faq => (
-                                    <div key={faq.id} className="p-4 bg-white hover:bg-slate-50/50 flex justify-between gap-4 items-start transition-all">
-                                        <div className="space-y-1">
-                                            <p className="font-semibold text-slate-800 text-sm">Q: {faq.question}</p>
-                                            <p className="text-slate-500 text-sm">A: {faq.answer}</p>
-                                        </div>
-                                        <Button 
-                                            type="button"
-                                            variant="ghost" 
-                                            size="sm" 
-                                            onClick={() => handleDeleteFaq(faq.id)}
-                                            className="text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors p-2"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                    <div key={faq.id} className="p-4 bg-white transition-all">
+                                        {editingId === faq.id ? (
+                                            <form onSubmit={handleEditFaq} className="space-y-3 w-full">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Question</label>
+                                                        <input 
+                                                            value={editingQuestion}
+                                                            onChange={e => setEditingQuestion(e.target.value)}
+                                                            className="w-full bg-slate-50 border border-slate-200 text-sm p-2 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Answer</label>
+                                                        <textarea 
+                                                            value={editingAnswer}
+                                                            onChange={e => setEditingAnswer(e.target.value)}
+                                                            className="w-full bg-slate-50 border border-slate-200 text-sm p-2 rounded-lg text-slate-800 h-[38px] min-h-[38px] max-h-[150px] resize-y focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end gap-2">
+                                                    <Button 
+                                                        type="button" 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={cancelEditing}
+                                                        className="text-slate-500 hover:bg-slate-100"
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button 
+                                                        type="submit" 
+                                                        disabled={submitting}
+                                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+                                                        size="sm"
+                                                    >
+                                                        {submitting ? "Saving..." : "Save Entry"}
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        ) : (
+                                            <div className="flex justify-between gap-4 items-start w-full">
+                                                <div className="space-y-1">
+                                                    <p className="font-semibold text-slate-800 text-sm">Q: {faq.question}</p>
+                                                    <p className="text-slate-500 text-sm">A: {faq.answer}</p>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Button 
+                                                        type="button"
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => startEditing(faq)}
+                                                        className="text-indigo-600 hover:bg-indigo-50 transition-colors p-2"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button 
+                                                        type="button"
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => handleDeleteFaq(faq.id)}
+                                                        className="text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors p-2"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
