@@ -52,6 +52,7 @@ async function main() {
 
     const bookPayload = {
         ...quotePayload,
+        price: quoteData.price,
         passengerName: 'Public Web User',
         passengerPhone: '07700900123',
         passengers: "2",
