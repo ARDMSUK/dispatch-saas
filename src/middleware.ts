@@ -51,7 +51,8 @@ export async function middleware(request: NextRequest) {
             !url.pathname.startsWith("/_next") &&
             !url.pathname.startsWith("/dashboard") &&
             !url.pathname.startsWith("/login") &&
-            !url.pathname.startsWith("/b2b")
+            !url.pathname.startsWith("/b2b") &&
+            !url.pathname.startsWith("/legal")
         ) {
             // Rewrite the request to /booker/[subdomain]
             let rewritePath = `/booker/${currentHost}${url.pathname}`;
