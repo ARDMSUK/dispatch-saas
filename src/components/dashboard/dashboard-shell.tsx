@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare, Sparkles } from 'lucide-react';
+import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare, Sparkles, ExternalLink } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -66,12 +66,14 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
         }
     }, [tenantId]);
 
-    const NavItem = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
+    const NavItem = ({ href, icon: Icon, label, target }: { href: string, icon: any, label: string, target?: string }) => {
         const isActive = pathname === href;
         return (
-            <Link href={href} onClick={() => setIsSidebarOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 ${isActive ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/80'}`}>
+            <Link href={href} target={target} onClick={() => setIsSidebarOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 ${isActive ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-accent/80'}`}>
                 <Icon className="h-4.5 w-4.5 shrink-0" />
-                <span className="text-sm font-medium tracking-wide">{label}</span>
+                <span className="text-sm font-medium tracking-wide flex items-center gap-1.5">
+                    {label} {target === '_blank' && <ExternalLink className="w-3 h-3 opacity-60" />}
+                </span>
             </Link>
         );
     };
@@ -111,6 +113,8 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                 <>
                     <NavItem href="/dashboard/reports" icon={FileText} label="Reports & Analytics" />
                     <NavItem href="/dashboard/reports/operator" icon={Phone} label="Call Center Floor" />
+                    <NavItem href="/dashboard/wallboard" icon={LayoutDashboard} label="Live Wallboard" />
+                    <NavItem href="/dashboard/map" icon={Map} label="Standalone Map" target="_blank" />
                 </>
             )}
             {hasPermission('manage_pricing') && <NavItem href="/dashboard/pricing" icon={Calculator} label="Pricing & Tariffs" />}

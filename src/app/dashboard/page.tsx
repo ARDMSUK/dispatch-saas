@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, MarkerF } from '@react-google-maps/api';
+import { ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 
@@ -391,6 +392,13 @@ export default function DashboardPage() {
                     onClick={handleSearchMap}
                 >
                     Find
+                </button>
+                <button
+                    className="bg-zinc-800 text-white p-2 rounded text-sm shadow hover:bg-zinc-700 flex items-center justify-center cursor-pointer shrink-0"
+                    onClick={() => window.open('/dashboard/map', '_blank')}
+                    title="Open Standalone Map on Second Screen"
+                >
+                    <ExternalLink className="w-4 h-4" />
                 </button>
             </div>
         </div>
