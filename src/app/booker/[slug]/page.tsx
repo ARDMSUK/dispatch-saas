@@ -664,6 +664,15 @@ export default function BookerPage() {
                                     </motion.div>
                                 )}
                             </AnimatePresence>
+
+                            {/* Legal Links Footer */}
+                            <div className="mt-8 pt-4 border-t border-white/5 flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-[10px] sm:text-xs text-zinc-500 font-medium tracking-wide select-none">
+                                <a href="/legal/terms" target="_blank" className="hover:text-zinc-300 transition-colors">Terms of Service</a>
+                                <span className="opacity-30">•</span>
+                                <a href="/legal/privacy" target="_blank" className="hover:text-zinc-300 transition-colors">Privacy Policy</a>
+                                <span className="opacity-30">•</span>
+                                <a href="/legal/gdpr" target="_blank" className="hover:text-zinc-300 transition-colors">GDPR & Data Protection</a>
+                            </div>
                         </div>
                     </div>
                 </div>
