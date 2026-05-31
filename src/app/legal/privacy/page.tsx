@@ -94,50 +94,40 @@ export default function PrivacyPolicyPage() {
                             4. Subprocessors & Data Sharing
                         </h2>
                         <div className="space-y-4 text-sm leading-relaxed">
-                            <p>We share data with trusted subprocessors strictly to provide our platform services. These subprocessors include:</p>
+                            <p>We share data with trusted third-party service providers (subprocessors) strictly as necessary to deliver our dispatch SaaS platform. The categories of subprocessors we utilize include:</p>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-xs border-collapse border border-zinc-800">
                                     <thead>
                                         <tr className="bg-zinc-900 border-b border-zinc-800">
-                                            <th className="p-3 border-r border-zinc-800 font-bold text-white">Subprocessor</th>
-                                            <th className="p-3 border-r border-zinc-800 font-bold text-white">Purpose</th>
+                                            <th className="p-3 border-r border-zinc-800 font-bold text-white">Subprocessor Category</th>
+                                            <th className="p-3 border-r border-zinc-800 font-bold text-white">Operational Purpose</th>
                                             <th className="p-3 font-bold text-white">Data Location</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-zinc-800">
                                         <tr>
-                                            <td className="p-3 border-r border-zinc-800 font-medium">Amazon Web Services (AWS)</td>
-                                            <td className="p-3 border-r border-zinc-800">Cloud Hosting & File Storage</td>
-                                            <td className="p-3">UK / Europe</td>
+                                            <td className="p-3 border-r border-zinc-800 font-medium">Cloud Infrastructure & Databases</td>
+                                            <td className="p-3 border-r border-zinc-800">Secure application hosting, files storage, PostgreSQL database engines, and real-time state synchronization.</td>
+                                            <td className="p-3">United Kingdom / European Economic Area (EEA)</td>
                                         </tr>
                                         <tr className="bg-zinc-900/30">
-                                            <td className="p-3 border-r border-zinc-800 font-medium">Supabase Inc.</td>
-                                            <td className="p-3 border-r border-zinc-800">Real-time DB Sync & WebSockets</td>
-                                            <td className="p-3">Europe (AWS)</td>
+                                            <td className="p-3 border-r border-zinc-800 font-medium">Telephony, SMS & Communications</td>
+                                            <td className="p-3 border-r border-zinc-800">Routing customer calls, dispatching automated SMS confirmation updates, and mailing receipts.</td>
+                                            <td className="p-3">United Kingdom / Europe / Global (enforced via SCCs)</td>
                                         </tr>
                                         <tr>
-                                            <td className="p-3 border-r border-zinc-800 font-medium">Neon Database</td>
-                                            <td className="p-3 border-r border-zinc-800">PostgreSQL Cloud Database</td>
-                                            <td className="p-3">Europe (AWS)</td>
+                                            <td className="p-3 border-r border-zinc-800 font-medium">Automated Voice & NLP Processing</td>
+                                            <td className="p-3 border-r border-zinc-800">Powering interactive AI booking flows, telephone transcription, and customer support chatbot interfaces.</td>
+                                            <td className="p-3">Global (enforced via SCCs)</td>
                                         </tr>
                                         <tr className="bg-zinc-900/30">
-                                            <td className="p-3 border-r border-zinc-800 font-medium">Twilio & Resend</td>
-                                            <td className="p-3 border-r border-zinc-800">SMS Notifications & Email Receipts</td>
-                                            <td className="p-3">Global / US (SCCs)</td>
+                                            <td className="p-3 border-r border-zinc-800 font-medium">PCI-DSS Payment Gateways</td>
+                                            <td className="p-3 border-r border-zinc-800">Securing pre-authorization transactions, credit card booking captures, and mobile contactless NFC payments.</td>
+                                            <td className="p-3">United Kingdom / Europe / Global</td>
                                         </tr>
                                         <tr>
-                                            <td className="p-3 border-r border-zinc-800 font-medium">OpenAI & Vapi AI</td>
-                                            <td className="p-3 border-r border-zinc-800">Voice AI & Chatbot Processing</td>
-                                            <td className="p-3">Global / US (SCCs)</td>
-                                        </tr>
-                                        <tr className="bg-zinc-900/30">
-                                            <td className="p-3 border-r border-zinc-800 font-medium">Stripe / SumUp / Zettle</td>
-                                            <td className="p-3 border-r border-zinc-800">Payment Gateway Services</td>
-                                            <td className="p-3">Global / Europe</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="p-3 border-r border-zinc-800 font-medium">Mapbox & Google Maps</td>
-                                            <td className="p-3 border-r border-zinc-800">Geocoding & ETA Matrix Calculations</td>
+                                            <td className="p-3 border-r border-zinc-800 font-medium">Mapping & Route Estimations</td>
+                                            <td className="p-3 border-r border-zinc-800">Calculating address lookup coordinates, route distances, pricing quotes, and intelligent dispatcher ETA matrices.</td>
                                             <td className="p-3">Global</td>
                                         </tr>
                                     </tbody>

@@ -48,7 +48,7 @@ export default function GDPRPage() {
                                 <li><strong>Isolation of Tenant Data:</strong> Our multi-tenant architecture implements PostgreSQL Row-Level Security (RLS) policies. Each query is automatically scoped with the logged-in session's `tenantId`, guaranteeing that no tenant can view, access, or modify another fleet's passenger, driver, or billing records.</li>
                                 <li><strong>Encryption Frameworks:</strong> All personal data is encrypted in transit using TLS 1.3/HTTPS, and all database tables, columns, backups, and file logs are encrypted at rest using AES-256 standards.</li>
                                 <li><strong>Access Control & Multi-Factor Auth (MFA):</strong> Administrative access to database servers and production logs is restricted to authorized personnel using role-based access controls (RBAC) and mandatory MFA verification.</li>
-                                <li><strong>Server Infrastructure:</strong> Our databases and hosting servers are deployed within secure, ISO 27001-certified Amazon Web Services (AWS) data centers located in the United Kingdom and the European Union.</li>
+                                <li><strong>Server Infrastructure:</strong> Our databases and hosting servers are deployed within secure, ISO 27001-certified cloud data centers located in the United Kingdom and the European Union.</li>
                             </ul>
                         </div>
                     </section>
@@ -65,8 +65,8 @@ export default function GDPRPage() {
                             </p>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li><strong>Processor Obligations:</strong> We process personal data solely to provide, support, and optimize the SaaS platform in accordance with the Tenant's documented configurations. We will not use passenger or driver data for marketing or profiling purposes.</li>
-                                <li><strong>Subprocessor Engagement:</strong> We only engage subprocessors who provide sufficient guarantees regarding technical and security measures (e.g., AWS, Supabase, Neon, Twilio, OpenAI, Vapi, Resend, Stripe, Mapbox). We maintain an up-to-date directory of subprocessors and notify Tenants of changes.</li>
-                                <li><strong>International Transfers:</strong> Where data is processed outside the UK/EEA (such as for AI voice routing via OpenAI/Vapi or notification delivery via Twilio), we enforce the UK International Data Transfer Addendum or EU Standard Contractual Clauses (SCCs) to ensure equivalent protection levels.</li>
+                                <li><strong>Subprocessor Engagement:</strong> We only engage third-party subprocessors who provide sufficient technical and organizational security measures. We maintain an up-to-date internal directory of subprocessors and notify Tenants of material changes.</li>
+                                <li><strong>International Transfers:</strong> Where data is processed outside the UK/EEA (such as for telephony or automated voice processing engines), we enforce the UK International Data Transfer Addendum or EU Standard Contractual Clauses (SCCs) to ensure equivalent protection levels.</li>
                             </ul>
                         </div>
                     </section>
