@@ -48,6 +48,7 @@ export async function POST(req: Request) {
                 incWebChatAi: body.incWebChatAi || false,
                 incWhatsAppAi: body.incWhatsAppAi || false,
                 incVoiceAi: body.incVoiceAi || false,
+                incTapToPay: body.incTapToPay || false,
             }
         });
 
