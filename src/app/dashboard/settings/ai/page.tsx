@@ -224,7 +224,7 @@ export default function TenantAIPage() {
     };
 
     return (
-        <div className="space-y-6 max-w-5xl mx-auto pb-12">
+        <div className="space-y-6 max-w-5xl mx-auto overflow-y-auto h-full p-6 pb-32">
             <div>
                 <h2 className="text-2xl font-bold tracking-tight">AI Agents & Integrations</h2>
                 <p className="text-slate-500">Manage your autonomous agents and configure integrations to live messaging platforms.</p>
