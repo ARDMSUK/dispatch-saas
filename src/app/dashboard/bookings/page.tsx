@@ -153,13 +153,25 @@ export default function BookingsPage() {
                                                 </div>
                                             )}
 
-                                            <div className="flex items-baseline gap-1.5 mt-auto">
+                                            <div className="flex items-baseline gap-2 mt-auto">
                                                 <span className="text-lg font-mono font-bold text-slate-900">
                                                     £{job.fare ? job.fare.toFixed(2) : '0.00'}
                                                 </span>
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase">
-                                                    {job.paymentType}
-                                                </span>
+                                                {(() => {
+                                                    if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
+                                                        return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType} ✓</Badge>;
+                                                    }
+                                                    if (job.paymentType === 'CARD') {
+                                                        return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1.5 py-0.5 text-[9px] font-extrabold rounded-sm uppercase">CARD UNPAID</Badge>;
+                                                    }
+                                                    if (job.paymentType === 'IN_CAR_TERMINAL') {
+                                                        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">TERMINAL</Badge>;
+                                                    }
+                                                    if (job.paymentType === 'ACCOUNT') {
+                                                        return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">ACCOUNT</Badge>;
+                                                    }
+                                                    return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">CASH</Badge>;
+                                                })()}
                                             </div>
                                         </div>
                                     </td>

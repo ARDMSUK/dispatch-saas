@@ -463,8 +463,11 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                             if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
                                 return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType} ✓</Badge>;
                             }
-                            if (job.paymentType === 'CARD' || job.paymentType === 'IN_CAR_TERMINAL') {
-                                return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-1 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : 'CARD'}</Badge>;
+                            if (job.paymentType === 'CARD') {
+                                return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1 text-[9px] font-extrabold rounded-sm">CARD UNPAID</Badge>;
+                            }
+                            if (job.paymentType === 'IN_CAR_TERMINAL') {
+                                return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-1 text-[9px] rounded-sm">TERMINAL</Badge>;
                             }
                             if (job.paymentType === 'ACCOUNT') {
                                 return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1 text-[9px] rounded-sm">ACCOUNT</Badge>;
