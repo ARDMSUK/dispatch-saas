@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react';
 import { 
     Loader2, Users, Calendar, Activity, AlertTriangle, CheckCircle, 
     Clock, Smartphone, Globe, PhoneCall, Radio, Phone, BarChart2,
-    TrendingUp, Percent, Coins, Maximize2, Minus, X, Sun, Moon, 
-    CloudSun, CloudRain, ShieldCheck, MapPin, DollarSign
+    Sun, Moon, CloudSun, MapPin, DollarSign, Percent, Coins
 } from 'lucide-react';
 import { 
     ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-    Tooltip, Legend, PieChart, Pie, Cell 
+    Tooltip, PieChart, Pie, Cell 
 } from 'recharts';
 
 interface JobFeedItem {
@@ -61,39 +60,282 @@ interface StatsData {
     hourlyTrend: Array<{ hour: string; Today: number; 'Last Week': number }>;
 }
 
-function WidgetCard({ 
+function DashboardCard({ 
     title, 
-    icon: Icon, 
-    children, 
-    className = "", 
-    glowColor = "" 
+    subtitle, 
+    value, 
+    accentColor = "", 
+    icon: Icon,
+    className = ""
 }: { 
     title: string; 
-    icon?: any; 
-    children: React.ReactNode; 
-    className?: string; 
-    glowColor?: string;
+    subtitle?: string; 
+    value: string | number; 
+    accentColor?: string; 
+    icon?: any;
+    className?: string;
 }) {
     return (
-        <div className={`bg-zinc-950/70 border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative group hover:border-white/10 transition-all duration-300 ${className} ${glowColor}`}>
-            {/* Widget Chrome Header */}
-            <div className="bg-zinc-900/60 px-4 py-2 border-b border-white/5 flex justify-between items-center select-none">
-                <div className="flex items-center gap-2">
-                    {/* Window Controls Decorators */}
-                    <div className="flex gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-red-500/60 hover:bg-red-500 transition-colors cursor-pointer"></span>
-                        <span className="w-2 h-2 rounded-full bg-amber-500/60 hover:bg-amber-500 transition-colors cursor-pointer"></span>
-                        <span className="w-2 h-2 rounded-full bg-emerald-500/60 hover:bg-emerald-500 transition-colors cursor-pointer"></span>
+        <div className={`bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex flex-col justify-between relative overflow-hidden transition-all duration-200 hover:border-[#444] ${className}`}>
+            {/* Subtle accent border at the bottom */}
+            {accentColor && (
+                <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ backgroundColor: accentColor }}></div>
+            )}
+            
+            <div className="flex justify-between items-start mb-2">
+                <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider">{title}</span>
+                {Icon && <Icon className="w-3.5 h-3.5 text-[#a0a0a0]" />}
+            </div>
+            
+            <div className="bg-[#333333] rounded-[6px] p-3 my-1.5">
+                <span className="text-2xl md:text-3xl font-bold text-[#f2f2f2] font-mono leading-none tracking-tight">{value}</span>
+            </div>
+            
+            {subtitle && (
+                <span className="text-[9px] font-bold text-[#a0a0a0] uppercase tracking-wider">{subtitle}</span>
+            )}
+        </div>
+    );
+}
+
+function DriverStatusCard({ 
+    online, 
+    available, 
+    booked,
+    total
+}: { 
+    online: number; 
+    available: number; 
+    booked: number;
+    total: number;
+}) {
+    return (
+        <div className="bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex flex-col justify-between">
+            <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider block mb-2">Driver Status</span>
+            
+            <div className="grid grid-cols-3 gap-2 my-1">
+                <div className="bg-[#333333] p-2 rounded-[6px] text-center">
+                    <span className="text-[8px] font-bold text-[#a0a0a0] uppercase tracking-wide block">Online</span>
+                    <span className="text-lg font-bold text-[#f2f2f2] font-mono">{online}</span>
+                </div>
+                <div className="bg-[#333333] p-2 rounded-[6px] text-center border-b-2 border-[#6fbf5f]">
+                    <span className="text-[8px] font-bold text-[#6fbf5f] uppercase tracking-wide block">Free</span>
+                    <span className="text-lg font-bold text-[#f2f2f2] font-mono">{available}</span>
+                </div>
+                <div className="bg-[#333333] p-2 rounded-[6px] text-center border-b-2 border-[#8b5cf6]">
+                    <span className="text-[8px] font-bold text-[#8b5cf6] uppercase tracking-wide block">Busy</span>
+                    <span className="text-lg font-bold text-[#f2f2f2] font-mono">{booked}</span>
+                </div>
+            </div>
+
+            <div className="flex justify-between items-center text-[9px] font-bold text-[#a0a0a0] uppercase tracking-wider mt-1 pt-1 border-t border-[#333333]">
+                <span>Registered Fleet</span>
+                <span className="text-[#f2f2f2] font-mono">{total}</span>
+            </div>
+        </div>
+    );
+}
+
+function OperationalAlertsCard({ 
+    lateCount, 
+    noShowCount, 
+    availableDrivers 
+}: { 
+    lateCount: number; 
+    noShowCount: number; 
+    availableDrivers: number;
+}) {
+    const alerts = [];
+    if (lateCount > 0) {
+        alerts.push({
+            id: 'late',
+            text: `${lateCount} Late bookings pending`,
+            color: '#d86666',
+            badge: 'Urgent'
+        });
+    }
+    if (noShowCount > 0) {
+        alerts.push({
+            id: 'noshow',
+            text: `${noShowCount} Passenger no-shows`,
+            color: '#d6a637',
+            badge: 'No-Show'
+        });
+    }
+    if (availableDrivers === 0) {
+        alerts.push({
+            id: 'shortage',
+            text: 'Low driver capacity alert',
+            color: '#d86666',
+            badge: 'Shortage'
+        });
+    }
+
+    if (alerts.length === 0) {
+        alerts.push({
+            id: 'none',
+            text: 'All fleets operating normal',
+            color: '#6fbf5f',
+            badge: 'Normal'
+        });
+    }
+
+    return (
+        <div className="bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex flex-col justify-between h-full">
+            <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider block mb-2">Operational Alerts</span>
+            <div className="space-y-1.5 my-1 overflow-y-auto max-h-[96px] pr-1">
+                {alerts.map(alert => (
+                    <div 
+                        key={alert.id} 
+                        className="flex items-center justify-between p-2 bg-[#1c1c1c] border border-[#333333] rounded-[4px] gap-2"
+                    >
+                        <span className="text-[10px] font-medium text-[#c8c8c8] truncate">{alert.text}</span>
+                        <span 
+                            className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded tracking-wide font-mono shrink-0"
+                            style={{ color: alert.color, border: `1px solid ${alert.color}25`, backgroundColor: `${alert.color}08` }}
+                        >
+                            {alert.badge}
+                        </span>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-2">
-                        {title}
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function WeatherCard({ temp, condition, icon }: { temp: number; condition: string; icon: string }) {
+    const renderIcon = (name: string) => {
+        switch (name) {
+            case 'cloud-sun':
+                return <CloudSun className="w-5 h-5 text-[#d6a637]" />;
+            case 'moon':
+                return <Moon className="w-5 h-5 text-[#6d9edb]" />;
+            default:
+                return <Sun className="w-5 h-5 text-[#d6a637]" />;
+        }
+    };
+
+    return (
+        <div className="bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider">Weather</span>
+                <span className="text-2xl font-bold text-[#f2f2f2] font-mono leading-none">{temp}°C</span>
+                <span className="text-[9px] font-bold text-[#a0a0a0] uppercase tracking-wider">{condition}</span>
+            </div>
+            <div className="bg-[#333333] p-2.5 rounded-md">
+                {renderIcon(icon)}
+            </div>
+        </div>
+    );
+}
+
+function PaymentSplitCard({ 
+    cash, 
+    card, 
+    account 
+}: { 
+    cash: number; 
+    card: number; 
+    account: number;
+}) {
+    const total = cash + card + account;
+    const chartData = [
+        { name: "Cash", value: cash || 55, color: "#d6a637" },
+        { name: "Card", value: card || 30, color: "#6fbf5f" },
+        { name: "Invoice", value: account || 15, color: "#6d9edb" }
+    ].filter(d => d.value > 0);
+
+    return (
+        <div className="bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex flex-col justify-between">
+            <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider block mb-1">Payment Split</span>
+            
+            {chartData.length > 0 ? (
+                <div className="h-[96px] flex items-center justify-center relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={chartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={22}
+                                outerRadius={36}
+                                paddingAngle={3}
+                                dataKey="value"
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: '#1c1c1c', border: '1px solid #333', borderRadius: '4px', color: '#f2f2f2' }}
+                                itemStyle={{ fontSize: '10px' }}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
+                        <span className="text-[8px] font-bold text-[#a0a0a0]">Today</span>
+                        <span className="text-sm font-bold text-[#f2f2f2] font-mono leading-none">{total}</span>
+                    </div>
+                </div>
+            ) : (
+                <div className="text-center py-6 text-[10px] text-[#a0a0a0] uppercase tracking-widest font-bold">No Records</div>
+            )}
+
+            <div className="flex justify-center gap-3 text-[9px] font-bold font-mono pt-1 border-t border-[#333333] mt-1">
+                {chartData.map(item => (
+                    <span key={item.name} className="flex items-center gap-1" style={{ color: item.color }}>
+                        <span className="h-1.5 w-1.5 rounded" style={{ backgroundColor: item.color }}></span>
+                        {item.name} ({item.value})
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function HourlyTrendCard({ 
+    trend 
+}: { 
+    trend: Array<{ hour: string; Today: number; 'Last Week': number }> 
+}) {
+    return (
+        <div className="bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex flex-col h-full min-h-[220px]">
+            <div className="flex justify-between items-center mb-3">
+                <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider">Bookings by Hour</span>
+                <div className="flex items-center gap-3 text-[9px] font-bold font-mono">
+                    <span className="flex items-center gap-1 text-[#a0a0a0]">
+                        <span className="h-1.5 w-1.5 rounded bg-slate-500"></span> Last Week
+                    </span>
+                    <span className="flex items-center gap-1 text-[#6fbf5f]">
+                        <span className="h-1.5 w-1.5 rounded bg-[#6fbf5f]"></span> Today
                     </span>
                 </div>
-                {Icon && <Icon className="w-3.5 h-3.5 text-slate-500" />}
             </div>
-            {/* Widget Content */}
-            <div className="p-4 md:p-5 relative z-10">
-                {children}
+
+            <div className="flex-1 w-full text-[9px] font-bold font-mono">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trend} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+                        <defs>
+                            <linearGradient id="colorToday" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#6fbf5f" stopOpacity={0.15}/>
+                                <stop offset="95%" stopColor="#6fbf5f" stopOpacity={0}/>
+                            </linearGradient>
+                            <linearGradient id="colorLastWeek" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#a0a0a0" stopOpacity={0.05}/>
+                                <stop offset="95%" stopColor="#a0a0a0" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
+                        <XAxis dataKey="hour" stroke="#a0a0a0" tickLine={false} />
+                        <YAxis stroke="#a0a0a0" tickLine={false} />
+                        <Tooltip 
+                            contentStyle={{ backgroundColor: '#1c1c1c', border: '1px solid #333', borderRadius: '4px', color: '#f2f2f2' }}
+                            labelStyle={{ fontWeight: 'bold', color: '#a0a0a0' }}
+                        />
+                        <Area type="monotone" dataKey="Today" stroke="#6fbf5f" strokeWidth={1.5} fillOpacity={1} fill="url(#colorToday)" />
+                        <Area type="monotone" dataKey="Last Week" stroke="#a0a0a0" strokeWidth={1} fillOpacity={1} fill="url(#colorLastWeek)" />
+                    </AreaChart>
+                </ResponsiveContainer>
             </div>
         </div>
     );
@@ -142,9 +384,9 @@ export default function WallboardPage() {
 
     if (loading || !data || !isMounted) {
         return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#09090b] text-white">
-                <Loader2 className="h-10 w-10 animate-spin text-emerald-500 mb-4" />
-                <p className="text-slate-400 font-medium tracking-wide">Initializing Operations Console...</p>
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#111111] text-[#f2f2f2]">
+                <Loader2 className="h-8 w-8 animate-spin text-[#6d9edb] mb-3" />
+                <p className="text-[#a0a0a0] text-xs font-bold uppercase tracking-widest">Initializing Control Room Wallboard...</p>
             </div>
         );
     }
@@ -154,439 +396,222 @@ export default function WallboardPage() {
         if (!seconds) return '0s';
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-    };
-
-    // Calculate total bookings today
-    const totalTodayBookings = data.completedCount + data.cancelledCount + data.noShowCount + data.dispatchingCount + data.prebookingsCount;
-
-    // Pie chart values
-    const pieData = [
-        { name: 'Card', value: data.paymentSplit.card, color: '#10b981' },
-        { name: 'Cash', value: data.paymentSplit.cash, color: '#f59e0b' },
-        { name: 'Account', value: data.paymentSplit.account, color: '#8b5cf6' }
-    ].filter(item => item.value > 0);
-
-    // Weather condition selector
-    const renderWeatherIcon = (iconName: string) => {
-        switch (iconName) {
-            case 'cloud-sun':
-                return <CloudSun className="w-8 h-8 text-amber-400 animate-pulse" />;
-            case 'moon':
-                return <Moon className="w-8 h-8 text-blue-300 animate-pulse" />;
-            default:
-                return <Sun className="w-8 h-8 text-amber-500 animate-pulse" />;
-        }
+        return mins > 0 ? `${mins} Min ${secs} Sec` : `${secs} Sec`;
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#050507] text-white p-4 md:p-6 font-sans flex flex-col gap-6 select-none overflow-y-auto">
+        <div className="min-h-screen w-full bg-[#111111] text-[#f2f2f2] p-4 md:p-6 font-sans flex flex-col gap-5 select-none overflow-y-auto selection:bg-[#8b5cf6]/30">
             
             {/* Top Status Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-zinc-950/60 border border-white/5 rounded-3xl p-5 md:p-6 backdrop-blur shadow-2xl">
-                <div className="flex items-center gap-3">
-                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_#10b981]"></div>
-                    <div>
-                        <h1 className="text-lg md:text-xl font-black uppercase tracking-widest text-white flex items-center gap-2">
-                            Cabai Control Center <span className="text-[10px] font-bold text-slate-500 normal-case tracking-normal px-2 py-0.5 bg-white/5 border border-white/5 rounded">v6.4</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#1c1c1c] border border-[#333333] rounded-lg px-5 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
+                <div className="flex items-center gap-4">
+                    <img src="/logo-full.png" alt="CabAI" className="h-8 object-contain" />
+                    <div className="border-l border-[#333333] pl-4">
+                        <h1 className="text-sm font-bold text-[#f2f2f2] uppercase tracking-wider">
+                            Operational Wallboard
                         </h1>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Live Operational Telemetry Dashboard</p>
+                        <p className="text-[10px] font-semibold text-[#a0a0a0] uppercase tracking-widest mt-0.5">Live dispatch monitoring</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-[#242424] border border-[#333333] px-2 py-0.5 rounded text-[8px] font-bold text-[#6fbf5f]">
+                        <span className="h-1.5 w-1.5 bg-[#6fbf5f] rounded-full animate-pulse"></span>
+                        System Online
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6 ml-auto md:ml-0 bg-black/40 border border-white/5 px-5 py-2.5 rounded-2xl shadow-inner">
-                    <div className="flex flex-col items-end">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{dateString}</span>
-                        <span className="text-xl md:text-2xl font-black font-mono text-emerald-400 tracking-wider select-text">{time}</span>
-                    </div>
+                <div className="flex flex-col items-end sm:ml-auto">
+                    <span className="text-base font-bold font-mono text-[#f2f2f2] tracking-wider select-text">{time}</span>
+                    <span className="text-[8px] font-bold text-[#a0a0a0] uppercase tracking-widest mt-0.5">{dateString}</span>
                 </div>
             </div>
 
-            {/* High Density Control Deck (Grid Layout) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                
-                {/* 1. Real-Time Status Widgets */}
-                <WidgetCard title="Operators" icon={Phone}>
-                    <p className="text-3xl md:text-4xl font-black text-blue-400 tracking-tight">
-                        {data.operatorsActive}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Active Extensions</p>
-                </WidgetCard>
-
-                <WidgetCard title="Drivers Online" icon={Radio}>
-                    <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl md:text-4xl font-black text-emerald-400 tracking-tight">
-                            {data.driversOnline}
-                        </span>
-                        <span className="text-xs text-slate-500">/ {data.totalDrivers}</span>
-                    </div>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Active Duty Drivers</p>
-                </WidgetCard>
-
-                <WidgetCard title="Drivers Available" icon={Users}>
-                    <p className="text-3xl md:text-4xl font-black text-teal-400 tracking-tight">
-                        {data.driversAvailable}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Available for Jobs</p>
-                </WidgetCard>
-
-                <WidgetCard title="Drivers Booked" icon={Clock}>
-                    <p className="text-3xl md:text-4xl font-black text-indigo-400 tracking-tight">
-                        {data.driversBooked}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">POB or Assigned</p>
-                </WidgetCard>
-
-                {/* 2. Today's Performance Widgets */}
-                <WidgetCard title="Completed Jobs" icon={CheckCircle}>
-                    <p className="text-3xl md:text-4xl font-black text-emerald-500 tracking-tight">
-                        {data.completedCount}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Rides Executed Today</p>
-                </WidgetCard>
-
-                <WidgetCard title="Dispatching" icon={Activity}>
-                    <p className="text-3xl md:text-4xl font-black text-amber-500 tracking-tight">
-                        {data.dispatchingCount}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Pending Assignment</p>
-                </WidgetCard>
-
-                {/* Late bookings widget: Red glow and pulse outline if there's any late job */}
-                <WidgetCard 
+            {/* High Density Control Deck (5-Column Grid Layout) */}
+            
+            {/* Row 1: Primary Metrics */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <DashboardCard 
+                    title="Bookings Completed" 
+                    subtitle="Today" 
+                    value={data.completedCount} 
+                    accentColor="#6fbf5f" 
+                    icon={CheckCircle} 
+                />
+                <DashboardCard 
+                    title="Prebookings" 
+                    subtitle="Upcoming" 
+                    value={data.prebookingsCount} 
+                    accentColor="#6d9edb" 
+                    icon={Calendar} 
+                />
+                <DashboardCard 
                     title="Late Bookings" 
-                    icon={AlertTriangle}
-                    glowColor={data.lateCount > 0 ? "border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-pulse" : ""}
-                >
-                    <p className={`text-3xl md:text-4xl font-black tracking-tight ${data.lateCount > 0 ? 'text-red-500 animate-bounce' : 'text-slate-400'}`}>
-                        {data.lateCount}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Pickup Time Exceeded</p>
-                </WidgetCard>
-
-                <WidgetCard title="Cancelled" icon={AlertTriangle}>
-                    <p className="text-3xl md:text-4xl font-black text-rose-500 tracking-tight">
-                        {data.cancelledCount}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Today's Cancelled / Rejected</p>
-                </WidgetCard>
-
-                <WidgetCard title="Prebookings" icon={Calendar}>
-                    <p className="text-3xl md:text-4xl font-black text-slate-300 tracking-tight">
-                        {data.prebookingsCount}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Scheduled Future Runs</p>
-                </WidgetCard>
-
-                <WidgetCard title="No Shows" icon={AlertTriangle}>
-                    <p className="text-3xl md:text-4xl font-black text-yellow-500 tracking-tight">
-                        {data.noShowCount}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Passenger No-Show</p>
-                </WidgetCard>
-
+                    subtitle="Now" 
+                    value={data.lateCount} 
+                    accentColor={data.lateCount > 0 ? "#d86666" : ""} 
+                    icon={AlertTriangle} 
+                />
+                <DashboardCard 
+                    title="Bookings Cancelled" 
+                    subtitle="Today" 
+                    value={data.cancelledCount} 
+                    accentColor="#d86666" 
+                    icon={AlertTriangle} 
+                />
+                <DashboardCard 
+                    title="Bookings No Show" 
+                    subtitle="Today" 
+                    value={data.noShowCount} 
+                    accentColor="#d6a637" 
+                    icon={AlertTriangle} 
+                />
             </div>
 
-            {/* Middle telemetry & KPI section */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {/* Row 2: Call Channels & Automation */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <DashboardCard 
+                    title="Dispatch Bookings" 
+                    subtitle="Today" 
+                    value={data.channels.dispatcher} 
+                    accentColor="#a0a0a0" 
+                    icon={Radio} 
+                />
+                <DashboardCard 
+                    title="Web Bookings" 
+                    subtitle="Today" 
+                    value={data.channels.web} 
+                    accentColor="#6d9edb" 
+                    icon={Globe} 
+                />
+                <DashboardCard 
+                    title="App Bookings" 
+                    subtitle="Today" 
+                    value={data.channels.app} 
+                    accentColor="#6d9edb" 
+                    icon={Smartphone} 
+                />
+                <DashboardCard 
+                    title="IVR Bookings" 
+                    subtitle="Today" 
+                    value={data.channels.ivr} 
+                    accentColor="#6d9edb" 
+                    icon={PhoneCall} 
+                />
                 
-                {/* 3. Efficiency & Financial metrics */}
-                <WidgetCard title="Automation Rate" icon={Percent}>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-3xl md:text-4xl font-black text-emerald-400 tracking-tight">
-                            {data.automationRate}%
-                        </span>
+                {/* Automation Progress Widget */}
+                <div className="bg-[#242424] border border-[#333333] rounded-lg p-4 shadow-[0_8px_20px_rgba(0,0,0,0.18)] flex flex-col justify-between">
+                    <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] font-bold text-[#a0a0a0] uppercase tracking-wider">Automation</span>
+                        <Percent className="w-3.5 h-3.5 text-[#8b5cf6]" />
                     </div>
-                    <div className="w-full bg-white/5 h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div 
-                            className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                            style={{ width: `${data.automationRate}%` }}
-                        ></div>
+                    <div className="bg-[#333333] rounded-md p-3 my-1.5">
+                        <div className="flex justify-between items-baseline mb-1">
+                            <span className="text-2xl font-bold text-[#f2f2f2] font-mono leading-none tracking-tight">{data.automationRate}%</span>
+                        </div>
+                        <div className="w-full bg-[#111111] h-1.5 rounded-full overflow-hidden mt-1">
+                            <div 
+                                className="bg-[#8b5cf6] h-full rounded-full transition-all duration-500" 
+                                style={{ width: `${data.automationRate}%` }}
+                            ></div>
+                        </div>
                     </div>
-                    <p className="text-[9px] font-bold text-slate-500 mt-2 uppercase tracking-wide">Web, App & AI Bookings</p>
-                </WidgetCard>
-
-                <WidgetCard title="Avg Dispatch Time" icon={ShieldCheck}>
-                    <p className="text-3xl md:text-4xl font-black text-teal-400 tracking-tight">
-                        {data.avgDispatchTime}s
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Assignation Latency</p>
-                </WidgetCard>
-
-                <WidgetCard title="Avg Pickup Time" icon={MapPin}>
-                    <p className="text-3xl md:text-4xl font-black text-blue-400 tracking-tight">
-                        {formatDuration(data.avgPickupTime)}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Dispatched to Arrived</p>
-                </WidgetCard>
-
-                <WidgetCard title="Avg Fare" icon={DollarSign}>
-                    <p className="text-3xl md:text-4xl font-black text-indigo-400 tracking-tight">
-                        £{data.avgFare}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Completed Booking Average</p>
-                </WidgetCard>
-
-                <WidgetCard title="Driver Earning (7D)" icon={Coins}>
-                    <p className="text-3xl md:text-4xl font-black text-amber-500 tracking-tight">
-                        £{data.avgDriverEarning}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wide">Average Commission Take</p>
-                </WidgetCard>
-
+                    <span className="text-[9px] font-bold text-[#a0a0a0] uppercase tracking-wider">IVR, App, Web Today</span>
+                </div>
             </div>
 
-            {/* Charts & Interactive Panels */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* Column 1 & 2: Main Booking Trend (Hourly chart) */}
-                <div className="lg:col-span-2 flex flex-col gap-6">
-                    
-                    {/* Hourly Booking Trend Chart */}
-                    <div className="bg-zinc-950/70 border border-white/5 rounded-3xl p-5 md:p-6 shadow-2xl backdrop-blur flex flex-col h-[400px]">
-                        <div className="bg-zinc-900/60 px-4 py-2 border border-white/5 rounded-2xl flex justify-between items-center mb-6 select-none">
-                            <div className="flex items-center gap-2">
-                                <BarChart2 className="w-4 h-4 text-emerald-400" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    Hourly Booking Trend Comparison
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-4 text-[10px] font-bold font-mono">
-                                <span className="flex items-center gap-1.5 text-slate-400">
-                                    <span className="h-2 w-2 rounded-full bg-slate-500"></span> Last Week
-                                </span>
-                                <span className="flex items-center gap-1.5 text-emerald-400">
-                                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span> Today
-                                </span>
-                            </div>
-                        </div>
+            {/* Row 3: Operational Latencies & Weather */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <DashboardCard 
+                    title="Avg Dispatch Time" 
+                    subtitle="Last Hour" 
+                    value={`${data.avgDispatchTime} Sec`} 
+                    accentColor="#6d9edb" 
+                    icon={ShieldCheckIcon} 
+                />
+                <DashboardCard 
+                    title="Avg Pickup Time" 
+                    subtitle="Last Hour" 
+                    value={formatDuration(data.avgPickupTime)} 
+                    accentColor={data.avgPickupTime > 600 ? "#d86666" : "#d6a637"} 
+                    icon={MapPin} 
+                />
+                <DashboardCard 
+                    title="Avg POB Time" 
+                    subtitle="Last Hour" 
+                    value={formatDuration(data.avgPobTime)} 
+                    accentColor="#a0a0a0" 
+                    icon={Clock} 
+                />
+                <DashboardCard 
+                    title="Avg Fare" 
+                    subtitle="Today" 
+                    value={`£${data.avgFare}`} 
+                    accentColor="#6fbf5f" 
+                    icon={DollarSign} 
+                />
+                <WeatherCard 
+                    temp={data.weather.temp} 
+                    condition={data.weather.condition} 
+                    icon={data.weather.icon} 
+                />
+            </div>
 
-                        <div className="flex-1 w-full text-[10px] font-bold font-mono">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={data.hourlyTrend} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorToday" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                                        </linearGradient>
-                                        <linearGradient id="colorLastWeek" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#71717a" stopOpacity={0.1}/>
-                                            <stop offset="95%" stopColor="#71717a" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1d1d21" vertical={false} />
-                                    <XAxis dataKey="hour" stroke="#71717a" tickLine={false} />
-                                    <YAxis stroke="#71717a" tickLine={false} />
-                                    <Tooltip 
-                                        contentStyle={{ backgroundColor: '#09090b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '1rem', color: '#ffffff' }}
-                                        labelStyle={{ fontWeight: 'bold', color: '#a1a1aa' }}
-                                    />
-                                    <Area type="monotone" dataKey="Today" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorToday)" />
-                                    <Area type="monotone" dataKey="Last Week" stroke="#71717a" strokeWidth={1.5} fillOpacity={1} fill="url(#colorLastWeek)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* Live Dispatch Job Feed (Real-Time ticker) */}
-                    <WidgetCard title="Live Dispatch Feed" icon={Activity}>
-                        <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
-                            {data.recentJobs.length > 0 ? (
-                                data.recentJobs.map((job) => (
-                                    <div 
-                                        key={job.id} 
-                                        className="flex items-center justify-between p-3 bg-zinc-900/30 border border-white/5 rounded-2xl hover:bg-zinc-900/50 transition-colors duration-200 select-text"
-                                    >
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-black text-slate-200 uppercase">{job.passengerName}</span>
-                                                <span className="text-[10px] text-slate-500 font-mono">#{job.id}</span>
-                                            </div>
-                                            <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                                                <span className="truncate max-w-[150px] md:max-w-[200px]">{job.pickupAddress.split(',')[0]}</span>
-                                                <span className="text-slate-600">→</span>
-                                                <span className="truncate max-w-[150px] md:max-w-[200px]">{job.dropoffAddress.split(',')[0]}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-4">
-                                            {job.fare && (
-                                                <span className="text-xs font-black text-slate-200 font-mono">£{job.fare}</span>
-                                            )}
-                                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded tracking-wide border ${
-                                                job.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                job.status === 'CANCELLED' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
-                                                ['DISPATCHING', 'ACCEPTED', 'EN_ROUTE', 'POB'].includes(job.status) ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse' :
-                                                'bg-slate-500/10 text-slate-400 border-white/5'
-                                            }`}>
-                                                {job.status}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-xs text-slate-500 text-center py-6 font-bold uppercase tracking-widest">No Active Bookings Today</p>
-                            )}
-                        </div>
-                    </WidgetCard>
-
+            {/* Row 4: Analytics, Drivers, Alerts, & Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {/* 1. Driver Status (Grouped mini-cards) */}
+                <div className="lg:col-span-1">
+                    <DriverStatusCard 
+                        online={data.driversOnline} 
+                        available={data.driversAvailable} 
+                        booked={data.driversBooked} 
+                        total={data.totalDrivers} 
+                    />
                 </div>
 
-                {/* Column 3: Payment Split & Channels & Weather Widgets */}
-                <div className="flex flex-col gap-6">
-                    
-                    {/* Payment Split & Booking Channels */}
-                    <div className="bg-zinc-950/70 border border-white/5 rounded-3xl p-5 md:p-6 shadow-2xl backdrop-blur flex flex-col justify-between gap-6">
-                        {/* Weather Widget Header */}
-                        <div className="bg-zinc-900/60 px-4 py-2 border border-white/5 rounded-2xl flex justify-between items-center select-none">
-                            <div className="flex items-center gap-2">
-                                <Sun className="w-4 h-4 text-amber-500" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    Local Operations Weather
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Weather Details */}
-                        <div className="flex items-center justify-between bg-black/40 border border-white/5 p-4 rounded-2xl select-text">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Covent Garden, London</span>
-                                <span className="text-2xl font-black text-white">{data.weather.temp}°C</span>
-                                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">{data.weather.condition}</span>
-                            </div>
-                            {renderWeatherIcon(data.weather.icon)}
-                        </div>
-
-                        <hr className="border-white/5" />
-
-                        {/* Payment Split Distribution */}
-                        <div>
-                            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                Payment Split (Card vs Cash vs A/C)
-                            </h2>
-
-                            {pieData.length > 0 ? (
-                                <div className="h-[120px] flex items-center justify-center relative">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={pieData}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={30}
-                                                outerRadius={45}
-                                                paddingAngle={3}
-                                                dataKey="value"
-                                            >
-                                                {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip 
-                                                contentStyle={{ backgroundColor: '#09090b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '0.5rem', color: '#ffffff' }}
-                                                itemStyle={{ fontSize: '10px' }}
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                    {/* Middle value display */}
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-1">
-                                        <span className="text-xs font-black text-slate-400">Today</span>
-                                        <span className="text-lg font-black text-white font-mono leading-none">{totalTodayBookings}</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <p className="text-[10px] text-slate-500 text-center py-6 font-bold uppercase tracking-widest">No Payments Settled Today</p>
-                            )}
-
-                            {/* Legend labels */}
-                            <div className="flex justify-center gap-4 mt-2 text-[10px] font-bold font-mono">
-                                <span className="flex items-center gap-1.5 text-emerald-400">
-                                    <span className="h-2 w-2 rounded bg-emerald-500"></span> Card ({data.paymentSplit.card})
-                                </span>
-                                <span className="flex items-center gap-1.5 text-amber-500">
-                                    <span className="h-2 w-2 rounded bg-amber-500"></span> Cash ({data.paymentSplit.cash})
-                                </span>
-                                <span className="flex items-center gap-1.5 text-purple-400">
-                                    <span className="h-2 w-2 rounded bg-purple-500"></span> A/C ({data.paymentSplit.account})
-                                </span>
-                            </div>
-                        </div>
-
-                        <hr className="border-white/5" />
-
-                        {/* Channels attribution list */}
-                        <div>
-                            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
-                                Attribution Channels
-                            </h2>
-
-                            <div className="space-y-2">
-                                
-                                {/* Web bookings */}
-                                <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-6 w-6 rounded bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                                            <Globe className="w-3.5 h-3.5" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-300">Web Booker</span>
-                                    </div>
-                                    <span className="text-sm font-black text-white font-mono">{data.channels.web}</span>
-                                </div>
-
-                                {/* App bookings */}
-                                <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-6 w-6 rounded bg-blue-500/10 flex items-center justify-center text-blue-400">
-                                            <Smartphone className="w-3.5 h-3.5" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-300">Passenger App</span>
-                                    </div>
-                                    <span className="text-sm font-black text-white font-mono">{data.channels.app}</span>
-                                </div>
-
-                                {/* Voice AI bookings */}
-                                <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-6 w-6 rounded bg-purple-500/10 flex items-center justify-center text-purple-400">
-                                            <PhoneCall className="w-3.5 h-3.5" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-300">Voice AI Agent</span>
-                                    </div>
-                                    <span className="text-sm font-black text-white font-mono">{data.channels.voice}</span>
-                                </div>
-
-                                {/* WhatsApp bookings */}
-                                <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-6 w-6 rounded bg-teal-500/10 flex items-center justify-center text-teal-400">
-                                            <Globe className="w-3.5 h-3.5" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-300">WhatsApp AI</span>
-                                    </div>
-                                    <span className="text-sm font-black text-white font-mono">{data.channels.ivr}</span>
-                                </div>
-
-                                {/* Console bookings */}
-                                <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-6 w-6 rounded bg-amber-500/10 flex items-center justify-center text-amber-400">
-                                            <Radio className="w-3.5 h-3.5" />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-slate-300">Dispatcher Console</span>
-                                    </div>
-                                    <span className="text-sm font-black text-white font-mono">{data.channels.dispatcher}</span>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
+                {/* 2. Operational Alerts */}
+                <div className="lg:col-span-1">
+                    <OperationalAlertsCard 
+                        lateCount={data.lateCount} 
+                        noShowCount={data.noShowCount} 
+                        availableDrivers={data.driversAvailable} 
+                    />
                 </div>
 
+                {/* 3. Payment Split Chart */}
+                <div className="lg:col-span-1">
+                    <PaymentSplitCard 
+                        cash={data.paymentSplit.cash} 
+                        card={data.paymentSplit.card} 
+                        account={data.paymentSplit.account} 
+                    />
+                </div>
+
+                {/* 4. Hourly Activity Chart (Spans 2 columns to fit properly on widescreen) */}
+                <div className="md:col-span-3 lg:col-span-2">
+                    <HourlyTrendCard trend={data.hourlyTrend} />
+                </div>
             </div>
 
         </div>
+    );
+}
+
+// Simple fallback inline icons to prevent missing symbols compilation issues
+function ShieldCheckIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={props.className}
+        >
+            <path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6v7z" />
+            <path d="m9 12 2 2 4-4" />
+        </svg>
     );
 }
