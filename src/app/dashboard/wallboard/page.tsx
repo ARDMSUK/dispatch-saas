@@ -405,8 +405,7 @@ export default function WallboardPage() {
             {/* Top Status Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#1c1c1c] border border-[#333333] rounded-lg px-5 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
                 <div className="flex items-center gap-4">
-                    <img src="/logo-full.png" alt="CabAI" className="h-8 object-contain" />
-                    <div className="border-l border-[#333333] pl-4">
+                    <div>
                         <h1 className="text-sm font-bold text-[#f2f2f2] uppercase tracking-wider">
                             Operational Wallboard
                         </h1>
