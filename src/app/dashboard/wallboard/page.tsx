@@ -400,7 +400,7 @@ export default function WallboardPage() {
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#111111] text-[#f2f2f2] p-4 md:p-6 font-sans flex flex-col gap-5 select-none overflow-y-auto selection:bg-[#8b5cf6]/30">
+        <div className="h-full w-full bg-[#111111] text-[#f2f2f2] p-4 md:p-6 font-sans flex flex-col gap-5 select-none overflow-y-auto selection:bg-[#8b5cf6]/30">
             
             {/* Top Status Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#1c1c1c] border border-[#333333] rounded-lg px-5 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
