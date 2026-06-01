@@ -284,7 +284,7 @@ export default function StandaloneMapPage() {
 
     if (loading) {
         return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#0a0a0c] text-white">
+            <div className="h-full w-full flex flex-col items-center justify-center bg-[#0a0a0c] text-white">
                 <Loader2 className="h-10 w-10 animate-spin text-emerald-500 mb-4" />
                 <p className="text-slate-400 font-medium tracking-wide">Loading Standalone Fleet Map...</p>
             </div>
@@ -292,7 +292,7 @@ export default function StandaloneMapPage() {
     }
 
     return (
-        <div className="h-screen w-screen relative overflow-hidden bg-[#09090b] font-sans">
+        <div className="h-full w-full relative overflow-hidden bg-[#09090b] font-sans">
             {/* Header Control Overlay */}
             <div className="absolute top-4 left-4 right-4 flex flex-col md:flex-row gap-3 z-10 pointer-events-none">
                 <div className="flex gap-2 items-center bg-zinc-900/90 backdrop-blur border border-white/10 rounded-2xl p-3 shadow-2xl pointer-events-auto shrink-0 select-none">
