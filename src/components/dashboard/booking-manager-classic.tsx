@@ -61,6 +61,7 @@ interface BookingManagerProps {
 
 export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigger }: BookingManagerProps) {
     const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('PENDING_NOW');
 
     // Search Box State
