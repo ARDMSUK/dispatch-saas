@@ -261,7 +261,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+            case 'PENDING': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
             case 'UNASSIGNED': return 'bg-blue-700/10 text-blue-700 border-blue-700/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
@@ -339,20 +339,22 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     };
 
     const getVehicleStyle = (vType: string) => {
-        if (vType === 'Saloon') return 'border-slate-200 bg-slate-100';
-        if (vType === 'Estate') return 'border-blue-500/30 bg-blue-500/5';
-        if (vType === 'Executive') return 'border-emerald-500/30 bg-emerald-500/5';
-        if (vType.includes('MPV')) return 'border-purple-500/30 bg-purple-500/5';
-        if (vType === 'Minibus' || vType === 'Coach') return 'border-blue-700/30 bg-blue-700/5';
-        return 'border-zinc-500/30 bg-zinc-500/5';
+        if (vType === 'Saloon') return 'border-zinc-200 bg-white hover:bg-slate-50';
+        if (vType.includes('WAV') || vType.includes('wav')) return 'border-l-4 border-l-orange-500 bg-orange-50 border-orange-200';
+        if (vType === 'Estate') return 'border-l-4 border-l-blue-500 bg-blue-50 border-blue-200';
+        if (vType === 'Executive') return 'border-l-4 border-l-emerald-500 bg-emerald-50 border-emerald-200';
+        if (vType.includes('MPV')) return 'border-l-4 border-l-purple-500 bg-purple-50 border-purple-200';
+        if (vType === 'Minibus' || vType === 'Coach' || vType.includes('Minibus')) return 'border-l-4 border-l-indigo-600 bg-indigo-50 border-indigo-200';
+        return 'border-zinc-200 bg-white hover:bg-slate-50';
     };
 
     const getVehicleTextColor = (vType: string) => {
-        if (vType === 'Estate') return 'text-blue-500';
-        if (vType === 'Executive') return 'text-emerald-500';
-        if (vType.includes('MPV')) return 'text-purple-500';
-        if (vType === 'Minibus' || vType === 'Coach') return 'text-blue-700';
-        return 'text-slate-400';
+        if (vType.includes('WAV') || vType.includes('wav')) return 'text-orange-600 font-bold';
+        if (vType === 'Estate') return 'text-blue-600 font-bold';
+        if (vType === 'Executive') return 'text-emerald-600 font-bold';
+        if (vType.includes('MPV')) return 'text-purple-600 font-bold';
+        if (vType === 'Minibus' || vType === 'Coach') return 'text-indigo-600 font-bold';
+        return 'text-slate-500';
     };
 
     const JobCard = ({ job }: { job: Job }) => {
@@ -629,14 +631,49 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     const match = job.notes.match(/^\[(.*?)\]\s*([\s\S]*)/);
                                     if (match) {
                                         const [_, header, body] = match;
+                                        const tags = header.split('|').map(t => t.trim()).filter(Boolean);
                                         return (
-                                            <>
-                                                <div className="flex items-start gap-2">
-                                                    <AlertCircle className="h-3 w-3 text-red-400 mt-0.5 shrink-0" />
-                                                    <span className="text-xs text-red-300 font-bold">{header}</span>
+                                            <div className="space-y-1.5">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {tags.map((tag, idx) => {
+                                                        if (tag.startsWith('REMINDER:')) {
+                                                            const text = tag.replace('REMINDER:', '').trim();
+                                                            return (
+                                                                <span key={idx} className="bg-red-50 text-red-700 border border-red-200 px-1.5 py-0.5 rounded font-bold text-[10px] flex items-center gap-1 uppercase tracking-wider">
+                                                                    🚨 {text}
+                                                                </span>
+                                                            );
+                                                        }
+                                                        if (tag === 'MEET & GREET p/u') {
+                                                            return (
+                                                                <span key={idx} className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider">
+                                                                    ✈️ M&G
+                                                                </span>
+                                                            );
+                                                        }
+                                                        if (tag === 'HAND LUGGAGE ONLY') {
+                                                            return (
+                                                                <span key={idx} className="bg-teal-50 text-teal-700 border border-teal-200 px-1.5 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider">
+                                                                    💼 HAND LUGGAGE
+                                                                </span>
+                                                            );
+                                                        }
+                                                        if (tag === 'NO_NOTIFICATIONS') {
+                                                            return (
+                                                                <span key={idx} className="bg-slate-100 text-slate-700 border border-slate-300 px-1.5 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider">
+                                                                    🔕 MUTED NOTIFS
+                                                                </span>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <span key={idx} className="bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider">
+                                                                    ⚠️ {tag}
+                                                                </span>
+                                                        );
+                                                    })}
                                                 </div>
-                                                {body && <p className="text-xs text-slate-500 pl-5 whitespace-pre-wrap">{body}</p>}
-                                            </>
+                                                {body && <p className="text-xs text-slate-600 pl-1.5 border-l border-slate-200 ml-1 whitespace-pre-wrap font-medium">{body}</p>}
+                                            </div>
                                         );
                                     } else {
                                         // Plain notes
@@ -687,7 +724,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 if (job.paymentType === 'ACCOUNT') {
                                     return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1.5 text-[9px] rounded-sm">ACCOUNT</Badge>;
                                 }
-                                return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none px-1.5 text-[9px] rounded-sm">CASH</Badge>;
+                                return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-none px-1.5 text-[9px] rounded-sm">CASH</Badge>;
                             })()}
                         </div>
                     </div>

@@ -85,6 +85,17 @@ export async function GET(req: Request) {
                         name: true,
                         callsign: true
                     }
+                },
+                calls: {
+                    select: {
+                        id: true,
+                        phone: true,
+                        status: true,
+                        recordingUrl: true,
+                        duration: true,
+                        createdAt: true,
+                        answeredByExt: true
+                    }
                 }
             },
             orderBy: { pickupTime: 'desc' },
@@ -121,6 +132,7 @@ export async function GET(req: Request) {
             returnBooking: j.isReturn,
             waitingTime: j.waitingTime,
             emergencyActive: j.emergencyActive,
+            calls: j.calls || [],
             source: 'WEB'
         }));
 
@@ -188,6 +200,8 @@ export async function POST(request: Request) {
             console.log('[API/jobs] Server calculated fare:', fare);
         }
 
+        const isWavType = body.vehicleType ? body.vehicleType.toLowerCase().includes('wav') : false;
+
         // 3. Prepare Common Job Data
         const commonJobData = {
             tenantId,
@@ -198,6 +212,7 @@ export async function POST(request: Request) {
             passengers: body.passengers ? parseInt(body.passengers) : 1,
             luggage: body.luggage ? parseInt(body.luggage) : 0,
             vehicleType: body.vehicleType || 'Saloon',
+            requiresWav: isWavType,
             flightNumber: body.flightNumber || null,
             vias: body.vias || undefined, // JSON
             paymentType: body.paymentType || 'CASH',
@@ -216,36 +231,63 @@ export async function POST(request: Request) {
         const jobsToCreate = [];
         const recurrenceGroupId = body.isRecurring ? crypto.randomUUID() : null;
 
-        if (body.isRecurring && body.recurrenceRule && body.recurrenceEnd) {
-            const endDate = new Date(body.recurrenceEnd);
-            let currentDate = new Date(finalPickupTime);
+        if (body.isRecurring && body.recurrenceRule) {
             const limitDate = new Date();
             limitDate.setDate(limitDate.getDate() + 28); // Max 4 weeks ahead for now
+            const endDate = body.recurrenceEnd ? new Date(body.recurrenceEnd) : limitDate;
 
             // Safety clamp
             const actualEndDate = endDate > limitDate ? limitDate : endDate;
 
-            // Loop day by day
+            const interval = body.recurrenceInterval ? parseInt(body.recurrenceInterval) : 1;
+            const daysList = Array.isArray(body.recurrenceDays) ? body.recurrenceDays : [];
+            const exclusions = Array.isArray(body.recurrenceExclusions) ? body.recurrenceExclusions : [];
+
+            let currentDate = new Date(finalPickupTime);
             let safetyCounter = 0;
-            while (currentDate <= actualEndDate && safetyCounter < 50) {
-                let shouldCreate = false;
+
+            const startMs = new Date(finalPickupTime.getFullYear(), finalPickupTime.getMonth(), finalPickupTime.getDate()).getTime();
+
+            while (currentDate <= actualEndDate && safetyCounter < 100) {
                 const dayOfWeek = currentDate.getDay(); // 0=Sun, 1=Mon...
+                const dateStr = currentDate.toISOString().slice(0, 10); // "YYYY-MM-DD"
+                
+                let shouldCreate = false;
 
-                if (body.recurrenceRule === 'DAILY') {
-                    shouldCreate = true;
-                } else if (body.recurrenceRule === 'WEEKLY') {
-                    // Only if day of week matches original
-                    if (currentDate.getDay() === finalPickupTime.getDay()) shouldCreate = true;
-                } else if (body.recurrenceRule === 'MON-FRI') {
-                    if (dayOfWeek >= 1 && dayOfWeek <= 5) shouldCreate = true;
-                } else if (body.recurrenceRule === 'MON,WED,FRI') {
-                    if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) shouldCreate = true;
+                // Check exclusions
+                if (!exclusions.includes(dateStr)) {
+                    // Check if it matches start date (always create first job if not excluded)
+                    if (currentDate.getTime() === finalPickupTime.getTime()) {
+                        shouldCreate = true;
+                    } else {
+                        // Calculate differences since start date
+                        const currentMs = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
+                        const diffDays = Math.round((currentMs - startMs) / (24 * 60 * 60 * 1000));
+                        
+                        if (body.recurrenceRule === 'DAILY') {
+                            if (diffDays % interval === 0) shouldCreate = true;
+                        } else if (body.recurrenceRule === 'WEEKLY') {
+                            const diffWeeks = Math.floor(diffDays / 7);
+                            if (diffWeeks % interval === 0) {
+                                if (daysList.length > 0) {
+                                    if (daysList.includes(dayOfWeek)) shouldCreate = true;
+                                } else {
+                                    if (dayOfWeek === finalPickupTime.getDay()) shouldCreate = true;
+                                }
+                            }
+                        } else if (body.recurrenceRule === 'WEEKDAYS') {
+                            if (dayOfWeek >= 1 && dayOfWeek <= 5) shouldCreate = true;
+                        } else if (body.recurrenceRule === 'WEEKENDS') {
+                            if (dayOfWeek === 0 || dayOfWeek === 6) shouldCreate = true;
+                        } else if (body.recurrenceRule === 'MONTHLY') {
+                            // Calculate month diff
+                            const diffMonths = (currentDate.getFullYear() - finalPickupTime.getFullYear()) * 12 + (currentDate.getMonth() - finalPickupTime.getMonth());
+                            if (diffMonths % interval === 0 && currentDate.getDate() === finalPickupTime.getDate()) {
+                                shouldCreate = true;
+                            }
+                        }
+                    }
                 }
-
-                // If it's the first one, we always create it (it matches start date)
-                // Actually, let's just use the loop logic. 
-                // Ensure the first job (start date) is included
-                if (currentDate.getTime() === finalPickupTime.getTime()) shouldCreate = true;
 
                 if (shouldCreate) {
                     jobsToCreate.push({
@@ -258,7 +300,7 @@ export async function POST(request: Request) {
                         isRecurring: true,
                         recurrenceRule: body.recurrenceRule,
                         recurrenceGroupId: recurrenceGroupId,
-                        recurrenceEnd: new Date(body.recurrenceEnd),
+                        recurrenceEnd: body.recurrenceEnd ? new Date(body.recurrenceEnd) : null,
                         // Wait & Return Fields
                         waitingTime: body.isWaitAndReturn ? (body.waitingTime || 0) : 0,
                         waitingCost: 0 // Calculated later or ignored for now
@@ -330,39 +372,45 @@ export async function POST(request: Request) {
 
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: tenantId } });
 
+        const muteNotifications = body.notes && body.notes.includes('NO_NOTIFICATIONS');
+
         // Notifications: Email & SMS
-        const notificationPromises = [
-            EmailService.sendBookingConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send email", e))
-        ];
+        const notificationPromises = [];
 
-        // NEW: Payment Confirmation
-        if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+        if (!muteNotifications) {
             notificationPromises.push(
-                EmailService.sendPaymentConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send payment receipt", e))
+                EmailService.sendBookingConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send email", e))
             );
-        }
 
-        if (body.passengerPhone) {
-            notificationPromises.push(
-                SmsService.sendBookingConfirmation(newJob as any, tenantSettings).catch(e => console.error("Failed to send SMS", e))
-            );
-        }
-
-
-
-        if (returnJob) {
-            const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
-            notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return email", e)));
-
-            // NEW: Payment Confirmation for Return Job
+            // NEW: Payment Confirmation
             if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
                 notificationPromises.push(
-                    EmailService.sendPaymentConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return payment receipt", e))
+                    EmailService.sendPaymentConfirmation(jobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send payment receipt", e))
                 );
             }
 
             if (body.passengerPhone) {
-                notificationPromises.push(SmsService.sendBookingConfirmation(returnJob as any, tenantSettings).catch(e => console.error("Failed to send return SMS", e)));
+                notificationPromises.push(
+                    SmsService.sendBookingConfirmation(newJob as any, tenantSettings).catch(e => console.error("Failed to send SMS", e))
+                );
+            }
+        }
+
+        if (returnJob) {
+            const returnJobWithDetails = { ...returnJob, passengerEmail: body.passengerEmail };
+            if (!muteNotifications) {
+                notificationPromises.push(EmailService.sendBookingConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return email", e)));
+
+                // NEW: Payment Confirmation for Return Job
+                if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+                    notificationPromises.push(
+                        EmailService.sendPaymentConfirmation(returnJobWithDetails as any, tenantSettings).catch(e => console.error("Failed to send return payment receipt", e))
+                    );
+                }
+
+                if (body.passengerPhone) {
+                    notificationPromises.push(SmsService.sendBookingConfirmation(returnJob as any, tenantSettings).catch(e => console.error("Failed to send return SMS", e)));
+                }
             }
         }
 

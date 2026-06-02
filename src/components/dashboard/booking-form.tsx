@@ -97,9 +97,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         fetch('/api/settings/organization')
             .then(res => res.json())
             .then(data => {
-                if (data && typeof data.autoDispatch === 'boolean') {
-                    setAutoDispatch(data.autoDispatch);
-                }
+                // Ignore organization default autoDispatch as we want it to always default to false (unchecked) for the operator console
             })
             .catch(err => console.error("Error loading auto-dispatch default:", err));
     }, []);
@@ -131,7 +129,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [recurrenceEnd, setRecurrenceEnd] = useState('');
 
     // Dispatch Config
-    const [autoDispatch, setAutoDispatch] = useState(true);
+    const [autoDispatch, setAutoDispatch] = useState(false);
+
+    // New Console States
+    const [handLuggageOnly, setHandLuggageOnly] = useState(false);
+    const [muteNotifications, setMuteNotifications] = useState(false);
+    const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+    const [recurrenceDays, setRecurrenceDays] = useState<number[]>([]);
+    const [recurrenceExclusions, setRecurrenceExclusions] = useState<string[]>([]);
+    const [currentCalMonth, setCurrentCalMonth] = useState(() => new Date());
 
 
     // ... (useEffect omitted for brevity, logic unchanged)
@@ -351,6 +357,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             const prefixParts = [];
             if (reminders) prefixParts.push(`REMINDER: ${reminders}`);
             if (meetAndGreet) prefixParts.push(`MEET & GREET p/u`);
+            if (handLuggageOnly) prefixParts.push(`HAND LUGGAGE ONLY`);
+            if (muteNotifications) prefixParts.push(`NO_NOTIFICATIONS`);
 
             if (prefixParts.length > 0) {
                 combinedNotes = `[${prefixParts.join(' | ')}]\n${instructions}`;
@@ -387,7 +395,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 // Recurrence
                 isRecurring,
                 recurrenceRule: isRecurring ? recurrenceRule : null,
-                recurrenceEnd: isRecurring ? recurrenceEnd : null,
+                recurrenceEnd: isRecurring && recurrenceEnd ? recurrenceEnd : null,
+                recurrenceInterval: isRecurring ? recurrenceInterval : 1,
+                recurrenceDays: isRecurring ? recurrenceDays : [],
+                recurrenceExclusions: isRecurring ? recurrenceExclusions : [],
                 // Return Details
                 returnBooking: isReturn,
                 returnDate: isReturn && returnDate ? new Date(returnDate).toISOString() : null,
@@ -451,7 +462,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         setIsRecurring(false);
         setRecurrenceRule('DAILY');
         setRecurrenceEnd('');
-        setAutoDispatch(true);
+        setAutoDispatch(false);
+        setHandLuggageOnly(false);
+        setMuteNotifications(false);
+        setRecurrenceInterval(1);
+        setRecurrenceDays([]);
+        setRecurrenceExclusions([]);
+        setCurrentCalMonth(new Date());
 
         const now = new Date();
         now.setMinutes(now.getMinutes() + 10);
@@ -557,6 +574,79 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         }
     };
 
+    const renderExclusionsCalendar = () => {
+        const year = currentCalMonth.getFullYear();
+        const month = currentCalMonth.getMonth();
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const firstDay = new Date(year, month, 1).getDay();
+        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        
+        const days = [];
+        for (let i = 0; i < startOffset; i++) {
+            days.push(<div key={`empty-${i}`} className="h-8"></div>);
+        }
+        
+        for (let day = 1; day <= totalDays; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isExcluded = recurrenceExclusions.includes(dateStr);
+            
+            days.push(
+                <button
+                    key={`day-${day}`}
+                    type="button"
+                    onClick={() => {
+                        if (isExcluded) {
+                            setRecurrenceExclusions(recurrenceExclusions.filter(d => d !== dateStr));
+                        } else {
+                            setRecurrenceExclusions([...recurrenceExclusions, dateStr]);
+                        }
+                    }}
+                    className={`h-8 w-8 text-xs rounded-full flex items-center justify-center font-medium transition-all ${
+                        isExcluded 
+                            ? 'bg-red-500 text-white font-bold hover:bg-red-600 line-through' 
+                            : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                    }`}
+                >
+                    {day}
+                </button>
+            );
+        }
+        
+        return (
+            <div className="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm font-bold text-slate-900">{monthNames[month]} {year}</span>
+                    <div className="flex gap-1">
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-6 w-6" 
+                            onClick={() => setCurrentCalMonth(new Date(year, month - 1, 1))}
+                        >
+                            &lt;
+                        </Button>
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-6 w-6" 
+                            onClick={() => setCurrentCalMonth(new Date(year, month + 1, 1))}
+                        >
+                            &gt;
+                        </Button>
+                    </div>
+                </div>
+                <div className="grid grid-cols-7 gap-1 text-center font-semibold text-[10px] text-slate-400 mb-1">
+                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                    {days}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="flex flex-col gap-5 h-full">
@@ -687,18 +777,34 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <input type="text" placeholder="Flight Number (e.g. BA101)" className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50" value={flightNumber} onChange={e => setFlightNumber(e.target.value.toUpperCase())} />
                             </div>
 
-                            {/* Meet & Greet Toggle */}
-                            <div className="flex items-center gap-3 p-2 rounded border border-blue-500/30 bg-blue-500/10">
-                                <input
-                                    type="checkbox"
-                                    id="mgToggle"
-                                    checked={meetAndGreet}
-                                    onChange={(e) => setMeetAndGreet(e.target.checked)}
-                                    className="w-4 h-4 rounded border-blue-500 text-blue-500 focus:ring-blue-500/20"
-                                />
-                                <label htmlFor="mgToggle" className="text-sm text-blue-200 flex-1 cursor-pointer select-none">
-                                    Meet & Greet Required?
-                                </label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {/* Meet & Greet Toggle */}
+                                <div className="flex items-center gap-2.5 p-2 rounded border border-blue-500/30 bg-blue-500/10">
+                                    <input
+                                        type="checkbox"
+                                        id="mgToggle"
+                                        checked={meetAndGreet}
+                                        onChange={(e) => setMeetAndGreet(e.target.checked)}
+                                        className="w-4 h-4 rounded border-blue-500 text-blue-500 focus:ring-blue-500/20"
+                                    />
+                                    <label htmlFor="mgToggle" className="text-xs text-blue-900 font-semibold flex-1 cursor-pointer select-none">
+                                        Meet & Greet?
+                                    </label>
+                                </div>
+
+                                {/* Hand Luggage Only Toggle */}
+                                <div className="flex items-center gap-2.5 p-2 rounded border border-teal-500/30 bg-teal-500/5">
+                                    <input
+                                        type="checkbox"
+                                        id="hloToggle"
+                                        checked={handLuggageOnly}
+                                        onChange={(e) => setHandLuggageOnly(e.target.checked)}
+                                        className="w-4 h-4 rounded border-teal-500 text-teal-500 focus:ring-teal-500/20"
+                                    />
+                                    <label htmlFor="hloToggle" className="text-xs text-teal-900 font-semibold flex-1 cursor-pointer select-none">
+                                        Hand Luggage?
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -779,6 +885,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             <option value="Executive">Executive</option>
                             <option value="MPV">MPV 6 Seater</option>
                             <option value="MPV8">MPV 8 Seater</option>
+                            <option value="WAV MPV">WAV MPV</option>
+                            <option value="WAV Minibus">WAV Minibus</option>
                             <option value="Minibus">Minibus</option>
                             <option value="Coach">Coach</option>
                         </select>
@@ -889,6 +997,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     setReturnDropoffCoords(pickupCoords);
                                     setReturnPassengers(passengers);
                                     setReturnLuggage(luggage);
+                                    if (pickupTime) {
+                                        const defaultReturn = addHours(new Date(pickupTime), 2);
+                                        setReturnDate(format(defaultReturn, "yyyy-MM-dd'T'HH:mm"));
+                                    }
                                 }
                             }}
                             disabled={isWaitAndReturn}
@@ -937,13 +1049,83 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 />
                             </div>
 
-                            {/* RETURN DATE/TIME */}
-                            <input
-                                type="datetime-local"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
-                                value={returnDate}
-                                onChange={e => setReturnDate(e.target.value)}
-                            />
+                            {/* RETURN DATE/TIME WITH QUICK-PICKER HELPERS */}
+                            <div className="space-y-2">
+                                <input
+                                    type="datetime-local"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
+                                    value={returnDate}
+                                    onChange={e => setReturnDate(e.target.value)}
+                                />
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
+                                        onClick={() => {
+                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
+                                            setReturnDate(format(addMinutes(curr, 30), "yyyy-MM-dd'T'HH:mm"));
+                                        }}
+                                    >
+                                        +30m
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
+                                        onClick={() => {
+                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
+                                            setReturnDate(format(addHours(curr, 1), "yyyy-MM-dd'T'HH:mm"));
+                                        }}
+                                    >
+                                        +1h
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
+                                        onClick={() => {
+                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
+                                            setReturnDate(format(addHours(curr, 2), "yyyy-MM-dd'T'HH:mm"));
+                                        }}
+                                    >
+                                        +2h
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
+                                        onClick={() => {
+                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
+                                            setReturnDate(format(addHours(curr, 3), "yyyy-MM-dd'T'HH:mm"));
+                                        }}
+                                    >
+                                        +3h
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
+                                        onClick={() => {
+                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
+                                            setReturnDate(format(addDays(curr, 1), "yyyy-MM-dd'T'HH:mm"));
+                                        }}
+                                    >
+                                        +1d
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
+                                        onClick={() => {
+                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
+                                            setReturnDate(format(addDays(curr, 7), "yyyy-MM-dd'T'HH:mm"));
+                                        }}
+                                    >
+                                        +7d
+                                    </Button>
+                                </div>
+                            </div>
 
                             {/* RETURN FLIGHT (Conditional logic can be same or just show it) */}
                             <div className="relative group">
@@ -1023,29 +1205,113 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                     </div>
 
+                    <div className="flex items-center gap-3 p-2 rounded border border-red-500/30 bg-red-500/5 mb-2">
+                        <input
+                            type="checkbox"
+                            id="muteNotificationsToggle"
+                            checked={muteNotifications}
+                            onChange={(e) => setMuteNotifications(e.target.checked)}
+                            className="w-4 h-4 rounded border-red-500 text-red-500 focus:ring-red-500/20"
+                        />
+                        <label htmlFor="muteNotificationsToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
+                            Mute Customer Notifications (SMS/Email)
+                        </label>
+                    </div>
+
                     {isRecurring && (
                         <div className="pl-4 border-l-2 border-emerald-500/20 animate-in slide-in-from-top-2 space-y-4 mt-2">
-                            <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-600 font-bold">Frequency</label>
-                                <select
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50"
-                                    value={recurrenceRule}
-                                    onChange={(e) => setRecurrenceRule(e.target.value)}
-                                >
-                                    <option value="DAILY">Daily</option>
-                                    <option value="WEEKLY">Weekly</option>
-                                    <option value="MON,WED,FRI">Mon, Wed, Fri</option>
-                                    <option value="MON-FRI">Mon - Fri</option>
-                                </select>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs text-emerald-600 font-bold block mb-1">Recurs</label>
+                                    <select
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50"
+                                        value={recurrenceRule}
+                                        onChange={(e) => {
+                                            setRecurrenceRule(e.target.value);
+                                            setRecurrenceDays([]);
+                                        }}
+                                    >
+                                        <option value="DAILY">Daily</option>
+                                        <option value="WEEKLY">Weekly</option>
+                                        <option value="WEEKDAYS">Weekdays</option>
+                                        <option value="WEEKENDS">Weekends</option>
+                                        <option value="MONTHLY">Monthly</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-xs text-emerald-600 font-bold block mb-1">Recurs every</label>
+                                    <div className="flex items-center gap-1.5">
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 text-center"
+                                            value={recurrenceInterval}
+                                            onChange={e => setRecurrenceInterval(parseInt(e.target.value) || 1)}
+                                        />
+                                        <span className="text-xs text-slate-500 font-semibold">
+                                            {recurrenceRule === 'DAILY' ? 'days' : recurrenceRule === 'WEEKLY' ? 'weeks' : 'months'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
+
+                            {recurrenceRule === 'WEEKLY' && (
+                                <div className="space-y-2">
+                                    <label className="text-xs text-emerald-600 font-bold block">Recurs on</label>
+                                    <div className="flex gap-1.5 justify-between">
+                                        {[
+                                            { label: 'M', value: 1 },
+                                            { label: 'T', value: 2 },
+                                            { label: 'W', value: 3 },
+                                            { label: 'T', value: 4 },
+                                            { label: 'F', value: 5 },
+                                            { label: 'S', value: 6 },
+                                            { label: 'S', value: 0 }
+                                        ].map(day => {
+                                            const active = recurrenceDays.includes(day.value);
+                                            return (
+                                                <button
+                                                    key={day.value}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (active) {
+                                                            setRecurrenceDays(recurrenceDays.filter(d => d !== day.value));
+                                                        } else {
+                                                            setRecurrenceDays([...recurrenceDays, day.value]);
+                                                        }
+                                                    }}
+                                                    className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${
+                                                        active 
+                                                            ? 'bg-emerald-500 text-white shadow' 
+                                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                    }`}
+                                                >
+                                                    {day.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-600 font-bold">Repeat Until</label>
+                                <label className="text-xs text-emerald-600 font-bold block">Repeat Until (Optional)</label>
                                 <input
                                     type="date"
                                     className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:dark]"
                                     value={recurrenceEnd}
                                     onChange={e => setRecurrenceEnd(e.target.value)}
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs text-emerald-600 font-bold block">Calendar Exclusions (Click to toggle)</label>
+                                {renderExclusionsCalendar()}
+                                {recurrenceExclusions.length > 0 && (
+                                    <div className="text-[10px] text-red-600 font-semibold bg-red-50 p-2 rounded border border-red-200">
+                                        Excluded dates: {recurrenceExclusions.sort().join(', ')}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

@@ -144,6 +144,8 @@ export async function PATCH(
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: updatedJob.tenantId } });
 
         // --- Notifications ---
+        const muteNotifications = updatedJob.notes && updatedJob.notes.includes('NO_NOTIFICATIONS');
+
         // 1. Job Offered to Driver (Dispatched)
         if (status === 'DISPATCHED' && updatedJob.driverId && updatedJob.driver) {
             console.log(`[API] Job ${jobId} Dispatched. Sending Notification to Driver...`);
@@ -163,40 +165,46 @@ export async function PATCH(
         // 1.2 Driver Accepted / En Route
         if (status === 'EN_ROUTE' && updatedJob.driverId && updatedJob.driver) {
             console.log(`[API] Job ${jobId} En Route. Sending Notification to Passenger...`);
-            EmailService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
-            SmsService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+            if (!muteNotifications) {
+                EmailService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+                SmsService.sendDriverAssigned(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
 
-            if (updatedJob.customer?.expoPushToken) {
-                sendPushNotification({
-                    to: updatedJob.customer.expoPushToken,
-                    title: 'Your driver is on the way!',
-                    body: `${updatedJob.driver.name} is heading to your pickup location.`,
-                    data: { route: 'tracking', id: jobId }
-                });
+                if (updatedJob.customer?.expoPushToken) {
+                    sendPushNotification({
+                        to: updatedJob.customer.expoPushToken,
+                        title: 'Your driver is on the way!',
+                        body: `${updatedJob.driver.name} is heading to your pickup location.`,
+                        data: { route: 'tracking', id: jobId }
+                    });
+                }
             }
         }
 
         // 1.5 Driver Arrived
         if (status === 'ARRIVED' && updatedJob.driverId && updatedJob.driver) {
             console.log(`[API] Job ${jobId} Arrived. Sending Notification...`);
-            EmailService.sendDriverArrived(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
-            // Notify Passenger
-            SmsService.sendDriverArrived(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+            if (!muteNotifications) {
+                EmailService.sendDriverArrived(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
+                // Notify Passenger
+                SmsService.sendDriverArrived(updatedJob, updatedJob.driver, tenantSettings).catch(e => console.error(e));
 
-            if (updatedJob.customer?.expoPushToken) {
-                sendPushNotification({
-                    to: updatedJob.customer.expoPushToken,
-                    title: 'Driver Arrived',
-                    body: 'Your driver is outside waiting for you.',
-                    data: { route: 'tracking', id: jobId }
-                });
+                if (updatedJob.customer?.expoPushToken) {
+                    sendPushNotification({
+                        to: updatedJob.customer.expoPushToken,
+                        title: 'Driver Arrived',
+                        body: 'Your driver is outside waiting for you.',
+                        data: { route: 'tracking', id: jobId }
+                    });
+                }
             }
         }
 
         // 2. Job Completed (Receipt)
         if (status === 'COMPLETED') {
             console.log(`[API] Job ${jobId} Completed. Sending Receipt...`);
-            EmailService.sendJobReceipt(updatedJob, tenantSettings).catch(e => console.error(e));
+            if (!muteNotifications) {
+                EmailService.sendJobReceipt(updatedJob, tenantSettings).catch(e => console.error(e));
+            }
         }
         // ---------------------
 
