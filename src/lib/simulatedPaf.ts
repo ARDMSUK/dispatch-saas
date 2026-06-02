@@ -10,61 +10,62 @@ export interface SimulatedAddress {
 }
 
 export const simulatedAddresses: SimulatedAddress[] = [
-    // --- HP13 6UW (Hawks Hill, High Wycombe) ---
+    // --- SL8 5JQ (Hawks Hill, Bourne End) ---
     {
-        address: "45 Hawks Hill, High Wycombe, HP13 6UW",
-        postcode: "HP13 6UW",
-        lat: 51.6214,
-        lng: -0.7224,
+        address: "45 Hawks Hill, Bourne End, SL8 5JQ",
+        postcode: "SL8 5JQ",
+        lat: 51.5814,
+        lng: -0.7124,
         houseNumber: "45",
         street: "Hawks Hill",
-        town: "High Wycombe"
+        town: "Bourne End"
     },
     {
-        address: "47 Hawks Hill, High Wycombe, HP13 6UW",
-        postcode: "HP13 6UW",
-        lat: 51.6215,
-        lng: -0.7225,
+        address: "47 Hawks Hill, Bourne End, SL8 5JQ",
+        postcode: "SL8 5JQ",
+        lat: 51.5815,
+        lng: -0.7125,
         houseNumber: "47",
         street: "Hawks Hill",
-        town: "High Wycombe"
+        town: "Bourne End"
     },
     {
-        address: "49 Hawks Hill, High Wycombe, HP13 6UW",
-        postcode: "HP13 6UW",
-        lat: 51.6216,
-        lng: -0.7226,
+        address: "49 Hawks Hill, Bourne End, SL8 5JQ",
+        postcode: "SL8 5JQ",
+        lat: 51.5816,
+        lng: -0.7126,
         houseNumber: "49",
         street: "Hawks Hill",
-        town: "High Wycombe"
+        town: "Bourne End"
     },
     {
-        address: "51 Hawks Hill, High Wycombe, HP13 6UW",
-        postcode: "HP13 6UW",
-        lat: 51.6217,
-        lng: -0.7227,
+        address: "51 Hawks Hill, Bourne End, SL8 5JQ",
+        postcode: "SL8 5JQ",
+        lat: 51.5817,
+        lng: -0.7127,
         houseNumber: "51",
         street: "Hawks Hill",
-        town: "High Wycombe"
+        town: "Bourne End"
     },
     {
-        address: "Mendip, Hawks Hill, High Wycombe, HP13 6UW",
-        postcode: "HP13 6UW",
-        lat: 51.6218,
-        lng: -0.7228,
+        address: "Mendip, Hawks Hill, Bourne End, SL8 5JQ",
+        postcode: "SL8 5JQ",
+        lat: 51.5818,
+        lng: -0.7128,
         houseName: "Mendip",
         street: "Hawks Hill",
-        town: "High Wycombe"
+        town: "Bourne End"
     },
     {
-        address: "Oakridge, Hawks Hill, High Wycombe, HP13 6UW",
-        postcode: "HP13 6UW",
-        lat: 51.6219,
-        lng: -0.7229,
+        address: "Oakridge, Hawks Hill, Bourne End, SL8 5JQ",
+        postcode: "SL8 5JQ",
+        lat: 51.5819,
+        lng: -0.7129,
         houseName: "Oakridge",
         street: "Hawks Hill",
-        town: "High Wycombe"
+        town: "Bourne End"
     },
+
 
     // --- HP10 0JQ (Wooburn Manor Park, Wooburn Green) ---
     {
