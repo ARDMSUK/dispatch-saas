@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { searchByPostcode, searchByText, normalizePostcode } from '@/lib/simulatedPaf';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -11,7 +10,7 @@ export async function OPTIONS() {
     return NextResponse.json({}, { headers: corsHeaders });
 }
 
-// Regex to detect UK Postcodes
+// Regex to detect UK Postcodes and separate remainder
 function extractPostcodeAndRemainder(query: string) {
     const postcodeRegex = /([A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2})/i;
     const match = query.match(postcodeRegex);
@@ -36,11 +35,10 @@ export async function GET(request: Request) {
         const osKey = process.env.OS_PLACES_API_KEY;
         const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-        // --- PHASE 1: POSTCODE SEARCH ---
+        // --- PHASE 1: UK POSTCODE SEARCH ---
         if (postcodeData) {
             const { postcode, remainder } = postcodeData;
 
-            // 1. Live OS Places API
             if (osKey) {
                 try {
                     const url = `https://api.os.uk/search/places/v1/postcode?postcode=${encodeURIComponent(postcode)}&key=${osKey}&output_srs=EPSG:4326`;
@@ -76,36 +74,10 @@ export async function GET(request: Request) {
                     console.error("OS Places postcode lookup failed, falling back:", e);
                 }
             }
-
-            // 2. Simulated Local PAF
-            const simMatches = searchByPostcode(postcode, remainder);
-            if (simMatches.length > 0) {
-                const results = simMatches.map(addr => ({
-                    label: addr.address,
-                    value: addr.address,
-                    lat: String(addr.lat),
-                    lng: String(addr.lng),
-                    lon: String(addr.lng)
-                }));
-                return NextResponse.json({ results }, { headers: corsHeaders });
-            }
         }
 
         // --- PHASE 2: TEXT & KEYWORD SEARCH ---
-        // 1. Check Simulated PAF by text first (e.g. "Malt Cottage" or "Mendip Hawks Hill")
-        const simTextMatches = searchByText(query);
-        if (simTextMatches.length > 0) {
-            const results = simTextMatches.map(addr => ({
-                label: addr.address,
-                value: addr.address,
-                lat: String(addr.lat),
-                lng: String(addr.lng),
-                lon: String(addr.lng)
-            }));
-            return NextResponse.json({ results }, { headers: corsHeaders });
-        }
-
-        // 2. Live OS Places Find API
+        // 1. Live OS Places Find API
         if (osKey) {
             try {
                 const url = `https://api.os.uk/search/places/v1/find?query=${encodeURIComponent(query)}&key=${osKey}&output_srs=EPSG:4326`;
@@ -131,7 +103,7 @@ export async function GET(request: Request) {
             }
         }
 
-        // 3. Google Maps Geocoding API
+        // 2. Google Maps Geocoding API Fallback
         if (googleKey) {
             try {
                 const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&components=country:GB&key=${googleKey}`;
@@ -154,7 +126,7 @@ export async function GET(request: Request) {
             }
         }
 
-        // 4. OpenStreetMap Nominatim Fallback
+        // 3. OpenStreetMap Nominatim Fallback
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=gb`;
         const res = await fetch(url, {
             headers: {
