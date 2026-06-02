@@ -60,10 +60,11 @@ export function LocationInput({
 
     // Handle typing and trigger autocomplete API fetch (debounced)
     useEffect(() => {
-        // Quick custom suggestions for Heathrow terminals
+        // Quick custom suggestions for airports (Heathrow, Gatwick, Luton, Stansted)
         const input = inputValue.toLowerCase().trim();
         const matches = [];
 
+        // Heathrow Terminal numbers (t1, t2, t3, t4, t5)
         if (input.match(/^t[1-5]$/)) {
             const term = input.replace('t', '');
             matches.push({
@@ -73,6 +74,7 @@ export function LocationInput({
             });
         }
 
+        // Heathrow general
         if (input.includes('heathrow') || input.includes('lhr') || input.includes('ter')) {
             if (!input.includes('2') && !input.includes('3') && !input.includes('4') && !input.includes('5')) {
                 matches.push(
@@ -83,6 +85,37 @@ export function LocationInput({
                 );
             }
         }
+
+        // Gatwick (South & North Terminals)
+        if (input.includes('gatwick') || input.includes('lgw') || input.includes('gat')) {
+            const hasNorth = input.includes('n') || input.includes('nor');
+            const hasSouth = input.includes('s') || input.includes('sou');
+
+            if (!hasNorth && !hasSouth) {
+                matches.push(
+                    { id: 'lgw-south', label: 'Gatwick Airport South Terminal', address: 'Gatwick Airport South Terminal, Horley, Gatwick, RH6 0NP' },
+                    { id: 'lgw-north', label: 'Gatwick Airport North Terminal', address: 'Gatwick Airport North Terminal, Horley, Gatwick, RH6 0JP' }
+                );
+            } else {
+                if (hasSouth) {
+                    matches.push({ id: 'lgw-south', label: 'Gatwick Airport South Terminal', address: 'Gatwick Airport South Terminal, Horley, Gatwick, RH6 0NP' });
+                }
+                if (hasNorth) {
+                    matches.push({ id: 'lgw-north', label: 'Gatwick Airport North Terminal', address: 'Gatwick Airport North Terminal, Horley, Gatwick, RH6 0JP' });
+                }
+            }
+        }
+
+        // Luton Airport
+        if (input.includes('luton') || input.includes('ltn') || input.includes('lut')) {
+            matches.push({ id: 'ltn-airport', label: 'Luton Airport', address: 'Luton Airport, Airport Way, Luton, LU2 9LY' });
+        }
+
+        // Stansted Airport
+        if (input.includes('stansted') || input.includes('stn') || input.includes('std') || input.includes('stan')) {
+            matches.push({ id: 'stn-airport', label: 'Stansted Airport', address: 'Stansted Airport, Bassingbourn Road, Stansted, CM24 1QW' });
+        }
+
         setCustomSuggestions(matches.slice(0, 4));
 
         // Fetch general suggestions from API
