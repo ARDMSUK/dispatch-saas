@@ -19,6 +19,7 @@ export default function VehiclesPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [pendingDocs, setPendingDocs] = useState<{ type: string; fileUrl: string; expiryDate: string }[]>([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -69,6 +70,7 @@ export default function VehiclesPage() {
             driverId: "unassigned"
         });
         setEditingId(null);
+        setPendingDocs([]);
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -93,6 +95,21 @@ export default function VehiclesPage() {
             });
 
             if (res.ok) {
+                if (!editingId && pendingDocs.length > 0) {
+                    const newVehicle = await res.json();
+                    for (const doc of pendingDocs) {
+                        await fetch('/api/documents', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: doc.type,
+                                fileUrl: doc.fileUrl,
+                                expiryDate: doc.expiryDate,
+                                vehicleId: newVehicle.id
+                            })
+                        });
+                    }
+                }
                 setIsDialogOpen(false);
                 resetForm();
                 fetchData();
@@ -168,7 +185,7 @@ export default function VehiclesPage() {
                             <Tabs defaultValue="profile" className="w-full">
                                 <TabsList className="grid w-full grid-cols-2">
                                     <TabsTrigger value="profile">Profile</TabsTrigger>
-                                    <TabsTrigger value="documents" disabled={!editingId}>Compliance</TabsTrigger>
+                                    <TabsTrigger value="documents">Compliance</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="profile" className="grid gap-4 py-4">
                                     <Input
@@ -245,7 +262,7 @@ export default function VehiclesPage() {
                                     </Button>
                                 </TabsContent>
                                 <TabsContent value="documents">
-                                    {editingId && <VehicleDocuments vehicleId={editingId} />}
+                                    <VehicleDocuments vehicleId={editingId} pendingDocuments={pendingDocs} setPendingDocuments={setPendingDocs} />
                                 </TabsContent>
                             </Tabs>
                         </DialogContent>
@@ -330,7 +347,15 @@ export default function VehiclesPage() {
     );
 }
 
-function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
+function VehicleDocuments({ 
+    vehicleId, 
+    pendingDocuments = [], 
+    setPendingDocuments 
+}: { 
+    vehicleId: string | null; 
+    pendingDocuments?: { type: string; fileUrl: string; expiryDate: string }[]; 
+    setPendingDocuments?: React.Dispatch<React.SetStateAction<{ type: string; fileUrl: string; expiryDate: string }[]>>; 
+}) {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [type, setType] = useState('MOT');
@@ -339,6 +364,7 @@ function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
     const [uploading, setUploading] = useState(false);
 
     const fetchDocs = async () => {
+        if (!vehicleId) return;
         try {
             const res = await fetch(`/api/documents?vehicleId=${vehicleId}`);
             if (res.ok) {
@@ -351,7 +377,15 @@ function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
         }
     };
 
-    useEffect(() => { fetchDocs(); }, [vehicleId]);
+    useEffect(() => { 
+        if (!vehicleId) {
+            setDocuments([]);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        fetchDocs(); 
+    }, [vehicleId]);
 
     const handleUpload = async () => {
         if (!file) return alert("Please select a file");
@@ -364,17 +398,29 @@ function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
             const blob = await response.json();
             if (blob.error) throw new Error(blob.error);
 
-            const res = await fetch('/api/documents', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, fileUrl: blob.url, expiryDate, vehicleId })
-            });
-            if (res.ok) {
+            if (!vehicleId) {
+                // Creation mode: append to pending list
+                if (setPendingDocuments) {
+                    setPendingDocuments(prev => [...prev, { type, fileUrl: blob.url, expiryDate }]);
+                }
                 setFile(null);
                 setExpiryDate('');
                 const fileInput = document.getElementById('vehicleFileUploadInput') as HTMLInputElement;
                 if (fileInput) fileInput.value = '';
-                fetchDocs();
+            } else {
+                // Edit mode: save directly
+                const res = await fetch('/api/documents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, fileUrl: blob.url, expiryDate, vehicleId })
+                });
+                if (res.ok) {
+                    setFile(null);
+                    setExpiryDate('');
+                    const fileInput = document.getElementById('vehicleFileUploadInput') as HTMLInputElement;
+                    if (fileInput) fileInput.value = '';
+                    fetchDocs();
+                }
             }
         } catch (e: any) {
             console.error(e);
@@ -383,6 +429,19 @@ function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
             setUploading(false);
         }
     };
+
+    const allDocs = [
+        ...documents,
+        ...pendingDocuments.map((d, index) => ({
+            id: `pending-${index}`,
+            type: d.type,
+            status: 'UNSAVED',
+            expiryDate: d.expiryDate,
+            fileUrl: d.fileUrl,
+            isPending: true,
+            index
+        }))
+    ];
 
     return (
         <div className="py-4 flex flex-col gap-4">
@@ -422,13 +481,33 @@ function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
                     </TableHeader>
                     <TableBody className="bg-card">
                         {loading ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Loading...</TableCell></TableRow> :
-                         documents.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No documents found</TableCell></TableRow> :
-                         documents.map(doc => (
-                              <TableRow key={doc.id} className="border-border hover:bg-muted/50">
+                         allDocs.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No documents found</TableCell></TableRow> :
+                         allDocs.map((doc, docIdx) => (
+                              <TableRow key={doc.id || docIdx} className="border-border hover:bg-muted/50">
                                   <TableCell className="font-medium text-foreground">{doc.type.replace('_', ' ')}</TableCell>
-                                  <TableCell><Badge variant="outline" className="border-border text-foreground">{doc.status}</Badge></TableCell>
+                                  <TableCell>
+                                      <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-amber-500 border-amber-500/30 bg-amber-500/5' : 'text-foreground'}`}>
+                                          {doc.status}
+                                      </Badge>
+                                  </TableCell>
                                   <TableCell className="text-muted-foreground">{doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}</TableCell>
-                                  <TableCell>{doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline font-semibold">View</a> : '-'}</TableCell>
+                                  <TableCell className="flex items-center gap-2">
+                                      {doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline font-semibold">View</a> : '-'}
+                                      {doc.isPending && (
+                                          <Button 
+                                              variant="ghost" 
+                                              size="sm" 
+                                              className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-500/10 text-xs ml-auto"
+                                              onClick={() => {
+                                                  if (setPendingDocuments) {
+                                                      setPendingDocuments(prev => prev.filter((_, idx) => idx !== doc.index));
+                                                  }
+                                              }}
+                                          >
+                                              Remove
+                                          </Button>
+                                      )}
+                                  </TableCell>
                               </TableRow>
                           ))}
                     </TableBody>
