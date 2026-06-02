@@ -93,6 +93,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 if (Array.isArray(data)) setAccounts(data);
             })
             .catch(err => console.error(err));
+
+        fetch('/api/settings/organization')
+            .then(res => res.json())
+            .then(data => {
+                if (data && typeof data.autoDispatch === 'boolean') {
+                    setAutoDispatch(data.autoDispatch);
+                }
+            })
+            .catch(err => console.error("Error loading auto-dispatch default:", err));
     }, []);
 
     // Timing
@@ -281,14 +290,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             return;
         }
 
-        // Mandatory Flight Number Validation for Airports
+        // Mandatory Flight Number Validation for Airports (Outbound)
         if (showFlightInput && !flightNumber) {
             toast.error("Flight Number Required", { description: "Please enter a flight number for airport transfers." });
             return;
         }
 
-        if (isReturn && showFlightInput && !returnFlightNumber) {
-            toast.error("Return Flight Number Required", { description: "Please enter the return flight number for the airport." });
+        // Mandatory Return Flight Number Validation if Return Pickup is an Airport
+        if (isReturn && isAirport(returnPickup) && !returnFlightNumber) {
+            toast.error("Return Flight Number Required", { description: "Please enter the return flight number for airport pickups." });
             return;
         }
 
@@ -453,7 +463,16 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const addVia = () => { setVias([...vias, { address: '' }]); };
     const removeVia = (index: number) => { const newVias = [...vias]; newVias.splice(index, 1); setVias(newVias); };
     const updateVia = (index: number, address: string, lat?: number, lng?: number) => { const newVias = [...vias]; newVias[index].address = address; if (lat) newVias[index].lat = lat; if (lng) newVias[index].lng = lng; setVias(newVias); };
-    const isAirport = (address: string) => { return address.toLowerCase().includes('terminal') || address.toLowerCase().includes('airport') || address.toLowerCase().includes('gatwick') || address.toLowerCase().includes('heathrow'); }
+    const isAirport = (address: string) => {
+        if (!address) return false;
+        const addrLower = address.toLowerCase();
+        return addrLower.includes('terminal') ||
+               addrLower.includes('airport') ||
+               addrLower.includes('gatwick') ||
+               addrLower.includes('heathrow') ||
+               addrLower.includes('luton') ||
+               addrLower.includes('stansted');
+    }
     const showFlightInput = isAirport(pickup) || isAirport(dropoff);
 
     // Reset M&G if not airport
@@ -860,7 +879,18 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             type="checkbox"
                             id="returnToggle"
                             checked={isReturn}
-                            onChange={(e) => setIsReturn(e.target.checked)}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                setIsReturn(checked);
+                                if (checked) {
+                                    setReturnPickup(dropoff);
+                                    setReturnPickupCoords(dropoffCoords);
+                                    setReturnDropoff(pickup);
+                                    setReturnDropoffCoords(pickupCoords);
+                                    setReturnPassengers(passengers);
+                                    setReturnLuggage(luggage);
+                                }
+                            }}
                             disabled={isWaitAndReturn}
                             className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-blue-700 focus:ring-blue-700/20"
                         />
@@ -922,7 +952,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Return Flight Number (Optional)"
+                                    placeholder={isAirport(returnPickup) ? "Return Flight Number (Required)" : "Return Flight Number (Optional)"}
                                     className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50"
                                     value={returnFlightNumber}
                                     onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}

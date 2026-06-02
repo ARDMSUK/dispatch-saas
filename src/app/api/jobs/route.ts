@@ -21,6 +21,7 @@ export async function GET(req: Request) {
 
         const { searchParams } = new URL(req.url);
         const status = searchParams.get('status'); // Optional filter
+        const search = searchParams.get('search'); // Search query
 
         try {
             // Run Smart Dispatch Engine
@@ -35,7 +36,16 @@ export async function GET(req: Request) {
             where: {
                 tenantId,
                 contractRouteId: null, // Filter out school contract jobs
-                ...(status ? { status: status.toUpperCase() } : {})
+                ...(status && !search ? { status: status.toUpperCase() } : {}),
+                ...(search ? {
+                    OR: [
+                        { passengerName: { contains: search, mode: 'insensitive' } },
+                        { passengerPhone: { contains: search, mode: 'insensitive' } },
+                        { pickupAddress: { contains: search, mode: 'insensitive' } },
+                        { dropoffAddress: { contains: search, mode: 'insensitive' } },
+                        ...(!isNaN(Number(search)) ? [{ id: Number(search) }] : [])
+                    ]
+                } : {})
             },
             select: {
                 id: true,
@@ -78,7 +88,7 @@ export async function GET(req: Request) {
                 }
             },
             orderBy: { pickupTime: 'desc' },
-            take: 50
+            take: search ? 100 : 50
         });
 
         // Map to frontend shape

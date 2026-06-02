@@ -62,8 +62,11 @@ interface BookingManagerProps {
 
 export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: BookingManagerProps) {
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('PENDING_NOW');
+
+    // Search Box State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
     // Future Filter State
     const [futureFilter, setFutureFilter] = useState('ALL');
@@ -86,14 +89,21 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     const [flights, setFlights] = useState<Record<string, any>>({});
 
     useEffect(() => {
-        fetchJobs(); // Initial load
+        const timer = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500); // 500ms debounce
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        fetchJobs(true, debouncedSearchQuery); // Initial load and on query change
 
         const interval = setInterval(() => {
-            fetchJobs(false); // Silent background refresh
+            fetchJobs(false, debouncedSearchQuery); // Silent background refresh
         }, 30000); // 30 seconds
 
         return () => clearInterval(interval);
-    }, [refreshTrigger]);
+    }, [refreshTrigger, debouncedSearchQuery]);
 
     // Fetch Flight Data for active jobs with flight numbers
     useEffect(() => {
@@ -131,10 +141,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         }
     }, [jobs]); // Re-run when jobs list updates
 
-    const fetchJobs = async (showLoading = true) => {
+    const fetchJobs = async (showLoading = true, searchVal = '') => {
         if (showLoading) setLoading(true);
         try {
-            const res = await fetch('/api/jobs');
+            const queryParam = searchVal ? `?search=${encodeURIComponent(searchVal)}` : '';
+            const res = await fetch(`/api/jobs${queryParam}`);
             if (res.ok) {
                 const data = await res.json();
                 setJobs(data);
@@ -684,6 +695,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         )
     };
 
+    const displayedJobs = searchQuery ? jobs : filterJobs(activeTab);
+
     return (
         <div className="h-full flex flex-col bg-slate-50">
             <div className="p-4 border-b border-slate-200 space-y-3 bg-white">
@@ -717,7 +730,26 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 </TabsTrigger>
                             </TabsList>
                         </div>
-                        <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 shrink-0" onClick={() => fetchJobs(true)}>
+                        {/* Search Input Box */}
+                        <div className="relative w-48 md:w-64 shrink-0">
+                            <input
+                                type="text"
+                                placeholder="Search name, phone, address, ID..."
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-1.5 pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-2 top-1.5 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full text-xs font-bold"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+                        <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 shrink-0" onClick={() => fetchJobs(true, searchQuery)}>
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
@@ -764,14 +796,14 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-200/60">
                 {loading ? (
                     <div className="text-center py-20 text-slate-500 animate-pulse">Loading jobs...</div>
-                ) : filterJobs(activeTab).length === 0 ? (
+                ) : displayedJobs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-slate-500 border border-dashed border-slate-200 rounded-lg bg-slate-50">
                         <AlertCircle className="h-8 w-8 mb-2 opacity-20" />
-                        <p className="text-sm">No bookings in this category.</p>
-                        {activeTab === 'FUTURE' && <p className="text-xs text-slate-400 mt-1">Try adjusting the period filter.</p>}
+                        <p className="text-sm">{searchQuery ? "No search matches found." : "No bookings in this category."}</p>
+                        {activeTab === 'FUTURE' && !searchQuery && <p className="text-xs text-slate-400 mt-1">Try adjusting the period filter.</p>}
                     </div>
                 ) : (
-                    filterJobs(activeTab).map(job => (
+                    displayedJobs.map(job => (
                         <JobCard key={job.id} job={job} />
                     ))
                 )}

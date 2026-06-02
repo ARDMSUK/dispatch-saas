@@ -26,8 +26,8 @@ export class DispatchEngine {
             select: { autoDispatch: true, dispatchAlgorithm: true }
         });
 
-        if (!tenant?.autoDispatch) {
-            console.log(`[DispatchEngine] Auto-dispatch disabled for tenant ${tenantId}`);
+        if (!tenant) {
+            console.log(`[DispatchEngine] Tenant ${tenantId} not found`);
             return report;
         }
 
