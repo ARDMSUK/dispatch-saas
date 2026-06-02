@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -106,6 +106,28 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [pickupTime, setPickupTime] = useState(() => {
         return format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm");
     });
+
+    const timeInputRef = useRef<HTMLInputElement>(null);
+
+    const [pickupDate, pickupTimeOnly] = pickupTime.includes('T')
+        ? pickupTime.split('T')
+        : [pickupTime, '12:00'];
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newDate = e.target.value || format(new Date(), 'yyyy-MM-dd');
+        setPickupTime(`${newDate}T${pickupTimeOnly}`);
+    };
+
+    const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTime = e.target.value || '12:00';
+        setPickupTime(`${pickupDate}T${newTime}`);
+    };
+
+    useEffect(() => {
+        if (timeInputRef.current) {
+            timeInputRef.current.focus();
+        }
+    }, []);
 
     // Return Booking
     const [isReturn, setIsReturn] = useState(false);
@@ -473,6 +495,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         const now = new Date();
         now.setMinutes(now.getMinutes() + 10);
         setPickupTime(now.toISOString().slice(0, 16));
+
+        // Re-focus the hour segment of the time input
+        setTimeout(() => {
+            if (timeInputRef.current) {
+                timeInputRef.current.focus();
+            }
+        }, 50);
     };
 
     // ...
@@ -662,10 +691,17 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pickup Date & Time</label>
                     <div className="flex gap-2">
                         <input
-                            type="datetime-local"
+                            type="date"
                             className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
-                            value={pickupTime}
-                            onChange={e => setPickupTime(e.target.value)}
+                            value={pickupDate}
+                            onChange={handleDateChange}
+                        />
+                        <input
+                            type="time"
+                            ref={timeInputRef}
+                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
+                            value={pickupTimeOnly}
+                            onChange={handleTimeChange}
                         />
                         <Button
                             variant="outline"
