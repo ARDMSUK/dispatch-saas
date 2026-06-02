@@ -7,8 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Vehicle } from "@/lib/types";
-import { Plus, Search, Car, Pencil, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Vehicle, Document } from "@/lib/types";
+import { Plus, Search, Car, Pencil, Trash2, Upload, FileText } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function VehiclesPage() {
@@ -160,84 +161,93 @@ export default function VehiclesPage() {
                                 <Plus className="mr-2 h-4 w-4" /> Add Vehicle
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-card border-border text-foreground">
+                        <DialogContent className="bg-card border-border text-foreground max-w-2xl">
                             <DialogHeader>
                                 <DialogTitle className="text-foreground">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
                             </DialogHeader>
-                             <div className="grid gap-4 py-4">
-                                <Input
-                                    placeholder="Registration (License Plate)"
-                                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
-                                    value={formData.reg}
-                                    onChange={e => setFormData({ ...formData, reg: e.target.value })}
-                                />
-                                <div className="grid grid-cols-2 gap-4">
+                            <Tabs defaultValue="profile" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="profile">Profile</TabsTrigger>
+                                    <TabsTrigger value="documents" disabled={!editingId}>Compliance</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="profile" className="grid gap-4 py-4">
                                     <Input
-                                        placeholder="Make (e.g. Toyota)"
+                                        placeholder="Registration (License Plate)"
                                         className="bg-background border-input text-foreground placeholder:text-muted-foreground"
-                                        value={formData.make}
-                                        onChange={e => setFormData({ ...formData, make: e.target.value })}
+                                        value={formData.reg}
+                                        onChange={e => setFormData({ ...formData, reg: e.target.value })}
                                     />
-                                    <Input
-                                        placeholder="Model (e.g. Prius)"
-                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
-                                        value={formData.model}
-                                        onChange={e => setFormData({ ...formData, model: e.target.value })}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input
-                                        placeholder="Color"
-                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground"
-                                        value={formData.color}
-                                        onChange={e => setFormData({ ...formData, color: e.target.value })}
-                                    />
-                                    <select
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-ring"
-                                        value={formData.type}
-                                        onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                    >
-                                        <option value="Saloon">Saloon</option>
-                                        <option value="Estate">Estate</option>
-                                        <option value="Executive">Executive</option>
-                                        <option value="MPV">MPV</option>
-                                        <option value="MPV+">MPV+</option>
-                                        <option value="Minibus">Minibus</option>
-                                        <option value="Coach">Coach</option>
-                                    </select>
-                                </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Input
+                                            placeholder="Make (e.g. Toyota)"
+                                            className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                                            value={formData.make}
+                                            onChange={e => setFormData({ ...formData, make: e.target.value })}
+                                        />
+                                        <Input
+                                            placeholder="Model (e.g. Prius)"
+                                            className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                                            value={formData.model}
+                                            onChange={e => setFormData({ ...formData, model: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Input
+                                            placeholder="Color"
+                                            className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                                            value={formData.color}
+                                            onChange={e => setFormData({ ...formData, color: e.target.value })}
+                                        />
+                                        <select
+                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-ring"
+                                            value={formData.type}
+                                            onChange={e => setFormData({ ...formData, type: e.target.value })}
+                                        >
+                                            <option value="Saloon">Saloon</option>
+                                            <option value="Estate">Estate</option>
+                                            <option value="Executive">Executive</option>
+                                            <option value="MPV">MPV</option>
+                                            <option value="MPV+">MPV+</option>
+                                            <option value="Minibus">Minibus</option>
+                                            <option value="Coach">Coach</option>
+                                        </select>
+                                    </div>
 
-                                {/* Driver Assignment */}
-                                <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground ml-1">Assigned Driver</label>
-                                    <select
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-ring"
-                                        value={formData.driverId}
-                                        onChange={e => setFormData({ ...formData, driverId: e.target.value })}
-                                    >
-                                        <option value="unassigned">-- Unassigned --</option>
-                                        {drivers.map(driver => (
-                                            <option key={driver.id} value={driver.id}>
-                                                {driver.callsign} - {driver.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                    {/* Driver Assignment */}
+                                    <div className="space-y-1">
+                                        <label className="text-xs text-muted-foreground ml-1">Assigned Driver</label>
+                                        <select
+                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus:ring-1 focus:ring-ring"
+                                            value={formData.driverId}
+                                            onChange={e => setFormData({ ...formData, driverId: e.target.value })}
+                                        >
+                                            <option value="unassigned">-- Unassigned --</option>
+                                            {drivers.map(driver => (
+                                                <option key={driver.id} value={driver.id}>
+                                                    {driver.callsign} - {driver.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                                <div className="space-y-1">
-                                    <Input
-                                        type="date"
-                                        className="bg-background border-input text-foreground placeholder:text-muted-foreground block w-full"
-                                        placeholder="MOT/License Expiry"
-                                        value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
-                                        onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
-                                    />
-                                    <span className="text-[10px] text-muted-foreground ml-1">MOT/License Expiry</span>
-                                </div>
-                                <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
-                                    {editingId ? 'Update Vehicle' : 'Create Vehicle'}
-                                </Button>
-                            </div>
+                                    <div className="space-y-1">
+                                        <Input
+                                            type="date"
+                                            className="bg-background border-input text-foreground placeholder:text-muted-foreground block w-full"
+                                            placeholder="MOT/License Expiry"
+                                            value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
+                                        />
+                                        <span className="text-[10px] text-muted-foreground ml-1">MOT/License Expiry</span>
+                                    </div>
+                                    <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
+                                        {editingId ? 'Update Vehicle' : 'Create Vehicle'}
+                                    </Button>
+                                </TabsContent>
+                                <TabsContent value="documents">
+                                    {editingId && <VehicleDocuments vehicleId={editingId} />}
+                                </TabsContent>
+                            </Tabs>
                         </DialogContent>
                     </Dialog>
                 )}
@@ -316,6 +326,114 @@ export default function VehiclesPage() {
                     </Table>
                 </div>
             </Card>
+        </div>
+    );
+}
+
+function VehicleDocuments({ vehicleId }: { vehicleId: string }) {
+    const [documents, setDocuments] = useState<Document[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [type, setType] = useState('MOT');
+    const [file, setFile] = useState<File | null>(null);
+    const [expiryDate, setExpiryDate] = useState('');
+    const [uploading, setUploading] = useState(false);
+
+    const fetchDocs = async () => {
+        try {
+            const res = await fetch(`/api/documents?vehicleId=${vehicleId}`);
+            if (res.ok) {
+                setDocuments(await res.json());
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchDocs(); }, [vehicleId]);
+
+    const handleUpload = async () => {
+        if (!file) return alert("Please select a file");
+        setUploading(true);
+        try {
+            const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                method: 'POST',
+                body: file,
+            });
+            const blob = await response.json();
+            if (blob.error) throw new Error(blob.error);
+
+            const res = await fetch('/api/documents', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, fileUrl: blob.url, expiryDate, vehicleId })
+            });
+            if (res.ok) {
+                setFile(null);
+                setExpiryDate('');
+                const fileInput = document.getElementById('vehicleFileUploadInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+                fetchDocs();
+            }
+        } catch (e: any) {
+            console.error(e);
+            alert("Upload failed: " + e.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="py-4 flex flex-col gap-4">
+            <div className="bg-card p-4 rounded border border-border flex gap-2 items-end">
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Doc Type</label>
+                    <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+                        <option value="MOT">MOT Certificate</option>
+                        <option value="INSURANCE">Insurance Certificate</option>
+                        <option value="TAX">Road Tax</option>
+                        <option value="PHV_LICENSE">PHV Vehicle License</option>
+                        <option value="LOGBOOK">Logbook (V5C)</option>
+                    </select>
+                </div>
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">File</label>
+                    <Input id="vehicleFileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-background text-xs pt-2 border-input cursor-pointer text-foreground" />
+                </div>
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Expiry</label>
+                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground" />
+                </div>
+                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
+                    {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Add</>}
+                </Button>
+            </div>
+            
+            <div className="border border-border rounded overflow-hidden">
+                <Table>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="border-border">
+                            <TableHead className="text-muted-foreground font-semibold">Type</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Status</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Expiry</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">File</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="bg-card">
+                        {loading ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Loading...</TableCell></TableRow> :
+                         documents.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No documents found</TableCell></TableRow> :
+                         documents.map(doc => (
+                              <TableRow key={doc.id} className="border-border hover:bg-muted/50">
+                                  <TableCell className="font-medium text-foreground">{doc.type.replace('_', ' ')}</TableCell>
+                                  <TableCell><Badge variant="outline" className="border-border text-foreground">{doc.status}</Badge></TableCell>
+                                  <TableCell className="text-muted-foreground">{doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}</TableCell>
+                                  <TableCell>{doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline font-semibold">View</a> : '-'}</TableCell>
+                              </TableRow>
+                          ))}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 }

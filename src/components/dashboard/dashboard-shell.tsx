@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare, Sparkles, ExternalLink } from 'lucide-react';
+import { Menu, LayoutDashboard, Settings, Users, Car, FileText, Bell, Phone, CreditCard, Map, Building2, Calculator, LogOut, User as UserIcon, MessageSquare, Sparkles, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -23,6 +23,24 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
     const { data: session, update } = useSession();
+
+    const [isFleetOpen, setIsFleetOpen] = useState(() => {
+        return pathname.startsWith('/dashboard/drivers') || 
+               pathname.startsWith('/dashboard/vehicles') || 
+               pathname.startsWith('/dashboard/compliance') ||
+               pathname.startsWith('/dashboard/staff/pas');
+    });
+
+    useEffect(() => {
+        if (
+            pathname.startsWith('/dashboard/drivers') || 
+            pathname.startsWith('/dashboard/vehicles') || 
+            pathname.startsWith('/dashboard/compliance') ||
+            pathname.startsWith('/dashboard/staff/pas')
+        ) {
+            setIsFleetOpen(true);
+        }
+    }, [pathname]);
 
     // Explicit Role Check
     const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(userRole as string);
@@ -78,6 +96,40 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
         );
     };
 
+    const CollapsibleNavGroup = ({ 
+        label, 
+        icon: Icon, 
+        isOpen, 
+        setIsOpen, 
+        children 
+    }: { 
+        label: string, 
+        icon: any, 
+        isOpen: boolean, 
+        setIsOpen: (val: boolean) => void, 
+        children: React.ReactNode 
+    }) => {
+        return (
+            <div className="flex flex-col gap-1">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center justify-between w-full px-3 py-2.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-all duration-200 cursor-pointer"
+                >
+                    <div className="flex items-center gap-3">
+                        <Icon className="h-4.5 w-4.5 shrink-0" />
+                        <span className="text-sm font-medium tracking-wide">{label}</span>
+                    </div>
+                    {isOpen ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground/70" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />}
+                </button>
+                {isOpen && (
+                    <div className="pl-6 flex flex-col gap-1 border-l border-border/60 ml-[21px] mt-1 transition-all duration-200 animate-in fade-in slide-in-from-top-1">
+                        {children}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const handleLogout = async () => {
         await signOut({ redirect: false });
         window.location.href = '/login';
@@ -92,14 +144,16 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                 <NavItem href="/dashboard/contracts" icon={Building2} label="School Contracts" />
             )}
             
-            <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
-            
-            {hasSchoolContracts && (
-                <NavItem href="/dashboard/staff/pas" icon={UserIcon} label="Passenger Assistants" />
-            )}
-            
-            <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
-            <NavItem href="/dashboard/compliance" icon={FileText} label="Compliance" />
+            <CollapsibleNavGroup label="Fleet Management" icon={Users} isOpen={isFleetOpen} setIsOpen={setIsFleetOpen}>
+                <NavItem href="/dashboard/drivers" icon={Users} label="Drivers" />
+                
+                {hasSchoolContracts && (
+                    <NavItem href="/dashboard/staff/pas" icon={UserIcon} label="Passenger Assistants" />
+                )}
+                
+                <NavItem href="/dashboard/vehicles" icon={Car} label="Vehicles" />
+                <NavItem href="/dashboard/compliance" icon={FileText} label="Compliance" />
+            </CollapsibleNavGroup>
 
             <div className="my-2 border-t border-border"></div>
             <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />
