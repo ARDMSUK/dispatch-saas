@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
+import { LocationInput } from '@/components/dashboard/location-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,19 +62,7 @@ export default function SettingsPage() {
     const [apiKey, setApiKey] = useState('');
     const [user, setUser] = useState<any>(null);
 
-    // Address Autocomplete Hook
-    const {
-        ready,
-        value,
-        suggestions: { status, data },
-        setValue,
-        clearSuggestions,
-    } = usePlacesAutocomplete({
-        requestOptions: {
-            componentRestrictions: { country: 'uk' },
-        },
-        debounce: 300,
-    });
+    // Address Autocomplete Hook replaced with unified LocationInput
 
     useEffect(() => {
         fetchData();
@@ -93,8 +81,7 @@ export default function SettingsPage() {
                 setLat(data.lat);
                 setLng(data.lng);
 
-                // Initialize autocomplete value
-                setValue(data.address || '', false);
+                // Initialize office address
 
                 setSlug(data.slug);
                 setApiKey(data.apiKey);
@@ -139,22 +126,7 @@ export default function SettingsPage() {
         }
     };
 
-    const handleAddressSelect = async (description: string) => {
-        setValue(description, false);
-        setAddress(description);
-        clearSuggestions();
-
-        try {
-            const results = await getGeocode({ address: description });
-            const { lat, lng } = await getLatLng(results[0]);
-            setLat(lat);
-            setLng(lng);
-            toast.success("Location coordinates updated");
-        } catch (error) {
-            console.error("Error: ", error);
-            toast.error("Failed to get coordinates");
-        }
-    };
+    // Handled directly by LocationInput component
 
     const handleSave = async () => {
         setSaving(true);
@@ -263,30 +235,18 @@ export default function SettingsPage() {
 
                     <div className="md:col-span-2 relative">
                         <Label className="text-muted-foreground font-medium">Operating Address</Label>
-                        <Input
-                            value={value}
-                            onChange={(e) => {
-                                setValue(e.target.value);
-                                setAddress(e.target.value); // Sync basic text
+                        <LocationInput
+                            value={address}
+                            onChange={setAddress}
+                            onLocationSelect={(loc) => {
+                                setAddress(loc.address);
+                                setLat(loc.lat);
+                                setLng(loc.lng);
+                                toast.success("Location coordinates updated");
                             }}
-                            disabled={!ready}
                             placeholder="Search for your office address..."
-                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1"
+                            className="bg-background border-input text-foreground placeholder:text-muted-foreground mt-1 w-full rounded-md border p-2 text-sm"
                         />
-                        {/* Autocomplete Suggestions */}
-                        {status === "OK" && (
-                            <ul className="absolute z-50 w-full bg-popover border border-border rounded-md mt-1 shadow-xl max-h-60 overflow-auto">
-                                {data.map(({ place_id, description }) => (
-                                    <li
-                                        key={place_id}
-                                        onClick={() => handleAddressSelect(description)}
-                                        className="px-4 py-2 hover:bg-accent cursor-pointer text-sm text-popover-foreground"
-                                    >
-                                        {description}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
                         <p className="text-xs text-muted-foreground mt-2">
                             This address will be used to center the Dispatch Map.
                             {lat && lng && <span className="text-emerald-500 dark:text-emerald-400 ml-2 font-medium">✓ Coordinates Found</span>}

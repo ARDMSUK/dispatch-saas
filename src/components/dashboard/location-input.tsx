@@ -1,15 +1,10 @@
 /* eslint-disable */
 "use client";
 
-import { useEffect, useState } from "react";
-import usePlacesAutocomplete, {
-    getGeocode,
-    getLatLng,
-} from "use-places-autocomplete";
+import { useEffect, useState, useRef } from "react";
 import { Check, Loader2, MapPin, Plane } from "lucide-react";
 import { toast } from "sonner";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 
 interface LocationInputProps {
@@ -30,29 +25,15 @@ export function LocationInput({
     disabled
 }: LocationInputProps) {
     const [open, setOpen] = useState(false);
-
-    const {
-        ready,
-        value: inputValue,
-        suggestions: { status, data },
-        setValue,
-        clearSuggestions,
-        init,
-    } = usePlacesAutocomplete({
-        requestOptions: {
-            componentRestrictions: { country: "gb" },
-            locationBias: {
-                center: { lat: 51.576, lng: -0.708 },
-                radius: 16000 
-            }
-        },
-        debounce: 300,
-        initOnMount: false, 
-    });
+    const [inputValue, setInputValue] = useState(value);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [customSuggestions, setCustomSuggestions] = useState<{ id: string, label: string, address: string }[]>([]);
     const [frequentLocations, setFrequentLocations] = useState<{ address: string, count: number }[]>([]);
 
+    // Fetch frequent locations
     useEffect(() => {
         const fetchFrequent = async () => {
             try {
@@ -70,7 +51,16 @@ export function LocationInput({
         fetchFrequent();
     }, []);
 
+    // Sync input value with external value prop changes
     useEffect(() => {
+        if (value !== inputValue) {
+            setInputValue(value);
+        }
+    }, [value]);
+
+    // Handle typing and trigger autocomplete API fetch (debounced)
+    useEffect(() => {
+        // Quick custom suggestions for Heathrow terminals
         const input = inputValue.toLowerCase().trim();
         const matches = [];
 
@@ -83,7 +73,7 @@ export function LocationInput({
             });
         }
 
-        if (input.includes('heathrow') || input.includes('lhr')) {
+        if (input.includes('heathrow') || input.includes('lhr') || input.includes('ter')) {
             if (!input.includes('2') && !input.includes('3') && !input.includes('4') && !input.includes('5')) {
                 matches.push(
                     { id: 'lhr-t2', label: 'Heathrow Terminal 2', address: 'Heathrow Terminal 2, Longford, Hounslow, UK' },
@@ -93,82 +83,109 @@ export function LocationInput({
                 );
             }
         }
+        setCustomSuggestions(matches.slice(0, 4));
 
-        setCustomSuggestions(matches.slice(0, 4)); 
+        // Fetch general suggestions from API
+        if (inputValue.length < 3) {
+            setSuggestions([]);
+            return;
+        }
+
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
+        }
+
+        searchTimeout.current = setTimeout(async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/external/autocomplete?q=${encodeURIComponent(inputValue)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Array.isArray(data.results)) {
+                        setSuggestions(data.results);
+                    }
+                }
+            } catch (e) {
+                console.error("Autocomplete lookup failed", e);
+            } finally {
+                setLoading(false);
+            }
+        }, 300);
+
+        return () => {
+            if (searchTimeout.current) {
+                clearTimeout(searchTimeout.current);
+            }
+        };
     }, [inputValue]);
 
-    useEffect(() => {
-        if (value !== inputValue) {
-            setValue(value, false);
-        }
-    }, [value, setValue]);
-
-    const [scriptLoaded, setScriptLoaded] = useState(false);
-    useEffect(() => {
-        if (typeof window !== "undefined" && window.google) {
-            setScriptLoaded(true);
-            init();
-        } else {
-            const interval = setInterval(() => {
-                if (typeof window !== "undefined" && window.google) {
-                    setScriptLoaded(true);
-                    init();
-                    clearInterval(interval);
+    // Direct helper to geocode selected address (e.g. from frequent or custom lists)
+    const geocodeAddressText = async (address: string): Promise<{ lat: number, lng: number } | null> => {
+        try {
+            const res = await fetch(`/api/external/autocomplete?q=${encodeURIComponent(address)}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && Array.isArray(data.results) && data.results.length > 0) {
+                    const match = data.results[0];
+                    return {
+                        lat: parseFloat(String(match.lat)),
+                        lng: parseFloat(String(match.lng))
+                    };
                 }
-            }, 500);
-            return () => clearInterval(interval);
+            }
+        } catch (e) {
+            console.error("Address resolution failed", e);
         }
-    }, [init]);
+        return null;
+    }
 
-    const handleSelect = async (address: string) => {
-        setValue(address, false);
-        clearSuggestions();
+    const handleSelect = (item: any) => {
+        setInputValue(item.value);
+        setSuggestions([]);
         setOpen(false);
 
-        try {
-            const results = await getGeocode({ address });
-            const { lat, lng } = await getLatLng(results[0]);
-            onLocationSelect({ address, lat, lng });
-            if (onChange) onChange(address);
-        } catch (error) {
-            console.error("Error fetching coordinates: ", error);
-            toast.error("Could not fetch precise location, using address text.");
-            if (onChange) onChange(address);
-        }
+        const lat = parseFloat(String(item.lat));
+        const lng = parseFloat(String(item.lng));
+
+        onLocationSelect({ address: item.value, lat, lng });
+        if (onChange) onChange(item.value);
     };
 
     const handleCustomSelect = async (item: { label: string, address: string }) => {
-        setValue(item.address, false);
-        clearSuggestions();
+        setInputValue(item.address);
+        setSuggestions([]);
         setOpen(false);
-        try {
-            const results = await getGeocode({ address: item.address });
-            const { lat, lng } = await getLatLng(results[0]);
-            onLocationSelect({ address: item.address, lat, lng });
+        setLoading(true);
+
+        const coords = await geocodeAddressText(item.address);
+        setLoading(false);
+
+        if (coords) {
+            onLocationSelect({ address: item.address, lat: coords.lat, lng: coords.lng });
             if (onChange) onChange(item.address);
-        } catch (e) {
-            console.error("Geocoding failed for shortcut", e);
-            toast.error("Locating failed, check network.");
+        } else {
+            toast.error("Could not geocode Heathrow Terminal, check network.");
+            if (onChange) onChange(item.address);
         }
-    }
+    };
 
-    const handleFrequentSelect = (addr: string) => {
-        setValue(addr, false);
+    const handleFrequentSelect = async (addr: string) => {
+        setInputValue(addr);
+        setSuggestions([]);
         setOpen(false);
-        handleSelect(addr);
-    }
+        setLoading(true);
 
-    if (!scriptLoaded) {
-        return (
-            <div className="relative w-full">
-                <input
-                    disabled
-                    className={cn(className, "opacity-50 cursor-not-allowed")}
-                    placeholder="Loading maps..."
-                />
-            </div>
-        )
-    }
+        const coords = await geocodeAddressText(addr);
+        setLoading(false);
+
+        if (coords) {
+            onLocationSelect({ address: addr, lat: coords.lat, lng: coords.lng });
+            if (onChange) onChange(addr);
+        } else {
+            toast.error("Could not geocode address, check network.");
+            if (onChange) onChange(addr);
+        }
+    };
 
     const filteredFrequent = inputValue.length < 2
         ? frequentLocations
@@ -176,24 +193,29 @@ export function LocationInput({
 
     return (
         <div className="relative w-full">
-            <input
-                type="text"
-                autoComplete="off"
-                value={inputValue}
-                onChange={(e) => {
-                    const val = e.target.value;
-                    setValue(val);
-                    if (onChange) onChange(val);
-                    setOpen(true);
-                }}
-                onFocus={() => { if (ready) setOpen(true); }}
-                onBlur={() => setTimeout(() => setOpen(false), 200)}
-                placeholder={placeholder}
-                disabled={disabled || !ready}
-                className={cn(className, "dark:bg-black/40 dark:border-white/10 dark:text-white dark:placeholder:text-slate-500")}
-            />
+            <div className="relative flex items-center w-full">
+                <input
+                    type="text"
+                    autoComplete="off"
+                    value={inputValue}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setInputValue(val);
+                        if (onChange) onChange(val);
+                        setOpen(true);
+                    }}
+                    onFocus={() => { setOpen(true); }}
+                    onBlur={() => setTimeout(() => setOpen(false), 200)}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    className={cn(className, "dark:bg-black/40 dark:border-white/10 dark:text-white dark:placeholder:text-slate-500 pr-10")}
+                />
+                {loading && (
+                    <Loader2 className="absolute right-3 h-4 w-4 animate-spin text-slate-400" />
+                )}
+            </div>
             
-            {open && (
+            {open && (suggestions.length > 0 || filteredFrequent.length > 0 || customSuggestions.length > 0) && (
                 <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 dark:bg-[#1e1e24] border border-slate-200 dark:border-white/10 shadow-2xl rounded-md overflow-hidden">
                     <Command shouldFilter={false} className="bg-slate-100 dark:bg-[#1e1e24] w-full max-h-80 overflow-y-auto overflow-x-hidden">
                         <CommandList>
@@ -232,31 +254,24 @@ export function LocationInput({
                                 </CommandGroup>
                             )}
 
-                            {/* GOOGLE RESULTS */}
-                            {status === "OK" && (
-                                <CommandGroup heading="Google Locations" className="dark:text-slate-400">
-                                    {data.map(({ place_id, description, structured_formatting }) => (
+                            {/* SUGGESTED LOCATIONS */}
+                            {suggestions.length > 0 && (
+                                <CommandGroup heading="Suggested Locations" className="dark:text-slate-400">
+                                    {suggestions.map((item, i) => (
                                         <CommandItem
-                                            key={place_id}
-                                            value={description}
-                                            onSelect={handleSelect}
+                                            key={`sugg-${i}`}
+                                            value={item.label}
+                                            onSelect={() => handleSelect(item)}
                                             className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-blue-700 dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
                                         >
                                             <MapPin className="mr-2 h-4 w-4 opacity-50 dark:opacity-70" />
                                             <span className="truncate">
-                                                <span className="font-medium">{structured_formatting.main_text}</span>
-                                                <span className="ml-2 text-xs text-muted-foreground dark:text-slate-400">{structured_formatting.secondary_text}</span>
+                                                <span className="font-medium">{item.label}</span>
                                             </span>
-                                            {value === description && <Check className="ml-auto h-4 w-4 opacity-50" />}
+                                            {value === item.label && <Check className="ml-auto h-4 w-4 opacity-50" />}
                                         </CommandItem>
                                     ))}
                                 </CommandGroup>
-                            )}
-
-                            {status !== "OK" && inputValue.length > 0 && customSuggestions.length === 0 && (
-                                <div className="py-6 text-center text-sm text-muted-foreground dark:text-slate-400">
-                                    {status === "ZERO_RESULTS" ? "No locations found." : "Typing..."}
-                                </div>
                             )}
                         </CommandList>
                     </Command>
