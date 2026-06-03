@@ -92,7 +92,7 @@ export function DispatchDriverDialog({ job, open, onOpenChange, onSuccess }: Dis
                             <option value="">-- Select Driver --</option>
                             {drivers.map((d: any) => (
                                 <option key={d.id} value={d.id}>
-                                    {d.status === 'ONLINE' ? '🟢' : d.status === 'BUSY' ? '🟠' : '🔴'} {d.callsign} - {d.name} ({d.status})
+                                    {(d.status === 'ONLINE' || d.status === 'FREE') ? '🟢' : d.status === 'BUSY' ? '🟠' : '🔴'} {d.callsign} - {d.name} ({d.status})
                                 </option>
                             ))}
                         </select>

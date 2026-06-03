@@ -127,6 +127,42 @@ export async function PATCH(
                     }
                 });
             }
+        } else if (status === 'PENDING' || status === 'UNASSIGNED') {
+            const currentJob = await prisma.job.findUnique({ where: { id: jobId } });
+            const dataToUpdate = {
+                ...updateData,
+                driverId: null,
+            };
+            if (currentJob?.driverId) {
+                const [job, driver] = await prisma.$transaction([
+                    prisma.job.update({
+                        where: { id: jobId },
+                        data: dataToUpdate,
+                        include: {
+                            driver: {
+                                include: { vehicles: true }
+                            },
+                            customer: true
+                        }
+                    }),
+                    prisma.driver.update({
+                        where: { id: currentJob.driverId },
+                        data: { status: 'ONLINE' }
+                    })
+                ]);
+                updatedJob = job;
+            } else {
+                updatedJob = await prisma.job.update({
+                    where: { id: jobId },
+                    data: dataToUpdate,
+                    include: {
+                        driver: {
+                            include: { vehicles: true }
+                        },
+                        customer: true
+                    }
+                });
+            }
         } else {
             updatedJob = await prisma.job.update({
                 where: { id: jobId },
