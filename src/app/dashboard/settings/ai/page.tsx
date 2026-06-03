@@ -241,11 +241,11 @@ export default function TenantAIPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 {/* WHATSAPP AGENT CARD */}
-                <Card className="border-emerald-200 bg-emerald-50/10">
-                    <CardHeader className="pb-4 border-b border-emerald-100">
+                <Card className={status === "CONNECTED" ? "border-emerald-200 bg-emerald-50/10" : "border-slate-200"}>
+                    <CardHeader className={`pb-4 border-b ${status === "CONNECTED" ? "border-emerald-100" : "border-slate-100"}`}>
                         <div className="flex justify-between items-start">
-                            <CardTitle className="flex items-center gap-2 text-emerald-800">
-                                <MessageSquare className="w-5 h-5" />
+                            <CardTitle className={`flex items-center gap-2 ${status === "CONNECTED" ? "text-emerald-800" : "text-slate-800"}`}>
+                                <MessageSquare className="w-5 h-5 text-emerald-600" />
                                 WhatsApp AI Agent
                             </CardTitle>
                             {status === "CONNECTED" ? (
@@ -258,7 +258,7 @@ export default function TenantAIPage() {
                                 </span>
                             )}
                         </div>
-                        <CardDescription className="text-emerald-700/70 pt-2">
+                        <CardDescription className={status === "CONNECTED" ? "text-emerald-700/70 pt-2" : "pt-2"}>
                             Connect your business WhatsApp number by scanning a QR code. The Cabot AI Agent will instantly take over and autonomously handle inbound reservations.
                         </CardDescription>
                     </CardHeader>
@@ -266,7 +266,7 @@ export default function TenantAIPage() {
                         
                         {/* Status UI Contexts */}
                         {(!status || status === "DISCONNECTED" || (status === "CONNECTING" && !qrCode)) && (
-                            <div className="bg-white border rounded-xl p-6 text-center space-y-4 shadow-sm">
+                            <div className="bg-white border rounded-xl p-4 text-center space-y-4 shadow-sm">
                                 <div className="mx-auto w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
                                     <QrCode className="w-6 h-6 text-emerald-600" />
                                 </div>
@@ -277,9 +277,9 @@ export default function TenantAIPage() {
                                 <Button 
                                     onClick={requestWhatsAppQR} 
                                     disabled={loading}
-                                    className="bg-emerald-600 hover:bg-emerald-700 w-full font-medium shadow-sm transition-all"
+                                    className="bg-emerald-600 hover:bg-emerald-700 w-full text-xs font-medium shadow-sm transition-all"
                                 >
-                                    {loading ? "Waking up Gateway..." : "Generate Connection QR"}
+                                    {loading ? "Waking up..." : "Generate QR Code"}
                                 </Button>
                             </div>
                         )}
