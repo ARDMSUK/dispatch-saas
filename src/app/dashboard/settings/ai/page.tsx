@@ -241,7 +241,7 @@ export default function TenantAIPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 {/* WHATSAPP AGENT CARD */}
-                <Card className={status === "CONNECTED" ? "border-emerald-200 bg-emerald-50/10" : "border-slate-200"}>
+                <Card className={`overflow-hidden relative transition-all duration-300 ${status === "CONNECTED" ? "border-emerald-200 bg-emerald-50/10" : "border-slate-200 bg-muted/30"}`}>
                     <CardHeader className={`pb-4 border-b ${status === "CONNECTED" ? "border-emerald-100" : "border-slate-100"}`}>
                         <div className="flex justify-between items-start">
                             <CardTitle className={`flex items-center gap-2 ${status === "CONNECTED" ? "text-emerald-800" : "text-slate-800"}`}>
@@ -259,10 +259,10 @@ export default function TenantAIPage() {
                             )}
                         </div>
                         <CardDescription className={status === "CONNECTED" ? "text-emerald-700/70 pt-2" : "pt-2"}>
-                            Connect your business WhatsApp number by scanning a QR code. The Cabot AI Agent will instantly take over and autonomously handle inbound reservations.
+                            Connect your business WhatsApp number by scanning a QR code. The Cabai AI Agent will instantly take over and autonomously handle inbound reservations.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6 space-y-6">
+                    <CardContent className="pt-4 space-y-4">
                         
                         {/* Status UI Contexts */}
                         {(!status || status === "DISCONNECTED" || (status === "CONNECTING" && !qrCode)) && (
@@ -335,7 +335,7 @@ export default function TenantAIPage() {
                 </Card>
 
                 {/* WEB CHAT AI CARD */}
-                <Card className={`overflow-hidden relative transition-all duration-300 ${hasWebChat ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-200'}`}>
+                <Card className={`overflow-hidden relative transition-all duration-300 ${hasWebChat ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-200 bg-muted/30'}`}>
                     <CardHeader className={`pb-4 border-b ${hasWebChat ? 'border-indigo-100' : 'border-slate-100'}`}>
                         <div className="flex justify-between items-start">
                             <CardTitle className={`flex items-center gap-2 ${hasWebChat ? 'text-indigo-800' : 'text-slate-700'}`}>
@@ -356,7 +356,7 @@ export default function TenantAIPage() {
                             Embed our interactive AI Booking Agent directly onto your website. It can answer customer questions, provide quotes, and take modern bookings 24/7.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6 space-y-4">
+                    <CardContent className="pt-4 space-y-4">
                         {hasWebChat ? (
                             <div className="space-y-4">
                                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 space-y-2">
@@ -398,7 +398,7 @@ export default function TenantAIPage() {
                 </Card>
 
                 {/* VOICE AI AGENT CARD */}
-                <Card className={`border-slate-200 overflow-hidden relative ${!hasVoiceAi ? 'opacity-80' : ''}`}>
+                <Card className={`border-slate-200 overflow-hidden relative bg-muted/30 ${!hasVoiceAi ? 'opacity-80' : ''}`}>
                     <CardHeader className="pb-4 border-b border-slate-100">
                         <div className="flex justify-between items-start">
                             <CardTitle className="flex items-center gap-2 text-indigo-700">
@@ -423,7 +423,7 @@ export default function TenantAIPage() {
                             Deploy an autonomous phone-booking voice assistant. It estimates fares, schedules bookings, and answers FAQs.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6 space-y-4">
+                    <CardContent className="pt-4 space-y-4">
                         {!hasVoiceAi ? (
                             <div className="bg-slate-50 border rounded-xl p-4 text-center space-y-2">
                                 <p className="text-xs text-slate-500">
@@ -470,7 +470,7 @@ export default function TenantAIPage() {
                 </Card>
 
                 {/* AI COPILOT CARD */}
-                <Card className={`border-slate-200 overflow-hidden relative ${!hasAiCopilot ? 'opacity-80' : ''}`}>
+                <Card className={`border-slate-200 overflow-hidden relative bg-muted/30 ${!hasAiCopilot ? 'opacity-80' : ''}`}>
                     <CardHeader className="pb-4 border-b border-slate-100">
                         <div className="flex justify-between items-start">
                             <CardTitle className="flex items-center gap-2 text-indigo-700">
@@ -495,7 +495,7 @@ export default function TenantAIPage() {
                             Enables Voice and WhatsApp AI to fetch real-time ETAs/driver details and coordinate booking modifications.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6 space-y-4">
+                    <CardContent className="pt-4 space-y-4">
                         {!hasAiCopilot ? (
                             <div className="bg-slate-50 border rounded-xl p-4 text-center space-y-2">
                                 <p className="text-xs text-slate-500">
