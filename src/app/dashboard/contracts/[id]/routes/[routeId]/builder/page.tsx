@@ -16,6 +16,7 @@ export default function RouteBuilderPage() {
     const router = useRouter();
     const [route, setRoute] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [savingRoute, setSavingRoute] = useState(false);
 
     // Stop Manager State
     const [newStopAddress, setNewStopAddress] = useState("");
@@ -38,6 +39,7 @@ export default function RouteBuilderPage() {
             }
         } catch (error) {
             console.error(error);
+            toast.error("Failed to load route details");
         } finally {
             setLoading(false);
         }
@@ -47,10 +49,39 @@ export default function RouteBuilderPage() {
         fetchRoute();
     }, [params?.id, params?.routeId]);
 
+    const handleSaveRoute = async () => {
+        if (!route) return;
+        setSavingRoute(true);
+        try {
+            const res = await fetch(`/api/routes/${route.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: route.name,
+                    routeNumber: route.routeNumber,
+                    requiresWav: route.requiresWav,
+                    requiresPa: route.requiresPa
+                })
+            });
+
+            if (res.ok) {
+                toast.success("Route saved successfully");
+                fetchRoute();
+            } else {
+                toast.error("Failed to save route");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("An error occurred while saving");
+        } finally {
+            setSavingRoute(false);
+        }
+    };
+
     const handleAddStop = async () => {
         if (!newStopAddress) return;
         try {
-            const res = await fetch(`/api/routes/${route.id}/stops/route`, {
+            const res = await fetch(`/api/routes/${route.id}/stops`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -74,10 +105,28 @@ export default function RouteBuilderPage() {
         }
     };
 
+    const handleRemoveStop = async (stopId: string) => {
+        if (!confirm("Are you sure you want to remove this stop?")) return;
+        try {
+            const res = await fetch(`/api/routes/${route.id}/stops?stopId=${stopId}`, {
+                method: "DELETE"
+            });
+
+            if (res.ok) {
+                toast.success("Stop removed");
+                fetchRoute();
+            } else {
+                toast.error("Failed to remove stop");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const handleAddStudent = async () => {
         if (!newStudentName) return;
         try {
-            const res = await fetch(`/api/routes/${route.id}/students/route`, {
+            const res = await fetch(`/api/routes/${route.id}/students`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -101,6 +150,24 @@ export default function RouteBuilderPage() {
         }
     };
 
+    const handleRemoveStudent = async (studentId: string) => {
+        if (!confirm("Are you sure you want to remove this student?")) return;
+        try {
+            const res = await fetch(`/api/routes/${route.id}/students?studentId=${studentId}`, {
+                method: "DELETE"
+            });
+
+            if (res.ok) {
+                toast.success("Student removed");
+                fetchRoute();
+            } else {
+                toast.error("Failed to remove student");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     if (loading) return <div className="p-10 text-slate-500">Loading Route Builder...</div>;
     if (!route) return <div className="p-10 text-red-500">Route not found</div>;
 
@@ -116,8 +183,8 @@ export default function RouteBuilderPage() {
                         <p className="text-slate-500 mt-1">{route.name} {route.routeNumber && `(${route.routeNumber})`}</p>
                     </div>
                 </div>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md">
-                    <Save className="mr-2 h-4 w-4" /> Save Route
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md" onClick={handleSaveRoute} disabled={savingRoute}>
+                    <Save className="mr-2 h-4 w-4" /> {savingRoute ? "Saving..." : "Save Route"}
                 </Button>
             </div>
 
@@ -152,9 +219,14 @@ export default function RouteBuilderPage() {
                                                 <p className="font-medium text-slate-800">{stop.address}</p>
                                                 <p className="text-xs text-slate-500 font-mono mt-1">Type: {stop.type}</p>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-right flex flex-col items-end">
                                                 <p className="text-lg font-bold text-indigo-700 font-mono">{stop.scheduledTime || "--:--"}</p>
-                                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 h-6 px-2 mt-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-red-500 hover:text-red-700 h-6 px-2 mt-1"
+                                                    onClick={() => handleRemoveStop(stop.id)}
+                                                >
                                                     Remove
                                                 </Button>
                                             </div>
@@ -179,7 +251,7 @@ export default function RouteBuilderPage() {
                             <div className="md:col-span-3 space-y-2">
                                 <label className="text-xs font-semibold text-slate-500 uppercase">Stop Type</label>
                                 <select 
-                                    className="w-full flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                                    className="w-full flex h-10 items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
                                     value={newStopType}
                                     onChange={e => setNewStopType(e.target.value)}
                                 >
@@ -207,7 +279,7 @@ export default function RouteBuilderPage() {
                                 route.students.map((student: any) => (
                                     <Card key={student.id} className="border-slate-200 shadow-sm">
                                         <CardContent className="p-4 flex justify-between items-start">
-                                            <div>
+                                            <div className="flex-1">
                                                 <h3 className="font-bold text-slate-800 text-lg">{student.name}</h3>
                                                 <div className="mt-2 space-y-1">
                                                     {student.riskAssessmentNotes && (
@@ -224,7 +296,12 @@ export default function RouteBuilderPage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-500">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-slate-400 hover:text-red-500"
+                                                onClick={() => handleRemoveStudent(student.id)}
+                                            >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </CardContent>
@@ -270,27 +347,53 @@ export default function RouteBuilderPage() {
                 <TabsContent value="settings" className="space-y-6">
                     <Card className="border-slate-200 shadow-sm max-w-2xl">
                         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
-                            <CardTitle className="text-lg">Route Constraints</CardTitle>
+                            <CardTitle className="text-lg">Route Details & Constraints</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-6 space-y-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-600">Route Name</label>
+                                    <Input
+                                        value={route.name || ""}
+                                        onChange={e => setRoute({ ...route, name: e.target.value })}
+                                        placeholder="e.g. Morning Run"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-600">Route Number / Code</label>
+                                    <Input
+                                        value={route.routeNumber || ""}
+                                        onChange={e => setRoute({ ...route, routeNumber: e.target.value })}
+                                        placeholder="e.g. RTE-100A"
+                                    />
+                                </div>
+                            </div>
+
+                            <hr className="border-slate-100" />
+
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h4 className="font-medium text-slate-900">Wheelchair Accessible (WAV) Required</h4>
                                     <p className="text-sm text-slate-500">Only WAV-compliant vehicles can be assigned to this route.</p>
                                 </div>
-                                <Switch checked={route.requiresWav} />
+                                <Switch
+                                    checked={route.requiresWav || false}
+                                    onCheckedChange={checked => setRoute({ ...route, requiresWav: checked })}
+                                />
                             </div>
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h4 className="font-medium text-slate-900">Passenger Assistant Required</h4>
                                     <p className="text-sm text-slate-500">A vetted PA must be assigned alongside the driver.</p>
                                 </div>
-                                <Switch checked={route.requiresPa} />
+                                <Switch
+                                    checked={route.requiresPa || false}
+                                    onCheckedChange={checked => setRoute({ ...route, requiresPa: checked })}
+                                />
                             </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
-
             </Tabs>
         </div>
     );

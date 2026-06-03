@@ -47,3 +47,40 @@ export async function POST(req: Request, { params }: { params: { routeId: string
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request, { params }: { params: { routeId: string } }) {
+    try {
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const routeId = params.routeId;
+        const { searchParams } = new URL(req.url);
+        const stopId = searchParams.get('stopId');
+
+        if (!stopId) {
+            return NextResponse.json({ error: 'Stop ID is required' }, { status: 400 });
+        }
+
+        // Verify route belongs to tenant contract
+        const route = await prisma.contractRoute.findUnique({
+            where: { id: routeId },
+            include: { contract: true }
+        });
+
+        if (!route || route.contract.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Route not found or access denied' }, { status: 403 });
+        }
+
+        await prisma.routeStop.delete({
+            where: { id: stopId, contractRouteId: routeId }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Failed to delete stop:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+

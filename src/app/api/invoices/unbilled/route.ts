@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
     try {
         const session = await auth();
-        if (!session?.user?.tenantId || (session.user.role !== 'SUPERADMIN' && session.user.role !== 'DISPATCHER')) {
+        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'];
+        if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

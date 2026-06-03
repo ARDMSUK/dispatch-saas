@@ -84,6 +84,22 @@ export default function ZonesPage() {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this zone?")) return;
+        try {
+            const res = await fetch(`/api/zones?id=${id}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                fetchZones();
+            } else {
+                alert("Failed to delete zone");
+            }
+        } catch (err) {
+            console.error("Error deleting zone", err);
+        }
+    };
+
     return (
         <div className="h-full flex flex-col p-4 bg-zinc-50 gap-4">
             <div className="flex justify-between items-center">
@@ -159,7 +175,12 @@ export default function ZonesPage() {
                                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: zone.color }}></div>
                                         <span className="font-medium text-sm text-zinc-900">{zone.name}</span>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-500 hover:text-red-500">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-slate-500 hover:text-red-500"
+                                        onClick={() => handleDelete(zone.id)}
+                                    >
                                         <Trash2 className="h-3 w-3" />
                                     </Button>
                                 </div>

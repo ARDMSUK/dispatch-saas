@@ -63,3 +63,38 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'Zone ID is required' }, { status: 400 });
+        }
+
+        // Verify zone belongs to tenant
+        const zone = await prisma.zone.findUnique({
+            where: { id }
+        });
+
+        if (!zone || zone.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Zone not found or access denied' }, { status: 403 });
+        }
+
+        await prisma.zone.delete({
+            where: { id }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting zone:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+

@@ -157,6 +157,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
 
             <div className="my-2 border-t border-border"></div>
             <NavItem href="/dashboard/support" icon={MessageSquare} label="AI Support Desk" />
+            <NavItem href="/dashboard/logs" icon={FileText} label="Audit & VoIP Logs" />
 
             {/* Granular Feature Access */}
             {(hasPermission('view_reports') || hasPermission('manage_pricing') || hasPermission('manage_zones') || hasPermission('manage_accounts') || hasPermission('manage_billing')) && (

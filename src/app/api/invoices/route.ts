@@ -8,7 +8,8 @@ export async function POST(req: Request) {
     try {
         const session = await auth();
         // Route restricted to internal dispatchers only
-        if (!session?.user?.tenantId || (session.user.role !== 'SUPERADMIN' && session.user.role !== 'DISPATCHER')) {
+        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'];
+        if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -100,7 +101,8 @@ export async function POST(req: Request) {
 export async function GET() {
     try {
         const session = await auth();
-        if (!session?.user?.tenantId || (session.user.role !== 'SUPERADMIN' && session.user.role !== 'DISPATCHER')) {
+        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'];
+        if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

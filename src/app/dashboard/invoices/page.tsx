@@ -266,7 +266,13 @@ export default function InvoicesPage() {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-900" title="View PDF">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-slate-500 hover:text-slate-900"
+                                                title="View PDF"
+                                                onClick={() => window.open(`/shared/invoice/${inv.id}`, '_blank')}
+                                            >
                                                 <ExternalLink className="w-4 h-4" />
                                             </Button>
                                         </TableCell>

@@ -37,7 +37,7 @@ export default function B2BLedger() {
             // First fetch jobs (Ledger endpoint currently returns all Historic jobs)
             const [jobsRes, invRes] = await Promise.all([
                 fetch("/api/b2b/ledger"),
-                fetch("/api/invoices") // Reusing Admin endpoint since it's Tenant-secured Server-side
+                fetch("/api/b2b/invoices")
             ]);
 
             if (jobsRes.ok) {
