@@ -418,7 +418,7 @@ export default function DashboardPage() {
     const classicView = (
         <div className="hidden lg:flex h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex-row font-sans overflow-hidden relative">
             {/* COL 1: NEW BOOKING (Full Height) */}
-            <div className="w-[380px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shrink-0">
+            <div className="w-[420px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shrink-0">
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     <BookingForm onJobCreated={triggerRefresh} />
                 </div>
@@ -457,7 +457,7 @@ export default function DashboardPage() {
             {/* 3-COLUMN LAYOUT */}
 
             {/* COL 1: NEW BOOKING */}
-            <div className="w-full max-w-[100vw] lg:w-[380px] border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 lg:h-full flex flex-col z-20 shadow-xl shrink-0 min-h-[600px] lg:min-h-0 overflow-x-hidden">
+            <div className="w-full max-w-[100vw] lg:w-[420px] border-b lg:border-b-0 lg:border-r border-slate-200 bg-slate-50 lg:h-full flex flex-col z-20 shadow-xl shrink-0 min-h-[600px] lg:min-h-0 overflow-x-hidden">
                 <div className="p-4 border-b border-slate-200 bg-white hidden lg:block">
                     {/* Empty header block to match alignments if needed */}
                 </div>

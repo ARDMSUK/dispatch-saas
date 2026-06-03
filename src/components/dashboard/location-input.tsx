@@ -241,7 +241,7 @@ export function LocationInput({
                     onBlur={() => setTimeout(() => setOpen(false), 200)}
                     placeholder={placeholder}
                     disabled={disabled}
-                    className={cn(className, "dark:bg-black/40 dark:border-white/10 dark:text-white dark:placeholder:text-slate-500 pr-10")}
+                    className={cn(className, "pr-10")}
                 />
                 {loading && (
                     <Loader2 className="absolute right-3 h-4 w-4 animate-spin text-slate-400" />

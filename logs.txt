@@ -1,0 +1,61 @@
+=== SYSTEM VERIFICATION RUN ===
+
+[2026-06-03T16:29:44.821Z] Starting system onboarding A-to-Z tests...
+[2026-06-03T16:29:46.464Z] Using active tenant: System Administration (Slug: system-admin, ID: cmlzatapq0000g18o5ynfb95n)
+[2026-06-03T16:29:46.466Z] Verifying core fleet and operators presence...
+[2026-06-03T16:29:47.871Z] Cleaning up any stale test data from previous runs...
+[2026-06-03T16:29:51.830Z] Stale test data cleanup complete.
+[2026-06-03T16:29:51.832Z] 
+--- PILLAR 1: B2B Account Isolation Boundaries ---
+[2026-06-03T16:29:52.181Z] Using existing B2B Corporate Account: Test Corporate Client Ltd
+[2026-06-03T16:29:52.186Z] 
+--- PILLAR 2: Job Dispatch State Machine & Driver Availability ---
+[2026-06-03T16:29:52.553Z] Created job #291 (Status: PENDING, Driver: Unassigned)
+[2026-06-03T16:29:52.556Z] Simulating Dispatching job #291 to Driver 38...
+[2026-06-03T16:29:53.981Z] Job #291 updated: Status is now DISPATCHED, Driver is 38
+[2026-06-03T16:29:53.984Z] Driver 38 updated: Status is now BUSY
+[2026-06-03T16:29:53.988Z] PASS: Job correctly marked DISPATCHED and Driver correctly locked as BUSY.
+[2026-06-03T16:29:53.991Z] Simulating Reactivating job #291 to PENDING queue...
+[2026-06-03T16:29:54.911Z] Job #291 status: PENDING, Driver ID is null
+[2026-06-03T16:29:54.913Z] Driver 38 status: ONLINE
+[2026-06-03T16:29:54.916Z] PASS: Job correctly unassigned (driverId: null), returned to PENDING, and Driver 38 correctly released to ONLINE.
+[2026-06-03T16:29:54.920Z] Simulating Dispatching again to complete cancellation flow...
+[2026-06-03T16:29:55.641Z] Simulating job cancel (status: CANCELLED)...
+[2026-06-03T16:29:56.522Z] Job #291 status: CANCELLED
+[2026-06-03T16:29:56.528Z] Driver 38 status: ONLINE
+[2026-06-03T16:29:56.533Z] PASS: Cancellation correctly freed Driver 38 status to ONLINE.
+[2026-06-03T16:29:56.537Z] 
+--- PILLAR 3: Local Authority School Contracts Suite ---
+[2026-06-03T16:29:56.903Z] Created School Contract: #cmpya86nz0001mosj68fyp319 (Test School Contract 2026, Ref: SCH-9999)
+[2026-06-03T16:29:57.280Z] Created Route: #cmpya86y30003mosjoidohf9h (Route to Wooburn Academy, WAV: true, PA: true)
+[2026-06-03T16:29:57.650Z] Added Stop: #cmpya878i0005mosjgknuzg4o (School Gate Pickup Stop) to Route #cmpya86y30003mosjoidohf9h
+[2026-06-03T16:29:58.020Z] Added Student: #cmpya87it0007mosjfi5qm892 (Young Student AR) to Route #cmpya86y30003mosjoidohf9h
+[2026-06-03T16:29:58.910Z] Stops in Route #cmpya86y30003mosjoidohf9h: 1, Students: 1
+[2026-06-03T16:29:58.912Z] PASS: School contract, route, stops, and student mappings are verified.
+[2026-06-03T16:29:58.915Z] 
+--- PILLAR 4: Invoicing & Billing Engine Permissions ---
+[2026-06-03T16:29:59.281Z] Created completed billable job #292
+[2026-06-03T16:29:59.802Z] Found 24 unbilled completed rides
+[2026-06-03T16:29:59.804Z] Asserting role permissions: allowed roles for billing endpoints are: ["SUPER_ADMIN","ADMIN"]
+[2026-06-03T16:29:59.808Z] PASS: Role validation rules allow tenant admin access to billing engines.
+[2026-06-03T16:29:59.812Z] 
+--- PILLAR 5: B2B Account Statement ledgers ---
+[2026-06-03T16:30:00.159Z] Created sample invoice #cmpya896x0009mosjlnpg3y69 (INV-9999, Account: cmpya19qx0003fo3c1y5hyzdy)
+[2026-06-03T16:30:00.520Z] B2B Portal Invoices for corporate account #cmpya19qx0003fo3c1y5hyzdy: 1
+[2026-06-03T16:30:00.524Z] PASS: B2B portal ledger query restricts invoices strictly to the matching accountId.
+[2026-06-03T16:30:00.528Z] 
+--- PILLAR 6: Activity Audit & VoIP Logs ---
+[2026-06-03T16:30:00.895Z] Inserted VoIP voice call log entry: #cmpya89qt000bmosj8nnz1irf (Caller: +447970586381)
+[2026-06-03T16:30:01.251Z] VoIP Histories compiled: 5 calls found.
+[2026-06-03T16:30:01.253Z] PASS: Activity Log activity feed and VoIP logs databases are responsive and synced.
+[2026-06-03T16:30:01.257Z] 
+--- PILLAR 7: AI Support Knowledge Base FAQs ---
+[2026-06-03T16:30:01.810Z] Created AI Knowledge base FAQ: #cmpya8ag1000dmosjhguzslke (What is Cabai's refund policy?)
+[2026-06-03T16:30:02.171Z] Active FAQs in DB: 1
+[2026-06-03T16:30:02.530Z] Deleted AI FAQ #cmpya8ag1000dmosjhguzslke successfully.
+[2026-06-03T16:30:02.535Z] PASS: FAQ system endpoints create, retrieve, and delete items securely.
+[2026-06-03T16:30:02.541Z] 
+--- CLEANUP ---
+[2026-06-03T16:30:04.890Z] Cleanup completed successfully.
+[2026-06-03T16:30:04.891Z] 
+=== ALL SYSTEM TESTS COMPLETED SUCCESSFULLY ===

@@ -692,14 +692,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <div className="flex gap-2">
                         <input
                             type="date"
-                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                             value={pickupDate}
                             onChange={handleDateChange}
                         />
                         <input
                             type="time"
                             ref={timeInputRef}
-                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
+                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                             value={pickupTimeOnly}
                             onChange={handleTimeChange}
                         />
@@ -711,23 +711,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             ASAP
                         </Button>
                     </div>
-                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => setPickupTime(format(addMinutes(new Date(), 15), "yyyy-MM-dd'T'HH:mm"))}>ASAP (+15m)</Button>
-                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => setPickupTime(format(addMinutes(new Date(), 30), "yyyy-MM-dd'T'HH:mm"))}>+30m</Button>
-                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => setPickupTime(format(addHours(new Date(), 1), "yyyy-MM-dd'T'HH:mm"))}>+1h</Button>
-                        <Button type="button" variant="outline" size="sm" className="bg-slate-50 border-slate-200 text-xs px-2 h-7"
-                            onClick={() => setPickupTime(format(setMinutes(setHours(addDays(new Date(), 1), 9), 0), "yyyy-MM-dd'T'HH:mm"))}>Tomorrow 9AM</Button>
-                    </div>
                 </div>
 
                 {/* 2. CUSTOMER PHONE */}
                 <div className="space-y-3 p-3 bg-blue-700/5 border border-blue-700/10 rounded-lg">
                     <div className="flex justify-between items-end">
                         <label className="text-xs font-bold text-blue-700 uppercase tracking-wider flex items-center gap-2">
-                            <Phone className="h-3 w-3" /> Customer Mobile
+                            <Phone className="h-3 w-3" /> Telephone
                         </label>
                         {customerStats && (
                             <div className="text-[10px] text-right">
@@ -739,7 +729,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <div className="relative">
                         <input
                             type="tel"
-                            placeholder="Enter Number (e.g. 077...)"
+                            placeholder=""
                             className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-slate-900 focus:outline-none focus:border-blue-600/50"
                             value={passengerPhone}
                             onChange={e => setPassengerPhone(e.target.value)}
@@ -781,12 +771,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                 <div className="border-t border-slate-200 my-4"></div>
 
-                {/* 2. ROUTE ... (Unchanged) */}
+                {/* 2. ROUTE */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Journey</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pickup</label>
                     {/* Pickup */}
                     <div className="relative group z-50">
-                        <LocationInput placeholder="Pickup Location (e.g. Heathrow T5)" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
+                        <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
                         <div className="absolute left-3 top-3 text-emerald-500 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
                     </div>
                     {/* Vias */}
@@ -801,9 +791,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     ))}
                     <button onClick={addVia} className="text-xs text-blue-700 hover:text-blue-600 flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
                     {/* Dropoff */}
-                    <div className="relative group z-40">
-                        <LocationInput placeholder="Destination" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
-                        <div className="absolute left-3 top-3 text-blue-700 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Dropoff</label>
+                        <div className="relative group z-40">
+                            <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
+                            <div className="absolute left-3 top-3 text-blue-700 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
+                        </div>
                     </div>
                     {/* Flight */}
                     {showFlightInput && (
@@ -848,18 +841,17 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                 <div className="border-t border-slate-200 my-4"></div>
 
-                {/* 3. DETAILS SECTION (Modified) */}
+                {/* 3. DETAILS SECTION */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Customer Details</label>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="relative">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-600 w-16 shrink-0">Name:</label>
+                        <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400">
                                 <User className="h-4 w-4" />
                             </div>
-                            {/* Renamed Placeholder to 'Customer' */}
                             <input
                                 type="text"
-                                placeholder="Customer"
+                                placeholder=""
                                 className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={passengerName}
                                 onChange={e => setPassengerName(e.target.value)}
@@ -867,18 +859,21 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     </div>
 
-                    {/* EMAIL FIELD (New) */}
-                    <div className="relative">
-                        <div className="absolute left-3 top-3 text-slate-400">
-                            <span className="text-xs font-bold">@</span>
+                    {/* EMAIL FIELD */}
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-600 w-16 shrink-0">Email:</label>
+                        <div className="relative flex-1">
+                            <div className="absolute left-3 top-3 text-slate-400">
+                                <span className="text-xs font-bold">@</span>
+                            </div>
+                            <input
+                                type="email"
+                                placeholder=""
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                value={passengerEmail}
+                                onChange={e => setPassengerEmail(e.target.value)}
+                            />
                         </div>
-                        <input
-                            type="email"
-                            placeholder="Email Address"
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
-                            value={passengerEmail}
-                            onChange={e => setPassengerEmail(e.target.value)}
-                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -957,66 +952,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </select>
                     </div>
 
-                    {/* INSTRUCTIONS (New) */}
-                    <textarea
-                        placeholder="Instructions (Notes)..."
-                        rows={2}
-                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 resize-none"
-                        value={instructions}
-                        onChange={e => setInstructions(e.target.value)}
-                    />
-
-                    {/* REMINDERS (New) */}
-                    <select
-                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50 appearance-none"
-                        value={reminders}
-                        onChange={e => setReminders(e.target.value)}
-                    >
-                        <option value="">-- No Reminders --</option>
-                        <option value="Checked Bags">Checked Bags</option>
-                        <option value="Remember to take baby seat">Remember to take baby seat</option>
-                        <option value="Dont ring doorbell">Don't ring doorbell</option>
-                        <option value="Call when outside">Call when outside</option>
-                    </select>
-
                 </div>
 
                 <div className="border-t border-slate-200 my-4"></div>
 
-                {/* 4. RETURN OPTION (Renamed from Schedule) */}
+                <div className="border-t border-slate-200 my-4"></div>
+
+                {/* 4. RETURN & DETAILS/SCHEDULING OPTIONS */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Return Journey</label>
-
-                    {/* WAIT & RETURN TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5">
-                        <input
-                            type="checkbox"
-                            id="waitReturnToggle"
-                            checked={isWaitAndReturn}
-                            onChange={(e) => setIsWaitAndReturn(e.target.checked)}
-                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-blue-700 focus:ring-blue-700/20"
-                        />
-                        <label htmlFor="waitReturnToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <RotateCw className="h-3 w-3 text-blue-700" /> Wait & Return
-                        </label>
-                    </div>
-
-                    {isWaitAndReturn && (
-                        <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-2 mb-4">
-                            <div className="space-y-2">
-                                <label className="text-xs text-blue-600 font-bold">Waiting Time (Minutes)</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="5"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
-                                    value={waitingTime}
-                                    onChange={e => setWaitingTime(parseInt(e.target.value))}
-                                />
-                            </div>
-                        </div>
-                    )}
-
+                    
                     {/* RETURN BOOKING TOGGLE */}
                     <div className={`flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 ${isWaitAndReturn ? 'opacity-50 pointer-events-none' : ''}`}>
                         <input
@@ -1049,15 +993,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     {isReturn && (
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
-                            <h3 className="text-xs text-blue-700 font-bold uppercase tracking-wider">Return Journey Details</h3>
-
                             {/* RETURN PICKUP */}
                             <div className="relative group z-30">
                                 <div className="absolute left-3 top-3 text-emerald-500">
                                     <Navigation className="h-4 w-4" />
                                 </div>
                                 <LocationInput
-                                    placeholder="Return Pickup (e.g. Hotel)"
+                                    placeholder=""
                                     className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                     value={returnPickup}
                                     onChange={setReturnPickup}
@@ -1074,7 +1016,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     <MapPin className="h-4 w-4" />
                                 </div>
                                 <LocationInput
-                                    placeholder="Return Destination"
+                                    placeholder=""
                                     className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                     value={returnDropoff}
                                     onChange={setReturnDropoff}
@@ -1085,92 +1027,24 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 />
                             </div>
 
-                            {/* RETURN DATE/TIME WITH QUICK-PICKER HELPERS */}
+                            {/* RETURN DATE/TIME */}
                             <div className="space-y-2">
                                 <input
                                     type="datetime-local"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:dark]"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                                     value={returnDate}
                                     onChange={e => setReturnDate(e.target.value)}
                                 />
-                                <div className="flex flex-wrap gap-1.5 mt-1">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
-                                        onClick={() => {
-                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
-                                            setReturnDate(format(addMinutes(curr, 30), "yyyy-MM-dd'T'HH:mm"));
-                                        }}
-                                    >
-                                        +30m
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
-                                        onClick={() => {
-                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
-                                            setReturnDate(format(addHours(curr, 1), "yyyy-MM-dd'T'HH:mm"));
-                                        }}
-                                    >
-                                        +1h
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
-                                        onClick={() => {
-                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
-                                            setReturnDate(format(addHours(curr, 2), "yyyy-MM-dd'T'HH:mm"));
-                                        }}
-                                    >
-                                        +2h
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
-                                        onClick={() => {
-                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
-                                            setReturnDate(format(addHours(curr, 3), "yyyy-MM-dd'T'HH:mm"));
-                                        }}
-                                    >
-                                        +3h
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
-                                        onClick={() => {
-                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
-                                            setReturnDate(format(addDays(curr, 1), "yyyy-MM-dd'T'HH:mm"));
-                                        }}
-                                    >
-                                        +1d
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        className="h-7 px-2 text-xs bg-slate-50 border-slate-200 text-slate-700 font-medium"
-                                        onClick={() => {
-                                            const curr = returnDate ? new Date(returnDate) : addHours(new Date(pickupTime), 2);
-                                            setReturnDate(format(addDays(curr, 7), "yyyy-MM-dd'T'HH:mm"));
-                                        }}
-                                    >
-                                        +7d
-                                    </Button>
-                                </div>
                             </div>
 
-                            {/* RETURN FLIGHT (Conditional logic can be same or just show it) */}
+                            {/* RETURN FLIGHT */}
                             <div className="relative group">
                                 <div className="absolute left-3 top-3 text-blue-600">
                                     <Plane className="h-4 w-4" />
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder={isAirport(returnPickup) ? "Return Flight Number (Required)" : "Return Flight Number (Optional)"}
+                                    placeholder=""
                                     className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50"
                                     value={returnFlightNumber}
                                     onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
@@ -1206,11 +1080,41 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             {/* RETURN NOTES */}
                             <input
                                 type="text"
-                                placeholder="Return Journey Notes..."
+                                placeholder=""
                                 className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={returnNotes}
                                 onChange={e => setReturnNotes(e.target.value)}
                             />
+                        </div>
+                    )}
+
+                    {/* WAIT & RETURN TOGGLE */}
+                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5">
+                        <input
+                            type="checkbox"
+                            id="waitReturnToggle"
+                            checked={isWaitAndReturn}
+                            onChange={(e) => setIsWaitAndReturn(e.target.checked)}
+                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-blue-700 focus:ring-blue-700/20"
+                        />
+                        <label htmlFor="waitReturnToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
+                            <RotateCw className="h-3 w-3 text-blue-700" /> Wait & Return
+                        </label>
+                    </div>
+
+                    {isWaitAndReturn && (
+                        <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-2 mb-4">
+                            <div className="space-y-2">
+                                <label className="text-xs text-blue-600 font-bold">Waiting Time (Minutes)</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="5"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                    value={waitingTime}
+                                    onChange={e => setWaitingTime(parseInt(e.target.value))}
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -1228,6 +1132,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                     </div>
 
+                    {/* AUTO DISPATCH TOGGLE */}
                     <div className="flex items-center gap-3 p-2 rounded border border-indigo-500/30 bg-indigo-500/10 mb-2">
                         <input
                             type="checkbox"
@@ -1241,6 +1146,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                     </div>
 
+                    {/* MUTE NOTIFICATIONS TOGGLE */}
                     <div className="flex items-center gap-3 p-2 rounded border border-red-500/30 bg-red-500/5 mb-2">
                         <input
                             type="checkbox"
@@ -1334,7 +1240,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <label className="text-xs text-emerald-600 font-bold block">Repeat Until (Optional)</label>
                                 <input
                                     type="date"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:dark]"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:light]"
                                     value={recurrenceEnd}
                                     onChange={e => setRecurrenceEnd(e.target.value)}
                                 />
@@ -1351,6 +1257,28 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             </div>
                         </div>
                     )}
+
+                    {/* INSTRUCTIONS (Notes) */}
+                    <textarea
+                        placeholder="Instructions (Notes)..."
+                        rows={2}
+                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 resize-none"
+                        value={instructions}
+                        onChange={e => setInstructions(e.target.value)}
+                    />
+
+                    {/* REMINDERS */}
+                    <select
+                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50 appearance-none"
+                        value={reminders}
+                        onChange={e => setReminders(e.target.value)}
+                    >
+                        <option value="">-- No Reminders --</option>
+                        <option value="Checked Bags">Checked Bags</option>
+                        <option value="Remember to take baby seat">Remember to take baby seat</option>
+                        <option value="Dont ring doorbell">Don't ring doorbell</option>
+                        <option value="Call when outside">Call when outside</option>
+                    </select>
 
                 </div>
 
