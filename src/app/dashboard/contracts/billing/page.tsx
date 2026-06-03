@@ -143,10 +143,14 @@ export default function ContractBillingPage() {
                                 <SelectTrigger className="w-full bg-slate-50 border-slate-200">
                                     <SelectValue placeholder={loading ? "Loading contracts..." : "Select Local Authority Contract..."} />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    {contracts.map(c => (
-                                        <SelectItem key={c.id} value={c.id}>{c.name} ({c.reference})</SelectItem>
-                                    ))}
+                                <SelectContent className="bg-white border-slate-200">
+                                    {contracts.length === 0 ? (
+                                        <SelectItem value="none" disabled>No Contracts Found - Create one first</SelectItem>
+                                    ) : (
+                                        contracts.map(c => (
+                                            <SelectItem key={c.id} value={c.id}>{c.name} ({c.reference})</SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
