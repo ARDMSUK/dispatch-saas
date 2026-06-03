@@ -678,7 +678,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     };
 
     return (
-        <div className="flex flex-col gap-5 h-full">
+        <div className="flex flex-col gap-5 h-full relative">
             {/* Header ... */}
             <div>
                 {/* Header Cleaned */}
@@ -773,27 +773,35 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                 {/* 2. ROUTE */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pickup</label>
                     {/* Pickup */}
-                    <div className="relative group z-50">
-                        <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
-                        <div className="absolute left-3 top-3 text-emerald-500 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Pickup:</label>
+                        <div className="relative flex-1 group z-50">
+                            <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
+                            <div className="absolute left-3 top-3 text-emerald-500 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
+                        </div>
                     </div>
                     {/* Vias */}
                     {vias.map((via, index) => (
-                        <div key={index} className="relative group flex gap-2">
-                            <div className="relative flex-1">
-                                <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
-                                <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
+                        <div key={index} className="flex items-center gap-2">
+                            <div className="w-16 shrink-0"></div>
+                            <div className="relative flex-1 group flex gap-2">
+                                <div className="relative flex-1">
+                                    <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
+                                    <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
+                                </div>
+                                <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-slate-200" onClick={() => removeVia(index)}><X className="h-4 w-4" /></Button>
                             </div>
-                            <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-slate-200" onClick={() => removeVia(index)}><X className="h-4 w-4" /></Button>
                         </div>
                     ))}
-                    <button onClick={addVia} className="text-xs text-blue-700 hover:text-blue-600 flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
-                    {/* Dropoff */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Dropoff</label>
-                        <div className="relative group z-40">
+                    <div className="flex items-center gap-2">
+                        <div className="w-16 shrink-0"></div>
+                        <button onClick={addVia} className="text-xs text-blue-700 hover:text-blue-600 flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
+                    </div>
+                    {/* Dest */}
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Dest:</label>
+                        <div className="relative flex-1 group z-40">
                             <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
                             <div className="absolute left-3 top-3 text-blue-700 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
                         </div>
@@ -844,7 +852,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 {/* 3. DETAILS SECTION */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-600 w-16 shrink-0">Name:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Name:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400">
                                 <User className="h-4 w-4" />
@@ -861,7 +869,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     {/* EMAIL FIELD */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-600 w-16 shrink-0">Email:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Email:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400">
                                 <span className="text-xs font-bold">@</span>
@@ -876,51 +884,57 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="relative">
-                            <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">PAX</span>
+                    {/* PAX, LUG, Veh on the same line */}
+                    <div className="flex items-center gap-3 flex-wrap pl-16">
+                        {/* PAX */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <label className="text-xs font-bold text-slate-900">PAX:</label>
                             <input
                                 type="number"
                                 min="1"
                                 max="16"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                className="w-12 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={passengers}
-                                onChange={e => setPassengers(parseInt(e.target.value))}
+                                onChange={e => setPassengers(parseInt(e.target.value) || 1)}
                             />
                         </div>
-                        <div className="relative">
-                            <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">LUG</span>
+
+                        {/* LUG */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <label className="text-xs font-bold text-slate-900">LUG:</label>
                             <input
                                 type="number"
                                 min="0"
                                 max="10"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                className="w-12 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={luggage}
-                                onChange={e => setLuggage(parseInt(e.target.value))}
+                                onChange={e => setLuggage(parseInt(e.target.value) || 0)}
                             />
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-3">
-                        <select
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 appearance-none"
-                            value={vehicleType}
-                            onChange={e => {
-                                const newVal = e.target.value;
-                                setVehicleType(newVal);
-                                handleCalculate(newVal);
-                            }}
-                        >
-                            <option value="Saloon">Saloon</option>
-                            <option value="Estate">Estate</option>
-                            <option value="Executive">Executive</option>
-                            <option value="MPV">MPV 6 Seater</option>
-                            <option value="MPV8">MPV 8 Seater</option>
-                            <option value="WAV MPV">WAV MPV</option>
-                            <option value="WAV Minibus">WAV Minibus</option>
-                            <option value="Minibus">Minibus</option>
-                            <option value="Coach">Coach</option>
-                        </select>
+                        {/* Veh */}
+                        <div className="flex items-center gap-1.5 flex-1 min-w-[120px]">
+                            <label className="text-xs font-bold text-slate-900 shrink-0">Veh:</label>
+                            <select
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 appearance-none"
+                                value={vehicleType}
+                                onChange={e => {
+                                    const newVal = e.target.value;
+                                    setVehicleType(newVal);
+                                    handleCalculate(newVal);
+                                }}
+                            >
+                                <option value="Saloon">Saloon</option>
+                                <option value="Estate">Estate</option>
+                                <option value="Executive">Executive</option>
+                                <option value="MPV">MPV 6 Seater</option>
+                                <option value="MPV8">MPV 8 Seater</option>
+                                <option value="WAV MPV">WAV MPV</option>
+                                <option value="WAV Minibus">WAV Minibus</option>
+                                <option value="Minibus">Minibus</option>
+                                <option value="Coach">Coach</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* ACCOUNT SELECTION */}
@@ -1338,6 +1352,25 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     tenantId: 'demo-taxis' // Should be dynamic
                 }}
             />
+
+            {/* Floating Live Quote Badge */}
+            {quotedPrice !== null && (
+                <div 
+                    onClick={() => {
+                        const formContainer = document.querySelector('.custom-scrollbar');
+                        if (formContainer) {
+                            formContainer.scrollTo({
+                                top: formContainer.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }}
+                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-white/95 dark:bg-slate-900/95 border border-emerald-500/30 hover:border-emerald-500 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-emerald-500/10 transition-all select-none hover:scale-105 active:scale-95"
+                >
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Live Quote</span>
+                    <span className="text-base font-mono font-bold text-emerald-600">£{quotedPrice.toFixed(2)}</span>
+                </div>
+            )}
         </div>
     );
 }
