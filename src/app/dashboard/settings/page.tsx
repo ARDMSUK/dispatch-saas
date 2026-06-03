@@ -309,17 +309,25 @@ export default function SettingsPage() {
                                     <SelectTrigger className="w-full bg-background border-input text-foreground">
                                         <SelectValue placeholder="Select Algorithm" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-popover border-border text-popover-foreground">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground" position="popper">
                                         <SelectItem value="CLOSEST">
-                                            <span className="font-medium text-foreground">Closest Driver (GPS Distance)</span>
-                                            <p className="text-xs text-muted-foreground mt-1">Assigns to the nearest driver by direct line-of-sight.</p>
+                                            Closest Driver (GPS Distance)
                                         </SelectItem>
                                         <SelectItem value="LONGEST_WAITING">
-                                            <span className="font-medium text-foreground">Zone Queueing (Longest Waiting)</span>
-                                            <p className="text-xs text-muted-foreground mt-1">First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.</p>
+                                            Zone Queueing (Longest Waiting)
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                                {dispatchAlgorithm === "CLOSEST" && (
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        Assigns to the nearest driver by direct line-of-sight.
+                                    </p>
+                                )}
+                                {dispatchAlgorithm === "LONGEST_WAITING" && (
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        First-In-First-Out within geographical zones. Falls back to Closest if queue is empty.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -650,17 +658,25 @@ export default function SettingsPage() {
                             <SelectTrigger className="w-full md:w-1/2 bg-background border-input text-foreground">
                                 <SelectValue placeholder="Select Layout" />
                             </SelectTrigger>
-                            <SelectContent className="bg-popover border-border text-popover-foreground">
+                            <SelectContent className="bg-popover border-border text-popover-foreground" position="popper">
                                 <SelectItem value="MODERN">
-                                    <span className="font-medium text-emerald-600 dark:text-emerald-400">Modern Layout (Default)</span>
-                                    <p className="text-xs text-muted-foreground mt-1">Clean, large cards with comprehensive details and dedicated sidebars.</p>
+                                    Modern Layout (Default)
                                 </SelectItem>
                                 <SelectItem value="CLASSIC">
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">Classic Layout (Dense)</span>
-                                    <p className="text-xs text-muted-foreground mt-1">iCabbi-style horizontal split with high-density columnar job strips.</p>
+                                    Classic Layout (Dense)
                                 </SelectItem>
                             </SelectContent>
                         </Select>
+                        {consoleLayout === "MODERN" && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                                Clean, large cards with comprehensive details and dedicated sidebars.
+                            </p>
+                        )}
+                        {consoleLayout === "CLASSIC" && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                                iCabbi-style horizontal split with high-density columnar job strips.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -744,17 +760,25 @@ export default function SettingsPage() {
                                 <SelectTrigger className="w-full bg-background border-input text-foreground">
                                     <SelectValue placeholder="Select Routing Method" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-popover border-border text-popover-foreground">
+                                <SelectContent className="bg-popover border-border text-popover-foreground" position="popper">
                                     <SelectItem value="CENTRAL">
-                                        <span className="font-medium text-foreground">Central Account (Company)</span>
-                                        <p className="text-xs text-muted-foreground mt-1">Payments are processed through the company's central SumUp/Zettle accounts.</p>
+                                        Central Account (Company)
                                     </SelectItem>
                                     <SelectItem value="DRIVER">
-                                        <span className="font-medium text-foreground">Driver Accounts (Individual)</span>
-                                        <p className="text-xs text-muted-foreground mt-1">Drivers will connect their own accounts in the Driver App to process payments directly.</p>
+                                        Driver Accounts (Individual)
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
+                            {paymentRouting === "CENTRAL" && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    Payments are processed through the company's central SumUp/Zettle accounts.
+                                </p>
+                            )}
+                            {paymentRouting === "DRIVER" && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    Drivers will connect their own accounts in the Driver App to process payments directly.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
