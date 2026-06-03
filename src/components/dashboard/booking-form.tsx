@@ -108,6 +108,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     });
 
     const timeInputRef = useRef<HTMLInputElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const [pickupDate, pickupTimeOnly] = pickupTime.includes('T')
         ? pickupTime.split('T')
@@ -685,7 +686,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 <h1 className="text-2xl font-bold text-slate-900">Booking Console</h1>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                 {/* 1. PICKUP TIME ... (Unchanged) */}
                 <div className="space-y-3">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pickup Date & Time</label>
@@ -884,8 +885,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     </div>
 
-                    {/* PAX, LUG, Veh on the same line */}
-                    <div className="flex items-center gap-3 flex-wrap pl-16">
+                    {/* PAX, LUG, VEH on the same line */}
+                    <div className="flex items-center gap-3 pl-16">
                         {/* PAX */}
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">PAX:</label>
@@ -893,7 +894,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 type="number"
                                 min="1"
                                 max="16"
-                                className="w-12 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={passengers}
                                 onChange={e => setPassengers(parseInt(e.target.value) || 1)}
                             />
@@ -906,15 +907,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 type="number"
                                 min="0"
                                 max="10"
-                                className="w-12 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={luggage}
                                 onChange={e => setLuggage(parseInt(e.target.value) || 0)}
                             />
                         </div>
 
                         {/* Veh */}
-                        <div className="flex items-center gap-1.5 flex-1 min-w-[120px]">
-                            <label className="text-xs font-bold text-slate-900 shrink-0">Veh:</label>
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            <label className="text-xs font-bold text-slate-900 shrink-0">VEH:</label>
                             <select
                                 className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 appearance-none"
                                 value={vehicleType}
@@ -1357,10 +1358,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             {quotedPrice !== null && (
                 <div 
                     onClick={() => {
-                        const formContainer = document.querySelector('.custom-scrollbar');
-                        if (formContainer) {
-                            formContainer.scrollTo({
-                                top: formContainer.scrollHeight,
+                        if (scrollContainerRef.current) {
+                            scrollContainerRef.current.scrollTo({
+                                top: scrollContainerRef.current.scrollHeight,
                                 behavior: 'smooth'
                             });
                         }

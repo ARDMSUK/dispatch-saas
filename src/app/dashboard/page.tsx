@@ -419,7 +419,7 @@ export default function DashboardPage() {
         <div className="hidden lg:flex h-full w-full max-w-[100vw] bg-slate-50 text-slate-900 flex-row font-sans overflow-hidden relative">
             {/* COL 1: NEW BOOKING (Full Height) */}
             <div className="w-[420px] border-r border-slate-200 bg-slate-50 h-full flex flex-col z-20 shrink-0">
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                <div className="flex-1 overflow-hidden p-4 flex flex-col h-full">
                     <BookingForm onJobCreated={triggerRefresh} />
                 </div>
             </div>
@@ -461,7 +461,7 @@ export default function DashboardPage() {
                 <div className="p-4 border-b border-slate-200 bg-white hidden lg:block">
                     {/* Empty header block to match alignments if needed */}
                 </div>
-                <div className="flex-1 overflow-y-visible lg:overflow-y-auto p-4 custom-scrollbar">
+                <div className="flex-1 overflow-y-visible lg:overflow-hidden p-4 lg:flex lg:flex-col lg:h-full">
                     <BookingForm onJobCreated={triggerRefresh} />
                 </div>
             </div>
