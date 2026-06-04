@@ -61,7 +61,9 @@ export default function LogsPage() {
         call.phone.includes(searchTerm) ||
         (call.status && call.status.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (call.answeredBy?.name && call.answeredBy.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (call.transcript && call.transcript.toLowerCase().includes(searchTerm.toLowerCase()))
+        (call.transcript && call.transcript.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (call.booking?.id && call.booking.id.toString().includes(searchTerm)) ||
+        (call.booking?.id && `TRIP-${call.booking.id}`.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     const getCallStatusBadge = (status: string) => {
