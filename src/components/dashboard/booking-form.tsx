@@ -124,6 +124,18 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         setPickupTime(`${pickupDate}T${newTime}`);
     };
 
+    const getPickupDayName = () => {
+        if (!pickupDate) return '';
+        try {
+            const dateStr = pickupDate.includes('-') ? pickupDate : format(new Date(), 'yyyy-MM-dd');
+            const parts = dateStr.split('-');
+            const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            return format(date, "EEE dd");
+        } catch (e) {
+            return '';
+        }
+    };
+
     useEffect(() => {
         if (timeInputRef.current) {
             timeInputRef.current.focus();
@@ -133,6 +145,58 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     // Return Booking
     const [isReturn, setIsReturn] = useState(false);
     const [returnDate, setReturnDate] = useState('');
+
+    const returnDateOnly = returnDate.includes('T') ? returnDate.split('T')[0] : returnDate;
+    const returnTimeOnly = returnDate.includes('T') ? returnDate.split('T')[1] : '12:00';
+
+    const handleReturnDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newDate = e.target.value || format(new Date(), 'yyyy-MM-dd');
+        setReturnDate(`${newDate}T${returnTimeOnly}`);
+    };
+
+    const handleReturnTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTime = e.target.value || '12:00';
+        setReturnDate(`${returnDateOnly}T${newTime}`);
+    };
+
+    const getReturnDayName = () => {
+        if (!returnDateOnly) return '';
+        try {
+            const dateStr = returnDateOnly.includes('-') ? returnDateOnly : format(new Date(), 'yyyy-MM-dd');
+            const parts = dateStr.split('-');
+            const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            return format(date, "EEE dd");
+        } catch (e) {
+            return '';
+        }
+    };
+
+    // Scroll handler for auto-hiding the quote badge
+    const [showFloatingQuote, setShowFloatingQuote] = useState(true);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (scrollContainerRef.current) {
+                const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+                if (scrollTop + clientHeight >= scrollHeight - 40) {
+                    setShowFloatingQuote(false);
+                } else {
+                    setShowFloatingQuote(true);
+                }
+            }
+        };
+
+        const container = scrollContainerRef.current;
+        if (container) {
+            container.addEventListener('scroll', handleScroll, { passive: true });
+            handleScroll();
+        }
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, []);
     const [returnPickup, setReturnPickup] = useState('');
     const [returnDropoff, setReturnDropoff] = useState('');
     const [returnPickupCoords, setReturnPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -702,11 +766,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                 {/* 1. PICKUP TIME */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-black uppercase tracking-wider">Pickup Date & Time</label>
+                    <label className="text-xs font-bold text-black uppercase tracking-wider">
+                        Pickup Date & Time {getPickupDayName() && `(${getPickupDayName()})`}
+                    </label>
                     <div className="flex gap-2">
                         <input
                             type="date"
-                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black font-bold focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                             value={pickupDate}
                             onChange={handleDateChange}
                         />
@@ -789,7 +855,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 <div className="space-y-3">
                     {/* Pickup */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Pickup:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Pickup:</label>
                         <div className="relative flex-1 group z-50">
                             <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
@@ -814,7 +880,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     </div>
                     {/* Dest */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Dest:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Dest:</label>
                         <div className="relative flex-1 group z-40">
                             <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
@@ -866,7 +932,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 {/* 3. DETAILS SECTION */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Name:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Name:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400">
                                 <User className="h-4 w-4" />
@@ -883,7 +949,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     {/* EMAIL FIELD */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Email:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Email:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400">
                                 <span className="text-xs font-bold">@</span>
@@ -899,7 +965,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     </div>
 
                     {/* PAX, LUG, VEH on the same line */}
-                    <div className="flex items-center gap-3 pl-16">
+                    <div className="flex items-center gap-3 pl-24">
                         {/* PAX */}
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">PAX:</label>
@@ -952,7 +1018,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0 leading-tight">Payment:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-24 shrink-0 leading-tight">Payment:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
                                 {getPaymentIcon()}
@@ -972,7 +1038,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {/* ACCOUNT SELECTION (Moved to bottom of payment field and styled to match) */}
                     {paymentType === 'ACCOUNT' && (
                         <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                            <div className="w-16 shrink-0"></div>
+                            <div className="w-24 shrink-0"></div>
                             <div className="relative flex-1">
                                 <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
                                     <Building2 className="h-4 w-4" />
@@ -1002,8 +1068,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 {/* 4. RETURN & DETAILS/SCHEDULING OPTIONS */}
                 <div className="space-y-3">
                     
-                    {/* RETURN & W&R TOGGLES (Segmented buttons with AI gradient text on black active background) */}
-                    <div className="flex items-center gap-2 pl-16">
+                    {/* RETURN & OTHER OPTIONS (Segmented buttons with AI gradient text on black active background) */}
+                    <div className="flex items-center gap-1.5 pl-24">
                         <button
                             type="button"
                             onClick={() => {
@@ -1023,9 +1089,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     }
                                 }
                             }}
-                            className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 text-center ${
+                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
                                 isReturn 
-                                    ? 'bg-black border border-black shadow-sm' 
+                                    ? 'bg-black border border-black shadow-sm text-transparent' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
                             }`}
                         >
@@ -1047,9 +1113,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     setIsReturn(false);
                                 }
                             }}
-                            className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 text-center ${
+                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
                                 isWaitAndReturn 
-                                    ? 'bg-black border border-black shadow-sm' 
+                                    ? 'bg-black border border-black shadow-sm text-transparent' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
                             }`}
                         >
@@ -1061,52 +1127,101 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 "W & R"
                             )}
                         </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setIsRecurring(!isRecurring)}
+                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
+                                isRecurring 
+                                    ? 'bg-black border border-black shadow-sm text-transparent' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                            }`}
+                        >
+                            {isRecurring ? (
+                                <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
+                                    Recurring
+                                </span>
+                            ) : (
+                                "Recurring"
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setMuteNotifications(!muteNotifications)}
+                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
+                                muteNotifications 
+                                    ? 'bg-black border border-black shadow-sm text-transparent' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                            }`}
+                        >
+                            {muteNotifications ? (
+                                <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
+                                    Mute
+                                </span>
+                            ) : (
+                                "Mute"
+                            )}
+                        </button>
                     </div>
 
                     {isReturn && (
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
                             {/* RETURN PICKUP */}
-                            <div className="relative group z-30">
-                                <div className="absolute left-3 top-3 text-slate-400">
-                                    <Navigation className="h-4 w-4" />
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Pickup:</label>
+                                <div className="relative flex-1 group z-30">
+                                    <LocationInput
+                                        placeholder=""
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                        value={returnPickup}
+                                        onChange={setReturnPickup}
+                                        onLocationSelect={(loc) => {
+                                            setReturnPickup(loc.address);
+                                            setReturnPickupCoords({ lat: loc.lat, lng: loc.lng });
+                                        }}
+                                    />
+                                    <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
                                 </div>
-                                <LocationInput
-                                    placeholder=""
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
-                                    value={returnPickup}
-                                    onChange={setReturnPickup}
-                                    onLocationSelect={(loc) => {
-                                        setReturnPickup(loc.address);
-                                        setReturnPickupCoords({ lat: loc.lat, lng: loc.lng });
-                                    }}
-                                />
                             </div>
 
                             {/* RETURN DROPOFF */}
-                            <div className="relative group z-20">
-                                <div className="absolute left-3 top-3 text-slate-400">
-                                    <MapPin className="h-4 w-4" />
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Dest:</label>
+                                <div className="relative flex-1 group z-20">
+                                    <LocationInput
+                                        placeholder=""
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                        value={returnDropoff}
+                                        onChange={setReturnDropoff}
+                                        onLocationSelect={(loc) => {
+                                            setReturnDropoff(loc.address);
+                                            setReturnDropoffCoords({ lat: loc.lat, lng: loc.lng });
+                                        }}
+                                    />
+                                    <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
                                 </div>
-                                <LocationInput
-                                    placeholder=""
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-6 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
-                                    value={returnDropoff}
-                                    onChange={setReturnDropoff}
-                                    onLocationSelect={(loc) => {
-                                        setReturnDropoff(loc.address);
-                                        setReturnDropoffCoords({ lat: loc.lat, lng: loc.lng });
-                                    }}
-                                />
                             </div>
 
                             {/* RETURN DATE/TIME */}
-                            <div className="space-y-2">
-                                <input
-                                    type="datetime-local"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
-                                    value={returnDate}
-                                    onChange={e => setReturnDate(e.target.value)}
-                                />
+                            <div className="space-y-3">
+                                <label className="text-xs font-bold text-black uppercase tracking-wider">
+                                    Return Date & Time {getReturnDayName() && `(${getReturnDayName()})`}
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="date"
+                                        className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                                        value={returnDateOnly}
+                                        onChange={handleReturnDateChange}
+                                    />
+                                    <input
+                                        type="time"
+                                        className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                                        value={returnTimeOnly}
+                                        onChange={handleReturnTimeChange}
+                                    />
+                                </div>
                             </div>
 
                             {/* RETURN FLIGHT */}
@@ -1160,8 +1275,6 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     )}
 
-
-
                     {isWaitAndReturn && (
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-2 mb-4">
                             <div className="space-y-2">
@@ -1178,23 +1291,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     )}
 
-                    {/* RECURRING TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 mt-2">
-                        <input
-                            type="checkbox"
-                            id="recurringToggle"
-                            checked={isRecurring}
-                            onChange={(e) => setIsRecurring(e.target.checked)}
-                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-emerald-500 focus:ring-emerald-500/20"
-                        />
-                        <label htmlFor="recurringToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <RotateCw className="h-3 w-3 text-emerald-500" /> Recurring Booking
-                        </label>
-                    </div>
-
                     {/* REMINDERS (Aligned with Payment/Email/Name with label on left and matching light-gray background) */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-black w-16 shrink-0 leading-tight">Reminders:</label>
+                        <label className="text-sm font-semibold text-black w-24 shrink-0 leading-tight">Reminders:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
                                 <Bell className="h-4 w-4" />
@@ -1211,20 +1310,6 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <option value="Call when outside">Call when outside</option>
                             </select>
                         </div>
-                    </div>
-
-                    {/* MUTE NOTIFICATIONS TOGGLE (Styled with Magenta/Fuchsia AI colors) */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-fuchsia-500/20 bg-fuchsia-500/5 mb-2">
-                        <input
-                            type="checkbox"
-                            id="muteNotificationsToggle"
-                            checked={muteNotifications}
-                            onChange={(e) => setMuteNotifications(e.target.checked)}
-                            className="w-4 h-4 rounded border-fuchsia-400 bg-slate-100 text-fuchsia-600 focus:ring-fuchsia-500/20"
-                        />
-                        <label htmlFor="muteNotificationsToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            Mute Customer Notifications (SMS/Email)
-                        </label>
                     </div>
 
                     {isRecurring && (
@@ -1349,7 +1434,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className="w-24 bg-transparent border-b border-dashed border-slate-700 hover:border-white focus:border-white text-2xl font-mono text-white text-right focus:outline-none transition-all ml-1 py-0 px-0"
+                                        className="w-36 bg-transparent border-b border-dashed border-slate-700 hover:border-white focus:border-white text-2xl font-mono text-white text-right focus:outline-none transition-all ml-1 py-0 px-0"
                                         value={quotedPrice !== null ? quotedPrice : ''}
                                         onChange={(e) => setQuotedPrice(e.target.value ? parseFloat(e.target.value) : null)}
                                         placeholder="0.00"
@@ -1396,7 +1481,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             />
 
             {/* Floating Live Quote Badge */}
-            {quotedPrice !== null && (
+            {quotedPrice !== null && showFloatingQuote && (
                 <div 
                     onClick={() => {
                         if (scrollContainerRef.current) {
