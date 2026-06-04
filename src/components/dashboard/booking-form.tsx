@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone } from 'lucide-react';
+import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { LocationInput } from './location-input';
@@ -779,7 +779,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Pickup:</label>
                         <div className="relative flex-1 group z-50">
                             <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
-                            <div className="absolute left-3 top-3 text-emerald-500 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
+                            <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
                         </div>
                     </div>
                     {/* Vias */}
@@ -804,7 +804,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <label className="text-sm font-semibold text-slate-900 w-16 shrink-0">Dest:</label>
                         <div className="relative flex-1 group z-40">
                             <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
-                            <div className="absolute left-3 top-3 text-blue-700 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
+                            <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
                         </div>
                     </div>
                     {/* Flight */}
@@ -955,16 +955,22 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             </select>
                         </div>
                     )}
-                    <div className="grid grid-cols-1 gap-3">
-                        <select
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-emerald-600 font-bold focus:outline-none focus:border-blue-600/50"
-                            value={paymentType}
-                            onChange={e => setPaymentType(e.target.value)}
-                        >
-                            <option value="CASH">💵 CASH PAYMENT</option>
-                            <option value="CARD">💳 CARD / PRE-PAID</option>
-                            <option value="ACCOUNT">🏢 ACCOUNT (INVOICE)</option>
-                        </select>
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-slate-900 w-16 shrink-0 leading-tight">Payment Type:</label>
+                        <div className="relative flex-1">
+                            <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
+                                <CreditCard className="h-4 w-4" />
+                            </div>
+                            <select
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-600/50 appearance-none"
+                                value={paymentType}
+                                onChange={e => setPaymentType(e.target.value)}
+                            >
+                                <option value="CASH">💵 CASH PAYMENT</option>
+                                <option value="CARD">💳 CARD / PRE-PAID</option>
+                                <option value="ACCOUNT">🏢 ACCOUNT (INVOICE)</option>
+                            </select>
+                        </div>
                     </div>
 
                 </div>
@@ -1010,7 +1016,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
                             {/* RETURN PICKUP */}
                             <div className="relative group z-30">
-                                <div className="absolute left-3 top-3 text-emerald-500">
+                                <div className="absolute left-3 top-3 text-slate-400">
                                     <Navigation className="h-4 w-4" />
                                 </div>
                                 <LocationInput
@@ -1027,7 +1033,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                             {/* RETURN DROPOFF */}
                             <div className="relative group z-20">
-                                <div className="absolute left-3 top-3 text-blue-700">
+                                <div className="absolute left-3 top-3 text-slate-400">
                                     <MapPin className="h-4 w-4" />
                                 </div>
                                 <LocationInput
@@ -1147,28 +1153,27 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                     </div>
 
-                    {/* AUTO DISPATCH TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-indigo-500/30 bg-indigo-500/10 mb-2">
-                        <input
-                            type="checkbox"
-                            id="autoDispatchToggle"
-                            checked={autoDispatch}
-                            onChange={(e) => setAutoDispatch(e.target.checked)}
-                            className="w-4 h-4 rounded border-indigo-500 text-indigo-500 focus:ring-indigo-500/20"
-                        />
-                        <label htmlFor="autoDispatchToggle" className="text-sm text-indigo-200 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <Zap className="h-3 w-3 text-indigo-500" /> Auto-Dispatch Job
-                        </label>
-                    </div>
+                    {/* REMINDERS (Moved above Mute Notifications and styled with Cyan AI colors) */}
+                    <select
+                        className="w-full bg-cyan-500/5 border border-cyan-500/25 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-cyan-500 appearance-none"
+                        value={reminders}
+                        onChange={e => setReminders(e.target.value)}
+                    >
+                        <option value="">-- No Reminders --</option>
+                        <option value="Checked Bags">Checked Bags</option>
+                        <option value="Remember to take baby seat">Remember to take baby seat</option>
+                        <option value="Dont ring doorbell">Don't ring doorbell</option>
+                        <option value="Call when outside">Call when outside</option>
+                    </select>
 
-                    {/* MUTE NOTIFICATIONS TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-red-500/30 bg-red-500/5 mb-2">
+                    {/* MUTE NOTIFICATIONS TOGGLE (Styled with Magenta/Fuchsia AI colors) */}
+                    <div className="flex items-center gap-3 p-2 rounded border border-fuchsia-500/20 bg-fuchsia-500/5 mb-2">
                         <input
                             type="checkbox"
                             id="muteNotificationsToggle"
                             checked={muteNotifications}
                             onChange={(e) => setMuteNotifications(e.target.checked)}
-                            className="w-4 h-4 rounded border-red-500 text-red-500 focus:ring-red-500/20"
+                            className="w-4 h-4 rounded border-fuchsia-400 bg-slate-100 text-fuchsia-600 focus:ring-fuchsia-500/20"
                         />
                         <label htmlFor="muteNotificationsToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
                             Mute Customer Notifications (SMS/Email)
@@ -1281,36 +1286,23 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         value={instructions}
                         onChange={e => setInstructions(e.target.value)}
                     />
-
-                    {/* REMINDERS */}
-                    <select
-                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50 appearance-none"
-                        value={reminders}
-                        onChange={e => setReminders(e.target.value)}
-                    >
-                        <option value="">-- No Reminders --</option>
-                        <option value="Checked Bags">Checked Bags</option>
-                        <option value="Remember to take baby seat">Remember to take baby seat</option>
-                        <option value="Dont ring doorbell">Don't ring doorbell</option>
-                        <option value="Call when outside">Call when outside</option>
-                    </select>
-
+                    {/* Estimated Fare & Action Buttons (styled with Magenta/Cyan/Purple AI theme) */}
                 </div>
 
                 {/* QUOTE & SUBMIT */}
-                <div className={`mt-6 p-4 rounded-lg border border-dashed transition-all duration-300 ${quotedPrice ? "bg-emerald-500/10 border-emerald-500/30" : "bg-white/5 border-slate-200"}`}>
+                <div className={`mt-6 p-4 rounded-lg border border-dashed transition-all duration-300 ${quotedPrice ? "bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-fuchsia-500/5 border-purple-500/30 shadow-[0_4px_20px_rgba(168,85,247,0.06)]" : "bg-white/5 border-slate-200"}`}>
                     <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-xs uppercase tracking-wider font-bold">Estimated Fare</span>
+                        <span className="text-purple-600/70 text-xs uppercase tracking-wider font-bold">Estimated Fare</span>
                         {isCalculating ? (
-                            <span className="text-blue-600 text-xs animate-pulse">Calculating...</span>
+                            <span className="text-cyan-600 text-xs animate-pulse font-semibold">Calculating...</span>
                         ) : (
                             <div className="flex flex-col items-end">
                                 <div className="flex items-center justify-end group" title="Click to manually override fare">
-                                    <span className="text-2xl font-mono text-slate-900">£</span>
+                                    <span className="text-2xl font-mono text-fuchsia-600">£</span>
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className="w-24 bg-transparent border-b border-dashed border-white/30 hover:border-blue-600 focus:border-blue-600 focus:border-solid text-2xl font-mono text-slate-900 text-right focus:outline-none transition-all ml-1 py-0 px-0"
+                                        className="w-24 bg-transparent border-b border-dashed border-purple-500/30 hover:border-purple-600 focus:border-purple-600 focus:border-solid text-2xl font-mono text-fuchsia-700 text-right focus:outline-none transition-all ml-1 py-0 px-0"
                                         value={quotedPrice !== null ? quotedPrice : ''}
                                         onChange={(e) => setQuotedPrice(e.target.value ? parseFloat(e.target.value) : null)}
                                         placeholder="0.00"
@@ -1320,7 +1312,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     {debugData?.payload?.distance ? `${debugData.payload.distance.toFixed(1)} miles` : '0.0 miles'}
                                 </span>
                                 {isReturn && quotedPrice !== null && (
-                                    <span className="text-[10px] text-slate-400 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
+                                    <span className="text-[10px] text-purple-600/60 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
                                 )}
                             </div>
                         )}
@@ -1328,7 +1320,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 <Button
-                    className="w-full bg-blue-600 hover:bg-amber-300 text-black font-bold h-12 text-md shadow-[0_0_20px_rgba(251,191,36,0.3)] border-0 mt-4"
+                    className="w-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-cyan-400 text-white font-extrabold h-12 text-md shadow-[0_4px_25px_rgba(168,85,247,0.35)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border-0 mt-4 rounded-md uppercase tracking-wider"
                     onClick={handlePreSubmit}
                     disabled={!pickup || !dropoff || !passengerName}
                 >
@@ -1365,10 +1357,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             });
                         }
                     }}
-                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-white/95 dark:bg-slate-900/95 border border-emerald-500/30 hover:border-emerald-500 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-emerald-500/10 transition-all select-none hover:scale-105 active:scale-95"
+                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-white/95 dark:bg-slate-900/95 border border-fuchsia-500/30 hover:border-fuchsia-500 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-fuchsia-500/10 transition-all select-none hover:scale-105 active:scale-95"
                 >
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Live Quote</span>
-                    <span className="text-base font-mono font-bold text-emerald-600">£{quotedPrice.toFixed(2)}</span>
+                    <span className="text-[10px] font-bold text-purple-600/70 uppercase tracking-wider">Live Quote</span>
+                    <span className="text-base font-mono font-bold text-fuchsia-600">£{quotedPrice.toFixed(2)}</span>
                 </div>
             )}
         </div>
