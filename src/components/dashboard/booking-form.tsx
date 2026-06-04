@@ -1069,7 +1069,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 <div className="space-y-3">
                     
                     {/* RETURN & OTHER OPTIONS (Segmented buttons with AI gradient text on black active background) */}
-                    <div className="flex items-center gap-1.5 pl-24">
+                    <div className="flex items-center gap-2 pl-24">
                         <button
                             type="button"
                             onClick={() => {
@@ -1089,10 +1089,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     }
                                 }
                             }}
-                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
+                            className={`flex-1 py-2.5 px-2 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 isReturn 
                                     ? 'bg-black border border-black shadow-sm text-transparent' 
-                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                                    : paymentType !== ''
+                                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-purple-500/60 ring-2 ring-purple-500/40 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.3)]'
+                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
                             }`}
                         >
                             {isReturn ? (
@@ -1113,7 +1115,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     setIsReturn(false);
                                 }
                             }}
-                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
+                            className={`flex-1 py-2.5 px-2 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 isWaitAndReturn 
                                     ? 'bg-black border border-black shadow-sm text-transparent' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
@@ -1131,7 +1133,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <button
                             type="button"
                             onClick={() => setIsRecurring(!isRecurring)}
-                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
+                            className={`flex-1 py-2.5 px-2 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 isRecurring 
                                     ? 'bg-black border border-black shadow-sm text-transparent' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
@@ -1149,7 +1151,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <button
                             type="button"
                             onClick={() => setMuteNotifications(!muteNotifications)}
-                            className={`flex-1 py-2 px-1 rounded-md text-[10px] font-bold transition-all duration-200 text-center ${
+                            className={`flex-1 py-2.5 px-2 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 muteNotifications 
                                     ? 'bg-black border border-black shadow-sm text-transparent' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
@@ -1167,6 +1169,27 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     {isReturn && (
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
+                            {/* RETURN DATE/TIME (Moved to the top) */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-bold text-black uppercase tracking-wider">
+                                    Return Date & Time {getReturnDayName() && `(${getReturnDayName()})`}
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="date"
+                                        className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                                        value={returnDateOnly}
+                                        onChange={handleReturnDateChange}
+                                    />
+                                    <input
+                                        type="time"
+                                        className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                                        value={returnTimeOnly}
+                                        onChange={handleReturnTimeChange}
+                                    />
+                                </div>
+                            </div>
+
                             {/* RETURN PICKUP */}
                             <div className="flex items-center gap-2">
                                 <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Pickup:</label>
@@ -1203,75 +1226,62 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 </div>
                             </div>
 
-                            {/* RETURN DATE/TIME */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold text-black uppercase tracking-wider">
-                                    Return Date & Time {getReturnDayName() && `(${getReturnDayName()})`}
-                                </label>
-                                <div className="flex gap-2">
+                            {/* RETURN FLIGHT (Only visible if pickup is airport) */}
+                            {isAirport(returnPickup) && (
+                                <div className="relative group animate-in fade-in slide-in-from-top-2">
+                                    <div className="absolute left-3 top-3 text-blue-600">
+                                        <Plane className="h-4 w-4" />
+                                    </div>
                                     <input
-                                        type="date"
-                                        className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
-                                        value={returnDateOnly}
-                                        onChange={handleReturnDateChange}
-                                    />
-                                    <input
-                                        type="time"
-                                        className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
-                                        value={returnTimeOnly}
-                                        onChange={handleReturnTimeChange}
+                                        type="text"
+                                        placeholder="Flight Number (e.g. BA101) *"
+                                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50 font-bold"
+                                        value={returnFlightNumber}
+                                        onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
                                     />
                                 </div>
-                            </div>
+                            )}
 
-                            {/* RETURN FLIGHT */}
-                            <div className="relative group">
-                                <div className="absolute left-3 top-3 text-blue-600">
-                                    <Plane className="h-4 w-4" />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder=""
-                                    className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50"
-                                    value={returnFlightNumber}
-                                    onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
-                                />
-                            </div>
-
-                            {/* RETURN PAX & LUGGAGE */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">PAX</span>
+                            {/* RETURN PAX & LUGGAGE on a single line matching main journey */}
+                            <div className="flex items-center gap-3 pl-24">
+                                {/* PAX */}
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                    <label className="text-xs font-bold text-slate-900">PAX:</label>
                                     <input
                                         type="number"
                                         min="1"
                                         max="16"
-                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                        className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                         value={returnPassengers}
-                                        onChange={e => setReturnPassengers(parseInt(e.target.value))}
+                                        onChange={e => setReturnPassengers(parseInt(e.target.value) || 1)}
                                     />
                                 </div>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">LUG</span>
+
+                                {/* LUG */}
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                    <label className="text-xs font-bold text-slate-900">LUG:</label>
                                     <input
                                         type="number"
                                         min="0"
                                         max="10"
-                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                        className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                         value={returnLuggage}
-                                        onChange={e => setReturnLuggage(parseInt(e.target.value))}
+                                        onChange={e => setReturnLuggage(parseInt(e.target.value) || 0)}
                                     />
                                 </div>
                             </div>
 
-                            {/* RETURN NOTES */}
-                            <input
-                                type="text"
-                                placeholder=""
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
-                                value={returnNotes}
-                                onChange={e => setReturnNotes(e.target.value)}
-                            />
+                            {/* RETURN NOTES (Labeled Notes row) */}
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Notes:</label>
+                                <input
+                                    type="text"
+                                    placeholder="Return journey notes..."
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                    value={returnNotes}
+                                    onChange={e => setReturnNotes(e.target.value)}
+                                />
+                            </div>
                         </div>
                     )}
 
