@@ -12,6 +12,33 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
+        // Server-side validations
+        if (!body.pickupAddress) {
+            return NextResponse.json({ error: "Pickup address is required" }, { status: 400 });
+        }
+        if (!body.dropoffAddress) {
+            return NextResponse.json({ error: "Dropoff address is required" }, { status: 400 });
+        }
+        if (!body.passengerName) {
+            return NextResponse.json({ error: "Passenger name is required" }, { status: 400 });
+        }
+        if (!body.passengerPhone) {
+            return NextResponse.json({ error: "Telephone number is required" }, { status: 400 });
+        }
+
+        const cleanPhone = body.passengerPhone.replace(/\D/g, '');
+        const phoneRegex = /^\+?[0-9\s\-()]+$/;
+        if (!phoneRegex.test(body.passengerPhone) || cleanPhone.length < 10 || cleanPhone.length > 15) {
+            return NextResponse.json({ error: "Invalid telephone number format. Must contain 10-15 digits." }, { status: 400 });
+        }
+
+        if (body.passengerEmail) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(body.passengerEmail)) {
+                return NextResponse.json({ error: "Invalid email address format." }, { status: 400 });
+            }
+        }
+
         // 0. Tenant Resolution
         // Allow dynamic slug from frontend, fallback to default for testing
         const tenantSlug = body.tenantSlug || 'demo-taxis';

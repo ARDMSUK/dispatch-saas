@@ -391,9 +391,45 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             return;
         }
 
-        if (!pickup || !dropoff) {
-            toast.error("Please select a route first");
+        if (!pickup) {
+            toast.error("Pickup Address Required", { description: "Please select a pickup address to save the booking." });
             return;
+        }
+
+        if (!dropoff) {
+            toast.error("Dropoff Address Required", { description: "Please select a destination address to save the booking." });
+            return;
+        }
+
+        if (!passengerName) {
+            toast.error("Passenger Name Required", { description: "Please enter the passenger's name to save the booking." });
+            return;
+        }
+
+        if (!passengerPhone) {
+            toast.error("Telephone Number Required", { description: "Please enter the passenger's telephone number to save the booking." });
+            return;
+        }
+
+        // Validate Phone Format and Length (10 to 15 digits)
+        const cleanPhoneDigits = passengerPhone.replace(/\D/g, '');
+        const phoneCharRegex = /^\+?[0-9\s\-()]+$/;
+        if (!phoneCharRegex.test(passengerPhone) || cleanPhoneDigits.length < 10 || cleanPhoneDigits.length > 15) {
+            toast.error("Invalid Telephone Number", { 
+                description: "Please enter a valid telephone number containing between 10 and 15 digits." 
+            });
+            return;
+        }
+
+        // Validate Email Format if Entered
+        if (passengerEmail) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(passengerEmail)) {
+                toast.error("Invalid Email Address", { 
+                    description: "Please enter a valid email address (e.g. name@example.com) or leave the field blank." 
+                });
+                return;
+            }
         }
 
         // Mandatory Flight Number Validation for Airports (Outbound)
@@ -1467,7 +1503,6 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 <Button
                     className="w-full bg-black hover:bg-black/90 text-transparent font-extrabold h-12 text-md shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border border-black mt-4 rounded-md uppercase tracking-wider flex items-center justify-center"
                     onClick={handlePreSubmit}
-                    disabled={!pickup || !dropoff || !passengerName}
                 >
                     <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
                         {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
