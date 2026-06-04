@@ -268,9 +268,9 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     };
 
 
-    // Pricing
     const [quotedPrice, setQuotedPrice] = useState<number | null>(null);
     const [isCalculating, setIsCalculating] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Verify Price on Coords OR Address Change (Debounced)
     useEffect(() => {
@@ -487,6 +487,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
     // Fix: Separate the event handler from the logic
     const handleCreateJob = async (paymentIntentId?: string) => {
+        if (isSaving) return;
+        setIsSaving(true);
         try {
             // Compose Notes
             let combinedNotes = instructions;
@@ -567,6 +569,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         } catch (e: any) {
             toast.error("Failed to create booking", { description: e.message });
             console.error(e);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -1503,10 +1507,18 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 <Button
                     className="w-full bg-black hover:bg-black/90 text-transparent font-extrabold h-12 text-md shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border border-black mt-4 rounded-md uppercase tracking-wider flex items-center justify-center"
                     onClick={handlePreSubmit}
+                    disabled={isSaving}
                 >
-                    <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
-                        {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
-                    </span>
+                    {isSaving ? (
+                        <span className="text-white flex items-center gap-2 font-bold normal-case">
+                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                            Saving Booking...
+                        </span>
+                    ) : (
+                        <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
+                            {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
+                        </span>
+                    )}
                 </Button>
 
             </div>
