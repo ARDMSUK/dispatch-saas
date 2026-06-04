@@ -4,15 +4,16 @@ import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request, { params }: { params: { routeId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const routeId = (await params).routeId;
         const route = await prisma.contractRoute.findUnique({
-            where: { id: params.routeId },
+            where: { id: routeId },
             include: {
                 stops: {
                     orderBy: { sequenceIndex: 'asc' }
@@ -33,14 +34,14 @@ export async function GET(req: Request, { params }: { params: { routeId: string 
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: { routeId: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const routeId = params.routeId;
+        const routeId = (await params).routeId;
         const body = await req.json();
         const { name, routeNumber, requiresWav, requiresPa, requiredDriverGender, requiredPaGender, defaultDriverId, defaultPaId } = body;
 

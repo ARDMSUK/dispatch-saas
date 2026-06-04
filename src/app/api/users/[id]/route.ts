@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
 
 // PATCH /api/users/[id]
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
@@ -15,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
         const { name, role, password, permissions, sipExtension } = body;
 
@@ -53,7 +53,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 // DELETE /api/users/[id]
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
@@ -64,7 +64,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         // Prevent self-deletion
         if (id === session.user.id) {

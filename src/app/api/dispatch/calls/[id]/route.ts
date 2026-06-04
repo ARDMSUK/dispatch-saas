@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from "@/auth";
 import { revalidatePath } from 'next/cache';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
@@ -11,6 +11,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         }
         const tenantId = session.user.tenantId;
 
+        const { id } = await params;
         const body = await req.json();
         const { status } = body; // Expecting 'ANSWERED' or 'DISMISSED'
 
@@ -19,7 +20,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         }
 
         const call = await prisma.incomingCall.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!call || call.tenantId !== tenantId) {
@@ -27,7 +28,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         }
 
         const updatedCall = await prisma.incomingCall.update({
-            where: { id: params.id },
+            where: { id },
             data: { status }
         });
 

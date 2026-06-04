@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user?.tenantId) {
@@ -13,11 +13,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { type, fileUrl, expiryDate, status, notes } = body;
 
     const existing = await prisma.document.findUnique({
-      where: { id: params.id, tenantId: session.user.tenantId }
+      where: { id: id, tenantId: session.user.tenantId }
     });
 
     if (!existing) {
@@ -25,7 +26,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const document = await prisma.document.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(type !== undefined && { type }),
         ...(fileUrl !== undefined && { fileUrl }),
@@ -42,7 +43,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user?.tenantId) {
@@ -53,8 +54,9 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
     }
 
+    const { id } = await params;
     const existing = await prisma.document.findUnique({
-      where: { id: params.id, tenantId: session.user.tenantId }
+      where: { id: id, tenantId: session.user.tenantId }
     });
 
     if (!existing) {
@@ -62,7 +64,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     await prisma.document.delete({
-      where: { id: params.id }
+      where: { id: id }
     });
 
     return NextResponse.json({ success: true });

@@ -4,19 +4,20 @@ import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { id } = await params;
         const body = await req.json();
         const { name, callsign, phone, email, gender, status, payRatePerHour } = body;
 
         // Verify ownership
         const pa = await prisma.passengerAssistant.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!pa || pa.tenantId !== session.user.tenantId) {
@@ -40,7 +41,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         }
 
         const updatedPa = await prisma.passengerAssistant.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 name: name !== undefined ? name : undefined,
                 callsign: callsign !== undefined ? callsign : undefined,
@@ -59,16 +60,17 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { id } = await params;
         // Verify ownership
         const pa = await prisma.passengerAssistant.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!pa || pa.tenantId !== session.user.tenantId) {
@@ -76,7 +78,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
         }
 
         await prisma.passengerAssistant.delete({
-            where: { id: params.id }
+            where: { id }
         });
 
         return NextResponse.json({ success: true });

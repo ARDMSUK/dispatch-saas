@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, FileText, CheckCircle, XCircle, AlertCircle, Trash2, ShieldCheck, Car } from "lucide-react";
+import { Search, FileText, CheckCircle, XCircle, AlertCircle, Trash2, ShieldCheck, Car, Users } from "lucide-react";
 import { Document } from "@/lib/types";
 
 export default function ComplianceDashboard() {
@@ -80,7 +80,8 @@ export default function ComplianceDashboard() {
     const filteredDocs = documents.filter(doc => 
         doc.type.toLowerCase().includes(searchTerm.toLowerCase()) || 
         doc.driver?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.vehicle?.reg?.toLowerCase().includes(searchTerm.toLowerCase())
+        doc.vehicle?.reg?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.passengerAssistant?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -138,6 +139,11 @@ export default function ComplianceDashboard() {
                                             <div className="flex items-center gap-2">
                                                 <Car className="w-4 h-4 text-primary" />
                                                 <span className="font-medium text-foreground">{doc.vehicle.reg}</span>
+                                            </div>
+                                        ) : doc.passengerAssistant ? (
+                                            <div className="flex items-center gap-2">
+                                                <Users className="w-4 h-4 text-primary" />
+                                                <span className="font-medium text-foreground">{doc.passengerAssistant.name}</span>
                                             </div>
                                         ) : (
                                             <span className="text-muted-foreground">Unknown</span>

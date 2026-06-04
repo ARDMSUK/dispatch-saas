@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const session = await auth();
         // Since both Admins and B2B Clients view this page, we verify either exist
@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const invoiceId = params.id;
+        const invoiceId = (await params).id;
         if (!invoiceId) {
             return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 });
         }

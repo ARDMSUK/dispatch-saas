@@ -4,14 +4,14 @@ import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request, { params }: { params: { routeId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const routeId = params.routeId;
+        const routeId = (await params).routeId;
         const body = await req.json();
         const { address, lat, lng, type, sequenceIndex, scheduledTime } = body;
 
@@ -48,14 +48,14 @@ export async function POST(req: Request, { params }: { params: { routeId: string
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { routeId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const routeId = params.routeId;
+        const routeId = (await params).routeId;
         const { searchParams } = new URL(req.url);
         const stopId = searchParams.get('stopId');
 
