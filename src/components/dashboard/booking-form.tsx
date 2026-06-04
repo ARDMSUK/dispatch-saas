@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone, CreditCard } from 'lucide-react';
+import { Navigation, User, Zap, Plane, Plus, X, RotateCw, MapPin, Phone, CreditCard, Banknote, Building2, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { LocationInput } from './location-input';
@@ -189,6 +189,19 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             if (pickup && dropoff) handleCalculate();
         }
     }, [isWaitAndReturn, waitingTime]);
+
+    const getPaymentIcon = () => {
+        switch (paymentType) {
+            case 'CASH':
+                return <Banknote className="h-4 w-4" />;
+            case 'CARD':
+                return <CreditCard className="h-4 w-4" />;
+            case 'ACCOUNT':
+                return <Building2 className="h-4 w-4" />;
+            default:
+                return <CreditCard className="h-4 w-4" />;
+        }
+    };
 
 
     // Pricing
@@ -689,7 +702,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                 {/* 1. PICKUP TIME ... (Unchanged) */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pickup Date & Time</label>
+                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Pickup Date & Time</label>
                     <div className="flex gap-2">
                         <input
                             type="date"
@@ -706,7 +719,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         />
                         <Button
                             variant="outline"
-                            className={`h-[42px] px-3 border-slate-200 ${pickupTime.includes('T') ? 'bg-blue-700/10 text-blue-700 border-blue-700/50' : 'bg-slate-100 text-slate-500'}`}
+                            className={`h-[42px] px-3 border-slate-200 transition-all ${pickupTime.includes('T') ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-900 hover:bg-slate-200'}`}
                             onClick={() => setPickupTime(format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm"))}
                         >
                             ASAP
@@ -715,10 +728,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 {/* 2. CUSTOMER PHONE */}
-                <div className="space-y-3 p-3 bg-blue-700/5 border border-blue-700/10 rounded-lg">
+                <div className="space-y-3 p-3 bg-slate-100 border border-slate-200 rounded-lg">
                     <div className="flex justify-between items-end">
-                        <label className="text-xs font-bold text-blue-700 uppercase tracking-wider flex items-center gap-2">
-                            <Phone className="h-3 w-3" /> Telephone
+                        <label className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <Phone className="h-3 w-3 text-slate-900" /> Telephone
                         </label>
                         {customerStats && (
                             <div className="text-[10px] text-right">
@@ -797,7 +810,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     ))}
                     <div className="flex items-center gap-2">
                         <div className="w-16 shrink-0"></div>
-                        <button onClick={addVia} className="text-xs text-blue-700 hover:text-blue-600 flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
+                        <button onClick={addVia} className="text-xs text-slate-900 hover:text-black flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
                     </div>
                     {/* Dest */}
                     <div className="flex items-center gap-2">
@@ -938,40 +951,47 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     </div>
 
-                    {/* ACCOUNT SELECTION */}
-                    {paymentType === 'ACCOUNT' && (
-                        <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-1">
-                            <select
-                                className="w-full bg-indigo-50 border border-indigo-200 rounded-md py-2.5 px-3 text-sm text-indigo-900 font-bold focus:outline-none focus:border-indigo-400/50 appearance-none"
-                                value={selectedAccountId}
-                                onChange={e => setSelectedAccountId(e.target.value)}
-                            >
-                                <option value="">-- Select Account --</option>
-                                {accounts.map(acc => (
-                                    <option key={acc.id} value={acc.id}>
-                                        {acc.code} - {acc.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
                     <div className="flex items-center gap-2">
-                        <label className="text-xs font-semibold text-slate-900 w-16 shrink-0 leading-tight">Payment Type:</label>
+                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0 leading-tight">Payment:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
-                                <CreditCard className="h-4 w-4" />
+                                {getPaymentIcon()}
                             </div>
                             <select
                                 className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-600/50 appearance-none"
                                 value={paymentType}
                                 onChange={e => setPaymentType(e.target.value)}
                             >
-                                <option value="CASH">💵 CASH PAYMENT</option>
-                                <option value="CARD">💳 CARD / PRE-PAID</option>
-                                <option value="ACCOUNT">🏢 ACCOUNT (INVOICE)</option>
+                                <option value="CASH">CASH PAYMENT</option>
+                                <option value="CARD">CARD / PRE-PAID</option>
+                                <option value="ACCOUNT">ACCOUNT (INVOICE)</option>
                             </select>
                         </div>
                     </div>
+
+                    {/* ACCOUNT SELECTION (Moved to bottom of payment field and styled to match) */}
+                    {paymentType === 'ACCOUNT' && (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                            <div className="w-16 shrink-0"></div>
+                            <div className="relative flex-1">
+                                <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
+                                    <Building2 className="h-4 w-4" />
+                                </div>
+                                <select
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-600/50 appearance-none"
+                                    value={selectedAccountId}
+                                    onChange={e => setSelectedAccountId(e.target.value)}
+                                >
+                                    <option value="">-- Select Account --</option>
+                                    {accounts.map(acc => (
+                                        <option key={acc.id} value={acc.id}>
+                                            {acc.code} - {acc.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
 
@@ -982,16 +1002,15 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 {/* 4. RETURN & DETAILS/SCHEDULING OPTIONS */}
                 <div className="space-y-3">
                     
-                    {/* RETURN BOOKING TOGGLE */}
-                    <div className={`flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5 ${isWaitAndReturn ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <input
-                            type="checkbox"
-                            id="returnToggle"
-                            checked={isReturn}
-                            onChange={(e) => {
-                                const checked = e.target.checked;
-                                setIsReturn(checked);
-                                if (checked) {
+                    {/* RETURN & W&R TOGGLES (Segmented buttons with AI gradient text on black active background) */}
+                    <div className="flex items-center gap-2 pl-16">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const nextVal = !isReturn;
+                                setIsReturn(nextVal);
+                                if (nextVal) {
+                                    setIsWaitAndReturn(false);
                                     setReturnPickup(dropoff);
                                     setReturnPickupCoords(dropoffCoords);
                                     setReturnDropoff(pickup);
@@ -1004,12 +1023,44 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     }
                                 }
                             }}
-                            disabled={isWaitAndReturn}
-                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-blue-700 focus:ring-blue-700/20"
-                        />
-                        <label htmlFor="returnToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <RotateCw className="h-3 w-3 text-slate-500" /> Book Return Journey
-                        </label>
+                            className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 text-center ${
+                                isReturn 
+                                    ? 'bg-slate-900 border border-slate-900 shadow-sm' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                            }`}
+                        >
+                            {isReturn ? (
+                                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                                    Return
+                                </span>
+                            ) : (
+                                "Return"
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const nextVal = !isWaitAndReturn;
+                                setIsWaitAndReturn(nextVal);
+                                if (nextVal) {
+                                    setIsReturn(false);
+                                }
+                            }}
+                            className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 text-center ${
+                                isWaitAndReturn 
+                                    ? 'bg-slate-900 border border-slate-900 shadow-sm' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                            }`}
+                        >
+                            {isWaitAndReturn ? (
+                                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                                    W & R
+                                </span>
+                            ) : (
+                                "W & R"
+                            )}
+                        </button>
                     </div>
 
                     {isReturn && (
@@ -1109,19 +1160,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     )}
 
-                    {/* WAIT & RETURN TOGGLE */}
-                    <div className="flex items-center gap-3 p-2 rounded border border-slate-200 bg-white/5">
-                        <input
-                            type="checkbox"
-                            id="waitReturnToggle"
-                            checked={isWaitAndReturn}
-                            onChange={(e) => setIsWaitAndReturn(e.target.checked)}
-                            className="w-4 h-4 rounded border-zinc-600 bg-slate-100 text-blue-700 focus:ring-blue-700/20"
-                        />
-                        <label htmlFor="waitReturnToggle" className="text-sm text-slate-900 flex-1 cursor-pointer select-none flex items-center gap-2">
-                            <RotateCw className="h-3 w-3 text-blue-700" /> Wait & Return
-                        </label>
-                    </div>
+
 
                     {isWaitAndReturn && (
                         <div className="pl-4 border-l-2 border-blue-700/20 animate-in slide-in-from-top-2 space-y-4 mt-2 mb-4">
@@ -1153,18 +1192,26 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </label>
                     </div>
 
-                    {/* REMINDERS (Moved above Mute Notifications and styled with Cyan AI colors) */}
-                    <select
-                        className="w-full bg-cyan-500/5 border border-cyan-500/25 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-cyan-500 appearance-none"
-                        value={reminders}
-                        onChange={e => setReminders(e.target.value)}
-                    >
-                        <option value="">-- No Reminders --</option>
-                        <option value="Checked Bags">Checked Bags</option>
-                        <option value="Remember to take baby seat">Remember to take baby seat</option>
-                        <option value="Dont ring doorbell">Don't ring doorbell</option>
-                        <option value="Call when outside">Call when outside</option>
-                    </select>
+                    {/* REMINDERS (Aligned with Payment/Email/Name with label on left and matching light-gray background) */}
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0 leading-tight">Reminders:</label>
+                        <div className="relative flex-1">
+                            <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
+                                <Bell className="h-4 w-4" />
+                            </div>
+                            <select
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-600/50 appearance-none"
+                                value={reminders}
+                                onChange={e => setReminders(e.target.value)}
+                            >
+                                <option value="">-- No Reminders --</option>
+                                <option value="Checked Bags">Checked Bags</option>
+                                <option value="Remember to take baby seat">Remember to take baby seat</option>
+                                <option value="Dont ring doorbell">Don't ring doorbell</option>
+                                <option value="Call when outside">Call when outside</option>
+                            </select>
+                        </div>
+                    </div>
 
                     {/* MUTE NOTIFICATIONS TOGGLE (Styled with Magenta/Fuchsia AI colors) */}
                     <div className="flex items-center gap-3 p-2 rounded border border-fuchsia-500/20 bg-fuchsia-500/5 mb-2">
@@ -1290,29 +1337,29 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 {/* QUOTE & SUBMIT */}
-                <div className={`mt-6 p-4 rounded-lg border border-dashed transition-all duration-300 ${quotedPrice ? "bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-fuchsia-500/5 border-purple-500/30 shadow-[0_4px_20px_rgba(168,85,247,0.06)]" : "bg-white/5 border-slate-200"}`}>
+                <div className={`mt-6 p-4 rounded-lg border transition-all duration-300 ${quotedPrice ? "bg-slate-900 border-slate-900 shadow-md text-white" : "bg-slate-100 border-slate-200 text-slate-500"}`}>
                     <div className="flex justify-between items-center">
-                        <span className="text-purple-600/70 text-xs uppercase tracking-wider font-bold">Estimated Fare</span>
+                        <span className={`text-xs uppercase tracking-wider font-bold ${quotedPrice ? "text-slate-300" : "text-slate-500"}`}>Estimated Fare</span>
                         {isCalculating ? (
-                            <span className="text-cyan-600 text-xs animate-pulse font-semibold">Calculating...</span>
+                            <span className="text-cyan-400 text-xs animate-pulse font-semibold">Calculating...</span>
                         ) : (
                             <div className="flex flex-col items-end">
                                 <div className="flex items-center justify-end group" title="Click to manually override fare">
-                                    <span className="text-2xl font-mono text-fuchsia-600">£</span>
+                                    <span className={`text-2xl font-mono ${quotedPrice ? "text-white" : "text-slate-900"}`}>£</span>
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className="w-24 bg-transparent border-b border-dashed border-purple-500/30 hover:border-purple-600 focus:border-purple-600 focus:border-solid text-2xl font-mono text-fuchsia-700 text-right focus:outline-none transition-all ml-1 py-0 px-0"
+                                        className={`w-24 bg-transparent border-b border-dashed text-2xl font-mono text-right focus:outline-none transition-all ml-1 py-0 px-0 ${quotedPrice ? "border-slate-700 text-white focus:border-white" : "border-slate-300 text-slate-900 focus:border-blue-600"}`}
                                         value={quotedPrice !== null ? quotedPrice : ''}
                                         onChange={(e) => setQuotedPrice(e.target.value ? parseFloat(e.target.value) : null)}
                                         placeholder="0.00"
                                     />
                                 </div>
-                                <span className="block text-[10px] text-slate-400 mt-1">
+                                <span className={`block text-[10px] mt-1 ${quotedPrice ? "text-slate-400" : "text-slate-500"}`}>
                                     {debugData?.payload?.distance ? `${debugData.payload.distance.toFixed(1)} miles` : '0.0 miles'}
                                 </span>
                                 {isReturn && quotedPrice !== null && (
-                                    <span className="text-[10px] text-purple-600/60 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
+                                    <span className={`text-[10px] block ${quotedPrice ? "text-slate-400" : "text-slate-500"}`}>+ £{quotedPrice.toFixed(2)} Return Est.</span>
                                 )}
                             </div>
                         )}
@@ -1320,11 +1367,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 <Button
-                    className="w-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-cyan-400 text-white font-extrabold h-12 text-md shadow-[0_4px_25px_rgba(168,85,247,0.35)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border-0 mt-4 rounded-md uppercase tracking-wider"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-transparent font-extrabold h-12 text-md shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border border-slate-900 mt-4 rounded-md uppercase tracking-wider flex items-center justify-center"
                     onClick={handlePreSubmit}
                     disabled={!pickup || !dropoff || !passengerName}
                 >
-                    {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
+                    <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                        {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
+                    </span>
                 </Button>
 
             </div>
@@ -1357,13 +1406,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             });
                         }
                     }}
-                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-white/95 dark:bg-slate-900/95 border border-fuchsia-500/30 hover:border-fuchsia-500 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-fuchsia-500/10 transition-all select-none hover:scale-105 active:scale-95"
+                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-slate-900 border border-slate-800 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-slate-800 transition-all select-none hover:scale-105 active:scale-95"
                 >
-                    <span className="text-[10px] font-bold text-purple-600/70 uppercase tracking-wider">Live Quote</span>
-                    <span className="text-base font-mono font-bold text-fuchsia-600">£{quotedPrice.toFixed(2)}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live Quote</span>
+                    <span className="text-base font-mono font-bold text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text">
+                        £{quotedPrice.toFixed(2)}
+                    </span>
                 </div>
             )}
         </div>
     );
 }
-
