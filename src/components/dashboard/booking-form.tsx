@@ -700,26 +700,26 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             </div>
 
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                {/* 1. PICKUP TIME ... (Unchanged) */}
+                {/* 1. PICKUP TIME */}
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Pickup Date & Time</label>
+                    <label className="text-xs font-bold text-black uppercase tracking-wider">Pickup Date & Time</label>
                     <div className="flex gap-2">
                         <input
                             type="date"
-                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                             value={pickupDate}
                             onChange={handleDateChange}
                         />
                         <input
                             type="time"
                             ref={timeInputRef}
-                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
+                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                             value={pickupTimeOnly}
                             onChange={handleTimeChange}
                         />
                         <Button
                             variant="outline"
-                            className={`h-[42px] px-3 border-slate-200 transition-all ${pickupTime.includes('T') ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-900 hover:bg-slate-200'}`}
+                            className={`h-[42px] px-3 border-slate-200 transition-all ${pickupTime.includes('T') ? 'bg-black text-white border-black hover:bg-black/90' : 'bg-slate-100 text-black hover:bg-slate-200'}`}
                             onClick={() => setPickupTime(format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm"))}
                         >
                             ASAP
@@ -730,8 +730,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 {/* 2. CUSTOMER PHONE */}
                 <div className="space-y-3 p-3 bg-slate-100 border border-slate-200 rounded-lg">
                     <div className="flex justify-between items-end">
-                        <label className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                            <Phone className="h-3 w-3 text-slate-900" /> Telephone
+                        <label className="text-xs font-bold text-black uppercase tracking-wider flex items-center gap-2">
+                            <Phone className="h-3 w-3 text-black" /> Telephone
                         </label>
                         {customerStats && (
                             <div className="text-[10px] text-right">
@@ -744,7 +744,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <input
                             type="tel"
                             placeholder=""
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-slate-900 focus:outline-none focus:border-blue-600/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-black focus:outline-none focus:border-blue-600/50"
                             value={passengerPhone}
                             onChange={e => setPassengerPhone(e.target.value)}
                         />
@@ -810,7 +810,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     ))}
                     <div className="flex items-center gap-2">
                         <div className="w-16 shrink-0"></div>
-                        <button onClick={addVia} className="text-xs text-slate-900 hover:text-black flex items-center gap-1 font-medium"><Plus className="h-3 w-3" /> Add Stop / Via</button>
+                        <button onClick={addVia} className="text-xs text-black hover:text-black/80 flex items-center gap-1 font-medium"><Plus className="h-3 w-3 text-black" /> Add Stop / Via</button>
                     </div>
                     {/* Dest */}
                     <div className="flex items-center gap-2">
@@ -1025,12 +1025,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             }}
                             className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 isReturn 
-                                    ? 'bg-slate-900 border border-slate-900 shadow-sm' 
+                                    ? 'bg-black border border-black shadow-sm' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
                             }`}
                         >
                             {isReturn ? (
-                                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                                <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
                                     Return
                                 </span>
                             ) : (
@@ -1049,12 +1049,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             }}
                             className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 isWaitAndReturn 
-                                    ? 'bg-slate-900 border border-slate-900 shadow-sm' 
+                                    ? 'bg-black border border-black shadow-sm' 
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
                             }`}
                         >
                             {isWaitAndReturn ? (
-                                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                                <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
                                     W & R
                                 </span>
                             ) : (
@@ -1194,7 +1194,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                     {/* REMINDERS (Aligned with Payment/Email/Name with label on left and matching light-gray background) */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold text-slate-900 w-16 shrink-0 leading-tight">Reminders:</label>
+                        <label className="text-sm font-semibold text-black w-16 shrink-0 leading-tight">Reminders:</label>
                         <div className="relative flex-1">
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10">
                                 <Bell className="h-4 w-4" />
@@ -1337,29 +1337,29 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 {/* QUOTE & SUBMIT */}
-                <div className={`mt-6 p-4 rounded-lg border transition-all duration-300 ${quotedPrice ? "bg-slate-900 border-slate-900 shadow-md text-white" : "bg-slate-100 border-slate-200 text-slate-500"}`}>
+                <div className="mt-6 p-4 rounded-lg border border-black bg-black shadow-md text-white">
                     <div className="flex justify-between items-center">
-                        <span className={`text-xs uppercase tracking-wider font-bold ${quotedPrice ? "text-slate-300" : "text-slate-500"}`}>Estimated Fare</span>
+                        <span className="text-xs uppercase tracking-wider font-bold text-slate-300">Estimated Fare</span>
                         {isCalculating ? (
                             <span className="text-cyan-400 text-xs animate-pulse font-semibold">Calculating...</span>
                         ) : (
                             <div className="flex flex-col items-end">
                                 <div className="flex items-center justify-end group" title="Click to manually override fare">
-                                    <span className={`text-2xl font-mono ${quotedPrice ? "text-white" : "text-slate-900"}`}>£</span>
+                                    <span className="text-2xl font-mono text-white">£</span>
                                     <input
                                         type="number"
                                         step="0.01"
-                                        className={`w-24 bg-transparent border-b border-dashed text-2xl font-mono text-right focus:outline-none transition-all ml-1 py-0 px-0 ${quotedPrice ? "border-slate-700 text-white focus:border-white" : "border-slate-300 text-slate-900 focus:border-blue-600"}`}
+                                        className="w-24 bg-transparent border-b border-dashed border-slate-700 hover:border-white focus:border-white text-2xl font-mono text-white text-right focus:outline-none transition-all ml-1 py-0 px-0"
                                         value={quotedPrice !== null ? quotedPrice : ''}
                                         onChange={(e) => setQuotedPrice(e.target.value ? parseFloat(e.target.value) : null)}
                                         placeholder="0.00"
                                     />
                                 </div>
-                                <span className={`block text-[10px] mt-1 ${quotedPrice ? "text-slate-400" : "text-slate-500"}`}>
+                                <span className="block text-[10px] text-slate-400 mt-1">
                                     {debugData?.payload?.distance ? `${debugData.payload.distance.toFixed(1)} miles` : '0.0 miles'}
                                 </span>
                                 {isReturn && quotedPrice !== null && (
-                                    <span className={`text-[10px] block ${quotedPrice ? "text-slate-400" : "text-slate-500"}`}>+ £{quotedPrice.toFixed(2)} Return Est.</span>
+                                    <span className="text-[10px] text-slate-400 block">+ £{quotedPrice.toFixed(2)} Return Est.</span>
                                 )}
                             </div>
                         )}
@@ -1367,11 +1367,11 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 </div>
 
                 <Button
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-transparent font-extrabold h-12 text-md shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border border-slate-900 mt-4 rounded-md uppercase tracking-wider flex items-center justify-center"
+                    className="w-full bg-black hover:bg-black/90 text-transparent font-extrabold h-12 text-md shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border border-black mt-4 rounded-md uppercase tracking-wider flex items-center justify-center"
                     onClick={handlePreSubmit}
                     disabled={!pickup || !dropoff || !passengerName}
                 >
-                    <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
                         {isReturn ? 'SAVE BOOKING + RETURN' : 'SAVE BOOKING'}
                     </span>
                 </Button>
@@ -1406,10 +1406,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             });
                         }
                     }}
-                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-slate-900 border border-slate-800 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-slate-800 transition-all select-none hover:scale-105 active:scale-95"
+                    className="absolute bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 bg-black border border-slate-700 shadow-2xl rounded-full py-2.5 px-4 flex items-center gap-2 cursor-pointer hover:bg-slate-900 transition-all select-none hover:scale-105 active:scale-95"
                 >
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live Quote</span>
-                    <span className="text-base font-mono font-bold text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text">
+                    <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">Live Quote</span>
+                    <span className="text-base font-mono font-bold text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text">
                         £{quotedPrice.toFixed(2)}
                     </span>
                 </div>
