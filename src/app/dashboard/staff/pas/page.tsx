@@ -13,8 +13,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, User, Pencil, Trash2, X, MoreHorizontal, Power, CheckCircle, Clock, FileText } from "lucide-react";
+import { Plus, Search, User, Pencil, Trash2, X, MoreHorizontal, Power, CheckCircle, Clock, FileText, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PassengerAssistantsPage() {
     const [pas, setPas] = useState<any[]>([]);
@@ -22,6 +23,7 @@ export default function PassengerAssistantsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [pendingDocs, setPendingDocs] = useState<{ type: string; fileUrl: string; expiryDate: string }[]>([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -63,6 +65,7 @@ export default function PassengerAssistantsPage() {
             status: "OFF_DUTY"
         });
         setEditingId(null);
+        setPendingDocs([]);
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -70,8 +73,8 @@ export default function PassengerAssistantsPage() {
         if (!open) resetForm();
     };
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSave = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         if (!formData.name || !formData.callsign || !formData.phone) {
             toast.error("Name, Callsign, and Phone are required.");
             return;
@@ -88,6 +91,21 @@ export default function PassengerAssistantsPage() {
             });
 
             if (res.ok) {
+                if (!editingId && pendingDocs.length > 0) {
+                    const newPa = await res.json();
+                    for (const doc of pendingDocs) {
+                        await fetch('/api/documents', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: doc.type,
+                                fileUrl: doc.fileUrl,
+                                expiryDate: doc.expiryDate,
+                                passengerAssistantId: newPa.id
+                            })
+                        });
+                    }
+                }
                 toast.success(editingId ? "Passenger Assistant updated" : "Passenger Assistant added");
                 setIsDialogOpen(false);
                 resetForm();
@@ -182,84 +200,101 @@ export default function PassengerAssistantsPage() {
                             <Plus className="mr-2 h-4 w-4" /> Add Assistant
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[450px] bg-white border-slate-200">
+                    <DialogContent className="bg-card border-border text-foreground max-w-2xl">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-slate-900">
                                 {editingId ? "Edit Passenger Assistant" : "Add Passenger Assistant"}
                             </DialogTitle>
                         </DialogHeader>
-                        <form onSubmit={handleSave} className="space-y-4 pt-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-slate-500 uppercase">Assistant Name *</label>
-                                <Input
-                                    placeholder="e.g. Jane Doe"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                        <Tabs defaultValue="profile" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="profile">Profile</TabsTrigger>
+                                <TabsTrigger value="documents">Compliance</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="profile" className="space-y-4 pt-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Callsign / Code *</label>
+                                    <label className="text-xs font-semibold text-slate-500 uppercase">Assistant Name *</label>
                                     <Input
-                                        placeholder="e.g. PA-05"
-                                        value={formData.callsign}
-                                        onChange={e => setFormData({ ...formData, callsign: e.target.value })}
+                                        placeholder="e.g. Jane Doe"
+                                        value={formData.name}
+                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         required
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Gender *</label>
-                                    <select
-                                        className="w-full flex h-10 items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
-                                        value={formData.gender}
-                                        onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                                    >
-                                        <option value="MALE">Male</option>
-                                        <option value="FEMALE">Female</option>
-                                        <option value="OTHER">Other</option>
-                                    </select>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Callsign / Code *</label>
+                                        <Input
+                                            placeholder="e.g. PA-05"
+                                            value={formData.callsign}
+                                            onChange={e => setFormData({ ...formData, callsign: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Gender *</label>
+                                        <select
+                                            className="w-full flex h-10 items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800"
+                                            value={formData.gender}
+                                            onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                                        >
+                                            <option value="MALE">Male</option>
+                                            <option value="FEMALE">Female</option>
+                                            <option value="OTHER">Other</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Phone Number *</label>
+                                        <Input
+                                            placeholder="Mobile / Phone"
+                                            value={formData.phone}
+                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Pay Rate (£ / Hr) *</label>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.payRatePerHour}
+                                            onChange={e => setFormData({ ...formData, payRatePerHour: parseFloat(e.target.value) })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Phone Number *</label>
+                                    <label className="text-xs font-semibold text-slate-500 uppercase">Email Address</label>
                                     <Input
-                                        placeholder="Mobile / Phone"
-                                        value={formData.phone}
-                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                        required
+                                        type="email"
+                                        placeholder="email@example.com"
+                                        value={formData.email}
+                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Pay Rate (£ / Hr) *</label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.payRatePerHour}
-                                        onChange={e => setFormData({ ...formData, payRatePerHour: parseFloat(e.target.value) })}
-                                        required
-                                    />
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={() => handleSave()} className="bg-slate-900 text-white hover:bg-slate-800">
+                                        Save Assistant
+                                    </Button>
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-slate-500 uppercase">Email Address</label>
-                                <Input
-                                    type="email"
-                                    placeholder="email@example.com"
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex justify-end gap-2 pt-2">
-                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" className="bg-slate-900 text-white">
-                                    Save Assistant
-                                </Button>
-                            </div>
-                        </form>
+                            </TabsContent>
+                            <TabsContent value="documents" className="space-y-4 pt-4">
+                                <PADocuments paId={editingId} pendingDocuments={pendingDocs} setPendingDocuments={setPendingDocs} />
+                                <div className="mt-4 pt-4 border-t border-border flex justify-end gap-2">
+                                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={() => handleSave()} className="bg-slate-900 text-white hover:bg-slate-800">
+                                        Save Assistant
+                                    </Button>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
                     </DialogContent>
                 </Dialog>
             </div>
@@ -352,6 +387,176 @@ export default function PassengerAssistantsPage() {
                     </TableBody>
                 </Table>
             </Card>
+        </div>
+    );
+}
+
+function PADocuments({ 
+    paId, 
+    pendingDocuments = [], 
+    setPendingDocuments 
+}: { 
+    paId: string | null; 
+    pendingDocuments?: { type: string; fileUrl: string; expiryDate: string }[]; 
+    setPendingDocuments?: React.Dispatch<React.SetStateAction<{ type: string; fileUrl: string; expiryDate: string }[]>>; 
+}) {
+    const [documents, setDocuments] = useState<Document[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [type, setType] = useState('SCHOOL_BADGE');
+    const [file, setFile] = useState<File | null>(null);
+    const [expiryDate, setExpiryDate] = useState('');
+    const [uploading, setUploading] = useState(false);
+
+    const fetchDocs = async () => {
+        if (!paId) return;
+        try {
+            const res = await fetch(`/api/documents?passengerAssistantId=${paId}`);
+            if (res.ok) {
+                setDocuments(await res.json());
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { 
+        if (!paId) {
+            setDocuments([]);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        fetchDocs(); 
+    }, [paId]);
+
+    const handleUpload = async () => {
+        if (!file) return alert("Please select a file");
+        setUploading(true);
+        try {
+            const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                method: 'POST',
+                body: file,
+            });
+            const blob = await response.json();
+            if (blob.error) throw new Error(blob.error);
+
+            if (!paId) {
+                // Creation mode: append to pending list
+                if (setPendingDocuments) {
+                    setPendingDocuments(prev => [...prev, { type, fileUrl: blob.url, expiryDate }]);
+                }
+                setFile(null);
+                setExpiryDate('');
+                const fileInput = document.getElementById('paFileUploadInput') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            } else {
+                // Edit mode: save directly
+                const res = await fetch('/api/documents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, fileUrl: blob.url, expiryDate, passengerAssistantId: paId })
+                });
+                if (res.ok) {
+                    setFile(null);
+                    setExpiryDate('');
+                    const fileInput = document.getElementById('paFileUploadInput') as HTMLInputElement;
+                    if (fileInput) fileInput.value = '';
+                    fetchDocs();
+                }
+            }
+        } catch (e: any) {
+            console.error(e);
+            alert("Upload failed: " + e.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const allDocs = [
+        ...documents,
+        ...pendingDocuments.map((d, index) => ({
+            id: `pending-${index}`,
+            type: d.type,
+            status: 'UNSAVED',
+            expiryDate: d.expiryDate,
+            fileUrl: d.fileUrl,
+            isPending: true,
+            index
+        }))
+    ];
+
+    return (
+        <div className="py-4 flex flex-col gap-4">
+            <div className="bg-card p-4 rounded border border-border flex gap-2 items-end text-slate-800">
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Doc Type</label>
+                    <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+                        <option value="SCHOOL_BADGE">School Badge</option>
+                        <option value="DBS">DBS</option>
+                        <option value="PASSPORT">Passport</option>
+                        <option value="RIGHT_TO_WORK">Right To Work Proof</option>
+                        <option value="TRAINING_CERTIFICATE">Training Certificate</option>
+                    </select>
+                </div>
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">File</label>
+                    <Input id="paFileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-background text-xs pt-2 border-input cursor-pointer text-foreground" />
+                </div>
+                <div className="flex-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Expiry</label>
+                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground" />
+                </div>
+                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
+                    {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Upload & Save Document</>}
+                </Button>
+            </div>
+            
+            <div className="border border-border rounded overflow-hidden">
+                <Table>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="border-border">
+                            <TableHead className="text-muted-foreground font-semibold">Type</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Status</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">Expiry</TableHead>
+                            <TableHead className="text-muted-foreground font-semibold">File</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="bg-card">
+                        {loading ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Loading...</TableCell></TableRow> :
+                         allDocs.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No documents found</TableCell></TableRow> :
+                         allDocs.map((doc, docIdx) => (
+                             <TableRow key={doc.id || docIdx} className="border-border hover:bg-muted/50">
+                                 <TableCell className="font-medium text-foreground">{doc.type.replace(/_/g, ' ')}</TableCell>
+                                 <TableCell>
+                                     <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-amber-500 border-amber-500/30 bg-amber-500/5' : 'text-foreground'}`}>
+                                         {doc.status}
+                                     </Badge>
+                                 </TableCell>
+                                 <TableCell className="text-muted-foreground">{doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : '-'}</TableCell>
+                                 <TableCell className="flex items-center gap-2">
+                                     {doc.fileUrl ? <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline font-semibold">View</a> : '-'}
+                                     {doc.isPending && (
+                                         <Button 
+                                             variant="ghost" 
+                                             size="sm" 
+                                             className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-500/10 text-xs ml-auto"
+                                             onClick={() => {
+                                                 if (setPendingDocuments) {
+                                                     setPendingDocuments(prev => prev.filter((_, idx) => idx !== doc.index));
+                                                 }
+                                             }}
+                                         >
+                                             Remove
+                                         </Button>
+                                     )}
+                                 </TableCell>
+                             </TableRow>
+                         ))}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 }

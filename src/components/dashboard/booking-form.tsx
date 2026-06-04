@@ -1005,7 +1005,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     </div>
 
                     {/* PAX, LUG, VEH on the same line */}
-                    <div className="flex items-center gap-3 pl-24">
+                    <div className="flex items-center gap-3 pl-6 md:pl-24">
                         {/* PAX */}
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">PAX:</label>
@@ -1285,7 +1285,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             )}
 
                             {/* RETURN PAX & LUGGAGE on a single line matching main journey */}
-                            <div className="flex items-center gap-3 pl-24">
+                            <div className="flex items-center gap-3 pl-6 md:pl-24">
                                 {/* PAX */}
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <label className="text-xs font-bold text-slate-900">PAX:</label>

@@ -129,7 +129,7 @@ export default function SurchargesTab() {
                                     <SelectTrigger className="bg-background border-input text-foreground">
                                         <SelectValue placeholder="Type" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-popover border-border text-popover-foreground">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground" position="popper" sideOffset={4}>
                                         <SelectItem value="PERCENT">Percentage (%)</SelectItem>
                                         <SelectItem value="FLAT">Flat Amount (£)</SelectItem>
                                     </SelectContent>

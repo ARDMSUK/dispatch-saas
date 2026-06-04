@@ -152,7 +152,7 @@ export default function FixedPricesTab() {
                                     <SelectTrigger className="bg-background border-input text-foreground">
                                         <SelectValue placeholder="Vehicle" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-popover border-border text-popover-foreground">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground" position="popper" sideOffset={4}>
                                         <SelectItem value="Saloon">Saloon</SelectItem>
                                         <SelectItem value="Estate">Estate</SelectItem>
                                         <SelectItem value="Executive">Executive</SelectItem>

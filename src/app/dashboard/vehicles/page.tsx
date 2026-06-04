@@ -247,22 +247,17 @@ export default function VehiclesPage() {
                                         </select>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <Input
-                                            type="date"
-                                            className="bg-background border-input text-foreground placeholder:text-muted-foreground block w-full"
-                                            placeholder="MOT/License Expiry"
-                                            value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
-                                            onChange={e => setFormData({ ...formData, expiryDate: new Date(e.target.value).toISOString() })}
-                                        />
-                                        <span className="text-[10px] text-muted-foreground ml-1">MOT/License Expiry</span>
-                                    </div>
                                     <Button onClick={handleSave} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
                                         {editingId ? 'Update Vehicle' : 'Create Vehicle'}
                                     </Button>
                                 </TabsContent>
-                                <TabsContent value="documents">
+                                <TabsContent value="documents" className="space-y-4">
                                     <VehicleDocuments vehicleId={editingId} pendingDocuments={pendingDocs} setPendingDocuments={setPendingDocs} />
+                                    <div className="mt-4 pt-4 border-t border-border flex justify-end">
+                                        <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
+                                            {editingId ? 'Update Vehicle' : 'Create Vehicle'}
+                                        </Button>
+                                    </div>
                                 </TabsContent>
                             </Tabs>
                         </DialogContent>
@@ -464,9 +459,9 @@ function VehicleDocuments({
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Expiry</label>
                     <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground" />
                 </div>
-                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
-                    {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Add</>}
-                </Button>
+                 <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
+                     {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Upload & Save Document</>}
+                 </Button>
             </div>
             
             <div className="border border-border rounded overflow-hidden">

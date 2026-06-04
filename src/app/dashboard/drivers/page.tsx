@@ -207,36 +207,25 @@ export default function DriversPage() {
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Input
-                                        placeholder="Badge Number"
-                                        value={formData.badgeNumber}
-                                        onChange={e => setFormData({ ...formData, badgeNumber: e.target.value })}
-                                        className="bg-background border-input text-foreground"
-                                    />
                                     <div className="space-y-1">
+                                        <label className="text-xs font-bold text-muted-foreground block">Login PIN (4 digits)</label>
                                         <Input
-                                            type="date"
-                                            placeholder="License Expiry"
-                                            value={formData.licenseExpiry ? formData.licenseExpiry.split('T')[0] : ''}
-                                            onChange={e => setFormData({ ...formData, licenseExpiry: new Date(e.target.value).toISOString() })}
+                                            placeholder="Login PIN"
+                                            value={formData.pin}
+                                            onChange={e => setFormData({ ...formData, pin: e.target.value })}
                                             className="bg-background border-input text-foreground"
                                         />
                                     </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Input
-                                        placeholder="Login PIN (4 digits)"
-                                        value={formData.pin}
-                                        onChange={e => setFormData({ ...formData, pin: e.target.value })}
-                                        className="bg-background border-input text-foreground"
-                                    />
-                                    <Input
-                                        type="number"
-                                        placeholder="Commission Rate (%)"
-                                        value={formData.commissionRate}
-                                        onChange={e => setFormData({ ...formData, commissionRate: parseFloat(e.target.value) })}
-                                        className="bg-background border-input text-foreground"
-                                    />
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-muted-foreground block">Commission Rate (%)</label>
+                                        <Input
+                                            type="number"
+                                            placeholder="Commission Rate"
+                                            value={formData.commissionRate}
+                                            onChange={e => setFormData({ ...formData, commissionRate: parseFloat(e.target.value) })}
+                                            className="bg-background border-input text-foreground"
+                                        />
+                                    </div>
                                 </div>
                                 {isAdmin && (
                                     <div className="p-3 border border-red-200 bg-red-50 rounded-md flex flex-col gap-2">
@@ -264,9 +253,14 @@ export default function DriversPage() {
                                     {editingId ? 'Update Driver' : 'Create Driver'}
                                 </Button>
                             </TabsContent>
-                            <TabsContent value="documents">
-                                <DriverDocuments driverId={editingId} pendingDocuments={pendingDocs} setPendingDocuments={setPendingDocs} />
-                            </TabsContent>
+                             <TabsContent value="documents" className="space-y-4">
+                                 <DriverDocuments driverId={editingId} pendingDocuments={pendingDocs} setPendingDocuments={setPendingDocs} />
+                                 <div className="mt-4 pt-4 border-t border-border flex justify-end">
+                                     <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
+                                         {editingId ? 'Update Driver' : 'Create Driver'}
+                                     </Button>
+                                 </div>
+                             </TabsContent>
                             </Tabs>
                         </DialogContent>
                     </Dialog>
@@ -505,11 +499,16 @@ function DriverDocuments({
             <div className="bg-card p-4 rounded border border-border flex gap-2 items-end">
                 <div className="flex-1">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Doc Type</label>
-                    <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
-                        <option value="DRIVING_LICENSE">Driving License</option>
-                        <option value="PCO_BADGE">PCO Badge</option>
-                        <option value="INSURANCE">Insurance</option>
-                    </select>
+                     <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
+                         <option value="DRIVING_LICENSE">Driving License</option>
+                         <option value="PCO_BADGE">PCO Badge</option>
+                         <option value="INSURANCE">Insurance</option>
+                         <option value="TAXI_LICENSE">Taxi License</option>
+                         <option value="SCHOOL_BADGE">School Badge</option>
+                         <option value="DBS">DBS</option>
+                         <option value="PASSPORT">Passport</option>
+                         <option value="RIGHT_TO_WORK">Right To Work Proof</option>
+                     </select>
                 </div>
                 <div className="flex-1">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">File</label>
@@ -519,9 +518,9 @@ function DriverDocuments({
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Expiry</label>
                     <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground" />
                 </div>
-                <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
-                    {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Add</>}
-                </Button>
+                 <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
+                     {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Upload & Save Document</>}
+                 </Button>
             </div>
             
             <div className="border border-border rounded overflow-hidden">

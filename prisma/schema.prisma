@@ -743,6 +743,9 @@ model Document {
   vehicleId String?
   vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
 
+  passengerAssistantId String?
+  passengerAssistant   PassengerAssistant? @relation(fields: [passengerAssistantId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -768,6 +771,7 @@ model PassengerAssistant {
   updatedAt DateTime @updatedAt
 
   contractRoutes ContractRoute[]
+  documents      Document[]
 
   @@unique([tenantId, callsign])
   @@map("passenger_assistants")

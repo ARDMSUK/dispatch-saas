@@ -12,16 +12,19 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const driverId = searchParams.get('driverId');
     const vehicleId = searchParams.get('vehicleId');
+    const passengerAssistantId = searchParams.get('passengerAssistantId');
 
     const documents = await prisma.document.findMany({
       where: {
         tenantId: session.user.tenantId,
         ...(driverId && { driverId }),
         ...(vehicleId && { vehicleId }),
+        ...(passengerAssistantId && { passengerAssistantId }),
       },
       include: {
         driver: { select: { id: true, name: true, callsign: true } },
-        vehicle: { select: { id: true, reg: true, make: true, model: true } }
+        vehicle: { select: { id: true, reg: true, make: true, model: true } },
+        passengerAssistant: { select: { id: true, name: true, callsign: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -45,14 +48,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { type, fileUrl, expiryDate, status, notes, driverId, vehicleId } = body;
+    const { type, fileUrl, expiryDate, status, notes, driverId, vehicleId, passengerAssistantId } = body;
 
     if (!type) {
         return NextResponse.json({ error: "Type is required" }, { status: 400 });
     }
 
-    if (!driverId && !vehicleId) {
-        return NextResponse.json({ error: "Must belong to driver or vehicle" }, { status: 400 });
+    if (!driverId && !vehicleId && !passengerAssistantId) {
+        return NextResponse.json({ error: "Must belong to driver, vehicle or passenger assistant" }, { status: 400 });
     }
 
     const document = await prisma.document.create({
@@ -65,6 +68,7 @@ export async function POST(request: Request) {
         notes,
         ...(driverId && { driverId }),
         ...(vehicleId && { vehicleId }),
+        ...(passengerAssistantId && { passengerAssistantId }),
       }
     });
 

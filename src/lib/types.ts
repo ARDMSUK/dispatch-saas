@@ -185,6 +185,8 @@ export interface Document {
     driver?: Driver | null;
     vehicleId?: string | null;
     vehicle?: Vehicle | null;
+    passengerAssistantId?: string | null;
+    passengerAssistant?: any | null;
     createdAt: string;
     updatedAt: string;
 }

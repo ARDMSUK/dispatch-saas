@@ -110,7 +110,7 @@ export default function ZonesPage() {
                             <Plus className="mr-2 h-4 w-4" /> Add New Zone
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                    <DialogContent className="sm:max-w-5xl h-[80vh] flex flex-col">
                         <DialogHeader>
                             <DialogTitle>Create Pricing Zone</DialogTitle>
                         </DialogHeader>
