@@ -338,6 +338,12 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         }
     };
 
+    const getPostcode = (addr: string) => {
+        if (!addr) return '';
+        const match = addr.match(/\b([A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2})\b/i);
+        return match ? match[1].toUpperCase() : '';
+    };
+
     const getVehicleStyle = (vType: string) => {
         if (vType === 'Saloon') return 'border-zinc-200 bg-white hover:bg-slate-50';
         if (vType.includes('WAV') || vType.includes('wav')) return 'border-l-4 border-l-orange-500 bg-orange-50 border-orange-200';
@@ -615,12 +621,30 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="col-span-12 md:col-span-5 space-y-2">
                         <div className="flex items-start gap-2">
                             <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-emerald-500" /></div>
-                            <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2">{job.pickupAddress}</span>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-1.5">
+                                    <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2 flex-1">{job.pickupAddress}</span>
+                                    {getPostcode(job.pickupAddress) && (
+                                        <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[9px] px-1.5 py-0.5 font-bold rounded shrink-0 font-mono mt-0.5">
+                                            {getPostcode(job.pickupAddress)}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         <div className="pl-[7px] py-1"><div className="w-[2px] h-3 bg-slate-200 ml-[1px]"></div></div>
                         <div className="flex items-start gap-2">
                             <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-blue-700" /></div>
-                            <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2">{job.dropoffAddress}</span>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-1.5">
+                                    <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2 flex-1">{job.dropoffAddress}</span>
+                                    {getPostcode(job.dropoffAddress) && (
+                                        <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[9px] px-1.5 py-0.5 font-bold rounded shrink-0 font-mono mt-0.5">
+                                            {getPostcode(job.dropoffAddress)}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         {/* Notes / Reminders */}
                         {job.notes && (
@@ -738,42 +762,42 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     return (
         <div className="h-full flex flex-col bg-slate-50">
             <div className="p-4 border-b border-slate-200 space-y-3 bg-white">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex items-center gap-2 pb-2">
-                        <div className="flex-1 overflow-x-auto scrollbar-none">
-                            <TabsList className="inline-flex w-auto bg-slate-100 border border-slate-200 h-9 p-1 gap-1">
-                                <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-blue-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    Pending {filterJobs('PENDING_NOW').length > 0 && `(${filterJobs('PENDING_NOW').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="TODAY" className="px-3 text-[10px] data-[state=active]:bg-teal-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    Today {filterJobs('TODAY').length > 0 && `(${filterJobs('TODAY').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="FUTURE" className="px-3 text-[10px] data-[state=active]:bg-zinc-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    Future {filterJobs('FUTURE').length > 0 && `(${filterJobs('FUTURE').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="DISPATCHED" className="px-3 text-[10px] data-[state=active]:bg-blue-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    Dispatched {filterJobs('DISPATCHED').length > 0 && `(${filterJobs('DISPATCHED').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="POB" className="px-3 text-[10px] data-[state=active]:bg-pink-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    POB {filterJobs('POB').length > 0 && `(${filterJobs('POB').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="COMPLETED" className="px-3 text-[10px] data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    Completed {filterJobs('COMPLETED').length > 0 && `(${filterJobs('COMPLETED').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="CANCELLED" className="px-3 text-[10px] data-[state=active]:bg-red-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    Cancelled {filterJobs('CANCELLED').length > 0 && `(${filterJobs('CANCELLED').length})`}
-                                </TabsTrigger>
-                                <TabsTrigger value="NO_SHOW" className="px-3 text-[10px] data-[state=active]:bg-zinc-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
-                                    No Show {filterJobs('NO_SHOW').length > 0 && `(${filterJobs('NO_SHOW').length})`}
-                                </TabsTrigger>
-                            </TabsList>
-                        </div>
-                        {/* Search Input Box */}
-                        <div className="relative w-48 md:w-64 shrink-0">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-3">
+                    <div className="flex-1 overflow-x-auto scrollbar-none pb-1">
+                        <TabsList className="inline-flex w-auto bg-slate-100 border border-slate-200 h-9 p-1 gap-1">
+                            <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-blue-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                Pending {filterJobs('PENDING_NOW').length > 0 && `(${filterJobs('PENDING_NOW').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="TODAY" className="px-3 text-[10px] data-[state=active]:bg-teal-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                Today {filterJobs('TODAY').length > 0 && `(${filterJobs('TODAY').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="FUTURE" className="px-3 text-[10px] data-[state=active]:bg-zinc-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                Future {filterJobs('FUTURE').length > 0 && `(${filterJobs('FUTURE').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="DISPATCHED" className="px-3 text-[10px] data-[state=active]:bg-blue-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                Dispatched {filterJobs('DISPATCHED').length > 0 && `(${filterJobs('DISPATCHED').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="POB" className="px-3 text-[10px] data-[state=active]:bg-pink-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                POB {filterJobs('POB').length > 0 && `(${filterJobs('POB').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="COMPLETED" className="px-3 text-[10px] data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                Completed {filterJobs('COMPLETED').length > 0 && `(${filterJobs('COMPLETED').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="CANCELLED" className="px-3 text-[10px] data-[state=active]:bg-red-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                Cancelled {filterJobs('CANCELLED').length > 0 && `(${filterJobs('CANCELLED').length})`}
+                            </TabsTrigger>
+                            <TabsTrigger value="NO_SHOW" className="px-3 text-[10px] data-[state=active]:bg-zinc-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                No Show {filterJobs('NO_SHOW').length > 0 && `(${filterJobs('NO_SHOW').length})`}
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
+                    {/* Search Input Box & Refresh Button Row */}
+                    <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
                             <input
                                 type="text"
                                 placeholder="Search name, phone, address, ID..."
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-1.5 pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-1.5 pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-blue-600/50 h-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -781,7 +805,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             {searchQuery && (
                                 <button
                                     onClick={() => setSearchQuery('')}
-                                    className="absolute right-2 top-1.5 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full text-xs font-bold"
+                                    className="absolute right-2 top-2 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full text-xs font-bold"
                                 >
                                     ✕
                                 </button>

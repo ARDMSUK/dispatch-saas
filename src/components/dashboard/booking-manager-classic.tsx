@@ -257,6 +257,11 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
         }
     };
 
+    const getPostcode = (addr: string) => {
+        if (!addr) return '';
+        const match = addr.match(/\b([A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2})\b/i);
+        return match ? match[1].toUpperCase() : '';
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -401,13 +406,27 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
 
                 {/* COL: JOURNEY & NOTES (Flex-1) */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 border-r border-slate-100 pr-2">
-                    <div className="flex items-center gap-2 text-xs">
-                        <MapPin className="h-3 w-3 text-emerald-500 shrink-0" />
-                        <span className="font-bold text-slate-700 truncate">{job.pickupAddress}</span>
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <MapPin className="h-3 w-3 text-emerald-500 shrink-0" />
+                            <span className="font-bold text-slate-700 truncate">{job.pickupAddress}</span>
+                        </div>
+                        {getPostcode(job.pickupAddress) && (
+                            <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[9px] px-1.5 py-0.5 font-bold rounded shrink-0 font-mono">
+                                {getPostcode(job.pickupAddress)}
+                            </span>
+                        )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
-                        <MapPin className="h-3 w-3 text-blue-600 shrink-0" />
-                        <span className="font-medium text-slate-600 truncate">{job.dropoffAddress}</span>
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <MapPin className="h-3 w-3 text-blue-600 shrink-0" />
+                            <span className="font-medium text-slate-600 truncate">{job.dropoffAddress}</span>
+                        </div>
+                        {getPostcode(job.dropoffAddress) && (
+                            <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[9px] px-1.5 py-0.5 font-bold rounded shrink-0 font-mono">
+                                {getPostcode(job.dropoffAddress)}
+                            </span>
+                        )}
                     </div>
                     {(job.notes || job.flightNumber || hasMeetGreet || job.returnBooking || (job.waitingTime && job.waitingTime > 0)) ? (
                         <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5 overflow-hidden">
