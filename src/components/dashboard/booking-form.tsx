@@ -1069,7 +1069,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 <div className="space-y-3">
                     
                     {/* RETURN & OTHER OPTIONS (Segmented buttons with AI gradient text on black active background) */}
-                    <div className="flex items-center gap-2 pl-24">
+                    <div className="flex items-center gap-2 w-full mt-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -1092,7 +1092,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             className={`flex-1 py-2.5 px-2 rounded-md text-xs font-bold transition-all duration-200 text-center ${
                                 isReturn 
                                     ? 'bg-black border border-black shadow-sm text-transparent' 
-                                    : paymentType !== ''
+                                    : (pickup !== '' && dropoff !== '' && passengerPhone !== '' && !isReturn)
                                         ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-purple-500/60 ring-2 ring-purple-500/40 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.3)]'
                                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
                             }`}
@@ -1159,10 +1159,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         >
                             {muteNotifications ? (
                                 <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">
-                                    Mute
+                                    Mute SMS
                                 </span>
                             ) : (
-                                "Mute"
+                                "Mute SMS"
                             )}
                         </button>
                     </div>
@@ -1421,13 +1421,16 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     )}
 
                     {/* INSTRUCTIONS (Notes) */}
-                    <textarea
-                        placeholder="Instructions (Notes)..."
-                        rows={2}
-                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 resize-none"
-                        value={instructions}
-                        onChange={e => setInstructions(e.target.value)}
-                    />
+                    <div className="flex items-start gap-2">
+                        <label className="text-sm font-semibold text-black w-24 shrink-0 mt-2.5 leading-tight">Instructions:</label>
+                        <textarea
+                            placeholder="Instructions (Notes)..."
+                            rows={2}
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 resize-none"
+                            value={instructions}
+                            onChange={e => setInstructions(e.target.value)}
+                        />
+                    </div>
                     {/* Estimated Fare & Action Buttons (styled with Magenta/Cyan/Purple AI theme) */}
                 </div>
 
