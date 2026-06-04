@@ -1009,27 +1009,29 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         {/* PAX */}
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">PAX:</label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="16"
-                                className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                            <select
+                                className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={passengers}
-                                onChange={e => setPassengers(parseInt(e.target.value) || 1)}
-                            />
+                                onChange={e => setPassengers(parseInt(e.target.value))}
+                            >
+                                {Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
+                                    <option key={num} value={num}>{num}</option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* LUG */}
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">LUG:</label>
-                            <input
-                                type="number"
-                                min="0"
-                                max="10"
-                                className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                            <select
+                                className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                 value={luggage}
-                                onChange={e => setLuggage(parseInt(e.target.value) || 0)}
-                            />
+                                onChange={e => setLuggage(parseInt(e.target.value))}
+                            >
+                                {Array.from({ length: 51 }, (_, i) => i).map(num => (
+                                    <option key={num} value={num}>{num}</option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Veh */}
@@ -1287,27 +1289,29 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 {/* PAX */}
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <label className="text-xs font-bold text-slate-900">PAX:</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="16"
-                                        className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                    <select
+                                        className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                         value={returnPassengers}
-                                        onChange={e => setReturnPassengers(parseInt(e.target.value) || 1)}
-                                    />
+                                        onChange={e => setReturnPassengers(parseInt(e.target.value))}
+                                    >
+                                        {Array.from({ length: 50 }, (_, i) => i + 1).map(num => (
+                                            <option key={num} value={num}>{num}</option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 {/* LUG */}
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <label className="text-xs font-bold text-slate-900">LUG:</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="10"
-                                        className="w-10 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
+                                    <select
+                                        className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                         value={returnLuggage}
-                                        onChange={e => setReturnLuggage(parseInt(e.target.value) || 0)}
-                                    />
+                                        onChange={e => setReturnLuggage(parseInt(e.target.value))}
+                                    >
+                                        {Array.from({ length: 51 }, (_, i) => i).map(num => (
+                                            <option key={num} value={num}>{num}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
@@ -1363,12 +1367,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     </div>
 
                     {isRecurring && (
-                        <div className="pl-4 border-l-2 border-emerald-500/20 animate-in slide-in-from-top-2 space-y-4 mt-2">
+                        <div className="pl-4 border-l-2 border-slate-200 animate-in slide-in-from-top-2 space-y-4 mt-2">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-xs text-emerald-600 font-bold block mb-1">Recurs</label>
+                                    <label className="text-xs text-black font-bold block mb-1">Recurs</label>
                                     <select
-                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50"
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50"
                                         value={recurrenceRule}
                                         onChange={(e) => {
                                             setRecurrenceRule(e.target.value);
@@ -1383,12 +1387,12 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-xs text-emerald-600 font-bold block mb-1">Recurs every</label>
+                                    <label className="text-xs text-black font-bold block mb-1">Recurs every</label>
                                     <div className="flex items-center gap-1.5">
                                         <input
                                             type="number"
                                             min="1"
-                                            className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 text-center"
+                                            className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 text-center"
                                             value={recurrenceInterval}
                                             onChange={e => setRecurrenceInterval(parseInt(e.target.value) || 1)}
                                         />
@@ -1401,7 +1405,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
 
                             {recurrenceRule === 'WEEKLY' && (
                                 <div className="space-y-2">
-                                    <label className="text-xs text-emerald-600 font-bold block">Recurs on</label>
+                                    <label className="text-xs text-black font-bold block">Recurs on</label>
                                     <div className="flex gap-1.5 justify-between">
                                         {[
                                             { label: 'M', value: 1 },
@@ -1426,7 +1430,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                                     }}
                                                     className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${
                                                         active 
-                                                            ? 'bg-emerald-500 text-white shadow' 
+                                                            ? 'bg-black text-white shadow' 
                                                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                                     }`}
                                                 >
@@ -1439,17 +1443,17 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             )}
 
                             <div className="grid grid-cols-1 gap-3">
-                                <label className="text-xs text-emerald-600 font-bold block">Repeat Until (Optional)</label>
+                                <label className="text-xs text-black font-bold block">Repeat Until (Optional)</label>
                                 <input
                                     type="date"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-emerald-400/50 [color-scheme:light]"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-600/50 [color-scheme:light]"
                                     value={recurrenceEnd}
                                     onChange={e => setRecurrenceEnd(e.target.value)}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs text-emerald-600 font-bold block">Calendar Exclusions (Click to toggle)</label>
+                                <label className="text-xs text-black font-bold block">Calendar Exclusions (Click to toggle)</label>
                                 {renderExclusionsCalendar()}
                                 {recurrenceExclusions.length > 0 && (
                                     <div className="text-[10px] text-red-600 font-semibold bg-red-50 p-2 rounded border border-red-200">
