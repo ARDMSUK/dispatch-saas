@@ -65,6 +65,8 @@ export default function SettingsPage() {
     const [slug, setSlug] = useState('');
     const [apiKey, setApiKey] = useState('');
     const [user, setUser] = useState<any>(null);
+    const [sumupConnected, setSumupConnected] = useState(false);
+    const [zettleConnected, setZettleConnected] = useState(false);
 
     // Address Autocomplete Hook replaced with unified LocationInput
 
@@ -133,6 +135,8 @@ export default function SettingsPage() {
                 setStripeSecretKey(data.stripeSecretKey || '');
                 setPaymentRouting(data.paymentRouting || 'CENTRAL');
                 setAviationStackApiKey(data.aviationStackApiKey || '');
+                setSumupConnected(!!data.sumupAccessToken);
+                setZettleConnected(!!data.zettleAccessToken);
             }
         } catch (error) {
             console.error(error);
@@ -193,6 +197,44 @@ export default function SettingsPage() {
             toast.error("Error saving settings");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleDisconnectSumUp = async () => {
+        try {
+            const res = await fetch('/api/settings/organization', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disconnectSumup: true })
+            });
+            if (res.ok) {
+                setSumupConnected(false);
+                toast.success("SumUp successfully disconnected");
+            } else {
+                toast.error("Failed to disconnect SumUp");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to disconnect SumUp");
+        }
+    };
+
+    const handleDisconnectZettle = async () => {
+        try {
+            const res = await fetch('/api/settings/organization', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disconnectZettle: true })
+            });
+            if (res.ok) {
+                setZettleConnected(false);
+                toast.success("Zettle successfully disconnected");
+            } else {
+                toast.error("Failed to disconnect Zettle");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to disconnect Zettle");
         }
     };
 
@@ -741,29 +783,65 @@ export default function SettingsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="bg-muted/30 p-4 rounded-lg border border-border flex flex-col justify-between gap-2">
                                 <div>
-                                    <Label className="text-foreground font-bold block mb-1">SumUp</Label>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <Label className="text-foreground font-bold block">SumUp</Label>
+                                        {sumupConnected && (
+                                            <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                Connected
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">Process payments using your SumUp Air card reader via the driver app.</p>
                                 </div>
-                                <Button 
-                                    onClick={() => window.location.href = '/api/integrations/sumup/connect'}
-                                    className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
-                                    disabled={paymentRouting === 'DRIVER'}
-                                >
-                                    Connect SumUp
-                                </Button>
+                                {sumupConnected ? (
+                                    <Button 
+                                        onClick={handleDisconnectSumUp}
+                                        variant="destructive"
+                                        className="mt-2 w-full font-medium"
+                                        disabled={paymentRouting === 'DRIVER'}
+                                    >
+                                        Disconnect SumUp
+                                    </Button>
+                                ) : (
+                                    <Button 
+                                        onClick={() => window.location.href = '/api/integrations/sumup/connect'}
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
+                                        disabled={paymentRouting === 'DRIVER'}
+                                    >
+                                        Connect SumUp
+                                    </Button>
+                                )}
                             </div>
                             <div className="bg-muted/30 p-4 rounded-lg border border-border flex flex-col justify-between gap-2">
                                 <div>
-                                    <Label className="text-foreground font-bold block mb-1">Zettle</Label>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <Label className="text-foreground font-bold block">Zettle</Label>
+                                        {zettleConnected && (
+                                            <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                Connected
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">Process payments using your Zettle card reader via the driver app.</p>
                                 </div>
-                                <Button 
-                                    onClick={() => window.location.href = '/api/integrations/zettle/connect'}
-                                    className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
-                                    disabled={paymentRouting === 'DRIVER'}
-                                >
-                                    Connect Zettle
-                                </Button>
+                                {zettleConnected ? (
+                                    <Button 
+                                        onClick={handleDisconnectZettle}
+                                        variant="destructive"
+                                        className="mt-2 w-full font-medium"
+                                        disabled={paymentRouting === 'DRIVER'}
+                                    >
+                                        Disconnect Zettle
+                                    </Button>
+                                ) : (
+                                    <Button 
+                                        onClick={() => window.location.href = '/api/integrations/zettle/connect'}
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
+                                        disabled={paymentRouting === 'DRIVER'}
+                                    >
+                                        Connect Zettle
+                                    </Button>
+                                )}
                             </div>
                         </div>
 

@@ -88,6 +88,18 @@ export async function PATCH(req: Request) {
             outOfHoursEnd: body.outOfHoursEnd !== undefined ? body.outOfHoursEnd : undefined
         };
 
+        if (body.disconnectSumup === true) {
+            updateData.sumupAccessToken = null;
+            updateData.sumupRefreshToken = null;
+            updateData.sumupTokenExpiry = null;
+        }
+
+        if (body.disconnectZettle === true) {
+            updateData.zettleAccessToken = null;
+            updateData.zettleRefreshToken = null;
+            updateData.zettleTokenExpiry = null;
+        }
+
         if ((session.user.role as string) === 'SUPER_ADMIN') {
             if (body.smsTemplateDriverArrived !== undefined) updateData.smsTemplateDriverArrived = body.smsTemplateDriverArrived;
             if (body.smsTemplateConfirmation !== undefined) updateData.smsTemplateConfirmation = body.smsTemplateConfirmation;
