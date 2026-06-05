@@ -62,8 +62,16 @@ const path = require('path');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
 
+    // Disconnect SumUp first if it is already connected to start from a clean state
+    const sumupAlreadyConnected = await page.locator('button', { hasText: /^Disconnect SumUp$/ }).isVisible();
+    if (sumupAlreadyConnected) {
+      console.log('SumUp is already connected. Disconnecting first to test full flow...');
+      await page.locator('button', { hasText: /^Disconnect SumUp$/ }).click();
+      await page.waitForTimeout(2000);
+    }
+
     console.log('Clicking Connect SumUp on live...');
-    await page.click('button:has-text("Connect SumUp")');
+    await page.locator('button', { hasText: /^Connect SumUp$/ }).click();
     await page.waitForTimeout(4000);
     
     const sumupUrl = page.url();
@@ -74,29 +82,28 @@ const path = require('path');
 
     // Verify "Connected" badge and disconnect flow
     console.log('Verifying SumUp connection state...');
-    const sumupConnected = await page.locator('button:has-text("Disconnect SumUp")').isVisible();
+    const sumupConnected = await page.locator('button', { hasText: /^Disconnect SumUp$/ }).isVisible();
     console.log('SumUp connected:', sumupConnected);
     
     if (sumupConnected) {
       console.log('Clicking Disconnect SumUp...');
-      await page.click('button:has-text("Disconnect SumUp")');
+      await page.locator('button', { hasText: /^Disconnect SumUp$/ }).click();
       await page.waitForTimeout(2000);
-      const sumupDisconnected = await page.locator('button:has-text("Connect SumUp")').isVisible();
+      const sumupDisconnected = await page.locator('button', { hasText: /^Connect SumUp$/ }).isVisible();
       console.log('SumUp disconnect successful:', sumupDisconnected);
       await page.screenshot({ path: path.join(screenshotDir, 'live_04_sumup_disconnected.png') });
     }
 
     // 4. Test Settings Connect Zettle on live
-    const zettleAlreadyConnected = await page.locator('button:has-text("Disconnect Zettle")').isVisible();
-    
+    const zettleAlreadyConnected = await page.locator('button', { hasText: /^Disconnect Zettle$/ }).isVisible();
     if (zettleAlreadyConnected) {
       console.log('Zettle is already connected. Disconnecting first to test full flow...');
-      await page.click('button:has-text("Disconnect Zettle")');
+      await page.locator('button', { hasText: /^Disconnect Zettle$/ }).click();
       await page.waitForTimeout(2000);
     }
 
     console.log('Clicking Connect Zettle on live...');
-    await page.click('button:has-text("Connect Zettle")');
+    await page.locator('button', { hasText: /^Connect Zettle$/ }).click();
     await page.waitForTimeout(4000);
     
     const zettleUrl = page.url();
@@ -106,14 +113,14 @@ const path = require('path');
     await page.screenshot({ path: path.join(screenshotDir, 'live_05_zettle_redirect.png') });
 
     console.log('Verifying Zettle connection state...');
-    const zettleConnected = await page.locator('button:has-text("Disconnect Zettle")').isVisible();
+    const zettleConnected = await page.locator('button', { hasText: /^Disconnect Zettle$/ }).isVisible();
     console.log('Zettle connected:', zettleConnected);
     
     if (zettleConnected) {
       console.log('Clicking Disconnect Zettle...');
-      await page.click('button:has-text("Disconnect Zettle")');
+      await page.locator('button', { hasText: /^Disconnect Zettle$/ }).click();
       await page.waitForTimeout(2000);
-      const zettleDisconnected = await page.locator('button:has-text("Connect Zettle")').isVisible();
+      const zettleDisconnected = await page.locator('button', { hasText: /^Connect Zettle$/ }).isVisible();
       console.log('Zettle disconnect successful:', zettleDisconnected);
       await page.screenshot({ path: path.join(screenshotDir, 'live_05_zettle_disconnected.png') });
     }
