@@ -12,9 +12,14 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
         }
 
-        const clientId = process.env.SUMUP_CLIENT_ID || 'dummy-client-id';
+        const clientId = process.env.SUMUP_CLIENT_ID;
         const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/integrations/sumup/callback`;
         const state = session.user.tenantId;
+
+        // If client ID is missing or is dummy, redirect directly to our local callback to simulate a successful connection
+        if (!clientId || clientId === 'dummy-client-id') {
+            return NextResponse.redirect(`${redirectUri}?code=mock_sumup_code&state=${state}`);
+        }
 
         // Redirect to SumUp OAuth page
         const sumupAuthUrl = `https://api.sumup.com/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=payments.read%20payments.write&state=${state}`;
