@@ -13,18 +13,58 @@ export async function GET(req: Request) {
 
         const tenantId = state;
 
-        // In a real application, you would exchange the 'code' for an access token
-        // using your SUMUP_CLIENT_SECRET.
-        // For demonstration, we save dummy tokens.
-        const dummyAccessToken = `sumup_at_${Math.random().toString(36).substring(7)}`;
-        const dummyRefreshToken = `sumup_rt_${Math.random().toString(36).substring(7)}`;
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: tenantId }
+        });
+
+        if (!tenant) {
+            return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Tenant_Not_Found`);
+        }
+
+        const clientId = tenant.sumupClientId || process.env.SUMUP_CLIENT_ID;
+        const clientSecret = tenant.sumupClientSecret || process.env.SUMUP_CLIENT_SECRET;
+
+        let accessToken = `sumup_at_${Math.random().toString(36).substring(7)}`;
+        let refreshToken = `sumup_rt_${Math.random().toString(36).substring(7)}`;
+        let expiryDate = new Date(Date.now() + 3600 * 1000); // 1 hour
+
+        const isReal = clientId && !clientId.startsWith('dummy') && !clientId.startsWith('mock') && clientSecret;
+
+        if (isReal && code !== 'mock_sumup_code') {
+            const tokenRes = await fetch('https://api.sumup.com/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    client_id: clientId!,
+                    client_secret: clientSecret!,
+                    code: code,
+                    redirect_uri: `${url.origin}/api/integrations/sumup/callback`
+                })
+            });
+
+            if (!tokenRes.ok) {
+                const errText = await tokenRes.text();
+                console.error("SumUp token exchange failed:", errText);
+                return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Token_Exchange_Failed`);
+            }
+
+            const tokenData = await tokenRes.json();
+            accessToken = tokenData.access_token;
+            refreshToken = tokenData.refresh_token;
+            if (tokenData.expires_in) {
+                expiryDate = new Date(Date.now() + tokenData.expires_in * 1000);
+            }
+        }
 
         await prisma.tenant.update({
             where: { id: tenantId },
             data: {
-                sumupAccessToken: dummyAccessToken,
-                sumupRefreshToken: dummyRefreshToken,
-                sumupTokenExpiry: new Date(Date.now() + 3600 * 1000) // 1 hour
+                sumupAccessToken: accessToken,
+                sumupRefreshToken: refreshToken,
+                sumupTokenExpiry: expiryDate
             }
         });
 

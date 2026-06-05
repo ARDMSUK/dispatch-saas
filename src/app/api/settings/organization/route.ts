@@ -29,6 +29,8 @@ export async function GET(req: Request) {
         if (!isAdmin) {
             delete (safeTenant as any).stripeSecretKey;
             delete (safeTenant as any).stripePublishableKey;
+            delete (safeTenant as any).sumupClientSecret;
+            delete (safeTenant as any).zettleClientSecret;
             delete (safeTenant as any).twilioAccountSid;
             delete (safeTenant as any).twilioAuthToken;
             delete (safeTenant as any).twilioSubaccountId;
@@ -85,7 +87,11 @@ export async function PATCH(req: Request) {
             paymentRouting: body.paymentRouting !== undefined ? body.paymentRouting : undefined,
             aviationStackApiKey: body.aviationStackApiKey !== undefined ? body.aviationStackApiKey : undefined,
             outOfHoursStart: body.outOfHoursStart !== undefined ? body.outOfHoursStart : undefined,
-            outOfHoursEnd: body.outOfHoursEnd !== undefined ? body.outOfHoursEnd : undefined
+            outOfHoursEnd: body.outOfHoursEnd !== undefined ? body.outOfHoursEnd : undefined,
+            sumupClientId: body.sumupClientId !== undefined ? body.sumupClientId : undefined,
+            sumupClientSecret: body.sumupClientSecret !== undefined ? body.sumupClientSecret : undefined,
+            zettleClientId: body.zettleClientId !== undefined ? body.zettleClientId : undefined,
+            zettleClientSecret: body.zettleClientSecret !== undefined ? body.zettleClientSecret : undefined
         };
 
         if (body.disconnectSumup === true) {

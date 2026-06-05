@@ -69,6 +69,10 @@ model Tenant {
   // Integrations (Encrypted/Stored secure in prod, text for now)
   stripeSecretKey      String?
   stripePublishableKey String?
+  sumupClientId        String?
+  sumupClientSecret    String?
+  zettleClientId       String?
+  zettleClientSecret   String?
   sumupAccessToken     String?
   sumupRefreshToken    String?
   sumupTokenExpiry     DateTime?

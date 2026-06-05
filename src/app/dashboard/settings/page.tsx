@@ -58,6 +58,10 @@ export default function SettingsPage() {
     // Integrations State
     const [stripePublishableKey, setStripePublishableKey] = useState('');
     const [stripeSecretKey, setStripeSecretKey] = useState('');
+    const [sumupClientId, setSumupClientId] = useState('');
+    const [sumupClientSecret, setSumupClientSecret] = useState('');
+    const [zettleClientId, setZettleClientId] = useState('');
+    const [zettleClientSecret, setZettleClientSecret] = useState('');
     const [paymentRouting, setPaymentRouting] = useState('CENTRAL');
     const [aviationStackApiKey, setAviationStackApiKey] = useState('');
 
@@ -135,6 +139,10 @@ export default function SettingsPage() {
                 // Load Integrations
                 setStripePublishableKey(data.stripePublishableKey || '');
                 setStripeSecretKey(data.stripeSecretKey || '');
+                setSumupClientId(data.sumupClientId || '');
+                setSumupClientSecret(data.sumupClientSecret || '');
+                setZettleClientId(data.zettleClientId || '');
+                setZettleClientSecret(data.zettleClientSecret || '');
                 setPaymentRouting(data.paymentRouting || 'CENTRAL');
                 setAviationStackApiKey(data.aviationStackApiKey || '');
                 setSumupConnected(!!data.sumupAccessToken);
@@ -186,7 +194,11 @@ export default function SettingsPage() {
                     stripePublishableKey,
                     stripeSecretKey,
                     paymentRouting,
-                    aviationStackApiKey
+                    aviationStackApiKey,
+                    sumupClientId,
+                    sumupClientSecret,
+                    zettleClientId,
+                    zettleClientSecret
                 })
             });
 
@@ -793,7 +805,30 @@ export default function SettingsPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">Process payments using your SumUp Air card reader via the driver app.</p>
+                                    <p className="text-xs text-muted-foreground mb-3">Process payments using your SumUp Air card reader via the driver app.</p>
+                                    <div className="space-y-3 mb-2">
+                                        <div>
+                                            <Label className="text-[11px] text-muted-foreground font-medium">SumUp Client ID</Label>
+                                            <Input
+                                                value={sumupClientId}
+                                                onChange={(e) => setSumupClientId(e.target.value)}
+                                                placeholder="e.g. client-id-..."
+                                                className="bg-background border-input text-xs h-8 text-foreground"
+                                                disabled={paymentRouting === 'DRIVER'}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label className="text-[11px] text-muted-foreground font-medium">SumUp Client Secret</Label>
+                                            <Input
+                                                type="password"
+                                                value={sumupClientSecret}
+                                                onChange={(e) => setSumupClientSecret(e.target.value)}
+                                                placeholder="e.g. client-secret-..."
+                                                className="bg-background border-input text-xs h-8 text-foreground"
+                                                disabled={paymentRouting === 'DRIVER'}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                                 {sumupConnected ? (
                                     <Button 
@@ -806,7 +841,13 @@ export default function SettingsPage() {
                                     </Button>
                                 ) : (
                                     <Button 
-                                        onClick={() => window.location.href = '/api/integrations/sumup/connect'}
+                                        onClick={() => {
+                                            if (!sumupClientId || !sumupClientSecret) {
+                                                toast.error("Please enter and save your SumUp Client ID and Client Secret first.");
+                                                return;
+                                            }
+                                            window.location.href = '/api/integrations/sumup/connect';
+                                        }}
                                         className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
                                         disabled={paymentRouting === 'DRIVER'}
                                     >
@@ -824,7 +865,30 @@ export default function SettingsPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">Process payments using your Zettle card reader via the driver app.</p>
+                                    <p className="text-xs text-muted-foreground mb-3">Process payments using your Zettle card reader via the driver app.</p>
+                                    <div className="space-y-3 mb-2">
+                                        <div>
+                                            <Label className="text-[11px] text-muted-foreground font-medium">Zettle Client ID</Label>
+                                            <Input
+                                                value={zettleClientId}
+                                                onChange={(e) => setZettleClientId(e.target.value)}
+                                                placeholder="e.g. client-id-..."
+                                                className="bg-background border-input text-xs h-8 text-foreground"
+                                                disabled={paymentRouting === 'DRIVER'}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label className="text-[11px] text-muted-foreground font-medium">Zettle Client Secret</Label>
+                                            <Input
+                                                type="password"
+                                                value={zettleClientSecret}
+                                                onChange={(e) => setZettleClientSecret(e.target.value)}
+                                                placeholder="e.g. client-secret-..."
+                                                className="bg-background border-input text-xs h-8 text-foreground"
+                                                disabled={paymentRouting === 'DRIVER'}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                                 {zettleConnected ? (
                                     <Button 
@@ -837,7 +901,13 @@ export default function SettingsPage() {
                                     </Button>
                                 ) : (
                                     <Button 
-                                        onClick={() => window.location.href = '/api/integrations/zettle/connect'}
+                                        onClick={() => {
+                                            if (!zettleClientId || !zettleClientSecret) {
+                                                toast.error("Please enter and save your Zettle Client ID and Client Secret first.");
+                                                return;
+                                            }
+                                            window.location.href = '/api/integrations/zettle/connect';
+                                        }}
                                         className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
                                         disabled={paymentRouting === 'DRIVER'}
                                     >
