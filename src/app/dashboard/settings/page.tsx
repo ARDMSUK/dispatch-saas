@@ -79,8 +79,10 @@ export default function SettingsPage() {
         const error = searchParams.get('error');
         if (success === 'sumup_connected') {
             toast.success("SumUp successfully connected");
+            fetchData();
         } else if (success === 'zettle_connected') {
             toast.success("Zettle successfully connected");
+            fetchData();
         } else if (error) {
             toast.error(`Integration error: ${error.replace(/_/g, ' ')}`);
         }
