@@ -52,35 +52,73 @@ const path = require('path');
     console.log('Navigating to Settings on live...');
     await page.goto('https://app.cabai.co.uk/dashboard/settings', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
-    await page.screenshot({ path: path.join(screenshotDir, 'live_03_settings.png') });
+
+    // Test layout dropdown options rendering (check background opacity/transparency)
+    console.log('Testing layout dropdown contrast/transparency...');
+    await page.click('button:has-text("Modern Layout"), button:has-text("Classic Layout"), button:has-text("Select Layout")');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(screenshotDir, 'live_03_settings_layout_dropdown.png') });
+    // Press Escape to close the dropdown
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
 
     console.log('Clicking Connect SumUp on live...');
-    await page.click('button:has-text("SumUp"), a:has-text("SumUp")');
+    await page.click('button:has-text("Connect SumUp")');
     await page.waitForTimeout(4000);
     
     const sumupUrl = page.url();
     console.log('Live URL after clicking SumUp:', sumupUrl);
-    // It should redirect to https://app.cabai.co.uk/dashboard/settings?success=sumup_connected
-    const isSumupSuccessful = sumupUrl.includes('success=sumup_connected') || sumupUrl.includes('https://app.cabai.co.uk/api/integrations/sumup/callback');
-    console.log('Live SumUp redirection check passed (redirected to app.cabai.co.uk):', isSumupSuccessful);
+    const isSumupSuccessful = sumupUrl.includes('success=sumup_connected');
+    console.log('Live SumUp redirection check passed (redirected with success query):', isSumupSuccessful);
     await page.screenshot({ path: path.join(screenshotDir, 'live_04_sumup_redirect.png') });
 
+    // Verify "Connected" badge and disconnect flow
+    console.log('Verifying SumUp connection state...');
+    const sumupConnected = await page.locator('button:has-text("Disconnect SumUp")').isVisible();
+    console.log('SumUp connected:', sumupConnected);
+    
+    if (sumupConnected) {
+      console.log('Clicking Disconnect SumUp...');
+      await page.click('button:has-text("Disconnect SumUp")');
+      await page.waitForTimeout(2000);
+      const sumupDisconnected = await page.locator('button:has-text("Connect SumUp")').isVisible();
+      console.log('SumUp disconnect successful:', sumupDisconnected);
+      await page.screenshot({ path: path.join(screenshotDir, 'live_04_sumup_disconnected.png') });
+    }
+
     // 4. Test Settings Connect Zettle on live
-    console.log('Navigating back to Settings on live...');
-    await page.goto('https://app.cabai.co.uk/dashboard/settings', { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
+    const zettleAlreadyConnected = await page.locator('button:has-text("Disconnect Zettle")').isVisible();
+    
+    if (zettleAlreadyConnected) {
+      console.log('Zettle is already connected. Disconnecting first to test full flow...');
+      await page.click('button:has-text("Disconnect Zettle")');
+      await page.waitForTimeout(2000);
+    }
 
     console.log('Clicking Connect Zettle on live...');
-    await page.click('button:has-text("Zettle"), a:has-text("Zettle")');
+    await page.click('button:has-text("Connect Zettle")');
     await page.waitForTimeout(4000);
     
     const zettleUrl = page.url();
     console.log('Live URL after clicking Zettle:', zettleUrl);
-    const isZettleSuccessful = zettleUrl.includes('success=zettle_connected') || zettleUrl.includes('https://app.cabai.co.uk/api/integrations/zettle/callback');
-    console.log('Live Zettle redirection check passed (redirected to app.cabai.co.uk):', isZettleSuccessful);
+    const isZettleSuccessful = zettleUrl.includes('success=zettle_connected');
+    console.log('Live Zettle redirection check passed (redirected with success query):', isZettleSuccessful);
     await page.screenshot({ path: path.join(screenshotDir, 'live_05_zettle_redirect.png') });
 
-    if (!hasLogsError && isSumupSuccessful && isZettleSuccessful) {
+    console.log('Verifying Zettle connection state...');
+    const zettleConnected = await page.locator('button:has-text("Disconnect Zettle")').isVisible();
+    console.log('Zettle connected:', zettleConnected);
+    
+    if (zettleConnected) {
+      console.log('Clicking Disconnect Zettle...');
+      await page.click('button:has-text("Disconnect Zettle")');
+      await page.waitForTimeout(2000);
+      const zettleDisconnected = await page.locator('button:has-text("Connect Zettle")').isVisible();
+      console.log('Zettle disconnect successful:', zettleDisconnected);
+      await page.screenshot({ path: path.join(screenshotDir, 'live_05_zettle_disconnected.png') });
+    }
+
+    if (!hasLogsError && isSumupSuccessful && isZettleSuccessful && sumupConnected && zettleConnected) {
       console.log('LIVE E2E VERIFICATION PASSED SUCCESSFULLY.');
       fs.writeFileSync('/Users/ar/.gemini/antigravity/brain/b8cdf822-3cff-415d-9d77-a2d0c6df7782/live_verification_status.json', JSON.stringify({ status: 'passed' }));
     } else {
