@@ -13,7 +13,8 @@ export async function GET(req: Request) {
         }
 
         const clientId = process.env.SUMUP_CLIENT_ID;
-        const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/integrations/sumup/callback`;
+        const origin = new URL(req.url).origin;
+        const redirectUri = `${origin}/api/integrations/sumup/callback`;
         const state = session.user.tenantId;
 
         // If client ID is missing or is dummy, redirect directly to our local callback to simulate a successful connection

@@ -31,13 +31,13 @@ export async function GET() {
                 where: { tenantId },
                 orderBy: { updatedAt: 'desc' },
                 take: 10,
-                select: { id: true, make: true, model: true, registration: true, updatedAt: true }
+                select: { id: true, make: true, model: true, reg: true, updatedAt: true }
             }),
             prisma.zone.findMany({
                 where: { tenantId },
-                orderBy: { updatedAt: 'desc' },
+                orderBy: { id: 'desc' },
                 take: 5,
-                select: { id: true, name: true, updatedAt: true }
+                select: { id: true, name: true }
             }),
             prisma.contract.findMany({
                 where: { tenantId },
@@ -74,18 +74,18 @@ export async function GET() {
                 id: `vehicle-${v.id}-${v.updatedAt.getTime()}`,
                 type: 'Vehicle Record',
                 action: 'Record Modified',
-                description: `Vehicle record for ${v.make} ${v.model} (${v.registration}) was updated.`,
+                description: `Vehicle record for ${v.make} ${v.model} (${v.reg}) was updated.`,
                 timestamp: v.updatedAt.toISOString()
             });
         });
 
         zones.forEach(z => {
             events.push({
-                id: `zone-${z.id}-${z.updatedAt.getTime()}`,
+                id: `zone-${z.id}-edited`,
                 type: 'Pricing Zone',
                 action: 'Geofence Edited',
                 description: `Pricing Zone '${z.name}' coordinates or color details were modified.`,
-                timestamp: z.updatedAt.toISOString()
+                timestamp: new Date().toISOString()
             });
         });
 

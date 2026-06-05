@@ -8,7 +8,7 @@ export async function GET(req: Request) {
         const state = url.searchParams.get("state"); // This is the tenantId
 
         if (!code || !state) {
-            return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=Invalid_OAuth_Callback`);
+            return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Invalid_OAuth_Callback`);
         }
 
         const tenantId = state;
@@ -27,9 +27,9 @@ export async function GET(req: Request) {
         });
 
         // Redirect back to settings
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?success=zettle_connected`);
+        return NextResponse.redirect(`${url.origin}/dashboard/settings?success=zettle_connected`);
     } catch (error) {
         console.error("GET /api/integrations/zettle/callback error:", error);
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?error=Internal_Server_Error`);
+        return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Internal_Server_Error`);
     }
 }

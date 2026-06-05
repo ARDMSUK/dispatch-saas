@@ -16,7 +16,8 @@ export async function GET(req: Request) {
         }
 
         const clientId = process.env.SUMUP_CLIENT_ID || 'dummy-client-id';
-        const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/driver/integrations/sumup/callback`;
+        const origin = url.origin;
+        const redirectUri = `${origin}/api/driver/integrations/sumup/callback`;
         const state = driverId; // Pass driver ID in state
 
         // Redirect to SumUp OAuth page
