@@ -17,12 +17,16 @@ export async function GET(req: Request) {
 
         if (!tenant) return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
 
-        // Strip sensitive keys if user is not an admin
+        // Strip sensitive keys if user is not super admin/admin
+        const isSuperAdmin = session.user.role === 'SUPER_ADMIN';
         const isAdmin = session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN';
         const safeTenant = { ...tenant };
 
-        if (!isAdmin) {
+        if (!isSuperAdmin) {
             delete (safeTenant as any).apiKey;
+        }
+
+        if (!isAdmin) {
             delete (safeTenant as any).stripeSecretKey;
             delete (safeTenant as any).stripePublishableKey;
             delete (safeTenant as any).twilioAccountSid;

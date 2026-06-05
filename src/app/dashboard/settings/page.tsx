@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { LocationInput } from '@/components/dashboard/location-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SettingsPage() {
+    const { data: session } = useSession();
+    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -67,6 +71,18 @@ export default function SettingsPage() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const success = searchParams.get('success');
+        const error = searchParams.get('error');
+        if (success === 'sumup_connected') {
+            toast.success("SumUp successfully connected");
+        } else if (success === 'zettle_connected') {
+            toast.success("Zettle successfully connected");
+        } else if (error) {
+            toast.error(`Integration error: ${error.replace(/_/g, ' ')}`);
+        }
+    }, [searchParams]);
 
     const fetchData = async () => {
         try {
@@ -785,56 +801,58 @@ export default function SettingsPage() {
             </div>
 
             {/* Developer API */}
-            <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
-                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
-                    💻 Developer API
-                </h2>
-                <div className="space-y-6">
-                    <p className="text-sm text-muted-foreground">
-                        Use this secured token to build custom integrations (e.g., Zapier, Custom Apps) by sending HTTP requests directly to the `{window.location.host}/api/v1/bookings` ingestion endpoints.
-                    </p>
+            {session?.user?.role === 'SUPER_ADMIN' && (
+                <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
+                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-foreground">
+                        💻 Developer API
+                    </h2>
+                    <div className="space-y-6">
+                        <p className="text-sm text-muted-foreground">
+                            Use this secured token to build custom integrations (e.g., Zapier, Custom Apps) by sending HTTP requests directly to the `{window.location.host}/api/v1/bookings` ingestion endpoints.
+                        </p>
 
-                    <div>
-                        <Label className="text-muted-foreground font-medium">Secret API Key</Label>
-                        <div className="flex items-center gap-3 mt-1">
-                            <Input
-                                value={apiKey || '••••••••••••••••••••••••••••••••'}
-                                readOnly
-                                className="bg-background border-input font-mono text-muted-foreground w-full md:w-2/3"
-                                type="password"
-                            />
-                            <Button
-                                variant="secondary"
-                                className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium"
-                                onClick={() => {
-                                    if (apiKey) {
-                                        navigator.clipboard.writeText(apiKey);
-                                        toast.success("API Key copied to clipboard");
-                                    }
-                                }}
-                            >
-                                Copy Keystring
-                            </Button>
+                        <div>
+                            <Label className="text-muted-foreground font-medium">Secret API Key</Label>
+                            <div className="flex items-center gap-3 mt-1">
+                                <Input
+                                    value={apiKey || '••••••••••••••••••••••••••••••••'}
+                                    readOnly
+                                    className="bg-background border-input font-mono text-muted-foreground w-full md:w-2/3"
+                                    type="password"
+                                />
+                                <Button
+                                    variant="secondary"
+                                    className="bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium"
+                                    onClick={() => {
+                                        if (apiKey) {
+                                            navigator.clipboard.writeText(apiKey);
+                                            toast.success("API Key copied to clipboard");
+                                        }
+                                    }}
+                                >
+                                    Copy Keystring
+                                </Button>
+                            </div>
+                            <p className="text-xs text-rose-500 dark:text-rose-400 mt-2 font-medium">
+                                Warning: Do not expose this key to the public. It provides direct read/write access to your tenant data.
+                            </p>
                         </div>
-                        <p className="text-xs text-rose-500 dark:text-rose-400 mt-2 font-medium">
-                            Warning: Do not expose this key to the public. It provides direct read/write access to your tenant data.
-                        </p>
-                    </div>
 
-                    <div className="border-t border-border pt-6 mt-6">
-                        <Label className="text-muted-foreground font-medium">AviationStack API Key (Flight Tracking)</Label>
-                        <Input
-                            value={aviationStackApiKey}
-                            onChange={(e) => setAviationStackApiKey(e.target.value)}
-                            placeholder="Enter your personal AviationStack API Key"
-                            className="bg-background border-input mt-1 font-mono text-sm text-foreground w-full md:w-2/3"
-                        />
-                        <p className="text-xs text-muted-foreground mt-2">
-                            AviationStack provides 100 free requests/month. Plug your own key here to avoid sharing the global quota. Get one at <a href="https://aviationstack.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">aviationstack.com</a>.
-                        </p>
+                        <div className="border-t border-border pt-6 mt-6">
+                            <Label className="text-muted-foreground font-medium">AviationStack API Key (Flight Tracking)</Label>
+                            <Input
+                                value={aviationStackApiKey}
+                                onChange={(e) => setAviationStackApiKey(e.target.value)}
+                                placeholder="Enter your personal AviationStack API Key"
+                                className="bg-background border-input mt-1 font-mono text-sm text-foreground w-full md:w-2/3"
+                            />
+                            <p className="text-xs text-muted-foreground mt-2">
+                                AviationStack provides 100 free requests/month. Plug your own key here to avoid sharing the global quota. Get one at <a href="https://aviationstack.com" target="_blank" rel="noreferrer" className="text-primary hover:underline">aviationstack.com</a>.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Communication Templates */}
             <div className="bg-card p-6 rounded-xl border border-border mb-6 text-card-foreground shadow-sm">
