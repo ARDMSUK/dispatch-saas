@@ -1,0 +1,10 @@
+# Project Rules and QA Testing Policy
+
+## E2E Testing & Verification Policy
+* **All verification testing must happen on the live URL** (`https://app.cabai.co.uk`).
+* Whenever a bug is fixed or a feature is added:
+  1. Compile and push changes to GitHub (triggering the live Vercel deployment).
+  2. Write/run a Playwright E2E verification script that exercises the fixed components/flows on the live site.
+  3. The verification script must take step-by-step screenshots to visually prove the state transitions.
+  4. Perform logical math validation and database consistency checks of all related state changes.
+  5. Compile a `walkthrough.md` documenting the changes made, the E2E verification steps, the math validations, and embedding the screenshots.
