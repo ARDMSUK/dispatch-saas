@@ -97,7 +97,7 @@ export default function ForceResetPage() {
                                 type="password"
                                 {...register("password")}
                                 placeholder="••••••••"
-                                className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-amber-400 focus:border-amber-400"
+                                className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-blue-500 focus:border-blue-500"
                             />
                             {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
                         </div>
@@ -108,7 +108,7 @@ export default function ForceResetPage() {
                                 type="password"
                                 {...register("confirmPassword")}
                                 placeholder="••••••••"
-                                className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-amber-400 focus:border-amber-400"
+                                className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-blue-500 focus:border-blue-500"
                             />
                             {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
                         </div>
@@ -117,7 +117,7 @@ export default function ForceResetPage() {
 
                         <Button
                             type="submit"
-                            className="w-full bg-amber-500 text-white hover:bg-amber-600 font-bold"
+                            className="w-full bg-indigo-600 text-white hover:bg-purple-600 font-bold"
                             disabled={loading}
                         >
                             {loading ? "Updating..." : "Update Password"}

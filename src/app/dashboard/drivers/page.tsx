@@ -367,7 +367,7 @@ function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () =
     const getBadgeStyle = (status: string) => {
         switch (status) {
             case 'FREE': return 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20';
-            case 'BUSY': return 'bg-amber-500/20 text-amber-500 border-amber-500/20';
+            case 'BUSY': return 'bg-indigo-600/20 text-indigo-600 border-indigo-600/20';
             case 'POB': return 'bg-blue-500/20 text-blue-500 border-blue-500/20';
             case 'OFF_DUTY': return 'bg-slate-200 text-slate-400 border-slate-300';
             default: return 'bg-slate-200 text-slate-400';
@@ -387,7 +387,7 @@ function DriverStatusCell({ driver, onUpdate }: { driver: Driver; onUpdate: () =
                 <DropdownMenuItem onClick={() => updateStatus('FREE')} className="text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-400">
                     <CheckCircle className="mr-2 h-4 w-4" /> Set FREE
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => updateStatus('BUSY')} className="text-amber-500 focus:bg-amber-500/10 focus:text-amber-400">
+                <DropdownMenuItem onClick={() => updateStatus('BUSY')} className="text-indigo-600 focus:bg-indigo-600/10 focus:text-blue-500">
                     <Clock className="mr-2 h-4 w-4" /> Set BUSY
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => updateStatus('OFF_DUTY')} className="text-muted-foreground focus:bg-accent focus:text-accent-foreground">
@@ -540,7 +540,7 @@ function DriverDocuments({
                              <TableRow key={doc.id || docIdx} className="border-border hover:bg-muted/50">
                                  <TableCell className="font-medium text-foreground">{doc.type.replace('_', ' ')}</TableCell>
                                  <TableCell>
-                                     <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-amber-500 border-amber-500/30 bg-amber-500/5' : 'text-foreground'}`}>
+                                     <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-indigo-600 border-indigo-600/30 bg-indigo-600/5' : 'text-foreground'}`}>
                                          {doc.status}
                                      </Badge>
                                  </TableCell>

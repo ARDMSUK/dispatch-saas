@@ -133,7 +133,7 @@ export default function SaaSPlansPage() {
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={() => { setIsEditing(false); setSelectedPlan(null); }}>Cancel</Button>
-                        <Button onClick={handleSave} className="bg-amber-400 hover:bg-blue-500">Save Configuration</Button>
+                        <Button onClick={handleSave} className="bg-blue-500 hover:bg-blue-500">Save Configuration</Button>
                     </div>
                 </div>
 
@@ -226,7 +226,7 @@ export default function SaaSPlansPage() {
                                                 id={mod.field}
                                                 checked={(selectedPlan as any)[mod.field]}
                                                 onChange={e => setSelectedPlan({ ...selectedPlan, [mod.field]: e.target.checked })}
-                                                className="w-4 h-4 mt-0.5 accent-amber-400"
+                                                className="w-4 h-4 mt-0.5 accent-blue-500"
                                             />
                                             <label htmlFor={mod.field} className="text-sm font-medium cursor-pointer flex-1">
                                                 {mod.label}
@@ -282,9 +282,9 @@ export default function SaaSPlansPage() {
                                 <div className="space-y-2 mb-4 flex-1">
                                     <p className="text-xs font-semibold text-slate-400 uppercase">Included Modules</p>
                                     <div className="flex flex-wrap gap-2">
-                                        {plan.incWebBooker && <span className="text-xs px-2 py-1 bg-blue-50 text-amber-500 rounded-md border border-blue-100">Web Booker</span>}
-                                        {plan.incB2bPortal && <span className="text-xs px-2 py-1 bg-blue-50 text-amber-500 rounded-md border border-blue-100">B2B Portal</span>}
-                                        {plan.incAutoDispatch && <span className="text-xs px-2 py-1 bg-blue-50 text-amber-500 rounded-md border border-blue-100">Auto-Dispatch</span>}
+                                        {plan.incWebBooker && <span className="text-xs px-2 py-1 bg-blue-50 text-indigo-600 rounded-md border border-blue-100">Web Booker</span>}
+                                        {plan.incB2bPortal && <span className="text-xs px-2 py-1 bg-blue-50 text-indigo-600 rounded-md border border-blue-100">B2B Portal</span>}
+                                        {plan.incAutoDispatch && <span className="text-xs px-2 py-1 bg-blue-50 text-indigo-600 rounded-md border border-blue-100">Auto-Dispatch</span>}
                                         {plan.incWebChatAi && <span className="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded-md border border-purple-100">AI Chat</span>}
                                         {/* Summarize rest to prevent massive cards */}
                                         <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-md">

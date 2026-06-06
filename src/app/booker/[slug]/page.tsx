@@ -501,12 +501,12 @@ export default function BookerPage() {
                                                     exit={{ opacity: 0, height: 0, marginTop: 0 }}
                                                     className="relative group overflow-hidden"
                                                 >
-                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 group-focus-within:text-amber-400 transition-colors">
+                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-600 group-focus-within:text-blue-500 transition-colors">
                                                         <Plane className="w-5 h-5" />
                                                     </div>
                                                     <Input
                                                         placeholder="Flight Number (Optional)"
-                                                        className="h-14 pl-12 bg-amber-500/5 border-amber-500/20 text-white placeholder:text-amber-500/50 focus:bg-amber-500/10 focus:ring-1 focus:ring-amber-500/50 transition-all rounded-2xl uppercase font-mono shadow-inner"
+                                                        className="h-14 pl-12 bg-indigo-600/5 border-indigo-600/20 text-white placeholder:text-indigo-600/50 focus:bg-indigo-600/10 focus:ring-1 focus:ring-indigo-600/50 transition-all rounded-2xl uppercase font-mono shadow-inner"
                                                         value={formData.flightNumber}
                                                         onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
                                                     />
@@ -556,7 +556,7 @@ export default function BookerPage() {
                                             <Button
                                                 onClick={handleSumbitBooking}
                                                 disabled={loading || !formData.passengerName || !formData.passengerPhone}
-                                                className="h-14 sm:w-2/3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-lg rounded-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+                                                className="h-14 sm:w-2/3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg rounded-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
                                             >
                                                 {loading ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : "Confirm & Book"}
                                             </Button>
@@ -747,7 +747,7 @@ function StripeCheckoutForm({ amount, onSuccess, onError, onCancel }: StripeChec
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="flex-1 bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 h-14 rounded-2xl">
                     Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading || !stripe || !elements} className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold h-14 rounded-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)]">
+                <Button type="submit" disabled={isLoading || !stripe || !elements} className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold h-14 rounded-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)]">
                     {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Pay £" + amount.toFixed(2)}
                 </Button>
             </div>

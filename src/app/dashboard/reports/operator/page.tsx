@@ -183,7 +183,7 @@ export default function OperatorPerformanceDashboard() {
     const getStatusStyle = (status: string) => {
         switch (status) {
             case 'ONLINE': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-            case 'AWAY': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+            case 'AWAY': return 'bg-indigo-600/10 text-indigo-600 border-indigo-600/20';
             case 'BUSY': return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
             case 'OFFLINE': return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
             default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
@@ -323,7 +323,7 @@ export default function OperatorPerformanceDashboard() {
                             <CardContent className="p-6">
                                 <div className="flex flex-col space-y-1">
                                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Average Talk Time</span>
-                                    <span className="text-4xl font-black text-amber-500 tracking-tight">{formatSeconds(kpis.avgHandleTime)}</span>
+                                    <span className="text-4xl font-black text-indigo-600 tracking-tight">{formatSeconds(kpis.avgHandleTime)}</span>
                                     <span className="text-[11px] text-muted-foreground pt-1">Average duration per answered call</span>
                                 </div>
                             </CardContent>

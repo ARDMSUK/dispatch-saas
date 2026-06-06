@@ -113,7 +113,7 @@ export default function SchoolContractsPage() {
                     </Button>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-md">
+                            <Button className="bg-indigo-600 hover:bg-purple-600 text-white shadow-md">
                                 <Plus className="mr-2 h-4 w-4" /> New Contract
                             </Button>
                         </DialogTrigger>
@@ -193,7 +193,7 @@ export default function SchoolContractsPage() {
                                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                                         Cancel
                                     </Button>
-                                    <Button type="submit" className="bg-amber-500 text-white" disabled={saving}>
+                                    <Button type="submit" className="bg-indigo-600 text-white" disabled={saving}>
                                         {saving ? "Saving..." : "Save Contract"}
                                     </Button>
                                 </div>
@@ -219,7 +219,7 @@ export default function SchoolContractsPage() {
                 </div>
                 <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                     <div className="text-slate-500 text-sm font-medium mb-1">Compliance Alerts</div>
-                    <div className="text-2xl font-bold text-amber-600 flex items-center gap-2">
+                    <div className="text-2xl font-bold text-purple-600 flex items-center gap-2">
                         0 <AlertCircle className="h-4 w-4" />
                     </div>
                 </div>
@@ -258,7 +258,7 @@ export default function SchoolContractsPage() {
                             <p className="text-sm">You haven't set up any school contracts yet.</p>
                             <Button
                                 variant="outline"
-                                className="mt-4 border-blue-200 text-amber-500 bg-blue-50"
+                                className="mt-4 border-blue-200 text-indigo-600 bg-blue-50"
                                 onClick={() => setIsDialogOpen(true)}
                             >
                                 Create First Contract
@@ -273,7 +273,7 @@ export default function SchoolContractsPage() {
                             >
                                 <div className="flex gap-4 items-center">
                                     <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <Building2 className="h-5 w-5 text-amber-500" />
+                                        <Building2 className="h-5 w-5 text-indigo-600" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">

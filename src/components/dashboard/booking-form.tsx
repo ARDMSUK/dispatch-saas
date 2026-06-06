@@ -812,14 +812,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <div className="flex gap-2">
                         <input
                             type="date"
-                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black font-bold focus:outline-none focus:border-amber-400/50 [color-scheme:light]"
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black font-bold focus:outline-none focus:border-blue-500/50 [color-scheme:light]"
                             value={pickupDate}
                             onChange={handleDateChange}
                         />
                         <input
                             type="time"
                             ref={timeInputRef}
-                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-amber-400/50 [color-scheme:light]"
+                            className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-500/50 [color-scheme:light]"
                             value={pickupTimeOnly}
                             onChange={handleTimeChange}
                         />
@@ -850,13 +850,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <input
                             type="tel"
                             placeholder=""
-                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-black focus:outline-none focus:border-amber-400/50"
+                            className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-lg font-mono text-black focus:outline-none focus:border-blue-500/50"
                             value={passengerPhone}
                             onChange={e => setPassengerPhone(e.target.value)}
                         />
                         {phoneSearchOpen && recentJobs.length > 0 && (
-                            <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 border border-amber-400/30 shadow-2xl rounded-md overflow-hidden max-h-80 overflow-y-auto">
-                                <div className="px-2 py-1.5 text-xs font-semibold text-amber-500 bg-blue-50/50 border-b border-blue-100 uppercase flex justify-between items-center">
+                            <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 border border-blue-500/30 shadow-2xl rounded-md overflow-hidden max-h-80 overflow-y-auto">
+                                <div className="px-2 py-1.5 text-xs font-semibold text-indigo-600 bg-blue-50/50 border-b border-blue-100 uppercase flex justify-between items-center">
                                     <span>Recent Jobs (Click to populate)</span>
                                     <button onClick={() => setPhoneSearchOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="h-3 w-3" /></button>
                                 </div>
@@ -897,7 +897,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <div className="flex items-center gap-2">
                         <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Pickup:</label>
                         <div className="relative flex-1 group z-50">
-                            <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
+                            <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all placeholder:text-zinc-600" value={pickup} onChange={(val) => { setPickup(val); setPickupCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setPickup(loc.address); setPickupCoords({ lat: loc.lat, lng: loc.lng }); }} />
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><Navigation className="h-4 w-4" /></div>
                         </div>
                     </div>
@@ -907,7 +907,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             <div className="w-16 shrink-0"></div>
                             <div className="relative flex-1 group flex gap-2">
                                 <div className="relative flex-1">
-                                    <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
+                                    <LocationInput placeholder={`Via #${index + 1}`} className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50" value={via.address} onChange={(val) => updateVia(index, val)} onLocationSelect={(loc) => { updateVia(index, loc.address, loc.lat, loc.lng); }} />
                                     <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
                                 </div>
                                 <Button size="icon" variant="ghost" className="text-red-500 hover:text-red-400 hover:bg-slate-200" onClick={() => removeVia(index)}><X className="h-4 w-4" /></Button>
@@ -922,7 +922,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     <div className="flex items-center gap-2">
                         <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Dest:</label>
                         <div className="relative flex-1 group z-40">
-                            <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
+                            <LocationInput placeholder="" className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all placeholder:text-zinc-600" value={dropoff} onChange={(val) => { setDropoff(val); setDropoffCoords(null); setQuotedPrice(null); }} onLocationSelect={(loc) => { setDropoff(loc.address); setDropoffCoords({ lat: loc.lat, lng: loc.lng }); setTimeout(() => handleCalculate(), 100); }} />
                             <div className="absolute left-3 top-3 text-slate-400 pointer-events-none z-10"><MapPin className="h-4 w-4" /></div>
                         </div>
                     </div>
@@ -930,7 +930,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     {showFlightInput && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                             <div className="relative group">
-                                <div className="absolute left-3 top-3 text-amber-400"><Plane className="h-4 w-4" /></div>
+                                <div className="absolute left-3 top-3 text-blue-500"><Plane className="h-4 w-4" /></div>
                                 <input type="text" placeholder="Flight Number (e.g. BA101)" className="w-full bg-blue-500/10 border border-blue-500/30 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-400/50" value={flightNumber} onChange={e => setFlightNumber(e.target.value.toUpperCase())} />
                             </div>
 
@@ -980,7 +980,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             <input
                                 type="text"
                                 placeholder=""
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={passengerName}
                                 onChange={e => setPassengerName(e.target.value)}
                             />
@@ -997,7 +997,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             <input
                                 type="email"
                                 placeholder=""
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={passengerEmail}
                                 onChange={e => setPassengerEmail(e.target.value)}
                             />
@@ -1010,7 +1010,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">PAX:</label>
                             <select
-                                className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={passengers}
                                 onChange={e => setPassengers(parseInt(e.target.value))}
                             >
@@ -1024,7 +1024,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <div className="flex items-center gap-1.5 shrink-0">
                             <label className="text-xs font-bold text-slate-900">LUG:</label>
                             <select
-                                className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={luggage}
                                 onChange={e => setLuggage(parseInt(e.target.value))}
                             >
@@ -1038,7 +1038,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                             <label className="text-xs font-bold text-slate-900 shrink-0">VEH:</label>
                             <select
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 appearance-none"
                                 value={vehicleType}
                                 onChange={e => {
                                     const newVal = e.target.value;
@@ -1066,7 +1066,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 {getPaymentIcon()}
                             </div>
                             <select
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-500/50 appearance-none"
                                 value={paymentType}
                                 onChange={e => setPaymentType(e.target.value)}
                             >
@@ -1086,7 +1086,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                     <Building2 className="h-4 w-4" />
                                 </div>
                                 <select
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-amber-400/50 appearance-none"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-500/50 appearance-none"
                                     value={selectedAccountId}
                                     onChange={e => setSelectedAccountId(e.target.value)}
                                 >
@@ -1210,7 +1210,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     </div>
 
                     {isReturn && (
-                        <div className="pl-4 border-l-2 border-amber-500/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
+                        <div className="pl-4 border-l-2 border-indigo-600/20 animate-in slide-in-from-top-2 space-y-4 mt-4">
                             {/* RETURN DATE/TIME (Moved to the top) */}
                             <div className="space-y-3">
                                 <label className="text-xs font-bold text-black uppercase tracking-wider">
@@ -1219,13 +1219,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <div className="flex gap-2">
                                     <input
                                         type="date"
-                                        className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-amber-400/50 [color-scheme:light]"
+                                        className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-500/50 [color-scheme:light]"
                                         value={returnDateOnly}
                                         onChange={handleReturnDateChange}
                                     />
                                     <input
                                         type="time"
-                                        className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-amber-400/50 [color-scheme:light]"
+                                        className="w-32 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-black focus:outline-none focus:border-blue-500/50 [color-scheme:light]"
                                         value={returnTimeOnly}
                                         onChange={handleReturnTimeChange}
                                     />
@@ -1238,7 +1238,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <div className="relative flex-1 group z-30">
                                     <LocationInput
                                         placeholder=""
-                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                         value={returnPickup}
                                         onChange={setReturnPickup}
                                         onLocationSelect={(loc) => {
@@ -1256,7 +1256,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <div className="relative flex-1 group z-20">
                                     <LocationInput
                                         placeholder=""
-                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                         value={returnDropoff}
                                         onChange={setReturnDropoff}
                                         onLocationSelect={(loc) => {
@@ -1271,7 +1271,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                             {/* RETURN FLIGHT (Only visible if pickup is airport) */}
                             {isAirport(returnPickup) && (
                                 <div className="relative group animate-in fade-in slide-in-from-top-2">
-                                    <div className="absolute left-3 top-3 text-amber-400">
+                                    <div className="absolute left-3 top-3 text-blue-500">
                                         <Plane className="h-4 w-4" />
                                     </div>
                                     <input
@@ -1290,7 +1290,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <label className="text-xs font-bold text-slate-900">PAX:</label>
                                     <select
-                                        className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                        className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                         value={returnPassengers}
                                         onChange={e => setReturnPassengers(parseInt(e.target.value))}
                                     >
@@ -1304,7 +1304,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <label className="text-xs font-bold text-slate-900">LUG:</label>
                                     <select
-                                        className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                        className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-1 text-center text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                         value={returnLuggage}
                                         onChange={e => setReturnLuggage(parseInt(e.target.value))}
                                     >
@@ -1321,7 +1321,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <input
                                     type="text"
                                     placeholder="Return journey notes..."
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                     value={returnNotes}
                                     onChange={e => setReturnNotes(e.target.value)}
                                 />
@@ -1330,14 +1330,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     )}
 
                     {isWaitAndReturn && (
-                        <div className="pl-4 border-l-2 border-amber-500/20 animate-in slide-in-from-top-2 space-y-4 mt-2 mb-4">
+                        <div className="pl-4 border-l-2 border-indigo-600/20 animate-in slide-in-from-top-2 space-y-4 mt-2 mb-4">
                             <div className="space-y-2">
-                                <label className="text-xs text-amber-400 font-bold">Waiting Time (Minutes)</label>
+                                <label className="text-xs text-blue-500 font-bold">Waiting Time (Minutes)</label>
                                 <input
                                     type="number"
                                     min="0"
                                     step="5"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                     value={waitingTime}
                                     onChange={e => setWaitingTime(parseInt(e.target.value))}
                                 />
@@ -1353,7 +1353,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <Bell className="h-4 w-4" />
                             </div>
                             <select
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-amber-400/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-3 text-sm text-slate-900 font-bold focus:outline-none focus:border-blue-500/50 appearance-none"
                                 value={reminders}
                                 onChange={e => setReminders(e.target.value)}
                             >
@@ -1372,7 +1372,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <div>
                                     <label className="text-xs text-black font-bold block mb-1">Recurs</label>
                                     <select
-                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50"
+                                        className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                         value={recurrenceRule}
                                         onChange={(e) => {
                                             setRecurrenceRule(e.target.value);
@@ -1392,7 +1392,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                         <input
                                             type="number"
                                             min="1"
-                                            className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 text-center"
+                                            className="w-16 bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 text-center"
                                             value={recurrenceInterval}
                                             onChange={e => setRecurrenceInterval(parseInt(e.target.value) || 1)}
                                         />
@@ -1446,7 +1446,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 <label className="text-xs text-black font-bold block">Repeat Until (Optional)</label>
                                 <input
                                     type="date"
-                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 [color-scheme:light]"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 [color-scheme:light]"
                                     value={recurrenceEnd}
                                     onChange={e => setRecurrenceEnd(e.target.value)}
                                 />
@@ -1470,7 +1470,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <textarea
                             placeholder="Instructions (Notes)..."
                             rows={2}
-                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-amber-400/50 resize-none"
+                            className="flex-1 bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 resize-none"
                             value={instructions}
                             onChange={e => setInstructions(e.target.value)}
                         />

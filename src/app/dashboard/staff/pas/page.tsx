@@ -196,7 +196,7 @@ export default function PassengerAssistantsPage() {
 
                 <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                     <DialogTrigger asChild>
-                        <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-md">
+                        <Button className="bg-indigo-600 hover:bg-purple-600 text-white shadow-md">
                             <Plus className="mr-2 h-4 w-4" /> Add Assistant
                         </Button>
                     </DialogTrigger>
@@ -530,7 +530,7 @@ function PADocuments({
                              <TableRow key={doc.id || docIdx} className="border-border hover:bg-muted/50">
                                  <TableCell className="font-medium text-foreground">{doc.type.replace(/_/g, ' ')}</TableCell>
                                  <TableCell>
-                                     <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-amber-500 border-amber-500/30 bg-amber-500/5' : 'text-foreground'}`}>
+                                     <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-indigo-600 border-indigo-600/30 bg-indigo-600/5' : 'text-foreground'}`}>
                                          {doc.status}
                                      </Badge>
                                  </TableCell>

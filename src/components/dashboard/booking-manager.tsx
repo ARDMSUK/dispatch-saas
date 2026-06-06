@@ -262,7 +262,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'PENDING': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-            case 'UNASSIGNED': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+            case 'UNASSIGNED': return 'bg-indigo-600/10 text-indigo-600 border-indigo-600/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
             case 'ARRIVED': return 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20';
@@ -356,7 +356,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
     const getVehicleTextColor = (vType: string) => {
         if (vType.includes('WAV') || vType.includes('wav')) return 'text-orange-600 font-bold';
-        if (vType === 'Estate') return 'text-amber-400 font-bold';
+        if (vType === 'Estate') return 'text-blue-500 font-bold';
         if (vType === 'Executive') return 'text-emerald-600 font-bold';
         if (vType.includes('MPV')) return 'text-purple-600 font-bold';
         if (vType === 'Minibus' || vType === 'Coach') return 'text-indigo-600 font-bold';
@@ -375,7 +375,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 }}
                 className={`
                     group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer mb-2
-                    ${job.emergencyActive ? 'bg-red-600 animate-pulse border-red-800 text-white' : selectedJobId === job.id ? 'bg-amber-500/10 border-amber-500/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
+                    ${job.emergencyActive ? 'bg-red-600 animate-pulse border-red-800 text-white' : selectedJobId === job.id ? 'bg-indigo-600/10 border-indigo-600/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
                 `}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -390,7 +390,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         )}
                         {/* M&G Badge */}
                         {hasMeetGreet && (
-                            <Badge variant="outline" className="bg-blue-500/10 text-amber-400 border-blue-500/20 font-mono text-[10px]">
+                            <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20 font-mono text-[10px]">
                                 M&G
                             </Badge>
                         )}
@@ -422,7 +422,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         {/* Live Flight Info Badge */}
                         {job.flightNumber && (
                             <div className="flex flex-wrap items-center gap-1.5 ml-1 border-l border-slate-200 pl-2">
-                                <Badge variant="outline" className="bg-blue-500/10 text-amber-400 border-blue-500/20 font-mono text-[10px] whitespace-nowrap">
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20 font-mono text-[10px] whitespace-nowrap">
                                     ✈️ {job.flightNumber}
                                 </Badge>
 
@@ -473,7 +473,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     <div className="flex items-center gap-2">
                         {/* Prominent Time */}
                         <div className="text-right">
-                            <div className="text-amber-400 font-black text-2xl leading-none tracking-tight">
+                            <div className="text-blue-500 font-black text-2xl leading-none tracking-tight">
                                 {new Date(job.pickupTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                             <div className="text-slate-400 text-[10px] uppercase font-bold">
@@ -491,7 +491,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <PopoverContent className="w-48 bg-white border-slate-200 p-1" align="end">
                                 <div className="space-y-0.5">
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setEditJob(job); setEditOpen(true); }}>
-                                        <Edit className="mr-2 h-3.5 w-3.5 text-amber-500" /> Edit Booking
+                                        <Edit className="mr-2 h-3.5 w-3.5 text-indigo-600" /> Edit Booking
                                     </Button>
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setDesignateJob(job); setDesignateOpen(true); }}>
                                         <Car className="mr-2 h-3.5 w-3.5 text-purple-500" /> Designate Driver
@@ -501,7 +501,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         handleSendNotification('CONFIRMATION', job.id);
                                     }}>
                                         <div className="flex items-center">
-                                            <div className="w-[14px] mr-2 flex justify-center"><Send className="h-3 w-3 text-amber-400" /></div>
+                                            <div className="w-[14px] mr-2 flex justify-center"><Send className="h-3 w-3 text-blue-500" /></div>
                                             Resend Confirmation
                                         </div>
                                     </Button>
@@ -634,7 +634,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         </div>
                         <div className="pl-[7px] py-1"><div className="w-[2px] h-3 bg-slate-200 ml-[1px]"></div></div>
                         <div className="flex items-start gap-2">
-                            <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-amber-500" /></div>
+                            <div className="mt-1 min-w-[16px]"><MapPin className="h-4 w-4 text-indigo-600" /></div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-1.5">
                                     <span className="text-sm text-slate-900 font-medium leading-tight line-clamp-2 flex-1">{job.dropoffAddress}</span>
@@ -690,7 +690,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                                             );
                                                         }
                                                         return (
-                                                            <span key={idx} className="bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider">
+                                                            <span key={idx} className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded font-bold text-[10px] uppercase tracking-wider">
                                                                     ⚠️ {tag}
                                                                 </span>
                                                         );
@@ -743,7 +743,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">CARD UNPAID</Badge>;
                                 }
                                 if (job.paymentType === 'IN_CAR_TERMINAL') {
-                                    return <Badge className="bg-blue-100 text-amber-500 hover:bg-blue-200 border-none px-1.5 text-[9px] rounded-sm">TERMINAL</Badge>;
+                                    return <Badge className="bg-blue-100 text-indigo-600 hover:bg-blue-200 border-none px-1.5 text-[9px] rounded-sm">TERMINAL</Badge>;
                                 }
                                 if (job.paymentType === 'ACCOUNT') {
                                     return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1.5 text-[9px] rounded-sm">ACCOUNT</Badge>;
@@ -765,7 +765,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-3">
                     <div className="flex-1 overflow-x-auto scrollbar-none pb-1">
                         <TabsList className="inline-flex w-auto bg-slate-100 border border-slate-200 h-9 p-1 gap-1">
-                            <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-amber-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                            <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-indigo-600 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                 Pending {filterJobs('PENDING_NOW').length > 0 && `(${filterJobs('PENDING_NOW').length})`}
                             </TabsTrigger>
                             <TabsTrigger value="TODAY" className="px-3 text-[10px] data-[state=active]:bg-teal-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
@@ -797,7 +797,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <input
                                 type="text"
                                 placeholder="Search name, phone, address, ID..."
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-1.5 pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-amber-400/50 h-9"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-1.5 pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-blue-500/50 h-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />

@@ -283,7 +283,7 @@ export default function RouteBuilderPage() {
                                                 <h3 className="font-bold text-slate-800 text-lg">{student.name}</h3>
                                                 <div className="mt-2 space-y-1">
                                                     {student.riskAssessmentNotes && (
-                                                        <div className="text-sm bg-amber-50 text-amber-800 p-2 rounded border border-amber-200">
+                                                        <div className="text-sm bg-indigo-50 text-indigo-800 p-2 rounded border border-indigo-200">
                                                             <span className="font-bold text-xs uppercase tracking-wider block mb-1">Risk / SEN Notes</span>
                                                             {student.riskAssessmentNotes}
                                                         </div>

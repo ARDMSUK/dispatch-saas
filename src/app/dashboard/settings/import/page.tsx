@@ -182,7 +182,7 @@ export default function DataMigrationHub() {
                         </Select>
                         {entityType && (
                             <div className="pt-4 flex justify-end">
-                                <Button onClick={() => setStep(3)} className="bg-amber-400 hover:bg-amber-500">
+                                <Button onClick={() => setStep(3)} className="bg-blue-500 hover:bg-indigo-600">
                                     Next: Map Columns <ArrowRight className="w-4 h-4 ml-2" />
                                 </Button>
                             </div>
@@ -198,7 +198,7 @@ export default function DataMigrationHub() {
                         <CardDescription>Match your CSV columns to the CABAI system fields.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="bg-blue-50 border border-blue-200 text-amber-500 p-4 rounded-md flex items-start gap-3">
+                        <div className="bg-blue-50 border border-blue-200 text-indigo-600 p-4 rounded-md flex items-start gap-3">
                             <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
                             <p className="text-sm">
                                 We detected <strong>{csvHeaders.length} columns</strong> and <strong>{csvData.length} rows</strong>. Please map the required fields below. Unmapped columns will be ignored.
@@ -238,7 +238,7 @@ export default function DataMigrationHub() {
                         <Button 
                             onClick={handleImport} 
                             disabled={!validateMapping() || isImporting} 
-                            className="bg-amber-400 hover:bg-amber-500 min-w-[150px]"
+                            className="bg-blue-500 hover:bg-indigo-600 min-w-[150px]"
                         >
                             {isImporting ? (
                                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Importing...</>

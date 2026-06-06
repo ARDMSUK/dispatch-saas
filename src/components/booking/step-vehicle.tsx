@@ -100,16 +100,16 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
                         <div
                             key={v.id}
                             onClick={() => handleSelect(v.id)}
-                            className={`relative p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-4 ${isSelected ? 'bg-amber-500/10 border-amber-500' : 'bg-slate-100 border-slate-200 hover:bg-slate-200'}`}
+                            className={`relative p-4 rounded-xl border transition-all cursor-pointer flex items-center gap-4 ${isSelected ? 'bg-indigo-600/10 border-indigo-600' : 'bg-slate-100 border-slate-200 hover:bg-slate-200'}`}
                         >
                             {/* Icon / Image Placeholder */}
-                            <div className={`h-12 w-16 rounded-lg flex items-center justify-center ${isSelected ? 'bg-amber-500 text-black' : 'bg-white/10 text-slate-500'}`}>
+                            <div className={`h-12 w-16 rounded-lg flex items-center justify-center ${isSelected ? 'bg-indigo-600 text-black' : 'bg-white/10 text-slate-500'}`}>
                                 <Car className="h-6 w-6" />
                             </div>
 
                             <div className="flex-1">
                                 <div className="flex justify-between items-center mb-1">
-                                    <h3 className={`font-bold ${isSelected ? 'text-amber-500' : 'text-slate-900'}`}>{v.name}</h3>
+                                    <h3 className={`font-bold ${isSelected ? 'text-indigo-600' : 'text-slate-900'}`}>{v.name}</h3>
                                     {loading ? (
                                         <div className="h-4 w-12 bg-white/10 animate-pulse rounded"></div>
                                     ) : price ? (
@@ -126,7 +126,7 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
 
                             {isSelected && (
                                 <div className="absolute top-1/2 right-4 -translate-y-1/2">
-                                    <Check className="h-5 w-5 text-amber-500" />
+                                    <Check className="h-5 w-5 text-indigo-600" />
                                 </div>
                             )}
                         </div>
@@ -145,7 +145,7 @@ export function StepVehicle({ data, onUpdate, onNext }: Props) {
                     }
                     onNext();
                 }}
-                className="w-full h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-xl"
+                className="w-full h-14 text-lg font-bold bg-indigo-600 hover:bg-blue-500 text-black rounded-xl"
             >
                 Confirm {data.vehicleType}
             </Button>

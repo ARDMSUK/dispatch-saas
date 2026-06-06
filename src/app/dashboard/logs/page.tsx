@@ -71,7 +71,7 @@ export default function LogsPage() {
             case "ANSWERED":
                 return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">Answered</Badge>;
             case "RINGING":
-                return <Badge className="bg-blue-50 text-amber-500 border border-blue-200 animate-pulse">Ringing</Badge>;
+                return <Badge className="bg-blue-50 text-indigo-600 border border-blue-200 animate-pulse">Ringing</Badge>;
             default:
                 return <Badge className="bg-slate-50 text-slate-700 border border-slate-200">Dismissed</Badge>;
         }
@@ -82,9 +82,9 @@ export default function LogsPage() {
             case "Booking":
                 return "bg-indigo-50 text-indigo-700 border border-indigo-200";
             case "Driver Profile":
-                return "bg-amber-50 text-amber-700 border border-amber-200";
+                return "bg-indigo-50 text-indigo-700 border border-indigo-200";
             case "Vehicle Record":
-                return "bg-blue-50 text-amber-500 border border-blue-200";
+                return "bg-blue-50 text-indigo-600 border border-blue-200";
             case "Pricing Zone":
                 return "bg-emerald-50 text-emerald-700 border border-emerald-200";
             case "Contract Run":
@@ -119,10 +119,10 @@ export default function LogsPage() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
                 <TabsList className="bg-slate-100 border border-slate-200 self-start p-1 h-auto mb-4">
-                    <TabsTrigger value="audit" className="py-2 px-6 data-[state=active]:bg-white shadow-sm border border-slate-200 data-[state=active]:text-slate-950 transition-all font-semibold">
+                    <TabsTrigger value="audit" className="py-2 px-6 data-[state=active]:bg-white shadow-sm border border-slate-200 data-[state=active]:text-white transition-all font-semibold">
                         <FileText className="w-4 h-4 mr-2" /> System Audit Trail
                     </TabsTrigger>
-                    <TabsTrigger value="voip" className="py-2 px-6 data-[state=active]:bg-white shadow-sm border border-slate-200 data-[state=active]:text-slate-950 transition-all font-semibold">
+                    <TabsTrigger value="voip" className="py-2 px-6 data-[state=active]:bg-white shadow-sm border border-slate-200 data-[state=active]:text-white transition-all font-semibold">
                         <Phone className="w-4 h-4 mr-2" /> VoIP Call History
                     </TabsTrigger>
                 </TabsList>

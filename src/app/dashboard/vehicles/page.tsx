@@ -160,7 +160,7 @@ export default function VehiclesPage() {
         if (type === 'Estate') return 'border-blue-500 text-blue-500';
         if (type === 'Executive') return 'border-emerald-500 text-emerald-500';
         if (type.includes('MPV')) return 'border-purple-500 text-purple-500';
-        if (type === 'Minibus' || type === 'Coach') return 'border-amber-500 text-amber-500';
+        if (type === 'Minibus' || type === 'Coach') return 'border-indigo-600 text-indigo-600';
         return 'border-zinc-500 text-slate-400';
     };
 
@@ -481,7 +481,7 @@ function VehicleDocuments({
                               <TableRow key={doc.id || docIdx} className="border-border hover:bg-muted/50">
                                   <TableCell className="font-medium text-foreground">{doc.type.replace('_', ' ')}</TableCell>
                                   <TableCell>
-                                      <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-amber-500 border-amber-500/30 bg-amber-500/5' : 'text-foreground'}`}>
+                                      <Badge variant="outline" className={`border-border ${doc.isPending ? 'text-indigo-600 border-indigo-600/30 bg-indigo-600/5' : 'text-foreground'}`}>
                                           {doc.status}
                                       </Badge>
                                   </TableCell>

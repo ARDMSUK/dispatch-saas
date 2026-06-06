@@ -24,8 +24,8 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
     return (
         <div className="relative bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-lg animate-in fade-in slide-in-from-bottom-2">
             {/* Header / Status */}
-            <div className={`p-4 flex justify-between items-center ${isOffer ? 'bg-amber-500/10 border-b border-amber-500/20' : 'bg-blue-500/10 border-b border-blue-500/20'}`}>
-                <Badge className={isOffer ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-blue-500 text-slate-900 hover:bg-blue-400'}>
+            <div className={`p-4 flex justify-between items-center ${isOffer ? 'bg-indigo-600/10 border-b border-indigo-600/20' : 'bg-blue-500/10 border-b border-blue-500/20'}`}>
+                <Badge className={isOffer ? 'bg-indigo-600 text-black hover:bg-blue-500' : 'bg-blue-500 text-slate-900 hover:bg-blue-400'}>
                     {isOffer ? 'NEW JOB OFFER' : job.status.replace('_', ' ')}
                 </Badge>
                 <div className="text-right">
@@ -51,7 +51,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
 
                 {/* Flight Number Badge */}
                 {job.flightNumber && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded text-amber-400 text-xs font-medium w-fit">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded text-blue-500 text-xs font-medium w-fit">
                         ✈️ Fight: {job.flightNumber}
                     </div>
                 )}
@@ -79,14 +79,14 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
 
                     {/* Dropoff */}
                     <div className="flex gap-3 relative z-10">
-                        <div className="mt-1 h-5 w-5 rounded-full bg-slate-100 border-2 border-amber-500 flex items-center justify-center shrink-0">
-                            <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                        <div className="mt-1 h-5 w-5 rounded-full bg-slate-100 border-2 border-indigo-600 flex items-center justify-center shrink-0">
+                            <div className="h-2 w-2 rounded-full bg-indigo-600"></div>
                         </div>
                         <div>
                             <p className="text-xs text-slate-400 font-bold uppercase mb-0.5">Dropoff</p>
                             <p className="text-sm text-slate-800 font-medium leading-snug">{job.dropoffAddress}</p>
                             {!isHistory && isInProgress && (
-                                <Button variant="link" className="h-auto p-0 text-amber-500 text-xs mt-1" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(job.dropoffAddress)}`, '_blank')}>
+                                <Button variant="link" className="h-auto p-0 text-indigo-600 text-xs mt-1" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(job.dropoffAddress)}`, '_blank')}>
                                     <Navigation className="h-3 w-3 mr-1" /> Navigate
                                 </Button>
                             )}
@@ -114,8 +114,8 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
 
                 {/* Notes */}
                 {job.notes && (
-                    <div className="bg-amber-500/5 border border-amber-500/10 rounded-lg p-3">
-                        <p className="text-xs text-amber-500 font-medium whitespace-pre-wrap">{job.notes}</p>
+                    <div className="bg-indigo-600/5 border border-indigo-600/10 rounded-lg p-3">
+                        <p className="text-xs text-indigo-600 font-medium whitespace-pre-wrap">{job.notes}</p>
                     </div>
                 )}
             </div>
@@ -133,7 +133,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                                 REJECT
                             </Button>
                             <Button
-                                className="h-14 text-lg font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-900/20"
+                                className="h-14 text-lg font-bold bg-indigo-600 hover:bg-blue-500 text-black shadow-lg shadow-indigo-900/20"
                                 onClick={() => onStatusUpdate(job.id, 'EN_ROUTE')}
                             >
                                 ACCEPT
@@ -196,7 +196,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                             💵 Collect Cash
                         </Button>
                         <Button
-                            className="w-full h-14 text-lg font-bold bg-amber-400 hover:bg-blue-500 text-slate-900 shadow-lg shadow-blue-900/20"
+                            className="w-full h-14 text-lg font-bold bg-blue-500 hover:bg-blue-500 text-slate-900 shadow-lg shadow-blue-900/20"
                             onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'IN_CAR_TERMINAL')}
                         >
                             💳 Card Terminal

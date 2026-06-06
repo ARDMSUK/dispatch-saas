@@ -50,21 +50,21 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     <TabsContent value="DRIVERS" className="mt-0 space-y-3">
                         {drivers.map(driver => (
-                            <div key={driver.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-sm hover:border-amber-400/30 hover:shadow transition-all group">
+                            <div key={driver.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-sm hover:border-blue-500/30 hover:shadow transition-all group">
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
                                         <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
                                             <User className="h-5 w-5 text-slate-400" />
                                         </div>
                                         <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${(driver.status === 'ONLINE' || driver.status === 'FREE') ? 'bg-emerald-500' :
-                                            driver.status === 'BUSY' ? 'bg-amber-400' : 'bg-red-500'
+                                            driver.status === 'BUSY' ? 'bg-blue-500' : 'bg-red-500'
                                             }`} />
                                     </div>
                                     <div>
                                         <div className="text-sm font-bold text-slate-900 leading-none">{driver.name} <span className="text-slate-400 font-medium text-xs">({driver.callsign})</span></div>
                                         <div className="text-xs text-slate-500 mt-1.5 flex items-center gap-2">
                                             {driver.vehicles?.[0] ? (
-                                                <span className="truncate max-w-[80px] font-mono text-amber-500 bg-blue-50 px-1 rounded">{driver.vehicles[0].reg}</span>
+                                                <span className="truncate max-w-[80px] font-mono text-indigo-600 bg-blue-50 px-1 rounded">{driver.vehicles[0].reg}</span>
                                             ) : (
                                                 <span className="text-slate-400 bg-slate-100 px-1 rounded">No Vehicle</span>
                                             )}
@@ -85,13 +85,13 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                                 {selectedJobId && onAssign ? (
                                     <Button
                                         size="sm"
-                                        className="h-8 px-4 text-xs bg-amber-400 text-white hover:bg-amber-500 font-bold shadow-sm animate-in fade-in"
+                                        className="h-8 px-4 text-xs bg-blue-500 text-white hover:bg-indigo-600 font-bold shadow-sm animate-in fade-in"
                                         onClick={() => onAssign(driver.id)}
                                     >
                                         ASSIGN
                                     </Button>
                                 ) : (
-                                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 h-7 text-xs text-amber-400 hover:text-amber-500 hover:bg-blue-50">
+                                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 h-7 text-xs text-blue-500 hover:text-indigo-600 hover:bg-blue-50">
                                         Details
                                     </Button>
                                 )}
@@ -104,7 +104,7 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
 
                     <TabsContent value="VEHICLES" className="mt-0 space-y-3">
                         {vehicles.map(vehicle => (
-                            <div key={vehicle.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-sm hover:border-amber-400/30 hover:shadow transition-all group">
+                            <div key={vehicle.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200 shadow-sm hover:border-blue-500/30 hover:shadow transition-all group">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center border border-slate-200">
                                         <Car className="h-5 w-5 text-slate-400" />
@@ -114,7 +114,7 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
                                         <div className="text-xs text-slate-500 mt-1.5">{vehicle.model} • {vehicle.type}</div>
                                     </div>
                                 </div>
-                                <Badge variant="outline" className={`text-[10px] font-bold ${vehicle.driver ? 'text-amber-500 bg-blue-50 border-blue-200' : 'text-slate-500 bg-slate-100 border-slate-200'}`}>
+                                <Badge variant="outline" className={`text-[10px] font-bold ${vehicle.driver ? 'text-indigo-600 bg-blue-50 border-blue-200' : 'text-slate-500 bg-slate-100 border-slate-200'}`}>
                                     {vehicle.driver ? 'ASSIGNED' : 'POOL'}
                                 </Badge>
                             </div>

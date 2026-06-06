@@ -77,7 +77,7 @@ export default function CorporateContactPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4">
-                                    <div className="h-12 w-12 bg-blue-100 text-amber-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <div className="h-12 w-12 bg-blue-100 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
                                         <Mail className="h-6 w-6" />
                                     </div>
                                     <div>

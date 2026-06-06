@@ -287,7 +287,7 @@ export default function ReportsPage() {
                                                     <td className="py-4 px-4 text-right font-medium text-slate-600">£{driver.revenue.toFixed(2)}</td>
                                                     <td className="py-4 px-4 text-right text-rose-500 text-sm">-£{driver.platformFee.toFixed(2)}</td>
                                                     <td className="py-4 px-4 text-right font-bold text-emerald-600">£{driver.netEarnings.toFixed(2)}</td>
-                                                    <td className="py-4 px-4 text-right text-amber-600 font-medium">£{driver.cashCollected.toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right text-purple-600 font-medium">£{driver.cashCollected.toFixed(2)}</td>
                                                     <td className="py-4 px-4 text-right">
                                                         {driver.settlementBalance > 0 ? (
                                                             <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-sm font-bold border border-emerald-200">
@@ -320,7 +320,7 @@ export default function ReportsPage() {
                                         <CardTitle className="text-lg font-bold text-slate-900">Corporate Account Spending</CardTitle>
                                         <CardDescription className="text-slate-500">Total volume and billing size per B2B Client.</CardDescription>
                                     </div>
-                                    <Button variant="ghost" size="sm" className="h-8 text-amber-400" onClick={() => exportToCSV('account_billing', data.accountPerformance)}>
+                                    <Button variant="ghost" size="sm" className="h-8 text-blue-500" onClick={() => exportToCSV('account_billing', data.accountPerformance)}>
                                         <Download className="w-4 h-4 mr-2" /> Export
                                     </Button>
                                 </CardHeader>
@@ -340,7 +340,7 @@ export default function ReportsPage() {
                                                     <td className="py-4 px-4 font-bold text-slate-900">{account.name}</td>
                                                     <td className="py-4 px-4 text-slate-500 font-mono text-sm">{account.code}</td>
                                                     <td className="py-4 px-4 text-right text-indigo-300 font-medium">{account.jobs}</td>
-                                                    <td className="py-4 px-4 text-right font-bold text-amber-400 text-lg">£{account.revenue.toFixed(2)}</td>
+                                                    <td className="py-4 px-4 text-right font-bold text-blue-500 text-lg">£{account.revenue.toFixed(2)}</td>
                                                 </tr>
                                             ))}
                                             {data.accountPerformance.length === 0 && (

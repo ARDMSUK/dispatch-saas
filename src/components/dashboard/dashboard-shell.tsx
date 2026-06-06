@@ -224,11 +224,11 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
             {/* MAIN AREA */}
             <div className="flex-1 flex flex-col min-w-0">
                 {isImpersonating && (
-                    <div className="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-bold text-center flex items-center justify-center gap-2 z-50 shrink-0">
+                    <div className="bg-indigo-600 text-white px-4 py-1.5 text-xs font-bold text-center flex items-center justify-center gap-2 z-50 shrink-0">
                         <span>VIEWING AS {tenantSlug.toUpperCase()}</span>
                         <Button
                             variant="link"
-                            className="h-auto p-0 text-slate-950 font-extrabold underline hover:no-underline"
+                            className="h-auto p-0 text-white font-extrabold underline hover:no-underline"
                             onClick={async () => {
                                 await update({ stopImpersonation: true });
                                 window.location.href = "/admin/tenants";
@@ -239,7 +239,9 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                     </div>
                 )}
                 {/* GLOBAL HEADER */}
-                <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-card/95 backdrop-blur-md z-50 shrink-0">
+                <header className="relative h-14 border-b border-border flex items-center justify-between px-4 bg-card/95 backdrop-blur-md z-50 shrink-0">
+                    {/* Brand Gradient Top Bar */}
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-gradient" />
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="text-muted-foreground hover:text-foreground">
                             <Menu className="h-5 w-5" />

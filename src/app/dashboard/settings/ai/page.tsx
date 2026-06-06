@@ -302,7 +302,7 @@ export default function TenantAIPage() {
                                     <img src={qrCode} alt="WhatsApp Connection QR Code" className="w-48 h-48 mx-auto" />
                                 </div>
                                 
-                                <p className="text-xs text-amber-600 font-medium">Waiting for system to confirm scan...</p>
+                                <p className="text-xs text-purple-600 font-medium">Waiting for system to confirm scan...</p>
                             </div>
                         )}
 
@@ -347,7 +347,7 @@ export default function TenantAIPage() {
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
                                 </span>
                             ) : (
-                                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
+                                <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200">
                                     Not Subscribed
                                 </span>
                             )}
@@ -406,7 +406,7 @@ export default function TenantAIPage() {
                                 Voice AI Agent
                             </CardTitle>
                             {!hasVoiceAi ? (
-                                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
+                                <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200">
                                     Not Subscribed
                                 </span>
                             ) : enableVoiceAi ? (
@@ -435,7 +435,7 @@ export default function TenantAIPage() {
                                 <Button 
                                     onClick={toggleVoiceAi} 
                                     disabled={loading}
-                                    className={`w-full font-semibold transition-all ${enableVoiceAi ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
+                                    className={`w-full font-semibold transition-all ${enableVoiceAi ? 'bg-purple-600 hover:bg-indigo-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
                                 >
                                     {loading ? "Saving Settings..." : enableVoiceAi ? "Pause Voice Assistant" : "Activate Voice Assistant"}
                                 </Button>
@@ -478,7 +478,7 @@ export default function TenantAIPage() {
                                 AI Copilot
                             </CardTitle>
                             {!hasAiCopilot ? (
-                                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
+                                <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200">
                                     Not Subscribed
                                 </span>
                             ) : enableAiCopilot ? (
@@ -507,7 +507,7 @@ export default function TenantAIPage() {
                                 <Button 
                                     onClick={toggleAiCopilot} 
                                     disabled={loading}
-                                    className={`w-full font-semibold transition-all ${enableAiCopilot ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
+                                    className={`w-full font-semibold transition-all ${enableAiCopilot ? 'bg-purple-600 hover:bg-indigo-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
                                 >
                                     {loading ? "Saving Settings..." : enableAiCopilot ? "Pause AI Copilot" : "Activate AI Copilot"}
                                 </Button>

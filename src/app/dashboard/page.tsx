@@ -388,7 +388,7 @@ export default function DashboardPage() {
                     }}
                 />
                 <button 
-                    className="bg-amber-400 text-white px-4 rounded text-sm shadow hover:bg-amber-500"
+                    className="bg-blue-500 text-white px-4 rounded text-sm shadow hover:bg-indigo-600"
                     onClick={handleSearchMap}
                 >
                     Find

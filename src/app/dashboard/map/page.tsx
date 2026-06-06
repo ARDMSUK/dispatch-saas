@@ -324,7 +324,7 @@ export default function StandaloneMapPage() {
                     </div>
                     <button 
                         onClick={handleSearchMap}
-                        className="px-6 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-2xl transition-all shadow-xl h-12 flex items-center justify-center gap-1.5 cursor-pointer text-sm"
+                        className="px-6 bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold rounded-2xl transition-all shadow-xl h-12 flex items-center justify-center gap-1.5 cursor-pointer text-sm"
                     >
                         Search
                     </button>
@@ -370,7 +370,7 @@ export default function StandaloneMapPage() {
                             className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${trackingDriverId === driver.id ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/5 text-slate-300 hover:bg-white/10 hover:text-white'}`}
                         >
                             <div className="flex items-center gap-2">
-                                <span className={`h-2 w-2 rounded-full ${driver.status === 'FREE' || driver.status === 'ONLINE' ? 'bg-emerald-500' : driver.status === 'BUSY' ? 'bg-blue-500' : 'bg-amber-500'}`}></span>
+                                <span className={`h-2 w-2 rounded-full ${driver.status === 'FREE' || driver.status === 'ONLINE' ? 'bg-emerald-500' : driver.status === 'BUSY' ? 'bg-blue-500' : 'bg-indigo-600'}`}></span>
                                 <span className="text-xs font-extrabold">{driver.callsign}</span>
                                 <span className="text-xs font-medium truncate max-w-[120px]">{driver.name}</span>
                             </div>

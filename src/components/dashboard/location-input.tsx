@@ -272,15 +272,15 @@ export function LocationInput({
 
                             {/* CUSTOM SHORTCUTS */}
                             {customSuggestions.length > 0 && (
-                                <CommandGroup heading="Quick Matches" className="text-amber-500 dark:text-blue-400">
+                                <CommandGroup heading="Quick Matches" className="text-indigo-600 dark:text-blue-400">
                                     {customSuggestions.map((item) => (
                                         <CommandItem
                                             key={item.id}
                                             value={item.label}
                                             onSelect={() => handleCustomSelect(item)}
-                                            className="cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-amber-500/10 hover:bg-amber-500/20 dark:hover:bg-blue-500/20 mb-1 rounded-sm border border-amber-500/20 dark:border-blue-500/30"
+                                            className="cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-indigo-600/10 hover:bg-indigo-600/20 dark:hover:bg-blue-500/20 mb-1 rounded-sm border border-indigo-600/20 dark:border-blue-500/30"
                                         >
-                                            <Plane className="mr-2 h-4 w-4 text-amber-500 dark:text-blue-400" />
+                                            <Plane className="mr-2 h-4 w-4 text-indigo-600 dark:text-blue-400" />
                                             <span className="font-bold">{item.label}</span>
                                         </CommandItem>
                                     ))}
@@ -295,7 +295,7 @@ export function LocationInput({
                                             key={`sugg-${i}`}
                                             value={item.label}
                                             onSelect={() => handleSelect(item)}
-                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-amber-500 dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
+                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-indigo-600 dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
                                         >
                                             <MapPin className="mr-2 h-4 w-4 opacity-50 dark:opacity-70" />
                                             <span className="truncate">
