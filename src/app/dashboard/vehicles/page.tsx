@@ -178,7 +178,7 @@ export default function VehiclesPage() {
                                 <Plus className="mr-2 h-4 w-4" /> Add Vehicle
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-card border-border text-foreground max-w-4xl">
+                        <DialogContent className="bg-card border-border text-foreground max-w-4xl sm:max-w-4xl">
                             <DialogHeader>
                                 <DialogTitle className="text-foreground">{editingId ? 'Edit Vehicle' : 'Add New Vehicle'}</DialogTitle>
                             </DialogHeader>

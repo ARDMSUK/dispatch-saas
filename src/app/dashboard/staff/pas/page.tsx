@@ -200,7 +200,7 @@ export default function PassengerAssistantsPage() {
                             <Plus className="mr-2 h-4 w-4" /> Add Assistant
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-card border-border text-foreground max-w-4xl">
+                    <DialogContent className="bg-card border-border text-foreground max-w-4xl sm:max-w-4xl">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold text-slate-900">
                                 {editingId ? "Edit Passenger Assistant" : "Add Passenger Assistant"}

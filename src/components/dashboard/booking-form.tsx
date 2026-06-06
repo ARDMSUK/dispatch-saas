@@ -577,6 +577,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const resetForm = () => {
         setPickup('');
         setDropoff('');
+        setVehicleType('Saloon');
         setVias([]);
         setPassengerName('');
         setPassengerPhone('');

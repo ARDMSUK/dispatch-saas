@@ -168,7 +168,7 @@ export default function DriversPage() {
                                 <Plus className="mr-2 h-4 w-4" /> Add Driver
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-card border-border text-foreground max-w-4xl">
+                        <DialogContent className="bg-card border-border text-foreground max-w-4xl sm:max-w-4xl">
                             <DialogHeader>
                                 <DialogTitle className="text-foreground">{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
                             </DialogHeader>
