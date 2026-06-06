@@ -216,6 +216,7 @@ export async function POST(request: Request) {
             flightNumber: body.flightNumber || null,
             vias: body.vias || undefined, // JSON
             paymentType: body.paymentType || 'CASH',
+            accountId: body.paymentType === 'ACCOUNT' ? (body.accountId || null) : null,
             notes: body.notes || null,
             isFixedPrice: false,
             status: 'PENDING',
