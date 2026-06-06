@@ -9,6 +9,13 @@ import Link from 'next/link';
 
 const LONDON_CENTER = { lat: 51.5074, lng: -0.1278 };
 
+const isDriverOnline = (driver: any) => {
+    if (driver.status === 'OFF_DUTY') return false;
+    if (!driver.lastLocationUpdate) return true;
+    const lastUpdate = new Date(driver.lastLocationUpdate).getTime();
+    return (Date.now() - lastUpdate) < 5 * 60 * 1000;
+};
+
 const DARK_MAP_STYLE = [
     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
     { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -226,7 +233,7 @@ export default function StandaloneMapPage() {
         const bounds = new google.maps.LatLngBounds();
         let hasDriverLoc = false;
 
-        drivers.forEach(d => {
+        drivers.filter(isDriverOnline).forEach(d => {
             try {
                 let pos = null;
                 if (d.currentLat && d.currentLng) {
@@ -257,7 +264,7 @@ export default function StandaloneMapPage() {
             d.callsign?.toLowerCase().includes(mapSearchTerm.toLowerCase())
         );
         
-        if (driver) {
+        if (driver && isDriverOnline(driver)) {
             try {
                 let pos = null;
                 if (driver.currentLat && driver.currentLng) {
@@ -357,10 +364,10 @@ export default function StandaloneMapPage() {
             <div className="absolute bottom-4 left-4 w-[280px] max-h-[40vh] bg-zinc-950/90 backdrop-blur border border-white/10 rounded-3xl z-10 p-4 shadow-2xl flex flex-col overflow-hidden">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    Active Drivers ({drivers.filter(d => d.status !== 'OFF_DUTY').length})
+                    Active Drivers ({drivers.filter(isDriverOnline).length})
                 </h3>
                 <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
-                    {drivers.filter(d => d.status !== 'OFF_DUTY').map(driver => (
+                    {drivers.filter(isDriverOnline).map(driver => (
                         <div 
                             key={driver.id} 
                             onClick={() => {
@@ -404,7 +411,7 @@ export default function StandaloneMapPage() {
                         styles: mapStyle === 'dark' ? DARK_MAP_STYLE : undefined
                     }}
                 >
-                    {drivers.map(driver => {
+                    {drivers.filter(isDriverOnline).map(driver => {
                         try {
                             let pos = null;
                             if (driver.currentLat && driver.currentLng) {

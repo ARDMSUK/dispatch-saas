@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { LocationInput } from '@/components/dashboard/location-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -433,6 +434,13 @@ export default function SettingsPage() {
                                 </label>
                                 <p className="text-sm text-muted-foreground">
                                     Automatically apply percentage or flat multipliers to fares based on active Surcharge rules (Time of day, Day of week, etc).
+                                    <span className="block mt-1.5 font-semibold text-primary dark:text-blue-400">
+                                        Configure rules and multipliers in the{' '}
+                                        <Link href="/dashboard/pricing" className="underline hover:opacity-80">
+                                            Pricing & Tariffs
+                                        </Link>{' '}
+                                        panel.
+                                    </span>
                                 </p>
                             </div>
                         </div>

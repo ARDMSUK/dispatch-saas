@@ -11,9 +11,15 @@ import { BookingManager } from '@/components/dashboard/booking-manager';
 import { BookingManagerClassic } from '@/components/dashboard/booking-manager-classic';
 import { DriverFleetPanel } from '@/components/dashboard/driver-fleet-panel';
 
-// MAP CONSTANTS
 const LONDON_CENTER = { lat: 51.5074, lng: -0.1278 };
 const LIBRARIES: ("places" | "geometry")[] = ["places", "geometry"];
+
+const isDriverOnline = (driver: any) => {
+    if (driver.status === 'OFF_DUTY') return false;
+    if (!driver.lastLocationUpdate) return true;
+    const lastUpdate = new Date(driver.lastLocationUpdate).getTime();
+    return (Date.now() - lastUpdate) < 5 * 60 * 1000;
+};
 
 const DARK_MAP_STYLE = [
     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -236,7 +242,7 @@ export default function DashboardPage() {
             d.callsign?.toLowerCase().includes(mapSearchTerm.toLowerCase())
         );
         
-        if (driver) {
+        if (driver && isDriverOnline(driver)) {
             try {
                 let pos = null;
                 if (driver.currentLat && driver.currentLng) {
@@ -288,7 +294,7 @@ export default function DashboardPage() {
         const bounds = new google.maps.LatLngBounds();
         let hasDriverLoc = false;
 
-        drivers.forEach(d => {
+        drivers.filter(isDriverOnline).forEach(d => {
             try {
                 let pos = null;
                 if (d.currentLat && d.currentLng) {
@@ -337,7 +343,7 @@ export default function DashboardPage() {
                 }}
             >
                 {/* MARKERS */}
-                {drivers.map(driver => {
+                {drivers.filter(isDriverOnline).map(driver => {
                     try {
                         let pos = null;
                         if (driver.currentLat && driver.currentLng) {

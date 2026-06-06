@@ -54,6 +54,9 @@ export async function POST(req: Request) {
                     speed,
                     timestamp,
                 }),
+                currentLat: lat,
+                currentLng: lng,
+                lastLocationUpdate: new Date(Number(timestamp))
             },
         });
 

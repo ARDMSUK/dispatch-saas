@@ -43,7 +43,10 @@ export async function POST(req: Request) {
         await prisma.driver.update({
             where: { id: driver.driverId },
             data: {
-                location: JSON.stringify({ lat, lng })
+                location: JSON.stringify({ lat, lng }),
+                currentLat: lat,
+                currentLng: lng,
+                lastLocationUpdate: new Date()
             }
         });
 

@@ -168,7 +168,7 @@ export default function DriversPage() {
                                 <Plus className="mr-2 h-4 w-4" /> Add Driver
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-card border-border text-foreground max-w-2xl">
+                        <DialogContent className="bg-card border-border text-foreground max-w-4xl">
                             <DialogHeader>
                                 <DialogTitle className="text-foreground">{editingId ? 'Edit Driver' : 'Add New Driver'}</DialogTitle>
                             </DialogHeader>
@@ -496,8 +496,8 @@ function DriverDocuments({
 
     return (
         <div className="py-4 flex flex-col gap-4">
-            <div className="bg-card p-4 rounded border border-border flex gap-2 items-end">
-                <div className="flex-1">
+            <div className="bg-card p-4 rounded border border-border grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div className="w-full">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Doc Type</label>
                      <select value={type} onChange={e => setType(e.target.value)} className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground">
                          <option value="DRIVING_LICENSE">Driving License</option>
@@ -510,15 +510,15 @@ function DriverDocuments({
                          <option value="RIGHT_TO_WORK">Right To Work Proof</option>
                      </select>
                 </div>
-                <div className="flex-1">
+                <div className="w-full">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">File</label>
-                    <Input id="fileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-background text-xs pt-2 border-input cursor-pointer text-foreground" />
+                    <Input id="fileUploadInput" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="bg-background text-xs pt-2 border-input cursor-pointer text-foreground w-full" />
                 </div>
-                <div className="flex-1">
+                <div className="w-full">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Expiry</label>
-                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground" />
+                    <Input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="bg-background border-input text-foreground w-full" />
                 </div>
-                 <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px]">
+                 <Button onClick={handleUpload} disabled={uploading || !file} className="bg-primary text-primary-foreground hover:bg-primary/90 w-full">
                      {uploading ? 'Uploading...' : <><Upload className="h-4 w-4 mr-1"/> Upload & Save Document</>}
                  </Button>
             </div>
