@@ -82,8 +82,8 @@ export async function POST(req: Request) {
         // Use the tenant's Resend key if provided, otherwise fallback to system
         const emailResult = await sendEmail({
             to: adminEmail,
-            subject: "Welcome to Dispatch SaaS - Your Tenant is Ready",
-            html: getWelcomeEmail(adminName, loginUrl, adminEmail, adminPassword),
+            subject: `Welcome to ${companyName} - Your Tenant is Ready`,
+            html: getWelcomeEmail(adminName, loginUrl, adminEmail, adminPassword, companyName),
             apiKey: resendApiKey
         });
 

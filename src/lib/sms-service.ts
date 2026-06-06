@@ -170,6 +170,22 @@ export const SmsService = {
         return this.sendSms(booking.passengerPhone, message, config);
     },
 
+    async sendPaymentLink(booking: any, orgSettings?: any) {
+        if (!booking.passengerPhone || !booking.paymentLink) return { success: false, error: 'Missing phone or payment link' };
+        
+        const company = orgSettings?.name || 'Cabai';
+        const fareFormatted = booking.fare ? `£${Number(booking.fare).toFixed(2)}` : 'your fare';
+        const message = `${company}: Please click the link to pay for your booking #${booking.id} (${fareFormatted}):\n${booking.paymentLink}`;
+        
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+
+        return this.sendSms(booking.passengerPhone, message, config);
+    },
+
     async sendSms(to: string, body: string, config?: { accountSid?: string, authToken?: string, fromNumber?: string } | null) {
 
         // Priority: Passed Config > Global Env

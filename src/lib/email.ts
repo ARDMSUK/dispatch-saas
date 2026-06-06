@@ -49,17 +49,26 @@ export const getResetPasswordEmail = (resetLink: string, brandColor: string = '#
     </div>
 `;
 
-export const getWelcomeEmail = (name: string, loginUrl: string, email: string, tempPass: string, brandColor: string = '#f59e0b', logoUrl: string = '') => `
-    <div style="font-family: sans-serif; max-w-md; margin: 0 auto;">
-        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="Company Logo" style="max-height: 50px;" /></div>` : ''}
-        <h2>Welcome to the Team, ${name}!</h2>
-        <p>An account has been created for you.</p>
-        <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Login URL:</strong> <a href="${loginUrl}" style="color: ${brandColor};">${loginUrl}</a></p>
+export const getWelcomeEmail = (
+    name: string,
+    loginUrl: string,
+    email: string,
+    tempPass: string,
+    tenantName: string = 'Cabai',
+    brandColor: string = '#f59e0b',
+    logoUrl: string = ''
+) => `
+    <div style="font-family: sans-serif; max-w-md; margin: 0 auto; color: #333;">
+        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="${tenantName} Logo" style="max-height: 50px;" /></div>` : `<h2 style="color: ${brandColor}; text-align: center; margin-bottom: 10px;">${tenantName}</h2>`}
+        <h3 style="border-bottom: 1px solid #e4e4e7; padding-bottom: 10px; margin-top: 0;">Welcome to the Team, ${name}!</h3>
+        <p>An account has been created for you on the <strong>${tenantName}</strong> dispatch platform.</p>
+        <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e4e4e7;">
+            <p style="margin-top: 0;"><strong>Login URL:</strong> <a href="${loginUrl}" style="color: ${brandColor}; text-decoration: none; font-weight: bold;">${loginUrl}</a></p>
             <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Temporary Password:</strong> ${tempPass}</p>
+            <p style="margin-bottom: 0;"><strong>Temporary Password:</strong> <code style="background: #e4e4e7; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 1.1em;">${tempPass}</code></p>
         </div>
         <p>Please log in and change your password immediately.</p>
+        <p style="font-size: 11px; color: #888; text-align: center; margin-top: 30px;">This email is sent on behalf of ${tenantName}.</p>
     </div>
 `;
 

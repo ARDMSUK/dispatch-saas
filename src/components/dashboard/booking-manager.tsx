@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, UserX, Send } from "lucide-react";
+import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, UserX, Send, Copy } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
     differenceInMinutes, parseISO, isToday, isTomorrow, isThisWeek, isSameMonth,
@@ -88,6 +89,34 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
     // Flight Tracking State
     const [flights, setFlights] = useState<Record<string, any>>({});
+
+    // Job Details State
+    const [selectedDetailsJob, setSelectedDetailsJob] = useState<Job | null>(null);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [auditLogs, setAuditLogs] = useState<any[]>([]);
+    const [logsLoading, setLogsLoading] = useState(false);
+
+    // Fetch Logs for the details dialog
+    useEffect(() => {
+        if (selectedDetailsJob) {
+            setLogsLoading(true);
+            fetch('/api/logs')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        const filtered = data.filter((log: any) => 
+                            log.id?.includes(`job-${selectedDetailsJob.id}-`) || 
+                            log.description?.includes(`TRIP-${selectedDetailsJob.id}`)
+                        );
+                        setAuditLogs(filtered);
+                    }
+                })
+                .catch(err => console.error("Error fetching job logs:", err))
+                .finally(() => setLogsLoading(false));
+        } else {
+            setAuditLogs([]);
+        }
+    }, [selectedDetailsJob]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -493,6 +522,16 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setEditJob(job); setEditOpen(true); }}>
                                         <Edit className="mr-2 h-3.5 w-3.5 text-indigo-600" /> Edit Booking
                                     </Button>
+                                    <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => {
+                                        e.stopPropagation();
+                                        const ev = new CustomEvent('copy-booking', { detail: job });
+                                        window.dispatchEvent(ev);
+                                    }}>
+                                        <Copy className="mr-2 h-3.5 w-3.5 text-blue-500" /> Copy Booking
+                                    </Button>
+                                    <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setSelectedDetailsJob(job); setDetailsOpen(true); }}>
+                                        <AlertCircle className="mr-2 h-3.5 w-3.5 text-slate-500" /> Load Details
+                                    </Button>
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); setDesignateJob(job); setDesignateOpen(true); }}>
                                         <Car className="mr-2 h-3.5 w-3.5 text-purple-500" /> Designate Driver
                                     </Button>
@@ -534,7 +573,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         </Button>
                                     )}
 
-                                    {/* Manual Dispatch (No Pre-assign) */}
+                                    {/* Manual Dispatch / Assign */}
                                     {(job.status === 'PENDING' || job.status === 'UNASSIGNED') && (
                                         <Button
                                             variant="ghost"
@@ -546,6 +585,46 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                             }}
                                         >
                                             <Car className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Dispatch / Assign
+                                        </Button>
+                                    )}
+
+                                    {/* Switch Driver (For Dispatched / Active Jobs) */}
+                                    {['DISPATCHED', 'EN_ROUTE', 'ARRIVED', 'POB'].includes(job.status) && (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start h-8 text-xs font-normal"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDispatchJob(job);
+                                                setDispatchOpen(true);
+                                            }}
+                                        >
+                                            <RefreshCw className="mr-2 h-3.5 w-3.5 text-amber-500" /> Switch Driver
+                                        </Button>
+                                    )}
+
+                                    {/* Send Track & Pay SMS */}
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start h-8 text-xs font-normal"
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    const res = await fetch(`/api/jobs/${job.id}/payment/sms`, { method: 'POST' });
+                                                    if (res.ok) {
+                                                        toast.success("Track & Pay SMS sent successfully");
+                                                    } else {
+                                                        const data = await res.json();
+                                                        toast.error(data.error || "Failed to send Track & Pay SMS");
+                                                    }
+                                                } catch (err) {
+                                                    console.error(err);
+                                                    toast.error("Error sending Track & Pay SMS");
+                                                }
+                                            }}
+                                        >
+                                            <Send className="mr-2 h-3.5 w-3.5 text-teal-500" /> Send SMS Pay Link
                                         </Button>
                                     )}
 
@@ -570,9 +649,42 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'COMPLETED'); }}>
                                         <CheckCircle className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Mark Completed
                                     </Button>
-                                    <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'CANCELLED'); }}>
-                                        <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> Mark Cancelled
-                                    </Button>
+                                    
+                                    {/* Cancel & Refund (For card-paid, active bookings) */}
+                                    {(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') && job.status !== 'CANCELLED' ? (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start h-8 text-xs font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                if (confirm("Are you sure you want to cancel this booking and issue a full refund?")) {
+                                                    try {
+                                                        const res = await fetch(`/api/jobs/${job.id}`, {
+                                                            method: 'PATCH',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ status: 'CANCELLED', paymentStatus: 'REFUNDED' })
+                                                        });
+                                                        if (res.ok) {
+                                                            toast.success("Booking cancelled and refunded successfully");
+                                                            fetchJobs();
+                                                        } else {
+                                                            toast.error("Failed to cancel and refund booking");
+                                                        }
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                        toast.error("Error cancelling and refunding booking");
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> Cancel & Refund
+                                        </Button>
+                                    ) : (
+                                        <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'CANCELLED'); }}>
+                                            <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> Mark Cancelled
+                                        </Button>
+                                    )}
+
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'NO_SHOW'); }}>
                                         <UserX className="mr-2 h-3.5 w-3.5 text-slate-500" /> Mark No Show
                                     </Button>
@@ -718,8 +830,22 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             <User className="h-3 w-3 text-slate-400" /> {job.passengerName}
                         </div>
                         <div className="flex items-center gap-2 text-slate-500 text-xs">
-                            <Phone className="h-3 w-3" /> {job.passengerPhone}
+                            <Phone className="h-3 w-3" /> 
+                            <a href={`tel:${job.passengerPhone}`} className="hover:underline text-blue-600 font-mono" onClick={(e) => e.stopPropagation()}>
+                                {job.passengerPhone}
+                            </a>
                         </div>
+                        {job.driver && (
+                            <div className="flex items-center gap-2 text-slate-600 text-xs font-medium mt-1">
+                                <Car className="h-3 w-3 text-slate-400" />
+                                <span>DRV: {job.driver.callsign}</span>
+                                {job.driver.phone && (
+                                    <a href={`tel:${job.driver.phone}`} className="hover:underline text-blue-600 font-mono ml-1" onClick={(e) => e.stopPropagation()}>
+                                        {job.driver.phone}
+                                    </a>
+                                )}
+                            </div>
+                        )}
                         {/* Pax/Lug Data */}
                         <div className="flex items-center gap-3 mt-1">
                             <span className="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-500 flex items-center gap-1">
@@ -900,6 +1026,165 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     setDispatchJob(null);
                 }}
             />
+
+            <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+                <DialogContent className="max-w-2xl bg-white text-slate-900 border border-slate-200 shadow-xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-black text-slate-950 flex items-center gap-2">
+                            <span>Booking Details: TRIP-{selectedDetailsJob?.id}</span>
+                            {selectedDetailsJob && (
+                                <Badge variant="outline" className={`${getStatusColor(selectedDetailsJob.status)} font-mono text-[10px] tracking-wider`}>
+                                    {selectedDetailsJob.status}
+                                </Badge>
+                            )}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {selectedDetailsJob && (
+                        <div className="space-y-6 text-sm">
+                            {/* Route & Core Details */}
+                            <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <div>
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400">Pickup</h4>
+                                    <p className="font-semibold text-slate-800">{selectedDetailsJob.pickupAddress}</p>
+                                    {selectedDetailsJob.pickupLat && selectedDetailsJob.pickupLng && (
+                                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                            Coords: {selectedDetailsJob.pickupLat.toFixed(5)}, {selectedDetailsJob.pickupLng.toFixed(5)}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400">Destination</h4>
+                                    <p className="font-semibold text-slate-800">{selectedDetailsJob.dropoffAddress}</p>
+                                    {selectedDetailsJob.dropoffLat && selectedDetailsJob.dropoffLng && (
+                                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                            Coords: {selectedDetailsJob.dropoffLat.toFixed(5)}, {selectedDetailsJob.dropoffLng.toFixed(5)}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Passenger & Driver */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400 border-b pb-1">Passenger</h4>
+                                    <div className="space-y-1">
+                                        <p className="font-semibold">{selectedDetailsJob.passengerName}</p>
+                                        <p className="text-slate-600">
+                                            <a href={`tel:${selectedDetailsJob.passengerPhone}`} className="hover:underline text-blue-600 font-mono">
+                                                {selectedDetailsJob.passengerPhone}
+                                            </a>
+                                        </p>
+                                        {selectedDetailsJob.passengerEmail && (
+                                            <p className="text-xs text-slate-500">{selectedDetailsJob.passengerEmail}</p>
+                                        )}
+                                        <p className="text-xs text-slate-500">
+                                            Pax: {selectedDetailsJob.passengers} | Luggage: {selectedDetailsJob.luggage}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400 border-b pb-1">Driver & Dispatch</h4>
+                                    <div className="space-y-1">
+                                        {selectedDetailsJob.driver ? (
+                                            <>
+                                                <p className="font-semibold text-purple-700">
+                                                    Assigned: {selectedDetailsJob.driver.name} ({selectedDetailsJob.driver.callsign})
+                                                </p>
+                                                {selectedDetailsJob.driver.phone && (
+                                                    <p className="text-slate-600">
+                                                        <a href={`tel:${selectedDetailsJob.driver.phone}`} className="hover:underline text-blue-600 font-mono">
+                                                            {selectedDetailsJob.driver.phone}
+                                                        </a>
+                                                    </p>
+                                                )}
+                                            </>
+                                        ) : selectedDetailsJob.preAssignedDriver ? (
+                                            <p className="font-semibold text-amber-600">
+                                                Designated: {selectedDetailsJob.preAssignedDriver.name} ({selectedDetailsJob.preAssignedDriver.callsign})
+                                            </p>
+                                        ) : (
+                                            <p className="text-slate-400 italic text-xs">No driver assigned</p>
+                                        )}
+                                        <p className="text-xs text-slate-500">
+                                            Vehicle Type: {selectedDetailsJob.vehicleType}
+                                        </p>
+                                        <p className="text-xs text-slate-500">
+                                            Auto Dispatch: {selectedDetailsJob.autoDispatch ? "ENABLED" : "DISABLED"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Financials */}
+                            <div className="grid grid-cols-3 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <div>
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400">Quoted Fare</h4>
+                                    <p className="text-lg font-bold text-slate-900">£{selectedDetailsJob.fare?.toFixed(2) || '0.00'}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400">Payment Type</h4>
+                                    <p className="font-bold text-slate-700">{selectedDetailsJob.paymentType}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400">Payment Status</h4>
+                                    <Badge variant="secondary" className="bg-slate-200 text-slate-800 border-none font-bold">
+                                        {selectedDetailsJob.paymentStatus || 'UNPAID'}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            {/* Notes & Extra Info */}
+                            {(selectedDetailsJob.notes || selectedDetailsJob.flightNumber) && (
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] uppercase font-bold text-slate-400 border-b pb-1">Extra Details</h4>
+                                    {selectedDetailsJob.flightNumber && (
+                                        <p className="text-xs font-mono text-slate-700">
+                                            ✈️ Flight Number: {selectedDetailsJob.flightNumber}
+                                        </p>
+                                    )}
+                                    {selectedDetailsJob.notes && (
+                                        <div className="bg-amber-50/50 p-3 rounded border border-amber-100 text-slate-700 text-xs whitespace-pre-wrap font-mono">
+                                            {selectedDetailsJob.notes}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Audit Log / Timestamps */}
+                            <div className="space-y-3">
+                                <h4 className="text-[10px] uppercase font-bold text-slate-400 border-b pb-1">System Audit & Status History</h4>
+                                <div className="grid grid-cols-2 gap-4 text-xs text-slate-500">
+                                    <p>Created: {new Date(selectedDetailsJob.createdAt).toLocaleString()}</p>
+                                    <p>Last Activity: {new Date(selectedDetailsJob.updatedAt).toLocaleString()}</p>
+                                </div>
+
+                                <div className="space-y-2 mt-2">
+                                    <h5 className="text-[10px] font-bold text-slate-500">Recent Transitions</h5>
+                                    {logsLoading ? (
+                                        <div className="text-xs text-slate-400 animate-pulse">Loading system log timeline...</div>
+                                    ) : auditLogs.length === 0 ? (
+                                        <div className="text-xs text-slate-400 italic">No specific mutations recorded in global logs.</div>
+                                    ) : (
+                                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                            {auditLogs.map((log, idx) => (
+                                                <div key={idx} className="bg-slate-50 p-2 rounded border border-slate-200 text-[11px]">
+                                                    <div className="flex justify-between font-bold text-slate-700">
+                                                        <span>{log.action}</span>
+                                                        <span className="font-mono text-slate-400">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                                                    </div>
+                                                    <p className="text-slate-600 mt-0.5">{log.description}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

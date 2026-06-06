@@ -90,13 +90,20 @@ export async function POST(req: Request) {
         });
 
         // Send Welcome Email
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: session.user.tenantId }
+        });
+        const tenantName = tenant?.name || "Cabai";
+        const brandColor = tenant?.brandColor || "#f59e0b";
+        const logoUrl = tenant?.logoUrl || "";
+
         const host = req.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
         const loginUrl = `${protocol}://${host}/login`;
         await sendEmail({
             to: email,
-            subject: "Welcome to Dispatch SaaS",
-            html: getWelcomeEmail(name, loginUrl, email, password) // Note: Sending raw password (only on creation)
+            subject: `Welcome to ${tenantName}`,
+            html: getWelcomeEmail(name, loginUrl, email, password, tenantName, brandColor, logoUrl) // Note: Sending raw password (only on creation)
         });
 
         return NextResponse.json(user, { status: 201 });

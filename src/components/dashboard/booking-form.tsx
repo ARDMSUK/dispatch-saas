@@ -384,6 +384,60 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     // Payment Integration
     const [showPaymentModal, setShowPaymentModal] = useState(false);
 
+    useEffect(() => {
+        const handleCopy = (e: any) => {
+            const job = e.detail;
+            if (!job) return;
+
+            setPickup(job.pickupAddress || '');
+            setDropoff(job.dropoffAddress || '');
+            setPassengerPhone(job.passengerPhone || '');
+            setPassengerName(job.passengerName || '');
+            setPassengerEmail(job.passengerEmail || '');
+            setVehicleType(job.vehicleType || 'Saloon');
+            setPassengers(job.passengers || 1);
+            setLuggage(job.luggage || 0);
+            setQuotedPrice(job.fare || 0);
+            setPaymentType(job.paymentType || 'CASH');
+            setSelectedAccountId(job.accountId || '');
+            
+            // Notes parsing to extract reminders, M&G, notifications
+            let notesText = job.notes || '';
+            if (notesText.startsWith('[')) {
+                const closeBracketIdx = notesText.indexOf(']');
+                if (closeBracketIdx !== -1) {
+                    const prefix = notesText.substring(1, closeBracketIdx);
+                    notesText = notesText.substring(closeBracketIdx + 1).trim();
+                    const parts = prefix.split(' | ');
+                    parts.forEach(part => {
+                        if (part.startsWith('REMINDER:')) {
+                            setReminders(part.replace('REMINDER:', '').trim());
+                        } else if (part === 'MEET & GREET p/u') {
+                            setMeetAndGreet(true);
+                        } else if (part === 'HAND LUGGAGE ONLY') {
+                            setHandLuggageOnly(true);
+                        } else if (part === 'NO_NOTIFICATIONS') {
+                            setMuteNotifications(true);
+                        }
+                    });
+                }
+            }
+            setInstructions(notesText);
+            setFlightNumber(job.flightNumber || '');
+
+            // Set coordinates
+            setPickupCoords(job.pickupLat && job.pickupLng ? { lat: job.pickupLat, lng: job.pickupLng } : null);
+            setDropoffCoords(job.dropoffLat && job.dropoffLng ? { lat: job.dropoffLat, lng: job.dropoffLng } : null);
+
+            toast.success(`Booking details for TRIP-${job.id} copied to console!`);
+        };
+
+        window.addEventListener('copy-booking' as any, handleCopy);
+        return () => {
+            window.removeEventListener('copy-booking' as any, handleCopy);
+        };
+    }, []);
+
     // Initial check: Validate Flight Terminal then proceed
     const handlePreSubmit = async () => {
         if (isCalculating) {

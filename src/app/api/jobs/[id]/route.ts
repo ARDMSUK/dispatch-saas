@@ -34,6 +34,7 @@ const UpdateJobSchema = z.object({
     luggage: z.number().optional(),
     flightNumber: z.string().optional().nullable(),
     preAssignedDriverId: z.string().optional().nullable(),
+    paymentStatus: z.enum(["UNPAID", "AUTHORIZED", "PAID", "REFUNDED"]).optional(),
 });
 
 export async function PATCH(
@@ -72,11 +73,48 @@ export async function PATCH(
             ...(validation.data.luggage !== undefined && { luggage: validation.data.luggage }),
             ...(validation.data.flightNumber !== undefined && { flightNumber: validation.data.flightNumber }),
             ...(validation.data.preAssignedDriverId !== undefined && { preAssignedDriverId: validation.data.preAssignedDriverId }),
+            ...(validation.data.paymentStatus && { paymentStatus: validation.data.paymentStatus }),
         };
 
         let updatedJob;
         
-        if ((status === 'COMPLETED' || status === 'CANCELLED' || status === 'NO_SHOW') && updateData.driverId) {
+        if (driverId !== undefined) {
+            const currentJob = await prisma.job.findUnique({ where: { id: jobId } });
+            const oldDriverId = currentJob?.driverId;
+            
+            const updates: any[] = [];
+            updates.push(
+                prisma.job.update({
+                    where: { id: jobId },
+                    data: updateData,
+                    include: {
+                        driver: { include: { vehicles: true } },
+                        customer: true
+                    }
+                })
+            );
+            
+            if (oldDriverId && oldDriverId !== driverId) {
+                updates.push(
+                    prisma.driver.update({
+                        where: { id: oldDriverId },
+                        data: { status: 'ONLINE' }
+                    })
+                );
+            }
+            
+            if (driverId && oldDriverId !== driverId) {
+                updates.push(
+                    prisma.driver.update({
+                        where: { id: driverId },
+                        data: { status: 'BUSY' }
+                    })
+                );
+            }
+            
+            const results = await prisma.$transaction(updates);
+            updatedJob = results[0];
+        } else if ((status === 'COMPLETED' || status === 'CANCELLED' || status === 'NO_SHOW') && updateData.driverId) {
             const [job, driver] = await prisma.$transaction([
                 prisma.job.update({
                     where: { id: jobId },
