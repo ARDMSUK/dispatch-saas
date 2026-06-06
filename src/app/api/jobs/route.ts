@@ -69,7 +69,7 @@ export async function GET(req: Request) {
                 isReturn: true,
                 waitingTime: true,
                 emergencyActive: true,
-                createdAt: true,
+                bookedAt: true,
                 updatedAt: true,
                 paymentStatus: true,
                 paymentLink: true,
@@ -131,7 +131,7 @@ export async function GET(req: Request) {
             paymentLink: j.paymentLink,
             paymentProvider: j.paymentProvider,
             paymentReferenceId: j.paymentReferenceId,
-            createdAt: j.createdAt.toISOString(),
+            createdAt: j.bookedAt.toISOString(),
             updatedAt: j.updatedAt.toISOString(),
             driver: j.driver ? {
                 id: j.driver.id,
