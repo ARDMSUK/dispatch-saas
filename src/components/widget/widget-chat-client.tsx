@@ -195,7 +195,7 @@ export default function WidgetChatClient({ apiKey, color = '#1d4ed8' }: WidgetCh
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-sm text-slate-900 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-700 border border-slate-200"
+                        className="flex-1 bg-slate-100 rounded-full px-4 py-2 text-sm text-slate-900 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500 border border-slate-200"
                     />
                     <button
                         type="submit"

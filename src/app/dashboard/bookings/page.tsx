@@ -33,9 +33,9 @@ export default function BookingsPage() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'PENDING': return 'bg-zinc-500 hover:bg-zinc-600 text-slate-900';
-            case 'DISPATCHED': return 'bg-blue-700 hover:bg-blue-800 text-black';
-            case 'EN_ROUTE': return 'bg-blue-500 hover:bg-blue-600 text-slate-900';
-            case 'ARRIVED': return 'bg-blue-600 hover:bg-blue-700 text-slate-900';
+            case 'DISPATCHED': return 'bg-amber-500 hover:bg-amber-600 text-black';
+            case 'EN_ROUTE': return 'bg-blue-500 hover:bg-amber-400 text-slate-900';
+            case 'ARRIVED': return 'bg-amber-400 hover:bg-amber-500 text-slate-900';
             case 'POB': return 'bg-purple-500 hover:bg-purple-600 text-slate-900';
             case 'COMPLETED': return 'bg-emerald-500 hover:bg-emerald-600 text-slate-900';
             case 'CANCELLED': return 'bg-red-500 hover:bg-red-600 text-slate-900';
@@ -112,7 +112,7 @@ export default function BookingsPage() {
                                                 <div className="text-sm text-slate-600 line-clamp-2">{job.pickupAddress}</div>
                                             </div>
                                             <div className="flex gap-2">
-                                                <MapPin className="h-4 w-4 text-blue-700 shrink-0 mt-0.5" />
+                                                <MapPin className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                                                 <div className="text-sm text-slate-600 line-clamp-2">{job.dropoffAddress}</div>
                                             </div>
                                         </div>
@@ -122,7 +122,7 @@ export default function BookingsPage() {
                                             {job.status.replace('_', ' ')}
                                         </Badge>
                                         {job.returnBooking && (
-                                            <Badge variant="outline" className="mt-2 text-[10px] border-blue-700/30 text-blue-600 bg-blue-700/5 block w-fit">
+                                            <Badge variant="outline" className="mt-2 text-[10px] border-amber-500/30 text-amber-400 bg-amber-500/5 block w-fit">
                                                 Return Trip
                                             </Badge>
                                         )}
@@ -140,7 +140,7 @@ export default function BookingsPage() {
                                                 </div>
                                             ) : job.preAssignedDriver ? (
                                                 <div className="flex items-center gap-2">
-                                                    <div className="h-6 w-6 rounded-full bg-blue-700/20 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
+                                                    <div className="h-6 w-6 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center text-xs font-bold shrink-0">
                                                         {job.preAssignedDriver.callsign?.substring(0, 2)}
                                                     </div>
                                                     <div className="text-sm text-slate-500 max-w-[120px] truncate italic">
@@ -165,7 +165,7 @@ export default function BookingsPage() {
                                                         return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1.5 py-0.5 text-[9px] font-extrabold rounded-sm uppercase">CARD UNPAID</Badge>;
                                                     }
                                                     if (job.paymentType === 'IN_CAR_TERMINAL') {
-                                                        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">TERMINAL</Badge>;
+                                                        return <Badge className="bg-blue-100 text-amber-500 hover:bg-blue-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">TERMINAL</Badge>;
                                                     }
                                                     if (job.paymentType === 'ACCOUNT') {
                                                         return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-none px-1.5 py-0.5 text-[9px] font-bold rounded-sm uppercase">ACCOUNT</Badge>;

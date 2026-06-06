@@ -160,7 +160,7 @@ export default function VehiclesPage() {
         if (type === 'Estate') return 'border-blue-500 text-blue-500';
         if (type === 'Executive') return 'border-emerald-500 text-emerald-500';
         if (type.includes('MPV')) return 'border-purple-500 text-purple-500';
-        if (type === 'Minibus' || type === 'Coach') return 'border-blue-700 text-blue-700';
+        if (type === 'Minibus' || type === 'Coach') return 'border-amber-500 text-amber-500';
         return 'border-zinc-500 text-slate-400';
     };
 

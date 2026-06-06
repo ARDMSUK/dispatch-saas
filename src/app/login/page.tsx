@@ -94,7 +94,7 @@ export default function LoginPage() {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <label className="text-sm font-bold text-slate-700">Password</label>
-                                        <a href="/forgot-password" className="text-xs font-semibold text-blue-600 hover:text-blue-700">Forgot password?</a>
+                                        <a href="/forgot-password" className="text-xs font-semibold text-amber-400 hover:text-amber-500">Forgot password?</a>
                                     </div>
                                     <Input
                                         type="password"
@@ -108,12 +108,12 @@ export default function LoginPage() {
                         ) : (
                             <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 bg-blue-50 p-6 rounded-2xl border border-blue-100">
                                 <label className="text-sm font-bold text-blue-900">Authenticator Code (2FA)</label>
-                                <p className="text-xs text-blue-700 mb-2 font-medium">Please open your Authenticator app and enter the 6-digit code.</p>
+                                <p className="text-xs text-amber-500 mb-2 font-medium">Please open your Authenticator app and enter the 6-digit code.</p>
                                 <Input
                                     {...register("twoFactorToken")}
                                     placeholder="000111"
                                     maxLength={6}
-                                    className="bg-white border-blue-200 text-blue-900 text-center text-3xl tracking-[0.5em] focus:ring-blue-600 focus:border-blue-600 h-16 font-mono font-bold shadow-sm"
+                                    className="bg-white border-blue-200 text-blue-900 text-center text-3xl tracking-[0.5em] focus:ring-amber-400 focus:border-amber-400 h-16 font-mono font-bold shadow-sm"
                                 />
                                 {errors.twoFactorToken && <p className="text-xs text-red-500 font-medium">{errors.twoFactorToken.message}</p>}
                             </div>

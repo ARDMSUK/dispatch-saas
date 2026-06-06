@@ -129,7 +129,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                     <Button onClick={handleImpersonateAndEdit} variant="outline" className="border-slate-300">
                         <Layers className="w-4 h-4 mr-2" /> Edit Dispatch Settings
                     </Button>
-                    <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-500 min-w-[150px]">
+                    <Button onClick={handleSave} disabled={saving} className="bg-amber-400 hover:bg-blue-500 min-w-[150px]">
                         {saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
                     </Button>
                 </div>
@@ -196,7 +196,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                             </div>
 
                             <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-blue-600 uppercase tracking-wider border-b pb-2">Stripe</h3>
+                                <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider border-b pb-2">Stripe</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Secret Key</label>
@@ -330,14 +330,14 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                                 checked={isPlanGranted || isManuallyGranted}
                                                 disabled={isPlanGranted}
                                                 onChange={handleCheckboxChange}
-                                                className="w-4 h-4 mt-0.5 accent-blue-600 cursor-pointer disabled:opacity-50"
+                                                className="w-4 h-4 mt-0.5 accent-amber-400 cursor-pointer disabled:opacity-50"
                                             />
                                             <div className="space-y-1">
                                                 <label htmlFor={mod.stateField} className="text-sm font-medium cursor-pointer">
                                                     {mod.label}
                                                 </label>
                                                 {isPlanGranted ? (
-                                                    <p className="text-xs text-blue-600 font-medium">Included in Active Plan</p>
+                                                    <p className="text-xs text-amber-400 font-medium">Included in Active Plan</p>
                                                 ) : (
                                                     <p className="text-xs text-slate-500">Custom Toggle</p>
                                                 )}

@@ -93,7 +93,7 @@ export default function B2BBookings() {
         switch (status) {
             case "PENDING":
             case "UNASSIGNED": return "bg-zinc-500/20 text-slate-500 border-zinc-500/50";
-            case "DISPATCHED": return "bg-blue-500/20 text-blue-600 border-blue-500/50";
+            case "DISPATCHED": return "bg-blue-500/20 text-amber-400 border-blue-500/50";
             case "EN_ROUTE": return "bg-purple-500/20 text-purple-400 border-purple-500/50";
             case "ARRIVED": return "bg-orange-500/20 text-orange-400 border-orange-500/50";
             case "POB": return "bg-emerald-500/20 text-emerald-600 border-emerald-500/50";

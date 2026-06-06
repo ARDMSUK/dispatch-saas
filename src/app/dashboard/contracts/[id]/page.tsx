@@ -92,7 +92,7 @@ export default function ContractDetailPage() {
                                         <CardTitle className="text-lg text-slate-800 line-clamp-1">{route.name}</CardTitle>
                                     </div>
                                     <div className="flex gap-2 mt-2">
-                                        {route.requiresWav && <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded uppercase">WAV</span>}
+                                        {route.requiresWav && <span className="text-[10px] font-bold bg-blue-100 text-amber-600 px-2 py-0.5 rounded uppercase">WAV</span>}
                                         {route.requiresPa && <span className="text-[10px] font-bold bg-purple-100 text-purple-800 px-2 py-0.5 rounded uppercase">PA REQ</span>}
                                     </div>
                                 </CardHeader>

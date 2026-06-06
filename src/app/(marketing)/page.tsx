@@ -88,7 +88,7 @@ export default async function CorporateHomePage() {
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="h-14 w-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                            <div className="h-14 w-14 bg-blue-50 text-amber-400 rounded-2xl flex items-center justify-center mb-6">
                                 <Zap className="h-7 w-7" />
                             </div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-3">True Auto-Dispatch</h3>

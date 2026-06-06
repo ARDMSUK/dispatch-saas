@@ -196,7 +196,7 @@ export default function PassengerAssistantsPage() {
 
                 <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-700 hover:bg-blue-800 text-white shadow-md">
+                        <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-md">
                             <Plus className="mr-2 h-4 w-4" /> Add Assistant
                         </Button>
                     </DialogTrigger>

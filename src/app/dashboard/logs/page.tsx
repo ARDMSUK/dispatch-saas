@@ -71,7 +71,7 @@ export default function LogsPage() {
             case "ANSWERED":
                 return <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">Answered</Badge>;
             case "RINGING":
-                return <Badge className="bg-blue-50 text-blue-700 border border-blue-200 animate-pulse">Ringing</Badge>;
+                return <Badge className="bg-blue-50 text-amber-500 border border-blue-200 animate-pulse">Ringing</Badge>;
             default:
                 return <Badge className="bg-slate-50 text-slate-700 border border-slate-200">Dismissed</Badge>;
         }
@@ -84,7 +84,7 @@ export default function LogsPage() {
             case "Driver Profile":
                 return "bg-amber-50 text-amber-700 border border-amber-200";
             case "Vehicle Record":
-                return "bg-blue-50 text-blue-700 border border-blue-200";
+                return "bg-blue-50 text-amber-500 border border-blue-200";
             case "Pricing Zone":
                 return "bg-emerald-50 text-emerald-700 border border-emerald-200";
             case "Contract Run":

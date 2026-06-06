@@ -26,7 +26,7 @@ export default function MockupTablePage() {
             <div className="flex-1 border-r border-slate-200 bg-white h-full relative z-10 flex flex-col">
                 <div className="flex items-center gap-6 p-4 border-b border-slate-200 bg-slate-50">
                     <div className="flex gap-2">
-                        <Button variant="default" className="bg-blue-600 hover:bg-blue-700 text-xs font-bold shadow-sm h-8">DISPATCH (1)</Button>
+                        <Button variant="default" className="bg-amber-400 hover:bg-amber-500 text-xs font-bold shadow-sm h-8">DISPATCH (1)</Button>
                         <Button variant="secondary" className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold h-8">PRE-BOOKED (4)</Button>
                         <Button variant="secondary" className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold h-8">COMPLETED (3)</Button>
                     </div>
@@ -52,10 +52,10 @@ export default function MockupTablePage() {
                                 {MOCK_JOBS.map((job, idx) => (
                                     <tr key={idx} className="border-b border-slate-100 hover:bg-blue-50/50 transition-colors cursor-pointer group">
                                         <td className="py-2.5 px-3 font-bold text-slate-900">{job.time}</td>
-                                        <td className="py-2.5 px-3 font-mono font-bold text-blue-700">{job.driver || '-'}</td>
+                                        <td className="py-2.5 px-3 font-mono font-bold text-amber-500">{job.driver || '-'}</td>
                                         <td className="py-2.5 px-3 text-slate-600 font-medium">{job.phone}</td>
                                         <td className="py-2.5 px-3">
-                                            <span className="bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded border border-blue-200">{job.fare}</span>
+                                            <span className="bg-blue-100 text-amber-600 font-bold px-1.5 py-0.5 rounded border border-blue-200">{job.fare}</span>
                                         </td>
                                         <td className="py-2.5 px-3 text-slate-800 font-medium truncate max-w-[200px]">{job.pickup}</td>
                                         <td className="py-2.5 px-3 text-slate-600 truncate max-w-[200px]">{job.dest}</td>
