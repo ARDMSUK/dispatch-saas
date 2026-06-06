@@ -249,7 +249,7 @@ export function LocationInput({
             </div>
             
             {open && (suggestions.length > 0 || filteredFrequent.length > 0 || customSuggestions.length > 0) && (
-                <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 dark:bg-[#1e1e24] border border-slate-200 dark:border-white/10 shadow-2xl rounded-md overflow-hidden">
+                <div className="absolute top-[calc(100%+4px)] left-0 md:left-[-104px] w-full md:w-[410px] z-[10000] bg-slate-100 dark:bg-[#1e1e24] border border-slate-200 dark:border-white/10 shadow-2xl rounded-md overflow-hidden">
                     <Command shouldFilter={false} className="bg-slate-100 dark:bg-[#1e1e24] w-full max-h-80 overflow-y-auto overflow-x-hidden">
                         <CommandList>
                             {/* FREQUENT LOCATIONS */}
@@ -260,7 +260,7 @@ export function LocationInput({
                                             key={`freq-${i}`}
                                             value={item.address}
                                             onSelect={() => handleFrequentSelect(item.address)}
-                                            className="cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-emerald-500/10 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 mb-1 rounded-sm border border-emerald-500/20"
+                                            className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white dark:data-[selected=true]:bg-white/10 cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-emerald-500/10 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 mb-1 rounded-sm border border-emerald-500/20"
                                         >
                                             <MapPin className="mr-2 h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                                             <span className="font-medium truncate">{item.address}</span>
@@ -278,7 +278,7 @@ export function LocationInput({
                                             key={item.id}
                                             value={item.label}
                                             onSelect={() => handleCustomSelect(item)}
-                                            className="cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-indigo-600/10 hover:bg-indigo-600/20 dark:hover:bg-blue-500/20 mb-1 rounded-sm border border-indigo-600/20 dark:border-blue-500/30"
+                                            className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white dark:data-[selected=true]:bg-white/10 cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-indigo-600/10 hover:bg-indigo-600/20 dark:hover:bg-blue-500/20 mb-1 rounded-sm border border-indigo-600/20 dark:border-blue-500/30"
                                         >
                                             <Plane className="mr-2 h-4 w-4 text-indigo-600 dark:text-blue-400" />
                                             <span className="font-bold">{item.label}</span>
@@ -295,7 +295,7 @@ export function LocationInput({
                                             key={`sugg-${i}`}
                                             value={item.label}
                                             onSelect={() => handleSelect(item)}
-                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-indigo-600 dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
+                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-white dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
                                         >
                                             <MapPin className="mr-2 h-4 w-4 opacity-50 dark:opacity-70" />
                                             <span className="truncate">

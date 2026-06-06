@@ -1005,7 +1005,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         </div>
                     </div>
 
-                    {/* PAX, LUG, VEH on the same line */}
+                    {/* PAX, LUG on the same line */}
                     <div className="flex items-center gap-3 pl-6 md:pl-24">
                         {/* PAX */}
                         <div className="flex items-center gap-1.5 shrink-0">
@@ -1034,12 +1034,14 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                                 ))}
                             </select>
                         </div>
+                    </div>
 
-                        {/* Veh */}
-                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                            <label className="text-xs font-bold text-slate-900 shrink-0">VEH:</label>
+                    {/* VEH as its own full-width row */}
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm font-semibold text-slate-900 w-24 shrink-0">Vehicle:</label>
+                        <div className="relative flex-1">
                             <select
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2 px-2 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 appearance-none"
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 font-medium"
                                 value={vehicleType}
                                 onChange={e => {
                                     const newVal = e.target.value;
