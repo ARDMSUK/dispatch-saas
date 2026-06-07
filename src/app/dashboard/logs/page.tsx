@@ -238,16 +238,14 @@ export default function LogsPage() {
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {(call.recordingUrl || call.transcript) && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="h-8 border-slate-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 mx-auto"
-                                                            onClick={() => setSelectedCall(call)}
-                                                        >
-                                                            <Volume2 className="h-3.5 w-3.5" /> Details
-                                                        </Button>
-                                                    )}
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 border-slate-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 flex items-center gap-1 mx-auto"
+                                                        onClick={() => setSelectedCall(call)}
+                                                    >
+                                                        <Volume2 className="h-3.5 w-3.5" /> Details
+                                                    </Button>
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -272,25 +270,44 @@ export default function LogsPage() {
                                 <span>Duration: {selectedCall.duration ? `${selectedCall.duration}s` : "N/A"}</span>
                             </div>
 
-                            {selectedCall.recordingUrl && (
+                            {selectedCall.recordingUrl ? (
                                 <div className="space-y-2">
                                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Audio Recording</h4>
                                     <audio controls className="w-full h-10 border rounded bg-slate-50" src={selectedCall.recordingUrl} />
                                 </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Audio Recording</h4>
+                                    <div className="p-3 bg-slate-50 border border-slate-200 rounded text-center">
+                                        <p className="text-xs text-slate-500 italic">No audio recording available for this call</p>
+                                    </div>
+                                </div>
                             )}
 
-                            {selectedCall.summary && (
+                            {selectedCall.summary ? (
                                 <div className="space-y-1 bg-indigo-50/50 p-3 rounded border border-indigo-100/50">
                                     <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-700">AI Call Summary</h4>
                                     <p className="text-sm text-slate-700 leading-relaxed font-sans">{selectedCall.summary}</p>
                                 </div>
+                            ) : (
+                                <div className="space-y-1 bg-slate-50/50 p-3 rounded border border-slate-200/50">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">AI Call Summary</h4>
+                                    <p className="text-xs text-slate-500 italic">No summary available</p>
+                                </div>
                             )}
 
-                            {selectedCall.transcript && (
+                            {selectedCall.transcript ? (
                                 <div className="space-y-1">
                                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Call Transcript</h4>
                                     <div className="border border-slate-200 rounded p-3 text-xs bg-slate-50/50 leading-relaxed max-h-[180px] overflow-y-auto font-mono whitespace-pre-line text-slate-600">
                                         {selectedCall.transcript}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-1">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Call Transcript</h4>
+                                    <div className="border border-slate-200 border-dashed rounded p-3 text-center bg-slate-50/20">
+                                        <p className="text-xs text-slate-500 italic">No transcript available</p>
                                     </div>
                                 </div>
                             )}
