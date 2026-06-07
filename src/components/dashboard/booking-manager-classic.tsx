@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, UserX, Send, Copy } from "lucide-react";
+import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, UserX, Send, Copy, Volume2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
@@ -51,6 +51,18 @@ interface Job {
     driverPaymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
     createdAt: string;
     updatedAt: string;
+    bookedBy?: { name: string | null; email: string } | null;
+    calls?: Array<{
+        id: string;
+        phone: string;
+        status: string;
+        recordingUrl: string | null;
+        duration: number | null;
+        createdAt: string;
+        answeredByExt: string | null;
+        summary: string | null;
+        transcript: string | null;
+    }>;
 }
 
 
@@ -1091,8 +1103,21 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                             <div className="space-y-3">
                                 <h4 className="text-[10px] uppercase font-bold text-slate-400 border-b pb-1">System Audit & Status History</h4>
                                 <div className="grid grid-cols-2 gap-4 text-xs text-slate-500">
-                                    <p>Created: {new Date(selectedDetailsJob.createdAt).toLocaleString()}</p>
-                                    <p>Last Activity: {new Date(selectedDetailsJob.updatedAt).toLocaleString()}</p>
+                                    <div>
+                                        <span className="font-semibold text-slate-700">Created:</span>{' '}
+                                        {new Date(selectedDetailsJob.createdAt).toLocaleString()}
+                                        {selectedDetailsJob.bookedBy ? (
+                                            <span className="block text-slate-400 mt-0.5">
+                                                by {selectedDetailsJob.bookedBy.name || selectedDetailsJob.bookedBy.email}
+                                            </span>
+                                        ) : (
+                                            <span className="block text-slate-400 mt-0.5">by System / Web Booker</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold text-slate-700">Last Activity:</span>{' '}
+                                        {new Date(selectedDetailsJob.updatedAt).toLocaleString()}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2 mt-2">
@@ -1115,6 +1140,63 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                         </div>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* Related Call Recordings */}
+                            <div className="space-y-3">
+                                <h4 className="text-[10px] uppercase font-bold text-slate-400 border-b pb-1">Related Call Recordings & Transcripts</h4>
+                                {selectedDetailsJob.calls && selectedDetailsJob.calls.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {selectedDetailsJob.calls.map((call: any, idx: number) => (
+                                            <div key={idx} className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                                                <div className="flex justify-between items-center text-xs text-slate-500 font-mono">
+                                                    <span className="flex items-center gap-1">
+                                                        <Phone className="h-3 w-3 text-slate-400" /> {call.phone}
+                                                    </span>
+                                                    <span>{new Date(call.createdAt).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <div>
+                                                        <span className="font-semibold text-slate-700">Status:</span>{' '}
+                                                        <span className={call.status === 'ANSWERED' ? 'text-emerald-600 font-bold' : 'text-slate-500'}>
+                                                            {call.status}
+                                                        </span>
+                                                        {call.answeredByExt && (
+                                                            <span className="text-slate-400 ml-2">Ext: {call.answeredByExt}</span>
+                                                        )}
+                                                    </div>
+                                                    {call.duration && (
+                                                        <span className="font-mono text-slate-400">{call.duration}s</span>
+                                                    )}
+                                                </div>
+                                                {call.recordingUrl && (
+                                                    <div className="space-y-1 pt-1">
+                                                        <h5 className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
+                                                            <Volume2 className="h-3 w-3" /> Audio Recording
+                                                        </h5>
+                                                        <audio controls className="w-full h-8 border rounded bg-white" src={call.recordingUrl} />
+                                                    </div>
+                                                )}
+                                                {call.summary && (
+                                                    <div className="space-y-0.5 bg-indigo-50/50 p-2.5 rounded border border-indigo-100/50">
+                                                        <h5 className="text-[10px] font-bold text-indigo-700 uppercase">AI Summary</h5>
+                                                        <p className="text-xs text-slate-700 leading-relaxed font-sans">{call.summary}</p>
+                                                    </div>
+                                                )}
+                                                {call.transcript && (
+                                                    <div className="space-y-1">
+                                                        <h5 className="text-[10px] font-bold text-slate-400 uppercase">Call Transcript</h5>
+                                                        <div className="border border-slate-200 rounded p-2 text-[10px] bg-white leading-relaxed max-h-[100px] overflow-y-auto font-mono whitespace-pre-line text-slate-600">
+                                                            {call.transcript}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-slate-400 italic">No call records associated with this booking.</p>
+                                )}
                             </div>
                         </div>
                     )}

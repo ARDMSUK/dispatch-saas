@@ -81,6 +81,12 @@ export async function GET(req: Request) {
                         phone: true
                     }
                 },
+                bookedBy: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
+                },
                 driver: {
                     select: {
                         id: true,
@@ -104,7 +110,9 @@ export async function GET(req: Request) {
                         recordingUrl: true,
                         duration: true,
                         createdAt: true,
-                        answeredByExt: true
+                        answeredByExt: true,
+                        summary: true,
+                        transcript: true
                     }
                 }
             },
@@ -143,6 +151,10 @@ export async function GET(req: Request) {
                 id: j.preAssignedDriver.id,
                 name: j.preAssignedDriver.name,
                 callsign: j.preAssignedDriver.callsign
+            } : null,
+            bookedBy: j.bookedBy ? {
+                name: j.bookedBy.name,
+                email: j.bookedBy.email
             } : null,
             passengers: j.passengers,
             luggage: j.luggage,
