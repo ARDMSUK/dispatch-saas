@@ -97,6 +97,34 @@ export const EmailService = {
         return this.sendEmail(to, subject, html, companyName, replyTo);
     },
 
+    async sendPaymentLink(booking: any, orgSettings?: any) {
+        const companyName = orgSettings?.name || 'CABAI System';
+        const replyTo = orgSettings?.email;
+        const subject = `Payment Request - Booking #${booking.id.toString().padStart(6, '0')}`;
+        
+        // Inline template for simplicity since it's just a button link
+        const fareFormatted = booking.fare ? `£${Number(booking.fare).toFixed(2)}` : 'your fare';
+        const html = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333;">Payment Request from ${companyName}</h2>
+                <p>Please click the button below to securely pay for your recent booking #${booking.id} (${fareFormatted}).</p>
+                <div style="margin: 30px 0;">
+                    <a href="${booking.paymentLink}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Pay Now</a>
+                </div>
+                <p style="color: #666; font-size: 14px;">Or use this link: <a href="${booking.paymentLink}">${booking.paymentLink}</a></p>
+            </div>
+        `;
+
+        const to = booking.passengerEmail || booking.customer?.email || booking.email;
+
+        if (!to) {
+            console.warn(`[EmailService] No email address found for payment link for booking #${booking.id}`);
+            return { success: false, error: 'No email address found' };
+        }
+
+        return this.sendEmail(to, subject, html, companyName, replyTo);
+    },
+
     async sendEmail(to: string, subject: string, html: string, companyName: string = 'CABAI System', replyTo?: string) {
         if (RESEND_API_KEY) {
             // Real Sending Logic

@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'CABAI Taxi and Fleet Dispatch System',
     start_url: '/dashboard',
     display: 'standalone',
-    background_color: '#000000',
-    theme_color: '#000000',
+    background_color: '#ffffff',
+    theme_color: '#ffffff',
     icons: [
       {
         src: '/icons/icon-192x192.png',

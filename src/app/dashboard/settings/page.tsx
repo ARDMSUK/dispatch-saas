@@ -1064,10 +1064,10 @@ export default function SettingsPage() {
                 </p>
             </div>
 
-            {/* Sticky Save Bar */}
-            <div className="sticky bottom-0 bg-background/95 border-t border-border -mx-6 px-6 py-4 flex justify-between items-center z-40 backdrop-blur-sm shadow-lg mt-6">
+            {/* Save Bar */}
+            <div className="bg-background border-t border-border mt-8 pt-6 flex justify-between items-center">
                 <span className="text-sm text-muted-foreground font-medium hidden sm:inline">
-                    You have unsaved configuration changes.
+                    Make sure to save your changes after updating any fields above.
                 </span>
                 <span className="text-sm text-muted-foreground font-medium inline sm:hidden">
                     Settings Panel
@@ -1075,7 +1075,7 @@ export default function SettingsPage() {
                 <Button
                     onClick={handleSave}
                     disabled={saving}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 w-full sm:w-auto shadow-md transition-all duration-200"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 w-full sm:w-auto shadow-sm"
                 >
                     {saving ? 'Saving...' : 'Save Settings'}
                 </Button>

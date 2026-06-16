@@ -86,7 +86,7 @@ export default function DriverLoginPage() {
 
             {/* Header */}
             <div className="flex flex-col items-center justify-center pt-10 pb-6 space-y-4">
-                <img src="/logo-full.png" alt="CabAI Driver Portal" className="h-16 object-contain" />
+                <img src="/logo-full.png" alt="CabAI Driver Portal" className="h-16 object-contain bg-white rounded-lg p-2 shadow-sm" />
                 <div className="text-center">
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Driver Portal</h1>
                     <p className="text-slate-400 text-sm">Secure Dispatch System</p>
