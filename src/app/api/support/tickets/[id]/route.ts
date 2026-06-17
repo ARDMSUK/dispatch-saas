@@ -8,10 +8,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
         if (!session?.user?.tenantId) {
             return new NextResponse('Unauthorized', { status: 401 });
         }
+        const resolvedParams = await params;
+        const ticketId = resolvedParams.id;
 
         const ticket = await prisma.ticket.findUnique({
             where: {
-                id: params.id,
+                id: ticketId,
                 tenantId: session.user.tenantId
             },
             include: {

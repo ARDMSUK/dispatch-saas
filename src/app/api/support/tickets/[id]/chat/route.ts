@@ -154,8 +154,8 @@ Rules:
             },
         });
 
-        // 5. Send the stream back directly to the client (using text stream format)
-        return result.toTextStreamResponse();
+        // 5. Send the stream back directly to the client (using correct UI Message stream format)
+        return result.toUIMessageStreamResponse();
 
     } catch (error: any) {
         console.error("AI Chat Route Error:", error);

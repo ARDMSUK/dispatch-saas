@@ -18,10 +18,8 @@ interface ChatProps {
 }
 
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
-    // Vercel AI SDK hook. Automatically calls POST /api/support/tickets/:id/chat
     const { messages, input, handleInputChange, handleSubmit, isLoading, reload, setMessages } = useChat({
         api: `/api/support/tickets/${ticketId}/chat`,
-        streamProtocol: 'text',
         onError: (err) => {
             console.error("Chat Error:", err);
             // We could also show a toast here if we wanted

@@ -8,9 +8,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
         if (session?.user?.role !== 'SUPER_ADMIN') {
             return new NextResponse('Unauthorized', { status: 401 });
         }
+        const resolvedParams = await params;
+        const ticketId = resolvedParams.id;
 
         const ticket = await prisma.ticket.findUnique({
-            where: { id: params.id },
+            where: { id: ticketId },
             include: {
                 tenant: { select: { name: true, slug: true } },
                 messages: {
@@ -42,11 +44,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
         const { content } = body;
 
         if (!content) return new NextResponse('Missing content', { status: 400 });
+        const resolvedParams = await params;
+        const ticketId = resolvedParams.id;
 
         // Create the message from the admin
         const message = await prisma.ticketMessage.create({
             data: {
-                ticketId: params.id,
+                ticketId: ticketId,
                 senderType: 'SYSTEM_ADMIN',
                 senderId: session.user.id,
                 content
@@ -55,7 +59,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
         // Update ticket status to answered if it was pending
         await prisma.ticket.update({
-            where: { id: params.id },
+            where: { id: ticketId },
             data: { status: 'ANSWERED' }
         });
 
@@ -77,9 +81,11 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         const { status } = body;
 
         if (!status) return new NextResponse('Missing status', { status: 400 });
+        const resolvedParams = await params;
+        const ticketId = resolvedParams.id;
 
         const ticket = await prisma.ticket.update({
-            where: { id: params.id },
+            where: { id: ticketId },
             data: { status }
         });
 
