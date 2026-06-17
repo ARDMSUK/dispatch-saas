@@ -77,7 +77,31 @@ Rules:
 3. Never invent features that don't exist.
 `;
 
-        // 4. Stream the text from OpenAI
+        // 4. Check for OpenAI API Key before attempting to stream
+        if (!process.env.OPENAI_API_KEY) {
+            console.error("OPENAI_API_KEY is missing!");
+            // Stream a friendly error message to the chat window instead of crashing
+            const stream = new ReadableStream({
+                start(controller) {
+                    const errorMsg = "SYSTEM ALERT: The OpenAI API Key is missing. Please add OPENAI_API_KEY to your Vercel project environment variables and redeploy so I can start answering questions! (I am unable to process your request until this is fixed).";
+                    controller.enqueue(new TextEncoder().encode(errorMsg));
+                    controller.close();
+                }
+            });
+            
+            // Save the error message so the chat isn't permanently stuck pending
+            await prisma.ticketMessage.create({
+                data: {
+                    ticketId: ticketId,
+                    senderType: 'AI_AGENT',
+                    content: "SYSTEM ALERT: The OpenAI API Key is missing."
+                }
+            });
+            
+            return new Response(stream, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+        }
+
+        // 5. Stream the text from OpenAI
         const result = streamText({
             model: openai('gpt-4o-mini'),
             system: systemPrompt,
@@ -117,8 +141,8 @@ Rules:
             },
         });
 
-        // 5. Send the stream back directly to the client
-        return result.toDataStreamResponse();
+        // 6. Send the text stream back directly to the client (ai v6 uses toTextStreamResponse)
+        return result.toTextStreamResponse();
 
     } catch (error) {
         console.error("AI Chat Route Error:", error);
