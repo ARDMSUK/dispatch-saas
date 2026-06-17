@@ -58,23 +58,49 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             }
         }
 
-        // 3. Define the System Prompt for the AI
+        // 3. Fetch Dynamic Knowledge Base Rules
+        const dynamicRules = await prisma.aiKnowledgeRule.findMany({
+            where: { isActive: true }
+        });
+        const rulesText = dynamicRules.length > 0 
+            ? dynamicRules.map(r => `- ${r.topic}: ${r.content}`).join('\\n')
+            : "No dynamic rules configured.";
+
+        // Current UK time for working hours logic
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-GB', { 
+            timeZone: 'Europe/London', 
+            weekday: 'long', 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+        });
+        const currentUkTime = formatter.format(now);
+
+        // 4. Define the System Prompt for the AI
         const systemPrompt = `
 You are CABAI, the Level 1 Support AI for the Dispatch SaaS platform.
 You are helping a Tenant Administrator or Dispatcher.
 Your goal is to answer their technical or billing questions quickly and politely.
 
-Core Knowledge Base:
+Core Knowledge Base (Dynamic):
+${rulesText}
+
+Fallback Hardcoded Rules (Use only if not contradicted by above):
 - Web Booker: To enable the Web Booker, the user must add a Google Maps API Key in their Dashboard Settings.
 - Pricing Zones: Fixed pricing overrides standard distance calculations. They are configured in the Zones tab.
 - Billing: The system uses Stripe for subscriptions. If their account locks, they must visit the Billing tab to update their card.
 - Cron Jobs: Flight tracking and recurring bookings run automatically in the background.
-- School Contracts: They can be created and managed under the 'Contracts' tab in the dashboard. You can define routes, stops, and assign students.
+
+Operating Hours & Escalation Protocol:
+- The current UK time is ${currentUkTime}.
+- Human live support is available ONLY Monday to Friday, 09:00 to 17:00 UK Time.
+- If the user asks a question you CANNOT answer, or explicitly asks for a human, reply with exactly: "ESCALATING TO HUMAN".
+- IF you escalate, AND the current time is outside of the human live support hours, you MUST append a polite message explaining that our human support team is currently offline and will review their ticket on the next working day.
 
 Rules:
 1. Be concise, professional, and helpful.
-2. If the user asks a question you CANNOT answer with absolute certainty, or if they explicitly ask for a human, reply with exactly the phrase: "ESCALATING TO HUMAN". 
-3. Never invent features that don't exist.
+2. Never invent features that don't exist.
 `;
 
         // 4. Stream the text from OpenAI
@@ -104,8 +130,19 @@ Rules:
                         const { sendEmail, getSupportEscalationEmail } = await import('@/lib/email');
                         const html = getSupportEscalationEmail(ticket.id, ticket.tenant.slug, ticket.subject);
                         await sendEmail("support@cabai.co.uk", `Escalated Ticket [${ticket.id.slice(-8)}] - ${ticket.tenant.slug}`, html);
+                        
+                        // Twilio SMS Notification to Super Admin
+                        if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.SUPPORT_PHONE_NUMBER) {
+                            const twilio = (await import('twilio')).default;
+                            const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+                            await client.messages.create({
+                                body: `URGENT: Support ticket escalated by ${ticket.tenant.name}. Subject: ${ticket.subject}. Ticket ID: ${ticket.id.slice(-8)}`,
+                                from: process.env.TWILIO_FROM_NUMBER || '+447000000000',
+                                to: process.env.SUPPORT_PHONE_NUMBER
+                            });
+                        }
                     } catch (e) {
-                        console.error("Failed to send escalation email:", e);
+                        console.error("Failed to send escalation email/SMS:", e);
                     }
                 } else {
                     // Otherwise mark as answered

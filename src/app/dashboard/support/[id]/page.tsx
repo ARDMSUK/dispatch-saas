@@ -33,7 +33,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             role: msg.senderType === 'TENANT_USER' ? 'user' : 'assistant',
             content: msg.content,
         };
-        if (msg.senderType === 'SYSTEM_ADMIN') payload.name = 'Human Support';
+        if (msg.senderType === 'SYSTEM_ADMIN') payload.name = 'Human_Support';
         else if (msg.senderType === 'AI_AGENT') payload.name = 'CABAI';
         return payload;
     });

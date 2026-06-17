@@ -58,9 +58,9 @@ model Tenant {
   aiMessageCount       Int      @default(0)
   aiMessageLimit       Int      @default(100)
   aiBillingPeriodStart DateTime @default(now())
-  
+
   // Custom Pricing for A La Carte Add-ons
-  customAddonPrices    Json?    // e.g. {"enableWebBooker": 5.00}
+  customAddonPrices Json? // e.g. {"enableWebBooker": 5.00}
 
   // Whatsapp Evolution API State
   whatsappInstanceId     String? // The dynamically generated Evolution API instance name
@@ -146,14 +146,14 @@ model Tenant {
 }
 
 model SaasPlan {
-  id              String  @id @default(cuid())
-  name            String
-  priceMonthly    Float   @default(0)
-  priceAnnually   Float   @default(0)
-  priceWeekly     Float   @default(0)
-  pricePerDriverWeekly Float @default(0)
-  stripeProductId String?
-  stripePriceId   String?
+  id                   String  @id @default(cuid())
+  name                 String
+  priceMonthly         Float   @default(0)
+  priceAnnually        Float   @default(0)
+  priceWeekly          Float   @default(0)
+  pricePerDriverWeekly Float   @default(0)
+  stripeProductId      String?
+  stripePriceId        String?
 
   // Features Unlocked
   incZonePricing     Boolean @default(false)
@@ -205,10 +205,10 @@ model User {
 
   forcePasswordReset Boolean @default(false)
 
-  presenceStatus     String          @default("OFFLINE") // ONLINE, AWAY, BUSY, OFFLINE
+  presenceStatus     String         @default("OFFLINE") // ONLINE, AWAY, BUSY, OFFLINE
   lastPresenceUpdate DateTime?
-  bookedJobs         Job[]           @relation("BookedBy")
-  answeredCalls      IncomingCall[]  @relation("AnsweredBy")
+  bookedJobs         Job[]          @relation("BookedBy")
+  answeredCalls      IncomingCall[] @relation("AnsweredBy")
 
   ticketMessages TicketMessage[]
 
@@ -231,10 +231,10 @@ model Customer {
   accountId String?
   account   Account? @relation(fields: [accountId], references: [id]) // Use proper relation
 
-  tenantId      String
-  tenant        Tenant  @relation(fields: [tenantId], references: [id])
-  jobs          Job[]
-  expoPushToken String?
+  tenantId         String
+  tenant           Tenant  @relation(fields: [tenantId], references: [id])
+  jobs             Job[]
+  expoPushToken    String?
   stripeCustomerId String?
 
   createdAt DateTime @default(now())
@@ -474,8 +474,8 @@ model Job {
   DriverMessage   DriverMessage[]
   calls           IncomingCall[]
 
-  @@map("bookings")
   @@index([tenantId, status, pickupTime])
+  @@map("bookings")
   @@schema("public")
 }
 
@@ -498,9 +498,9 @@ model PricingRule {
 }
 
 model Zone {
-  id          String @id @default(cuid())
+  id          String                                   @id @default(cuid())
   name        String
-  color       String @default("#3b82f6") // Blue
+  color       String                                   @default("#3b82f6") // Blue
   coordinates String // JSON string: [[lat,lng], [lat,lng], ...]
   boundary    Unsupported("geography(Polygon, 4326)")?
 
@@ -569,21 +569,21 @@ model Surcharge {
 }
 
 model IncomingCall {
-  id            String  @id @default(cuid())
+  id            String    @id @default(cuid())
   phone         String // The caller's phone number
-  status        String  @default("RINGING") // RINGING, ANSWERED, DISMISSED
+  status        String    @default("RINGING") // RINGING, ANSWERED, DISMISSED
   answeredByExt String?
   answeredAt    DateTime?
   answeredById  String?
   answeredBy    User?     @relation("AnsweredBy", fields: [answeredById], references: [id])
 
-  recordingUrl  String?
-  duration      Int?
-  transcript    String?  @db.Text
-  summary       String?  @db.Text
+  recordingUrl String?
+  duration     Int?
+  transcript   String? @db.Text
+  summary      String? @db.Text
 
-  bookingId     Int?
-  booking       Job?     @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  bookingId Int?
+  booking   Job? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
@@ -951,5 +951,27 @@ model FlightCache {
 
   @@unique([tenantId, flightNumber, dateString])
   @@map("flight_cache")
+  @@schema("public")
+}
+
+model AiKnowledgeRule {
+  id        String   @id @default(cuid())
+  topic     String
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ai_knowledge_rules")
+  @@schema("public")
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
   @@schema("public")
 }

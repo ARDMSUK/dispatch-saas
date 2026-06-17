@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Shield, Building2, LogOut, LayoutDashboard, CreditCard, Settings, TerminalSquare } from "lucide-react";
+import { Shield, Building2, LogOut, LayoutDashboard, CreditCard, Settings, TerminalSquare, BookOpen, LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminLayout({
@@ -38,9 +38,17 @@ export default async function AdminLayout({
                                 <TerminalSquare className="w-4 h-4 text-slate-500 group-hover:text-slate-400" />
                                 Overview
                             </Link>
-                            <Link href="/admin/tenants" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-50 bg-slate-900 rounded-lg transition-colors border border-slate-800 shadow-sm">
-                                <Building2 className="w-4 h-4 text-blue-400" />
+                            <Link href="/admin/tenants" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-50 hover:bg-slate-900 rounded-lg transition-colors group">
+                                <Building2 className="w-4 h-4 text-slate-500 group-hover:text-blue-400" />
                                 Tenants
+                            </Link>
+                            <Link href="/admin/support" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-50 hover:bg-slate-900 rounded-lg transition-colors group">
+                                <LifeBuoy className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
+                                Support Hub
+                            </Link>
+                            <Link href="/admin/knowledge-base" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-400 hover:text-slate-50 hover:bg-slate-900 rounded-lg transition-colors group">
+                                <BookOpen className="w-4 h-4 text-slate-500 group-hover:text-indigo-400" />
+                                CABAI Knowledge Base
                             </Link>
                         </nav>
                     </div>

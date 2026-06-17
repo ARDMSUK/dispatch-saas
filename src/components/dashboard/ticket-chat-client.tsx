@@ -41,6 +41,33 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
         }
     }, [initialMessages, status, setMessages, reload]);
 
+    // Poll the server for new messages (e.g. from Human Support)
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            if (isLoading) return; // Don't poll while AI is typing
+            try {
+                const res = await fetch(`/api/support/tickets/${ticketId}`);
+                if (!res.ok) return;
+                const ticket = await res.json();
+                
+                // Compare message counts to see if a human replied
+                if (ticket.messages && ticket.messages.length > messages.length) {
+                    const mappedMessages = ticket.messages.map((m: any) => ({
+                        id: String(m.id),
+                        role: m.senderType === 'TENANT_USER' ? 'user' : 'assistant',
+                        content: m.content,
+                        name: m.senderType === 'SYSTEM_ADMIN' ? 'Human_Support' : (m.senderType === 'AI_AGENT' ? 'CABAI' : undefined)
+                    }));
+                    setMessages(mappedMessages);
+                }
+            } catch (err) {
+                console.error("Failed to poll messages:", err);
+            }
+        }, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(interval);
+    }, [ticketId, messages.length, isLoading, setMessages]);
+
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom of chat
