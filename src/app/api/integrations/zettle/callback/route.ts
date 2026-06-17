@@ -24,13 +24,29 @@ export async function GET(req: Request) {
         const clientId = tenant.zettleClientId || process.env.ZETTLE_CLIENT_ID;
         const clientSecret = tenant.zettleClientSecret || process.env.ZETTLE_CLIENT_SECRET;
 
-        let accessToken = `zettle_at_${Math.random().toString(36).substring(7)}`;
-        let refreshToken = `zettle_rt_${Math.random().toString(36).substring(7)}`;
-        let expiryDate = new Date(Date.now() + 3600 * 1000); // 1 hour
+        // Ensure we have required configuration
+        if (!clientId || !clientSecret) {
+            return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Missing_Zettle_Configuration`);
+        }
 
-        const isReal = clientId && !clientId.startsWith('dummy') && !clientId.startsWith('mock') && clientSecret;
+        let accessToken = '';
+        let refreshToken = '';
+        let expiryDate = new Date();
 
-        if (isReal && code !== 'mock_zettle_code') {
+        const isMockAllowed = process.env.NODE_ENV !== 'production' && process.env.ALLOW_MOCK_ZETTLE_OAUTH === 'true';
+        const isMockFlow = code === 'mock_zettle_code' || clientId.startsWith('mock') || clientId.startsWith('dummy');
+
+        if (isMockFlow) {
+            if (isMockAllowed) {
+                // SECURITY WARNING: Never enable mock OAuth in production
+                accessToken = `zettle_at_${Math.random().toString(36).substring(7)}`;
+                refreshToken = `zettle_rt_${Math.random().toString(36).substring(7)}`;
+                expiryDate = new Date(Date.now() + 3600 * 1000); // 1 hour
+            } else {
+                return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Mock_Zettle_Not_Allowed_In_Production`);
+            }
+        } else {
+            // Real OAuth flow
             const tokenRes = await fetch('https://oauth.zettle.com/token', {
                 method: 'POST',
                 headers: {
@@ -38,25 +54,36 @@ export async function GET(req: Request) {
                 },
                 body: new URLSearchParams({
                     grant_type: 'authorization_code',
-                    client_id: clientId!,
-                    client_secret: clientSecret!,
+                    client_id: clientId,
+                    client_secret: clientSecret,
                     code: code,
                     redirect_uri: `${url.origin}/api/integrations/zettle/callback`
                 })
             });
 
             if (!tokenRes.ok) {
-                const errText = await tokenRes.text();
-                console.error("Zettle token exchange failed:", errText);
+                console.error("Zettle token exchange failed, status:", tokenRes.status);
                 return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Token_Exchange_Failed`);
             }
 
             const tokenData = await tokenRes.json();
+            if (!tokenData.access_token || !tokenData.refresh_token) {
+                console.error("Zettle token exchange returned invalid payload");
+                return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Invalid_Token_Payload`);
+            }
+
             accessToken = tokenData.access_token;
             refreshToken = tokenData.refresh_token;
             if (tokenData.expires_in) {
                 expiryDate = new Date(Date.now() + tokenData.expires_in * 1000);
+            } else {
+                expiryDate = new Date(Date.now() + 3600 * 1000);
             }
+        }
+
+        // Final security check before updating tenant
+        if (!accessToken || !refreshToken) {
+            return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Token_Retrieval_Failed`);
         }
 
         await prisma.tenant.update({

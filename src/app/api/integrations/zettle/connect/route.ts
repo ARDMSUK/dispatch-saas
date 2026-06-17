@@ -26,9 +26,16 @@ export async function GET(req: Request) {
             return NextResponse.redirect(`${origin}/dashboard/settings?error=Missing_Zettle_Client_ID`);
         }
 
-        // If client ID is missing or is dummy, redirect directly to our local callback to simulate a successful connection
+        const isMockAllowed = process.env.NODE_ENV !== 'production' && process.env.ALLOW_MOCK_ZETTLE_OAUTH === 'true';
+
+        // If client ID is dummy, redirect directly to our local callback to simulate a successful connection
         if (clientId === 'dummy-zettle-client-id' || clientId.startsWith('mock') || clientId.startsWith('dummy')) {
-            return NextResponse.redirect(`${redirectUri}?code=mock_zettle_code&state=${state}`);
+            if (isMockAllowed) {
+                // SECURITY WARNING: Never enable mock OAuth in production
+                return NextResponse.redirect(`${redirectUri}?code=mock_zettle_code&state=${state}`);
+            } else {
+                return NextResponse.redirect(`${origin}/dashboard/settings?error=Invalid_Client_ID_In_Production`);
+            }
         }
 
         // Redirect to Zettle OAuth page
