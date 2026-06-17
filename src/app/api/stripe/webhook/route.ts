@@ -30,14 +30,32 @@ export async function POST(req: NextRequest) {
                 const session = event.data.object as Stripe.Checkout.Session;
 
                 if (session.metadata?.tenantId) {
+                    const updateData: {
+                        stripeCustomerId: string;
+                        stripeSubscriptionId: string;
+                        subscriptionStatus: string;
+                        subscriptionPlanId?: string;
+                    } = {
+                        stripeCustomerId: session.customer as string,
+                        stripeSubscriptionId: session.subscription as string,
+                        subscriptionStatus: "ACTIVE",
+                    };
+
+                    if (session.metadata.planId) {
+                        const planExists = await prisma.saasPlan.findUnique({
+                            where: { id: session.metadata.planId },
+                        });
+
+                        if (planExists) {
+                            updateData.subscriptionPlanId = session.metadata.planId;
+                        } else {
+                            console.warn(`Webhook Warning: Invalid planId '${session.metadata.planId}' passed for Tenant ${session.metadata.tenantId}. Activating without a specific plan.`);
+                        }
+                    }
+
                     await prisma.tenant.update({
                         where: { id: session.metadata.tenantId },
-                        data: {
-                            stripeCustomerId: session.customer as string,
-                            stripeSubscriptionId: session.subscription as string,
-                            subscriptionStatus: "ACTIVE",
-                            subscriptionPlanId: "TBD", // Ideally mapped from line items if multiple plans exist
-                        },
+                        data: updateData,
                     });
                     console.log(`✅ Activated subscription for Tenant ${session.metadata.tenantId}`);
                 }
