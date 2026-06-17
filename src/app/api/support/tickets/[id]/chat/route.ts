@@ -8,6 +8,7 @@ export const maxDuration = 30;
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        console.log("[DEBUG-SERVER] POST /api/support/tickets/[id]/chat hit!");
         const session = await auth();
 
         if (!session || !session.user) {
@@ -20,6 +21,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
         // Extract the messages from the frontend useChat() hook
         const { messages } = await req.json();
+        console.log("[DEBUG-SERVER] Received payload messages:", JSON.stringify(messages).substring(0, 200));
 
         // 1. Verify ticket ownership
         const ticket = await prisma.ticket.findUnique({
@@ -104,6 +106,7 @@ Rules:
 `;
 
         // 4. Stream the text from OpenAI
+        console.log("[DEBUG-SERVER] Starting streamText from OpenAI...");
         const result = streamText({
             model: openai('gpt-4o-mini'),
             system: systemPrompt,
@@ -155,9 +158,11 @@ Rules:
         });
 
         // 5. Send the stream back directly to the client (using correct UI Message stream format)
+        console.log("[DEBUG-SERVER] Returning toUIMessageStreamResponse()");
         return result.toUIMessageStreamResponse();
 
     } catch (error: any) {
+        console.error("[DEBUG-SERVER] Caught error in route:", error);
         console.error("AI Chat Route Error:", error);
         return new Response(JSON.stringify({ error: error.message, stack: error.stack }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }

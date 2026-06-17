@@ -18,16 +18,20 @@ interface ChatProps {
 }
 
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
+    console.log("[DEBUG] TicketChatClient mounted. TicketID:", ticketId, "Status:", status);
+    console.log("[DEBUG] initialMessages state:", initialMessages);
     // If it's a brand new ticket pending AI review, we withhold the first message from initialMessages
     // so we can use append() to trigger the AI without duplicating the message in the UI.
     const isBrandNewPending = status === 'PENDING_AI_REVIEW' && initialMessages.length === 1 && initialMessages[0].role === 'user';
     const startingMessages = isBrandNewPending ? [] : (initialMessages ? initialMessages.map(m => ({ ...m, id: String(m.id) })) : []);
 
-    const { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages } = useChat({
+    const chatState = useChat
+    console.log("[DEBUG] useChat returned keys:", Object.keys(chatState));
+    const { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages } = chatState;({
         api: `/api/support/tickets/${ticketId}/chat`,
         initialMessages: startingMessages,
         onError: (err) => {
-            console.error("Chat Error:", err);
+            console.error("[DEBUG] Chat Error caught by useChat:", err);
             // We could also show a toast here if we wanted
         }
     });
@@ -37,15 +41,17 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
     // Auto-trigger AI if it's a brand new ticket pending AI review
     useEffect(() => {
         if (!hasTriggeredRef.current && isBrandNewPending) {
+            console.log("[DEBUG] Auto-trigger condition met. Preparing append().");
             hasTriggeredRef.current = true;
             // Delay slightly to ensure UI is mounted and SDK is ready
             setTimeout(() => {
                 const firstMsg = initialMessages[0];
+                console.log("[DEBUG] Before append(), firstMsg:", firstMsg);
                 append({
                     id: String(firstMsg.id),
                     role: 'user',
                     content: firstMsg.content
-                }).catch(err => console.error("Failed to auto-append:", err));
+                }).then(() => console.log("[DEBUG] After append() resolved")).catch(err => console.error("[DEBUG] Failed to auto-append:", err));
             }, 500);
         }
     }, [isBrandNewPending, initialMessages, append]);
@@ -160,7 +166,10 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
 
             <CardFooter className="border-t border-slate-200 bg-white/80 p-4">
                 <form
-                    onSubmit={handleSubmit}
+                    onSubmit={(e) => {
+                        console.log("[DEBUG] form onSubmit triggered. Input:", input, "isLoading:", isLoading);
+                        handleSubmit(e);
+                    }}
                     className="flex w-full items-center space-x-2"
                 >
                     <Input
@@ -175,6 +184,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                         size="icon"
                         disabled={!(input || '').trim() || isLoading || status === 'CLOSED'}
                         className="bg-indigo-600 hover:bg-purple-600 text-black shrink-0"
+                        onClick={() => console.log("[DEBUG] Send button clicked. Disabled state:", !(input || '').trim() || isLoading || status === 'CLOSED')}
                     >
                         <Send className="h-4 w-4" />
                     </Button>
