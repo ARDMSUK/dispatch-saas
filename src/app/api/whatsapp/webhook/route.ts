@@ -75,7 +75,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: true, ignored: true });
             }
 
-            // ---- CABOT AI AGENT INJECTION HERE ----
+            // ---- CABAI AGENT INJECTION HERE ----
             // We ping the LLM to decide what to reply to the passenger
             try {
                 // Fetch or Create session

@@ -27,7 +27,7 @@ export default function SuperAdminSettingsPage() {
                             <input 
                                 type="text" 
                                 className="w-full p-2 border rounded-md" 
-                                defaultValue="Cabot AI SaaS Platform"
+                                defaultValue="CABAI SaaS Platform"
                                 disabled
                             />
                         </div>

@@ -31,23 +31,36 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             return new Response('Ticket not found or unauthorized', { status: 404 });
         }
 
-        // 2. The *latest* message in the array is the one the user just typed. 
-        // We must save it to the database immediately so human admins have a record.
+        // 2. The *latest* message in the array is the one the user just typed (or a reload).
+        // We must save it to the database immediately so human admins have a record,
+        // but only if it doesn't already exist.
         const latestMessage = messages[messages.length - 1];
         if (latestMessage.role === 'user') {
-            await prisma.ticketMessage.create({
-                data: {
-                    ticketId: ticketId,
-                    senderType: 'TENANT_USER',
-                    senderId: session.user.id,
-                    content: latestMessage.content
-                }
-            });
+            // Because useChat might generate custom IDs, we use the message content & ticket to find duplicates for recent messages.
+            // Or, simply check by ID if it matches a cuid length
+            let existingMsg = null;
+            if (latestMessage.id && latestMessage.id.length > 10) {
+                existingMsg = await prisma.ticketMessage.findUnique({
+                    where: { id: latestMessage.id }
+                });
+            }
+            
+            if (!existingMsg) {
+                await prisma.ticketMessage.create({
+                    data: {
+                        id: latestMessage.id && latestMessage.id.length > 10 ? latestMessage.id : undefined,
+                        ticketId: ticketId,
+                        senderType: 'TENANT_USER',
+                        senderId: session.user.id,
+                        content: latestMessage.content
+                    }
+                });
+            }
         }
 
         // 3. Define the System Prompt for the AI
         const systemPrompt = `
-You are Cabot, the Level 1 Support AI for the Dispatch SaaS platform.
+You are CABAI, the Level 1 Support AI for the Dispatch SaaS platform.
 You are helping a Tenant Administrator or Dispatcher.
 Your goal is to answer their technical or billing questions quickly and politely.
 
@@ -56,6 +69,7 @@ Core Knowledge Base:
 - Pricing Zones: Fixed pricing overrides standard distance calculations. They are configured in the Zones tab.
 - Billing: The system uses Stripe for subscriptions. If their account locks, they must visit the Billing tab to update their card.
 - Cron Jobs: Flight tracking and recurring bookings run automatically in the background.
+- School Contracts: They can be created and managed under the 'Contracts' tab in the dashboard. You can define routes, stops, and assign students.
 
 Rules:
 1. Be concise, professional, and helpful.
@@ -85,9 +99,14 @@ Rules:
                         data: { status: 'ESCALATED' }
                     });
 
-                    const { sendEmail, getSupportEscalationEmail } = await import('@/lib/email');
-                    const html = getSupportEscalationEmail(ticket.id, ticket.tenant.slug, ticket.subject);
-                    await sendEmail("support@cabai.co.uk", `Escalated Ticket [${ticket.id.slice(-8)}] - ${ticket.tenant.slug}`, html);
+                    // We wrap the email sending in a try/catch so it doesn't crash the onFinish handler
+                    try {
+                        const { sendEmail, getSupportEscalationEmail } = await import('@/lib/email');
+                        const html = getSupportEscalationEmail(ticket.id, ticket.tenant.slug, ticket.subject);
+                        await sendEmail("support@cabai.co.uk", `Escalated Ticket [${ticket.id.slice(-8)}] - ${ticket.tenant.slug}`, html);
+                    } catch (e) {
+                        console.error("Failed to send escalation email:", e);
+                    }
                 } else {
                     // Otherwise mark as answered
                     await prisma.ticket.update({
@@ -99,7 +118,7 @@ Rules:
         });
 
         // 5. Send the stream back directly to the client
-        return result.toTextStreamResponse();
+        return result.toDataStreamResponse();
 
     } catch (error) {
         console.error("AI Chat Route Error:", error);

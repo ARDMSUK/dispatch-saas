@@ -34,7 +34,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             content: msg.content,
         };
         if (msg.senderType === 'SYSTEM_ADMIN') payload.name = 'Human Support';
-        else if (msg.senderType === 'AI_AGENT') payload.name = 'Cabot AI';
+        else if (msg.senderType === 'AI_AGENT') payload.name = 'CABAI';
         return payload;
     });
 

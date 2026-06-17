@@ -130,7 +130,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                     <Input
                         value={input || ''}
                         onChange={handleInputChange}
-                        placeholder={status === 'ESCALATED' ? "Reply to human support..." : "Ask Cabot AI a question..."}
+                        placeholder={status === 'ESCALATED' ? "Reply to human support..." : "Ask CABAI a question..."}
                         className="flex-1 bg-slate-100 border-slate-300 text-slate-900 focus-visible:ring-indigo-600"
                         disabled={status === 'CLOSED'}
                     />
