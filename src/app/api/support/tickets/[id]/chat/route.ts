@@ -154,11 +154,11 @@ Rules:
             },
         });
 
-        // 5. Send the stream back directly to the client (using correct UI Message stream format)
-        return result.toUIMessageStreamResponse();
+        // 5. Send the stream back directly to the client (using text stream format)
+        return result.toTextStreamResponse();
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("AI Chat Route Error:", error);
-        return new Response('Internal Server Error', { status: 500 });
+        return new Response(JSON.stringify({ error: error.message, stack: error.stack }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 }
