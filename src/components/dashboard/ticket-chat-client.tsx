@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User, Clock, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ChatProps {
     ticketId: string;
@@ -25,9 +25,8 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
     const isBrandNewPending = status === 'PENDING_AI_REVIEW' && initialMessages.length === 1 && initialMessages[0].role === 'user';
     const startingMessages = isBrandNewPending ? [] : (initialMessages ? initialMessages.map(m => ({ ...m, id: String(m.id) })) : []);
 
-    const chatState = useChat
-    console.log("[DEBUG] useChat returned keys:", Object.keys(chatState));
-    const { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages } = chatState;({
+    const [input, setInput] = useState('');
+    const chatState = useChat({
         api: `/api/support/tickets/${ticketId}/chat`,
         initialMessages: startingMessages,
         onError: (err) => {
@@ -35,6 +34,8 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
             // We could also show a toast here if we wanted
         }
     });
+    const { messages, sendMessage, status: chatStatus, setMessages, error } = chatState as any;
+    const isLoading = chatStatus === 'submitted' || chatStatus === 'streaming';
 
     const hasTriggeredRef = useRef(false);
 
@@ -46,15 +47,12 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
             // Delay slightly to ensure UI is mounted and SDK is ready
             setTimeout(() => {
                 const firstMsg = initialMessages[0];
-                console.log("[DEBUG] Before append(), firstMsg:", firstMsg);
-                append({
-                    id: String(firstMsg.id),
-                    role: 'user',
-                    content: firstMsg.content
-                }).then(() => console.log("[DEBUG] After append() resolved")).catch(err => console.error("[DEBUG] Failed to auto-append:", err));
+                console.log("[DEBUG] Before sendMessage(), firstMsg:", firstMsg);
+                sendMessage({ role: 'user', content: firstMsg.content });
+                console.log("[DEBUG] After sendMessage() executed.");
             }, 500);
         }
-    }, [isBrandNewPending, initialMessages, append]);
+    }, [isBrandNewPending, initialMessages, sendMessage]);
 
     // Poll the server for new messages (e.g. from Human Support)
     useEffect(() => {
@@ -139,7 +137,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                                         ? 'bg-indigo-600 text-black rounded-br-sm'
                                         : 'bg-slate-200 text-slate-900 rounded-bl-sm border border-zinc-700/50 shadow-lg'
                                         }`}>
-                                        {m.content.split('\\n').map((line, i) => (
+                                        {String(m.content || (m.parts && m.parts[0]?.text) || '').split('\n').map((line, i) => (
                                             <p key={i} className="mb-1 last:mb-0 whitespace-pre-wrap">{line}</p>
                                         ))}
                                     </div>
@@ -167,14 +165,17 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
             <CardFooter className="border-t border-slate-200 bg-white/80 p-4">
                 <form
                     onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!input.trim() || isLoading) return;
                         console.log("[DEBUG] form onSubmit triggered. Input:", input, "isLoading:", isLoading);
-                        handleSubmit(e);
+                        sendMessage({ role: 'user', content: input });
+                        setInput('');
                     }}
                     className="flex w-full items-center space-x-2"
                 >
                     <Input
                         value={input || ''}
-                        onChange={handleInputChange}
+                        onChange={(e) => setInput(e.target.value)}
                         placeholder={status === 'ESCALATED' ? "Reply to human support..." : "Ask CABAI a question..."}
                         className="flex-1 bg-slate-100 border-slate-300 text-slate-900 focus-visible:ring-indigo-600"
                         disabled={status === 'CLOSED'}
