@@ -20,29 +20,25 @@ interface ChatProps {
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
     const { messages, input, handleInputChange, handleSubmit, isLoading, reload, setMessages } = useChat({
         api: `/api/support/tickets/${ticketId}/chat`,
+        initialMessages: initialMessages ? initialMessages.map(m => ({ ...m, id: String(m.id) })) : [],
         onError: (err) => {
             console.error("Chat Error:", err);
             // We could also show a toast here if we wanted
         }
     });
 
-    // Hydrate messages on mount and auto-trigger AI if it's a brand new ticket
-    const isHydratedRef = useRef(false);
-    useEffect(() => {
-        if (!isHydratedRef.current && initialMessages && initialMessages.length > 0) {
-            isHydratedRef.current = true;
-            // Ensure the IDs are strings to satisfy the SDK
-            const safeMessages = initialMessages.map(m => ({ ...m, id: String(m.id) }));
-            setMessages(safeMessages);
+    const hasTriggeredRef = useRef(false);
 
-            // If the chat has only one user message and is pending, trigger the AI
-            if (safeMessages.length === 1 && safeMessages[0].role === 'user' && status === 'PENDING_AI_REVIEW') {
-                setTimeout(() => {
-                    reload();
-                }, 500); // Small delay to guarantee state is committed
-            }
+    // Auto-trigger AI if it's a brand new ticket pending AI review
+    useEffect(() => {
+        if (!hasTriggeredRef.current && status === 'PENDING_AI_REVIEW' && messages.length === 1 && messages[0].role === 'user') {
+            hasTriggeredRef.current = true;
+            // Delay slightly to ensure UI is mounted and SDK is ready
+            setTimeout(() => {
+                reload().catch(err => console.error("Failed to auto-reload:", err));
+            }, 500);
         }
-    }, [initialMessages, status, setMessages, reload]);
+    }, [status, messages, reload]);
 
     // Poll the server for new messages (e.g. from Human Support)
     useEffect(() => {
