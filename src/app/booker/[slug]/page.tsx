@@ -65,10 +65,19 @@ export default function BookerPage() {
     const [quote, setQuote] = useState<number | null>(null);
     const [pricingBreakdown, setPricingBreakdown] = useState<any>(null);
 
-    // Branding State
     const [brandColor, setBrandColor] = useState('#3b82f6'); // Default Blue-500
     const [logoUrl, setLogoUrl] = useState('');
     const [companyName, setCompanyName] = useState('Book Your Ride');
+    const [vehicleTypes, setVehicleTypes] = useState<string[]>(['Saloon', 'Estate', 'Executive', 'MPV']); // Default fallback
+
+    const getVehicleDisplayInfo = (type: string) => {
+        const lower = type.toLowerCase();
+        if (lower.includes('8') || lower.includes('minibus')) return { pax: 8, extra: '8+ Pax' };
+        if (lower.includes('6') || lower.includes('mpv')) return { pax: 6, extra: '6 Pax' };
+        if (lower.includes('estate')) return { pax: 4, extra: '4+ Lugg' };
+        if (lower.includes('exec') || lower.includes('vip') || lower.includes('luxury')) return { pax: 3, extra: 'Premium' };
+        return { pax: 4, extra: 'Standard' };
+    };
 
     // Load Google Maps Script
     useEffect(() => {
@@ -94,6 +103,21 @@ export default function BookerPage() {
                     if (data.brandColor) setBrandColor(data.brandColor);
                     if (data.logoUrl) setLogoUrl(data.logoUrl);
                     if (data.name) setCompanyName(data.name);
+                    if (data.vehicleTypes && data.vehicleTypes.length > 0) {
+                        const standardOrder = ['Saloon', 'Estate', 'Executive', 'MPV', 'Minibus'];
+                        const sorted = [...data.vehicleTypes].sort((a, b) => {
+                            const idxA = standardOrder.indexOf(a);
+                            const idxB = standardOrder.indexOf(b);
+                            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                            if (idxA !== -1) return -1;
+                            if (idxB !== -1) return 1;
+                            return a.localeCompare(b);
+                        });
+                        setVehicleTypes(sorted);
+                        if (!sorted.includes(formData.vehicleType)) {
+                            setFormData(prev => ({ ...prev, vehicleType: sorted[0] }));
+                        }
+                    }
                 }
             } catch (e) {
                 console.error("Failed to fetch tenant branding");
@@ -384,11 +408,14 @@ export default function BookerPage() {
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent className="bg-[#1e1e24] border-white/10 text-white rounded-2xl shadow-2xl">
-                                                        <SelectItem value="Saloon" className="focus:bg-white/10 focus:text-white cursor-pointer py-3 rounded-lg mx-1 my-1">Saloon (4 Pax)</SelectItem>
-                                                        <SelectItem value="Estate" className="focus:bg-white/10 focus:text-white cursor-pointer py-3 rounded-lg mx-1 my-1">Estate (4+ Lugg)</SelectItem>
-                                                        <SelectItem value="Executive" className="focus:bg-white/10 focus:text-white cursor-pointer py-3 rounded-lg mx-1 my-1">Executive (Premium)</SelectItem>
-                                                        <SelectItem value="MPV" className="focus:bg-white/10 focus:text-white cursor-pointer py-3 rounded-lg mx-1 my-1">MPV (6 Pax)</SelectItem>
-                                                        <SelectItem value="Minibus" className="focus:bg-white/10 focus:text-white cursor-pointer py-3 rounded-lg mx-1 my-1">Minibus (8+ Pax)</SelectItem>
+                                                        {vehicleTypes.map((v) => {
+                                                            const info = getVehicleDisplayInfo(v);
+                                                            return (
+                                                                <SelectItem key={v} value={v} className="focus:bg-white/10 focus:text-white cursor-pointer py-3 rounded-lg mx-1 my-1">
+                                                                    {v} ({info.extra})
+                                                                </SelectItem>
+                                                            );
+                                                        })}
                                                     </SelectContent>
                                                 </Select>
                                             </div>

@@ -15,6 +15,9 @@ export async function GET(
                 logoUrl: true,
                 brandColor: true,
                 enableWebBooker: true,
+                pricingRules: {
+                    select: { vehicleType: true }
+                }
             }
         });
 
@@ -26,7 +29,18 @@ export async function GET(
             return NextResponse.json({ error: 'Web booking disabled' }, { status: 403 });
         }
 
-        return NextResponse.json(tenant);
+        // Extract and deduplicate valid vehicle types
+        const rawTypes = tenant.pricingRules?.map(r => r.vehicleType?.trim()) || [];
+        const validTypes = rawTypes.filter(t => t && t.length > 0);
+        const vehicleTypes = Array.from(new Set(validTypes));
+
+        return NextResponse.json({
+            name: tenant.name,
+            logoUrl: tenant.logoUrl,
+            brandColor: tenant.brandColor,
+            enableWebBooker: tenant.enableWebBooker,
+            vehicleTypes
+        });
 
     } catch (error) {
         console.error('Error fetching public tenant info:', error);
