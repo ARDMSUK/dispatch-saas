@@ -18,6 +18,7 @@ export default function SettingsPage() {
     const searchParams = useSearchParams();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     // Form State
     const [companyName, setCompanyName] = useState('');
@@ -250,6 +251,31 @@ export default function SettingsPage() {
         } catch (error) {
             console.error(error);
             toast.error("Failed to disconnect Zettle");
+        }
+    };
+
+    const handleExportData = async () => {
+        setIsExporting(true);
+        try {
+            const res = await fetch('/api/tenant/export-data');
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cabai-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                toast.success("Data export initiated securely.");
+            } else {
+                toast.error("Failed to export data.");
+            }
+        } catch (error) {
+            console.error("Export error", error);
+            toast.error("An error occurred during export.");
+        } finally {
+            setIsExporting(false);
         }
     };
 
@@ -1054,6 +1080,25 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground mt-2">
                         Leave blank to use the default system messages.
                     </p>
+                </div>
+            </div>
+
+            {/* Data & Privacy Section */}
+            <div className="bg-card p-6 rounded-xl border border-rose-200 mb-6 text-card-foreground shadow-sm bg-rose-50/10">
+                <h2 className="text-xl font-semibold flex items-center gap-2 mb-6 text-rose-700">
+                    🛡️ Data & Privacy (Anti-Ransom Guarantee)
+                </h2>
+                <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                        We believe that your data is exactly that—<strong className="text-foreground">your data</strong>. Unlike legacy systems that hold you hostage, you can download a complete raw JSON backup of all your Customers, Drivers, and Booking history at any time with a single click.
+                    </p>
+                    <Button 
+                        onClick={handleExportData}
+                        disabled={isExporting}
+                        className="bg-rose-600 hover:bg-rose-700 text-white font-medium shadow-sm"
+                    >
+                        {isExporting ? 'Bundling Data...' : 'Export All My Data (JSON)'}
+                    </Button>
                 </div>
             </div>
 

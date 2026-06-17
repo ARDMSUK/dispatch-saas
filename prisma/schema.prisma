@@ -54,9 +54,13 @@ model Tenant {
   hasSchoolContracts   Boolean  @default(false)
   hasDataImport        Boolean  @default(false)
   hasTapToPay          Boolean  @default(false)
+  enableFlightTracking Boolean  @default(false)
   aiMessageCount       Int      @default(0)
   aiMessageLimit       Int      @default(100)
   aiBillingPeriodStart DateTime @default(now())
+  
+  // Custom Pricing for A La Carte Add-ons
+  customAddonPrices    Json?    // e.g. {"enableWebBooker": 5.00}
 
   // Whatsapp Evolution API State
   whatsappInstanceId     String? // The dynamically generated Evolution API instance name
@@ -146,6 +150,8 @@ model SaasPlan {
   name            String
   priceMonthly    Float   @default(0)
   priceAnnually   Float   @default(0)
+  priceWeekly     Float   @default(0)
+  pricePerDriverWeekly Float @default(0)
   stripeProductId String?
   stripePriceId   String?
 
@@ -165,6 +171,7 @@ model SaasPlan {
   incDataImport      Boolean @default(false)
   incTapToPay        Boolean @default(false)
   incAiCopilot       Boolean @default(false)
+  incFlightTracking  Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

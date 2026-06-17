@@ -47,6 +47,18 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
         setTenant({ ...tenant, [e.target.name]: e.target.checked });
     };
 
+    const handleAddonPriceChange = (e: React.ChangeEvent<HTMLInputElement>, featureKey: string) => {
+        const val = parseFloat(e.target.value) || 0;
+        const currentPrices = tenant.customAddonPrices || {};
+        setTenant({
+            ...tenant,
+            customAddonPrices: {
+                ...currentPrices,
+                [featureKey]: val
+            }
+        });
+    };
+
     const handleSave = async () => {
         setSaving(true);
         try {
@@ -310,6 +322,7 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                     { stateField: 'enableB2BPortal', planField: 'incB2bPortal', label: 'Corporate B2B Portal' },
                                     { stateField: 'enableWavOptions', planField: 'incWavOptions', label: 'WAV Dispatching' },
                                     { stateField: 'enableLiveTracking', planField: 'incLiveTracking', label: 'Live Tracking Links' },
+                                    { stateField: 'enableFlightTracking', planField: 'incFlightTracking', label: 'Flight Tracking Engine' },
                                     { stateField: 'hasWebChatAi', planField: 'incWebChatAi', label: 'AI Web Chat Widget' },
                                     { stateField: 'hasWhatsAppAi', planField: 'incWhatsAppAi', label: 'WhatsApp AI Agent' },
                                     { stateField: 'hasVoiceAi', planField: 'incVoiceAi', label: 'Voice AI Agent' },
@@ -320,28 +333,45 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                 ].map(mod => {
                                     const isPlanGranted = isPlanUnlocked(mod.planField);
                                     const isManuallyGranted = tenant[mod.stateField] === true;
+                                    const customPrice = tenant.customAddonPrices?.[mod.stateField] || 0;
                                     
                                     return (
-                                        <div key={mod.stateField} className={`flex items-start space-x-3 p-3 rounded border transition-colors ${isPlanGranted ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
-                                            <input
-                                                type="checkbox"
-                                                name={mod.stateField}
-                                                id={mod.stateField}
-                                                checked={isPlanGranted || isManuallyGranted}
-                                                disabled={isPlanGranted}
-                                                onChange={handleCheckboxChange}
-                                                className="w-4 h-4 mt-0.5 accent-blue-500 cursor-pointer disabled:opacity-50"
-                                            />
-                                            <div className="space-y-1">
-                                                <label htmlFor={mod.stateField} className="text-sm font-medium cursor-pointer">
-                                                    {mod.label}
-                                                </label>
-                                                {isPlanGranted ? (
-                                                    <p className="text-xs text-blue-500 font-medium">Included in Active Plan</p>
-                                                ) : (
-                                                    <p className="text-xs text-slate-500">Custom Toggle</p>
-                                                )}
+                                        <div key={mod.stateField} className={`flex items-start justify-between space-x-3 p-3 rounded border transition-colors ${isPlanGranted ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
+                                            <div className="flex items-start space-x-3">
+                                                <input
+                                                    type="checkbox"
+                                                    name={mod.stateField}
+                                                    id={mod.stateField}
+                                                    checked={isPlanGranted || isManuallyGranted}
+                                                    disabled={isPlanGranted}
+                                                    onChange={handleCheckboxChange}
+                                                    className="w-4 h-4 mt-0.5 accent-blue-500 cursor-pointer disabled:opacity-50"
+                                                />
+                                                <div className="space-y-1">
+                                                    <label htmlFor={mod.stateField} className="text-sm font-medium cursor-pointer">
+                                                        {mod.label}
+                                                    </label>
+                                                    {isPlanGranted ? (
+                                                        <p className="text-xs text-blue-500 font-medium">Included in Active Plan</p>
+                                                    ) : (
+                                                        <p className="text-xs text-slate-500">Custom Toggle</p>
+                                                    )}
+                                                </div>
                                             </div>
+                                            {!isPlanGranted && isManuallyGranted && (
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="text-xs text-slate-500">£/wk</span>
+                                                    <Input 
+                                                        type="number" 
+                                                        min="0"
+                                                        step="0.01"
+                                                        className="w-20 h-8 text-xs"
+                                                        value={customPrice || ''}
+                                                        onChange={(e) => handleAddonPriceChange(e, mod.stateField)}
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

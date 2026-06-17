@@ -17,11 +17,68 @@ export async function POST(req: NextRequest) {
         }
 
         const tenant = await prisma.tenant.findUnique({
-            where: { id: session.user.tenantId }
+            where: { id: session.user.tenantId },
+            include: { subscriptionPlan: true }
         });
 
         if (!tenant) {
             return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
+        }
+
+        let plan = tenant.subscriptionPlan;
+        if (!plan) {
+            plan = await prisma.saasPlan.findFirst({ where: { name: "Solo" } });
+        }
+
+        const line_items: any[] = [];
+
+        // 1. Base Plan Weekly
+        if (plan && plan.priceWeekly > 0) {
+            line_items.push({
+                price_data: {
+                    currency: "gbp",
+                    product_data: { name: `${plan.name} Plan - Base Weekly` },
+                    unit_amount: Math.round(plan.priceWeekly * 100),
+                    recurring: { interval: "week" },
+                },
+                quantity: 1,
+            });
+        }
+
+        // 2. Per Driver Fee Weekly
+        const driverCount = await prisma.driver.count({ where: { tenantId: tenant.id } });
+        if (plan && plan.pricePerDriverWeekly > 0 && driverCount > 0) {
+            line_items.push({
+                price_data: {
+                    currency: "gbp",
+                    product_data: { name: "Active Drivers Fee (Weekly)" },
+                    unit_amount: Math.round(plan.pricePerDriverWeekly * 100),
+                    recurring: { interval: "week" },
+                },
+                quantity: driverCount,
+            });
+        }
+
+        // 3. Custom Addons
+        const customAddons = tenant.customAddonPrices as Record<string, number> | null;
+        if (customAddons) {
+            for (const [addonName, price] of Object.entries(customAddons)) {
+                if (typeof price === 'number' && price > 0) {
+                    line_items.push({
+                        price_data: {
+                            currency: "gbp",
+                            product_data: { name: `Add-on: ${addonName}` },
+                            unit_amount: Math.round(price * 100),
+                            recurring: { interval: "week" },
+                        },
+                        quantity: 1,
+                    });
+                }
+            }
+        }
+
+        if (line_items.length === 0) {
+            return NextResponse.json({ error: "No chargeable items found for this plan configuration" }, { status: 400 });
         }
 
         // Return URL when checkout is completed/cancelled
@@ -30,16 +87,12 @@ export async function POST(req: NextRequest) {
         const checkoutSessionOptions: any = {
             mode: "subscription",
             payment_method_types: ["card"],
-            line_items: [
-                {
-                    price: priceId,
-                    quantity: 1,
-                },
-            ],
+            line_items: line_items,
             success_url: `${returnUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${returnUrl}?canceled=true`,
             metadata: {
                 tenantId: tenant.id,
+                planId: plan?.id || "",
             },
         };
 
