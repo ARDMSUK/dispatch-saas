@@ -11,7 +11,7 @@ export const EmailService = {
         const companyName = orgSettings?.name || 'CABAI System';
         const replyTo = orgSettings?.email;
         const subject = `Booking Confirmed #${booking.id.toString().padStart(6, '0')}`;
-        const html = EmailTemplates.bookingConfirmation(booking, companyName);
+        const html = EmailTemplates.bookingConfirmation(booking, orgSettings);
         const to = booking.customer?.email || booking.passengerEmail || booking.email;
 
         if (!to) {
