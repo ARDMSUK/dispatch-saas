@@ -18,9 +18,14 @@ interface ChatProps {
 }
 
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
-    const { messages, input, handleInputChange, handleSubmit, isLoading, reload, setMessages } = useChat({
+    // If it's a brand new ticket pending AI review, we withhold the first message from initialMessages
+    // so we can use append() to trigger the AI without duplicating the message in the UI.
+    const isBrandNewPending = status === 'PENDING_AI_REVIEW' && initialMessages.length === 1 && initialMessages[0].role === 'user';
+    const startingMessages = isBrandNewPending ? [] : (initialMessages ? initialMessages.map(m => ({ ...m, id: String(m.id) })) : []);
+
+    const { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages } = useChat({
         api: `/api/support/tickets/${ticketId}/chat`,
-        initialMessages: initialMessages ? initialMessages.map(m => ({ ...m, id: String(m.id) })) : [],
+        initialMessages: startingMessages,
         onError: (err) => {
             console.error("Chat Error:", err);
             // We could also show a toast here if we wanted
@@ -31,14 +36,19 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
 
     // Auto-trigger AI if it's a brand new ticket pending AI review
     useEffect(() => {
-        if (!hasTriggeredRef.current && status === 'PENDING_AI_REVIEW' && messages.length === 1 && messages[0].role === 'user') {
+        if (!hasTriggeredRef.current && isBrandNewPending) {
             hasTriggeredRef.current = true;
             // Delay slightly to ensure UI is mounted and SDK is ready
             setTimeout(() => {
-                reload().catch(err => console.error("Failed to auto-reload:", err));
+                const firstMsg = initialMessages[0];
+                append({
+                    id: String(firstMsg.id),
+                    role: 'user',
+                    content: firstMsg.content
+                }).catch(err => console.error("Failed to auto-append:", err));
             }, 500);
         }
-    }, [status, messages, reload]);
+    }, [isBrandNewPending, initialMessages, append]);
 
     // Poll the server for new messages (e.g. from Human Support)
     useEffect(() => {
