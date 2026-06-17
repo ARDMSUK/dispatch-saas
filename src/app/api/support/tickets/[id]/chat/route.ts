@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { streamText, convertToModelMessages } from 'ai';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
@@ -47,6 +47,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
                 });
             }
             
+            let messageContent = latestMessage.content;
+            if (!messageContent && latestMessage.parts) {
+                messageContent = latestMessage.parts.map((p: any) => p.text || '').join('\n');
+            }
+            
             if (!existingMsg) {
                 await prisma.ticketMessage.create({
                     data: {
@@ -54,7 +59,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
                         ticketId: ticketId,
                         senderType: 'TENANT_USER',
                         senderId: session.user.id,
-                        content: latestMessage.content
+                        content: messageContent || ''
                     }
                 });
             }
@@ -105,12 +110,17 @@ Rules:
 2. Never invent features that don't exist.
 `;
 
-        // 4. Stream the text from OpenAI
-        console.log("[DEBUG-SERVER] Starting streamText from OpenAI...");
+        const sanitizedMessages = messages.map((m: any) => ({
+            ...m,
+            content: typeof m.content === 'string' ? m.content : (m.parts ? m.parts.map((p: any) => p.text || '').join('\n') : '')
+        }));
+        
+        console.log("[DEBUG-SERVER] sanitizedMessages:", JSON.stringify(sanitizedMessages, null, 2));
+
         const result = streamText({
             model: openai('gpt-4o-mini'),
             system: systemPrompt,
-            messages: messages,
+            messages: sanitizedMessages,
             async onFinish({ text }) {
                 // When the AI finishes typing, save its response to the database
                 await prisma.ticketMessage.create({
@@ -157,7 +167,7 @@ Rules:
             },
         });
 
-        // 5. Send the stream back directly to the client (using correct UI Message stream format)
+        // 5. Send the stream back directly to the client
         console.log("[DEBUG-SERVER] Returning toUIMessageStreamResponse()");
         return result.toUIMessageStreamResponse();
 

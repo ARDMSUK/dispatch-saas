@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport, type UIMessage } from 'ai';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User, Clock, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface ChatProps {
     ticketId: string;
@@ -17,42 +19,70 @@ interface ChatProps {
     initialMessages: any[];
 }
 
+function getMessageText(message: UIMessage | { content?: string; parts?: any[] }): string {
+    if ('content' in message && typeof message.content === 'string') {
+        return message.content;
+    }
+    if ('parts' in message && Array.isArray(message.parts)) {
+        return message.parts
+            .filter(p => p.type === 'text')
+            .map(p => 'text' in p ? p.text : '')
+            .join('');
+    }
+    return '';
+}
+
 export default function TicketChatClient({ ticketId, subject, status, initialMessages }: ChatProps) {
     console.log("[DEBUG] TicketChatClient mounted. TicketID:", ticketId, "Status:", status);
-    console.log("[DEBUG] initialMessages state:", initialMessages);
+    console.log("[DEBUG] initialMessages state length:", initialMessages ? initialMessages.length : 0);
+    if (initialMessages && initialMessages.length > 0) {
+        console.log("[DEBUG] initialMessages[0] role:", initialMessages[0].role, "content:", initialMessages[0].content);
+    }
     // If it's a brand new ticket pending AI review, we withhold the first message from initialMessages
     // so we can use append() to trigger the AI without duplicating the message in the UI.
     const isBrandNewPending = status === 'PENDING_AI_REVIEW' && initialMessages.length === 1 && initialMessages[0].role === 'user';
-    const startingMessages = isBrandNewPending ? [] : (initialMessages ? initialMessages.map(m => ({ ...m, id: String(m.id) })) : []);
-
-    const [input, setInput] = useState('');
-    const chatState = useChat({
-        api: `/api/support/tickets/${ticketId}/chat`,
-        initialMessages: startingMessages,
-        onError: (err) => {
-            console.error("[DEBUG] Chat Error caught by useChat:", err);
-            // We could also show a toast here if we wanted
+    console.log("[DEBUG] isBrandNewPending:", isBrandNewPending);
+    
+    const [localInput, setLocalInput] = useState('');
+    const { messages, error, sendMessage, setMessages, regenerate, stop, status: chatStatus } = useChat({
+        transport: new DefaultChatTransport({ api: `/api/support/tickets/${ticketId}/chat` }),
+        messages: initialMessages.map(msg => ({
+            id: String(msg.id),
+            role: msg.role === 'agent' ? 'assistant' : 'user',
+            parts: [{ type: 'text', text: msg.content || '' }]
+        })),
+        onFinish: (message) => {
+            // router.refresh();
+        },
+        onError: (error) => {
+            console.error("Chat error:", error);
+            toast.error("Sorry, the AI assistant could not respond right now. Your message has still been saved and our support team will reply manually.", {
+                duration: 6000
+            });
         }
     });
-    const { messages, sendMessage, status: chatStatus, setMessages, error } = chatState as any;
+
     const isLoading = chatStatus === 'submitted' || chatStatus === 'streaming';
 
-    const hasTriggeredRef = useRef(false);
+    const hasAutoTriggered = useRef(false);
 
-    // Auto-trigger AI if it's a brand new ticket pending AI review
+    // Auto-trigger the first AI response if this ticket is brand new and pending.
     useEffect(() => {
-        if (!hasTriggeredRef.current && isBrandNewPending) {
-            console.log("[DEBUG] Auto-trigger condition met. Preparing append().");
-            hasTriggeredRef.current = true;
-            // Delay slightly to ensure UI is mounted and SDK is ready
-            setTimeout(() => {
-                const firstMsg = initialMessages[0];
-                console.log("[DEBUG] Before sendMessage(), firstMsg:", firstMsg);
-                sendMessage({ role: 'user', content: firstMsg.content });
-                console.log("[DEBUG] After sendMessage() executed.");
-            }, 500);
+        if (isBrandNewPending && !hasAutoTriggered.current) {
+            hasAutoTriggered.current = true;
+            console.log("[DEBUG] Auto-trigger executing using regenerate. isBrandNewPending:", isBrandNewPending);
+            
+            if (setMessages && regenerate) {
+                console.log("[DEBUG] Setting initial messages and triggering regenerate...");
+                setMessages(initialMessages);
+                setTimeout(() => {
+                    regenerate();
+                }, 100);
+            } else {
+                console.warn("[DEBUG] Could not auto-trigger: setMessages or regenerate is missing.");
+            }
         }
-    }, [isBrandNewPending, initialMessages, sendMessage]);
+    }, [isBrandNewPending, initialMessages, setMessages, regenerate]);
 
     // Poll the server for new messages (e.g. from Human Support)
     useEffect(() => {
@@ -68,7 +98,7 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                     const mappedMessages = ticket.messages.map((m: any) => ({
                         id: String(m.id),
                         role: m.senderType === 'TENANT_USER' ? 'user' : 'assistant',
-                        content: m.content,
+                        parts: [{ type: 'text', text: m.content || '' }],
                         name: m.senderType === 'SYSTEM_ADMIN' ? 'Human_Support' : (m.senderType === 'AI_AGENT' ? 'CABAI' : undefined)
                     }));
                     setMessages(mappedMessages);
@@ -105,6 +135,8 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
         }
     };
 
+    console.log("[DEBUG] Render finishing normally.");
+
     return (
         <Card className="flex flex-col bg-slate-100 border-slate-200 flex-1 overflow-hidden max-w-4xl mx-auto w-full">
             <CardHeader className="border-b border-slate-200 bg-white flex flex-row items-center justify-between py-4">
@@ -137,13 +169,18 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                                         ? 'bg-indigo-600 text-black rounded-br-sm'
                                         : 'bg-slate-200 text-slate-900 rounded-bl-sm border border-zinc-700/50 shadow-lg'
                                         }`}>
-                                        {String(m.content || (m.parts && m.parts[0]?.text) || '').split('\n').map((line, i) => (
+                                        {getMessageText(m).split('\n').map((line, i) => (
                                             <p key={i} className="mb-1 last:mb-0 whitespace-pre-wrap">{line}</p>
                                         ))}
                                     </div>
                                 </div>
                             </div>
                         ))}
+                        {messages.length === 0 && (
+                            <p className="text-slate-500 text-center text-sm">No messages yet.</p>
+                        )}
+                        
+                        
                         {isLoading && (
                             <div className="flex justify-start">
                                 <div className="flex items-center gap-2">
@@ -166,16 +203,16 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        if (!input.trim() || isLoading) return;
-                        console.log("[DEBUG] form onSubmit triggered. Input:", input, "isLoading:", isLoading);
-                        sendMessage({ role: 'user', content: input });
-                        setInput('');
+                        if (!localInput.trim() || isLoading) return;
+                        console.log("[DEBUG] form onSubmit triggered. Input:", localInput, "isLoading:", isLoading);
+                        if (sendMessage) sendMessage({ role: 'user', parts: [{ type: 'text', text: localInput }] });
+                        setLocalInput('');
                     }}
                     className="flex w-full items-center space-x-2"
                 >
                     <Input
-                        value={input || ''}
-                        onChange={(e) => setInput(e.target.value)}
+                        value={localInput || ''}
+                        onChange={(e) => setLocalInput(e.target.value)}
                         placeholder={status === 'ESCALATED' ? "Reply to human support..." : "Ask CABAI a question..."}
                         className="flex-1 bg-slate-100 border-slate-300 text-slate-900 focus-visible:ring-indigo-600"
                         disabled={status === 'CLOSED'}
@@ -183,9 +220,8 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
                     <Button
                         type="submit"
                         size="icon"
-                        disabled={!(input || '').trim() || isLoading || status === 'CLOSED'}
+                        disabled={!(localInput || '').trim() || isLoading || status === 'CLOSED'}
                         className="bg-indigo-600 hover:bg-purple-600 text-black shrink-0"
-                        onClick={() => console.log("[DEBUG] Send button clicked. Disabled state:", !(input || '').trim() || isLoading || status === 'CLOSED')}
                     >
                         <Send className="h-4 w-4" />
                     </Button>
