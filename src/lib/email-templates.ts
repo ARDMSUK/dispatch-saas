@@ -254,62 +254,28 @@ export const EmailTemplates = {
     return BaseEmailLayout(contentHtml, orgSettings, "Booking Confirmation");
   },
 
-  paymentConfirmation: (booking: any, companyName: string = 'Our Service') => `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Payment Receipt: #${booking.id.toString().padStart(6, '0')}</h2>
-      <p>Dear ${booking.passengerName},</p>
-      <p>Thank you for your secure card payment. This email confirms we have received your payment for the upcoming journey with ${companyName}.</p>
-      
-      <div style="background: #f4f4f5; border-left: 4px solid #10b981; padding: 15px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Amount Paid:</strong> £${booking.fare ? booking.fare.toFixed(2) : '0.00'}</p>
-        <p><strong>Booking Ref:</strong> #${booking.id.toString().padStart(6, '0')}</p>
-        <p><strong>Date:</strong> ${new Date(booking.pickupTime).toLocaleString()}</p>
-      </div>
-
-      <p>We look forward to seeing you soon.</p>
-    </div>
-  `,
-
-  driverAssigned: (booking: any, driver: any, orgSettings: any = {}, enableLiveTracking = true) => {
+  
+  paymentConfirmation: (booking: any, orgSettings: any = {}) => {
     const isLegacy = typeof orgSettings === 'string';
     const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');
     const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
     const bookingRef = booking?.id ? `#${booking.id.toString().padStart(6, '0')}` : 'Pending';
-    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/track/${booking.id}`;
-    const vehicle = driver?.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : null;
-    const vehicleString = vehicle ? `${vehicle.model} (${vehicle.reg})` : 'Your assigned vehicle';
-    const driverName = driver?.name || 'A driver';
-    const driverPhone = driver?.phone || 'Not provided';
+    const passengerName = booking?.passengerName || 'Customer';
 
     const contentHtml = `
-      <!-- Intro -->
       <div style="text-align: center; margin-bottom: 20px;">
-        <span style="display: inline-block; background-color: #dbeafe; color: #1e3a8a; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">🚙 Driver Assigned</span>
-        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Booking Reference: ${bookingRef}</h2>
-        <p style="margin: 0; color: #666666; font-size: 16px;">Good news! ${driverName} is assigned to your upcoming booking.</p>
+        <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">💳 Payment Received</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Payment Receipt: ${bookingRef}</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">Hi ${passengerName}, thank you for your secure payment.</p>
       </div>
 
-      <!-- Details Card -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-        <!-- Driver Info -->
         <tr>
-          <td style="padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="50%" valign="top">
-                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Driver</strong><br/>
-                  <span style="color: #333333; font-size: 16px; font-weight: bold;">${driverName}</span>
-                </td>
-                <td width="50%" valign="top" align="right">
-                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Vehicle</strong><br/>
-                  <span style="color: #333333; font-size: 16px; font-weight: bold;">${vehicleString}</span>
-                </td>
-              </tr>
-            </table>
+          <td style="padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; text-align: center;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Amount Paid</strong><br/>
+            <span style="color: ${safeBrandColor}; font-size: 28px; font-weight: bold;">${formatPrice(booking?.fare)}</span>
           </td>
         </tr>
-
-        <!-- Journey Info -->
         <tr>
           <td style="padding: 15px 0;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -335,6 +301,91 @@ export const EmailTemplates = {
           </td>
         </tr>
       </table>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Payment Receipt");
+  },
+
+  paymentLink: (booking: any, orgSettings: any = {}) => {
+    const isLegacy = typeof orgSettings === 'string';
+    const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
+    const bookingRef = booking?.id ? `#${booking.id.toString().padStart(6, '0')}` : 'Pending';
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">💳 Payment Request</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Payment Due: ${bookingRef}</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">Please complete your secure card payment for your recent booking.</p>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 25px;">
+        <tr>
+          <td style="padding: 15px; background-color: #f9fafb; text-align: center;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Amount Due</strong><br/>
+            <span style="color: #333333; font-size: 28px; font-weight: bold;">${formatPrice(booking?.fare)}</span>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <a href="${booking?.paymentLink}" style="background-color: ${safeBrandColor}; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">
+          Pay Now
+        </a>
+      </div>
+      
+      <div style="text-align: center;">
+        <p style="margin: 0; color: #9ca3af; font-size: 14px; word-break: break-all;">
+          Or use this link: <a href="${booking?.paymentLink}" style="color: ${safeBrandColor};">${booking?.paymentLink}</a>
+        </p>
+      </div>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Payment Request");
+  },
+
+  driverArrived: (booking: any, driver: any, orgSettings: any = {}, enableLiveTracking = true) => {
+    const isLegacy = typeof orgSettings === 'string';
+    const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
+    const bookingRef = booking?.id ? `#${booking.id.toString().padStart(6, '0')}` : 'Pending';
+    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/track/${booking.id}`;
+    const vehicle = driver?.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : null;
+    const vehicleString = vehicle ? `${vehicle.model} (${vehicle.reg})` : 'Your assigned vehicle';
+    const driverName = driver?.name || 'A driver';
+    const driverPhone = driver?.phone || 'Not provided';
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">📍 Driver Arrived</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Booking Reference: ${bookingRef}</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">${driverName} has arrived and is waiting outside!</p>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <tr>
+          <td style="padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="50%" valign="top">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Driver</strong><br/>
+                  <span style="color: #333333; font-size: 16px; font-weight: bold;">${driverName}</span>
+                </td>
+                <td width="50%" valign="top" align="right">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Vehicle</strong><br/>
+                  <span style="color: #333333; font-size: 16px; font-weight: bold;">${vehicleString}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Pickup Location</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${formatAddressForDisplay(booking?.pickupAddress)}</span>
+          </td>
+        </tr>
+      </table>
 
       ${enableLiveTracking ? `
       <div style="text-align: center; margin-top: 25px;">
@@ -345,35 +396,7 @@ export const EmailTemplates = {
       ` : ''}
     `;
 
-    return BaseEmailLayout(contentHtml, orgSettings, "Driver Assigned");
-  },
-
-  driverArrived: (booking: any, driver: any, companyName: string = 'Our Service', enableLiveTracking = true) => {
-    const vehicle = driver.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : { model: 'Unknown', reg: 'Unknown' };
-    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/track/${booking.id}`;
-
-    return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Driver Arrived</h2>
-      <p>Your driver has arrived and is waiting outside for you!</p>
-      
-      <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Driver:</strong> ${driver.name}</p>
-        <p><strong>Vehicle:</strong> ${vehicle.model} (${vehicle.reg})</p>
-        <p><strong>Phone:</strong> ${driver.phone}</p>
-      </div>
-
-      <p>Please make your way out to the vehicle.</p>
-      
-      ${enableLiveTracking ? `
-      <div style="margin-top: 30px;">
-        <a href="${trackingLink}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-          Track My Driver
-        </a>
-      </div>
-      ` : ''}
-    </div>
-  `
+    return BaseEmailLayout(contentHtml, orgSettings, "Driver Arrived");
   },
 
   jobReceipt: (booking: any, companyName: string = 'Our Service') => `

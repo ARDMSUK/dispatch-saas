@@ -160,18 +160,51 @@ export const getPassengerReceiptEmail = (
     </div>
 `;
 
-export const getSupportEscalationEmail = (ticketId: string, tenantName: string, subject: string, brandColor: string = '#ef4444', logoUrl: string = '') => `
-    <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #333;">
-        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="${tenantName} Logo" style="max-height: 50px;" /></div>` : ''}
-        <h2 style="color: ${brandColor};">Support Ticket Escalated 🚨</h2>
-        <p>The AI Support Agent for <strong>${tenantName}</strong> has escalated a ticket to human support.</p>
-        
-        <div style="background: #fef2f2; border: 1px solid #fca5a5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 0 0 10px 0;"><strong>Ticket ID:</strong> ${ticketId}</p>
-            <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
-        </div>
-        
-        <p>Please log in to the Super Admin console to review the chat transcript and reply to the user.</p>
-        <a href="https://app.cabai.co.uk/admin/support/${ticketId}" style="display: inline-block; background: ${brandColor}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Ticket in Admin Console</a>
-    </div>
-`;
+
+export const getSupportEscalationEmail = (ticketId: string, tenantName: string, subject: string, brandColor: string = '#ef4444', logoUrl: string = '') => {
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#ef4444';
+    const orgSettings = {
+        name: tenantName,
+        brandColor: safeBrandColor,
+        logoUrl: logoUrl
+    };
+
+    const adminLink = `https://app.cabai.co.uk/admin/support/${ticketId}`;
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">🚨 Support Ticket Escalated</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Action Required</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">The AI Support Agent for <strong>${tenantName}</strong> has escalated a ticket to human support.</p>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 25px;">
+        <tr>
+          <td style="padding: 15px; background-color: #fef2f2; border-bottom: 1px solid #fecaca;">
+            <strong style="color: #991b1b; font-size: 14px; text-transform: uppercase;">Ticket Details</strong>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 15px 5px 15px;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Ticket ID</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${ticketId}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 15px 15px 15px;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Subject</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${subject}</span>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align: center;">
+        <p style="margin: 0 0 15px 0; color: #666666; font-size: 16px;">Please log in to the admin console to review the chat transcript and reply to the user.</p>
+        <a href="${adminLink}" style="background-color: ${safeBrandColor}; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">
+          View Ticket in Admin Console
+        </a>
+      </div>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Support Escalation");
+};
