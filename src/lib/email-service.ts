@@ -41,7 +41,7 @@ export const EmailService = {
         const companyName = orgSettings?.name || 'CABAI System';
         const replyTo = orgSettings?.email;
         const subject = `Driver Assigned - ${driver.name} is on the way`;
-        const html = EmailTemplates.driverAssigned(booking, driver, companyName, orgSettings?.enableLiveTracking !== false);
+        const html = EmailTemplates.driverAssigned(booking, driver, orgSettings, orgSettings?.enableLiveTracking !== false);
         const to = booking.customer?.email || booking.passengerEmail || booking.email;
 
         if (!to) {
@@ -86,7 +86,7 @@ export const EmailService = {
         const companyName = orgSettings?.name || 'CABAI System';
         const replyTo = orgSettings?.email;
         const subject = `Booking Cancelled #${booking.id.toString().padStart(6, '0')}`;
-        const html = EmailTemplates.jobCancelled(booking, companyName);
+        const html = EmailTemplates.jobCancelled(booking, orgSettings);
         const to = booking.customer?.email || booking.passengerEmail || booking.email;
 
         if (!to) {

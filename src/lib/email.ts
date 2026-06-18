@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { BaseEmailLayout } from './email-templates';
 
 interface EmailParams {
     to: string;
@@ -38,16 +39,34 @@ export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
     }
 }
 
-export const getResetPasswordEmail = (resetLink: string, brandColor: string = '#f59e0b', logoUrl: string = '') => `
-    <div style="font-family: sans-serif; max-w-md; margin: 0 auto;">
-        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="Company Logo" style="max-height: 50px;" /></div>` : ''}
-        <h2>Reset Your Password</h2>
-        <p>You requested a password reset for your account.</p>
-        <p>Click the link below to set a new password:</p>
-        <a href="${resetLink}" style="display: inline-block; background: ${brandColor}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
-        <p style="font-size: 12px; color: #666;">This link expires in 1 hour. If you didn't request this, please ignore this email.</p>
-    </div>
-`;
+export const getResetPasswordEmail = (resetLink: string, brandColor: string = '#f59e0b', logoUrl: string = '') => {
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
+    const orgSettings = {
+        name: 'Account Security',
+        brandColor: safeBrandColor,
+        logoUrl: logoUrl
+    };
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">🔒 Password Reset</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Reset Your Password</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
+      </div>
+
+      <div style="text-align: center; margin: 35px 0;">
+        <a href="${resetLink}" style="background-color: ${safeBrandColor}; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">
+          Reset Password
+        </a>
+      </div>
+
+      <div style="text-align: center;">
+        <p style="margin: 0; color: #9ca3af; font-size: 14px;">This secure link will expire in 1 hour.</p>
+      </div>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Password Reset");
+};
 
 export const getWelcomeEmail = (
     name: string,
@@ -57,20 +76,61 @@ export const getWelcomeEmail = (
     tenantName: string = 'Cabai',
     brandColor: string = '#f59e0b',
     logoUrl: string = ''
-) => `
-    <div style="font-family: sans-serif; max-w-md; margin: 0 auto; color: #333;">
-        ${logoUrl ? `<div style="text-align: center; margin-bottom: 20px;"><img src="${logoUrl}" alt="${tenantName} Logo" style="max-height: 50px;" /></div>` : `<h2 style="color: ${brandColor}; text-align: center; margin-bottom: 10px;">${tenantName}</h2>`}
-        <h3 style="border-bottom: 1px solid #e4e4e7; padding-bottom: 10px; margin-top: 0;">Welcome to the Team, ${name}!</h3>
-        <p>An account has been created for you on the <strong>${tenantName}</strong> dispatch platform.</p>
-        <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e4e4e7;">
-            <p style="margin-top: 0;"><strong>Login URL:</strong> <a href="${loginUrl}" style="color: ${brandColor}; text-decoration: none; font-weight: bold;">${loginUrl}</a></p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p style="margin-bottom: 0;"><strong>Temporary Password:</strong> <code style="background: #e4e4e7; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 1.1em;">${tempPass}</code></p>
-        </div>
-        <p>Please log in and change your password immediately.</p>
-        <p style="font-size: 11px; color: #888; text-align: center; margin-top: 30px;">This email is sent on behalf of ${tenantName}.</p>
-    </div>
-`;
+) => {
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
+    const orgSettings = {
+        name: tenantName,
+        brandColor: safeBrandColor,
+        logoUrl: logoUrl
+    };
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">👋 Welcome Aboard</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Welcome to ${tenantName}!</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">Hi ${name}, your account is ready. Here are your details to get started.</p>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <tr>
+          <td style="padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="100%" valign="top">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Portal URL</strong><br/>
+                  <span style="color: #333333; font-size: 16px;"><a href="${loginUrl}" style="color: ${safeBrandColor}; text-decoration: none; font-weight: bold;">${loginUrl}</a></span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Email</strong><br/>
+                  <span style="color: #333333; font-size: 16px;">${email}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 15px;">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Temporary Password</strong><br/>
+                  <span style="display: inline-block; background-color: #f3f4f6; color: #111827; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 16px; margin-top: 5px;">${tempPass}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; margin-top: 25px;">
+        <p style="margin: 0; color: #666666; font-size: 14px;">For security reasons, please log in and change your password immediately.</p>
+      </div>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Welcome");
+};
 
 export const getPassengerReceiptEmail = (
     tenantName: string,
