@@ -399,24 +399,90 @@ export const EmailTemplates = {
     return BaseEmailLayout(contentHtml, orgSettings, "Driver Arrived");
   },
 
-  jobReceipt: (booking: any, companyName: string = 'Our Service') => `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Receipt: Journey Completed</h2>
-      <p>Dear ${booking.passengerName},</p>
-      <p>Thank you for riding with ${companyName}. We hope you had a pleasant journey.</p>
-      
-      <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Booking Ref:</strong> #${booking.id.toString().padStart(6, '0')}</p>
-        <p><strong>Date:</strong> ${new Date(booking.pickupTime).toLocaleString()}</p>
-        <p><strong>From:</strong> ${booking.pickupAddress}</p>
-        <p><strong>To:</strong> ${booking.dropoffAddress}</p>
-        <hr style="border: 1px solid #e5e5e5; margin: 15px 0;">
-        <p style="font-size: 1.2em;"><strong>Total Paid:</strong> £${booking.fare ? booking.fare.toFixed(2) : '0.00'}</p>
+  jobReceipt: (booking: any, companyName: string = 'Our Service') => {
+    const orgSettings = { name: companyName || 'Our Service' };
+    const bookingRef = booking?.id ? `#${booking.id.toString().padStart(6, '0')}` : 'Pending';
+    const passengerName = booking?.passengerName || 'Customer';
+    const vehicleType = booking?.vehicleType || 'Standard Vehicle';
+    const paymentMethod = booking?.paymentType || 'Standard Payment';
+    
+    // Fallbacks
+    const pickupStr = booking?.pickupAddress ? formatAddressForDisplay(booking.pickupAddress) : 'Pickup location not specified';
+    const dropoffStr = booking?.dropoffAddress ? formatAddressForDisplay(booking.dropoffAddress) : 'Drop-off location not specified';
+    
+    const viasHtml = (booking?.vias && Array.isArray(booking.vias) && booking.vias.length > 0)
+      ? booking.vias.map((via: any, index: number) => `
+          <tr>
+            <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
+              <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Via ${index + 1}</strong><br/>
+              <span style="color: #333333; font-size: 16px;">${formatAddressForDisplay(via.address || via)}</span>
+            </td>
+          </tr>
+        `).join('')
+      : '';
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">✓ Journey Completed</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Receipt for Booking ${bookingRef}</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">Dear ${passengerName}, thank you for riding with ${orgSettings.name}. We hope you had a pleasant journey.</p>
       </div>
 
-      <p>If you have any feedback or need assistance, please reply to this email.</p>
-    </div>
-  `,
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+        <tr>
+          <td style="padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <strong style="color: #374151; font-size: 14px; text-transform: uppercase;">Journey Details</strong>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Date & Time</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${formatDateTime(booking?.pickupTime)}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Pickup</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${pickupStr}</span>
+          </td>
+        </tr>
+        ${viasHtml}
+        <tr>
+          <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Dropoff</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${dropoffStr}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Vehicle Type</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${vehicleType}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 15px;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Payment Method</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${paymentMethod}</span>
+          </td>
+        </tr>
+      </table>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background-color: #f3f4f6;">
+        <tr>
+          <td style="padding: 20px; text-align: center;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Total Paid</strong><br/>
+            <span style="color: #111827; font-size: 28px; font-weight: bold; display: block; margin-top: 5px;">${formatPrice(booking?.fare)}</span>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; margin-top: 25px;">
+        <p style="margin: 0; color: #666666; font-size: 14px;">If you have any feedback or need assistance, please reply to this email.</p>
+      </div>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Booking Receipt");
+  },
 
   jobCancelled: (booking: any, orgSettings: any = {}) => {
     const bookingRef = booking?.id ? `#${booking.id.toString().padStart(6, '0')}` : 'Pending';
