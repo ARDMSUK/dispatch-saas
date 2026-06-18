@@ -116,8 +116,27 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No chargeable items found for this plan configuration" }, { status: 400 });
         }
 
-        // Return URL when checkout is completed/cancelled
-        const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings/billing`;
+        // Safe base URL builder for Stripe success/cancel redirects
+        let baseUrl = 'https://app.cabai.co.uk'; // Safe production default
+
+        if (process.env.NEXT_PUBLIC_APP_URL) {
+            baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+        } else {
+            const host = req.headers.get("host") || "";
+            const origin = req.headers.get("origin") || req.nextUrl.origin || "";
+            const derivedHost = host || (origin ? new URL(origin).host : "");
+            
+            if (derivedHost === "app.cabai.co.uk") {
+                baseUrl = `https://${derivedHost}`;
+            } else if (derivedHost.endsWith(".vercel.app")) {
+                baseUrl = `https://${derivedHost}`;
+            } else if (process.env.NODE_ENV !== "production" && (derivedHost.startsWith("localhost:") || derivedHost.startsWith("127.0.0.1:"))) {
+                baseUrl = `http://${derivedHost}`;
+            }
+        }
+        
+        baseUrl = baseUrl.replace(/\/$/, "");
+        const returnUrl = `${baseUrl}/dashboard/settings/billing`;
 
         const checkoutSessionOptions: any = {
             mode: "subscription",
