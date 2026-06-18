@@ -139,7 +139,35 @@ export async function POST(req: NextRequest) {
             checkoutSessionOptions.customer_email = tenant.email || session.user.email;
         }
 
-        const stripeSession = await systemStripe.checkout.sessions.create(checkoutSessionOptions);
+        let stripeSession;
+        try {
+            stripeSession = await systemStripe.checkout.sessions.create(checkoutSessionOptions);
+        } catch (error: any) {
+            // Detect if Stripe rejected the customer ID (e.g., test-mode ID on live-mode keys)
+            const isCustomerError = error?.code === 'resource_missing' || 
+                                    error?.message?.includes('No such customer') || 
+                                    error?.param === 'customer';
+
+            if (isCustomerError && checkoutSessionOptions.customer) {
+                console.warn(`[Stripe Fallback] Invalid customer ID detected for tenant ${tenant.id}. Clearing ID and retrying...`);
+                
+                // Clear the invalid customer from the payload
+                delete checkoutSessionOptions.customer;
+                checkoutSessionOptions.customer_email = tenant.email || session.user.email;
+
+                // Clear it in the database so future attempts don't hit the same error
+                await prisma.tenant.update({
+                    where: { id: tenant.id },
+                    data: { stripeCustomerId: null }
+                });
+
+                // Retry session creation once
+                stripeSession = await systemStripe.checkout.sessions.create(checkoutSessionOptions);
+            } else {
+                // Not an invalid customer error, or retry failed, propagate to outer catch
+                throw error;
+            }
+        }
 
         return NextResponse.json({ url: stripeSession.url });
     } catch (error) {
