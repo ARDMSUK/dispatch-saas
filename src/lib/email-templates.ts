@@ -38,6 +38,32 @@ function parseVias(viasRaw: any): any[] {
     return [];
   }
 }
+function formatAddressForDisplay(address: string | undefined | null): string {
+  if (!address || typeof address !== 'string') return 'Pending';
+  const trimmed = address.trim();
+  if (trimmed === '') return 'Pending';
+
+  const upperCount = (trimmed.match(/[A-Z]/g) || []).length;
+  const lowerCount = (trimmed.match(/[a-z]/g) || []).length;
+
+  if (lowerCount > upperCount) {
+    return trimmed;
+  }
+
+  let titleCased = trimmed.replace(/\w\S*/g, (txt) => {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+
+  titleCased = titleCased.replace(/\b([a-z][a-hj-y]?\d[a-z\d]? ?\d[a-z]{2})\b/gi, (match) => match.toUpperCase());
+
+  const alwaysUpper = ['UK', 'USA', 'NHS', 'VIP'];
+  alwaysUpper.forEach(word => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    titleCased = titleCased.replace(regex, word);
+  });
+
+  return titleCased;
+}
 
 export const EmailTemplates = {
   bookingConfirmation: (booking: any, orgSettings: any = {}) => {
@@ -60,7 +86,7 @@ export const EmailTemplates = {
         <tr>
           <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
             <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Via ${index + 1}</strong><br/>
-            <span style="color: #333333; font-size: 16px;">${via.address || via}</span>
+            <span style="color: #333333; font-size: 16px;">${formatAddressForDisplay(via.address || via)}</span>
           </td>
         </tr>
       `).join('');
@@ -157,14 +183,14 @@ export const EmailTemplates = {
                             <tr>
                               <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
                                 <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Pickup</strong><br/>
-                                <span style="color: #333333; font-size: 16px;">${booking?.pickupAddress || 'Pending'}</span>
+                                <span style="color: #333333; font-size: 16px;">${formatAddressForDisplay(booking?.pickupAddress)}</span>
                               </td>
                             </tr>
                             ${viasHtml}
                             <tr>
                               <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
                                 <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Dropoff</strong><br/>
-                                <span style="color: #333333; font-size: 16px;">${booking?.dropoffAddress || 'Pending'}</span>
+                                <span style="color: #333333; font-size: 16px;">${formatAddressForDisplay(booking?.dropoffAddress)}</span>
                               </td>
                             </tr>
                             <!-- Passenger & Payment Info -->
