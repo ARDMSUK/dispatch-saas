@@ -10,7 +10,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { priceId } = await req.json();
+        const { priceId, interval = "week" } = await req.json();
+
+        if (interval !== "week" && interval !== "month") {
+            return NextResponse.json({ error: "Invalid billing interval" }, { status: 400 });
+        }
 
         if (!systemStripe) {
             return NextResponse.json({ error: "Stripe not configured on platform" }, { status: 500 });
@@ -31,50 +35,81 @@ export async function POST(req: NextRequest) {
         }
 
         const line_items: any[] = [];
-
-        // 1. Base Plan Weekly
-        if (plan && plan.priceWeekly > 0) {
-            line_items.push({
-                price_data: {
-                    currency: "gbp",
-                    product_data: { name: `${plan.name} Plan - Base Weekly` },
-                    unit_amount: Math.round(plan.priceWeekly * 100),
-                    recurring: { interval: "week" },
-                },
-                quantity: 1,
-            });
-        }
-
-        // 2. Per Driver Fee Weekly
         const driverCount = await prisma.driver.count({ where: { tenantId: tenant.id } });
-        if (plan && plan.pricePerDriverWeekly > 0 && driverCount > 0) {
-            line_items.push({
-                price_data: {
-                    currency: "gbp",
-                    product_data: { name: "Active Drivers Fee (Weekly)" },
-                    unit_amount: Math.round(plan.pricePerDriverWeekly * 100),
-                    recurring: { interval: "week" },
-                },
-                quantity: driverCount,
-            });
-        }
 
-        // 3. Custom Addons
-        const customAddons = tenant.customAddonPrices as Record<string, number> | null;
-        if (customAddons) {
-            for (const [addonName, price] of Object.entries(customAddons)) {
-                if (typeof price === 'number' && price > 0) {
-                    line_items.push({
-                        price_data: {
-                            currency: "gbp",
-                            product_data: { name: `Add-on: ${addonName}` },
-                            unit_amount: Math.round(price * 100),
-                            recurring: { interval: "week" },
-                        },
-                        quantity: 1,
-                    });
+        if (interval === "week") {
+            // 1. Base Plan Weekly
+            if (plan && plan.priceWeekly > 0) {
+                line_items.push({
+                    price_data: {
+                        currency: "gbp",
+                        product_data: { name: `${plan.name} Plan - Base Weekly` },
+                        unit_amount: Math.round(plan.priceWeekly * 100),
+                        recurring: { interval: "week" },
+                    },
+                    quantity: 1,
+                });
+            }
+
+            // 2. Per Driver Fee Weekly
+            if (plan && plan.pricePerDriverWeekly > 0 && driverCount > 0) {
+                line_items.push({
+                    price_data: {
+                        currency: "gbp",
+                        product_data: { name: "Active Drivers Fee (Weekly)" },
+                        unit_amount: Math.round(plan.pricePerDriverWeekly * 100),
+                        recurring: { interval: "week" },
+                    },
+                    quantity: driverCount,
+                });
+            }
+
+            // 3. Custom Addons (Weekly only for now)
+            const customAddons = tenant.customAddonPrices as Record<string, number> | null;
+            if (customAddons) {
+                for (const [addonName, price] of Object.entries(customAddons)) {
+                    if (typeof price === 'number' && price > 0) {
+                        line_items.push({
+                            price_data: {
+                                currency: "gbp",
+                                product_data: { name: `Add-on: ${addonName}` },
+                                unit_amount: Math.round(price * 100),
+                                recurring: { interval: "week" },
+                            },
+                            quantity: 1,
+                        });
+                    }
                 }
             }
+        } else if (interval === "month") {
+            // 1. Base Plan Monthly
+            if (plan && plan.priceMonthly > 0) {
+                line_items.push({
+                    price_data: {
+                        currency: "gbp",
+                        product_data: { name: `${plan.name} Plan - Base Monthly` },
+                        unit_amount: Math.round(plan.priceMonthly * 100),
+                        recurring: { interval: "month" },
+                    },
+                    quantity: 1,
+                });
+            }
+
+            // 2. Per Driver Fee Monthly
+            if (plan && plan.pricePerDriverMonthly > 0 && driverCount > 0) {
+                line_items.push({
+                    price_data: {
+                        currency: "gbp",
+                        product_data: { name: "Active Drivers Fee (Monthly)" },
+                        unit_amount: Math.round(plan.pricePerDriverMonthly * 100),
+                        recurring: { interval: "month" },
+                    },
+                    quantity: driverCount,
+                });
+            }
+
+            // Note: Custom Add-ons are explicitly omitted for "month" interval
+            // per Option A implementation to prevent unsafe flat-rate overcharging.
         }
 
         if (line_items.length === 0) {
@@ -93,6 +128,7 @@ export async function POST(req: NextRequest) {
             metadata: {
                 tenantId: tenant.id,
                 planId: plan?.id || "",
+                billingInterval: interval,
             },
         };
 

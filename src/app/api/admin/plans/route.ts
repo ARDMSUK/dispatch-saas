@@ -34,6 +34,9 @@ export async function POST(req: Request) {
                 name: body.name || "New Subscription Plan",
                 priceMonthly: body.priceMonthly || 0,
                 priceAnnually: body.priceAnnually || 0,
+                priceWeekly: body.priceWeekly || 0,
+                pricePerDriverWeekly: body.pricePerDriverWeekly || 0,
+                pricePerDriverMonthly: body.pricePerDriverMonthly || 0,
                 stripeProductId: body.stripeProductId,
                 stripePriceId: body.stripePriceId,
 

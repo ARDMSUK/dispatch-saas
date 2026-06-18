@@ -100,6 +100,7 @@ model Tenant {
   subscriptionStatus   String    @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, CANCELED
   subscriptionPlanId   String?
   subscriptionPlan     SaasPlan? @relation(fields: [subscriptionPlanId], references: [id])
+  billingInterval      String    @default("week") // week, month
 
   // Notification Templates (Super Admin ONLY)
   smsTemplateConfirmation   String? @db.Text
@@ -146,12 +147,13 @@ model Tenant {
 }
 
 model SaasPlan {
-  id                   String  @id @default(cuid())
-  name                 String
-  priceMonthly         Float   @default(0)
-  priceAnnually        Float   @default(0)
-  priceWeekly          Float   @default(0)
-  pricePerDriverWeekly Float   @default(0)
+  id                    String  @id @default(cuid())
+  name                  String
+  priceMonthly          Float   @default(0)
+  priceAnnually         Float   @default(0)
+  priceWeekly           Float   @default(0)
+  pricePerDriverWeekly  Float   @default(0)
+  pricePerDriverMonthly Float   @default(0)
   stripeProductId      String?
   stripePriceId        String?
 

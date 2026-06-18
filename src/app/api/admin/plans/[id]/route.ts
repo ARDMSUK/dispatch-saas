@@ -18,6 +18,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
                 name: body.name,
                 priceMonthly: body.priceMonthly,
                 priceAnnually: body.priceAnnually,
+                priceWeekly: body.priceWeekly,
+                pricePerDriverWeekly: body.pricePerDriverWeekly,
+                pricePerDriverMonthly: body.pricePerDriverMonthly,
                 stripeProductId: body.stripeProductId,
                 stripePriceId: body.stripePriceId,
 

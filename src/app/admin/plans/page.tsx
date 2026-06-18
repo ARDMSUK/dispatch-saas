@@ -11,6 +11,9 @@ interface SaasPlan {
     name: string;
     priceMonthly: number;
     priceAnnually: number;
+    priceWeekly: number;
+    pricePerDriverWeekly: number;
+    pricePerDriverMonthly: number;
     stripeProductId: string | null;
     stripePriceId: string | null;
 
@@ -59,6 +62,9 @@ export default function SaaSPlansPage() {
             name: 'New Plan',
             priceMonthly: 0,
             priceAnnually: 0,
+            priceWeekly: 0,
+            pricePerDriverWeekly: 0,
+            pricePerDriverMonthly: 0,
             stripeProductId: null,
             stripePriceId: null,
             incZonePricing: false,
@@ -171,6 +177,33 @@ export default function SaaSPlansPage() {
                                             className="w-full p-2 border rounded-md" 
                                             value={selectedPlan.priceAnnually} 
                                             onChange={e => setSelectedPlan({...selectedPlan, priceAnnually: parseFloat(e.target.value) || 0})} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Weekly Price ($)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full p-2 border rounded-md" 
+                                            value={selectedPlan.priceWeekly} 
+                                            onChange={e => setSelectedPlan({...selectedPlan, priceWeekly: parseFloat(e.target.value) || 0})} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Per-Driver Weekly ($)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full p-2 border rounded-md" 
+                                            value={selectedPlan.pricePerDriverWeekly} 
+                                            onChange={e => setSelectedPlan({...selectedPlan, pricePerDriverWeekly: parseFloat(e.target.value) || 0})} 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Per-Driver Monthly ($)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full p-2 border rounded-md" 
+                                            value={selectedPlan.pricePerDriverMonthly} 
+                                            onChange={e => setSelectedPlan({...selectedPlan, pricePerDriverMonthly: parseFloat(e.target.value) || 0})} 
                                         />
                                     </div>
                                 </div>

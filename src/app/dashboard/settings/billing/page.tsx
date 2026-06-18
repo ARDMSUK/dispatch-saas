@@ -16,10 +16,17 @@ export default async function BillingSettingsPage() {
             stripeCustomerId: true,
             stripeSubscriptionId: true,
             subscriptionStatus: true,
+            subscriptionPlan: true,
+            billingInterval: true,
         }
     });
 
     if (!tenant) redirect('/login');
+
+    let plan = tenant.subscriptionPlan;
+    if (!plan) {
+        plan = await prisma.saasPlan.findFirst({ where: { name: "Solo" } });
+    }
 
     return (
         <div className="space-y-6">
@@ -33,8 +40,11 @@ export default async function BillingSettingsPage() {
             <BillingSettingsClient
                 tenantId={tenant.id}
                 status={tenant.subscriptionStatus}
-                plan={"Basic"}
+                plan={plan?.name || "Dispatch Core Platform"}
                 hasCustomerProfile={!!tenant.stripeCustomerId}
+                priceWeekly={plan?.priceWeekly || 0}
+                priceMonthly={plan?.priceMonthly || 0}
+                currentInterval={tenant.billingInterval || "week"}
             />
         </div>
     );

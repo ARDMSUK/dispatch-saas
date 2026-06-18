@@ -30,15 +30,20 @@ export async function POST(req: NextRequest) {
                 const session = event.data.object as Stripe.Checkout.Session;
 
                 if (session.metadata?.tenantId) {
+                    const rawInterval = session.metadata.billingInterval;
+                    const billingInterval = rawInterval === "month" ? "month" : "week";
+
                     const updateData: {
                         stripeCustomerId: string;
                         stripeSubscriptionId: string;
                         subscriptionStatus: string;
                         subscriptionPlanId?: string;
+                        billingInterval: string;
                     } = {
                         stripeCustomerId: session.customer as string,
                         stripeSubscriptionId: session.subscription as string,
                         subscriptionStatus: "ACTIVE",
+                        billingInterval,
                     };
 
                     if (session.metadata.planId) {
@@ -57,7 +62,7 @@ export async function POST(req: NextRequest) {
                         where: { id: session.metadata.tenantId },
                         data: updateData,
                     });
-                    console.log(`✅ Activated subscription for Tenant ${session.metadata.tenantId}`);
+                    console.log(`✅ Activated subscription for Tenant ${session.metadata.tenantId} on ${billingInterval}ly cycle`);
                 }
                 break;
             }

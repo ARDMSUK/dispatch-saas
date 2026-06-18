@@ -13,10 +13,14 @@ interface BillingProps {
     status: string;
     plan: string | null;
     hasCustomerProfile: boolean;
+    priceWeekly: number;
+    priceMonthly: number;
+    currentInterval: string;
 }
 
-export function BillingSettingsClient({ tenantId, status, plan, hasCustomerProfile }: BillingProps) {
+export function BillingSettingsClient({ tenantId, status, plan, hasCustomerProfile, priceWeekly, priceMonthly, currentInterval }: BillingProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [interval, setInterval] = useState<"week" | "month">(currentInterval === "month" ? "month" : "week");
 
     // Hardcoded production Price ID for the SaaS plan
     // In reality, this would be fetched from the DB or env vars
@@ -28,7 +32,7 @@ export function BillingSettingsClient({ tenantId, status, plan, hasCustomerProfi
             const res = await fetch("/api/stripe/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ priceId: CORE_PLAN_PRICE_ID }),
+                body: JSON.stringify({ priceId: CORE_PLAN_PRICE_ID, interval }),
             });
             const data = await res.json();
 
@@ -102,7 +106,56 @@ export function BillingSettingsClient({ tenantId, status, plan, hasCustomerProfi
                         {getStatusDisplay()}
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
+                    {!hasCustomerProfile && (
+                        <div className="space-y-3">
+                            <label className="text-base font-semibold block">Select Billing Cycle</label>
+                            <div className="flex flex-col space-y-2">
+                                <label 
+                                    className={`flex items-center space-x-3 border p-4 rounded-md cursor-pointer transition-colors ${interval === "week" ? "bg-slate-50 border-blue-500 ring-1 ring-blue-500" : "hover:bg-slate-50 border-slate-200"}`}
+                                >
+                                    <input 
+                                        type="radio" 
+                                        name="billingInterval" 
+                                        value="week" 
+                                        checked={interval === "week"} 
+                                        onChange={() => setInterval("week")}
+                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="font-medium">Weekly Billing</div>
+                                    </div>
+                                    <div className="font-semibold">£{priceWeekly.toFixed(2)}/wk</div>
+                                </label>
+
+                                <label 
+                                    className={`flex items-center space-x-3 border p-4 rounded-md cursor-pointer transition-colors ${interval === "month" ? "bg-slate-50 border-blue-500 ring-1 ring-blue-500" : "hover:bg-slate-50 border-slate-200"}`}
+                                >
+                                    <input 
+                                        type="radio" 
+                                        name="billingInterval" 
+                                        value="month" 
+                                        checked={interval === "month"} 
+                                        onChange={() => setInterval("month")}
+                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="font-medium">Monthly Billing</div>
+                                    </div>
+                                    <div className="font-semibold">£{priceMonthly.toFixed(2)}/mo</div>
+                                </label>
+                            </div>
+                            {interval === "month" && (
+                                <Alert className="bg-amber-50 border-amber-200">
+                                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                                    <AlertDescription className="text-amber-800 text-xs">
+                                        Note: A La Carte Add-ons are currently billed weekly only. If you subscribe monthly, any active Custom Add-ons will be temporarily omitted from your bill until monthly add-on pricing is fully supported.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+                    )}
+
                     <div className="flex flex-col gap-4">
                         <div className="grid grid-cols-2 gap-4 border rounded-lg p-4 bg-slate-50/50">
                             <div>
@@ -111,7 +164,7 @@ export function BillingSettingsClient({ tenantId, status, plan, hasCustomerProfi
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-slate-500">Billing Cycle</p>
-                                <p className="text-lg font-semibold">Monthly</p>
+                                <p className="text-lg font-semibold capitalize">{hasCustomerProfile ? currentInterval : interval}ly</p>
                             </div>
                         </div>
 
