@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ChevronLeft, Save, Building2, Key, Trash2, Layers, CreditCard, ShieldAlert } from "lucide-react";
+import { ChevronLeft, Save, Building2, Key, Trash2, Layers, CreditCard, ShieldAlert, Users } from "lucide-react";
 
 export default function TenantConfigPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -148,8 +148,9 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
             </div>
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-12 bg-slate-100 p-1 mb-6">
+                <TabsList className="grid w-full grid-cols-5 h-12 bg-slate-100 p-1 mb-6">
                     <TabsTrigger value="general" className="data-[state=active]:bg-white">General Info</TabsTrigger>
+                    <TabsTrigger value="users" className="data-[state=active]:bg-white">Users</TabsTrigger>
                     <TabsTrigger value="integrations" className="data-[state=active]:bg-white">API Keys</TabsTrigger>
                     <TabsTrigger value="saas" className="data-[state=active]:bg-white">SaaS Subscription</TabsTrigger>
                     <TabsTrigger value="danger" className="data-[state=active]:bg-red-50 data-[state=active]:text-red-700">Danger Zone</TabsTrigger>
@@ -186,6 +187,76 @@ export default function TenantConfigPage({ params }: { params: Promise<{ id: str
                                     <Input name="address" value={tenant.address || ''} onChange={handleChange} />
                                 </div>
                             </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* USERS TAB */}
+                <TabsContent value="users" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Tenant Login Users</CardTitle>
+                            <CardDescription>
+                                These are the actual user accounts that can log into this tenant's workspace.
+                                <br />
+                                <strong>Company contact email:</strong> {tenant.email || 'None'}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {tenant.users && tenant.users.length > 0 ? (
+                                <div className="space-y-4">
+                                    {tenant.users.map((user: any) => (
+                                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-md">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h4 className="font-semibold">{user.name || 'Unnamed User'}</h4>
+                                                    <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600 border border-slate-200">
+                                                        {user.role}
+                                                    </span>
+                                                    {user.presenceStatus === 'ONLINE' && (
+                                                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-sm text-slate-500">{user.email}</span>
+                                                    <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-blue-500" onClick={() => {
+                                                        navigator.clipboard.writeText(user.email);
+                                                        toast.success("Email copied");
+                                                    }}>Copy</Button>
+                                                </div>
+                                                <p className="text-xs text-slate-400 mt-2">
+                                                    Created: {new Date(user.createdAt).toLocaleDateString()}
+                                                    {user.lastPresenceUpdate && ` • Last active: ${new Date(user.lastPresenceUpdate).toLocaleString()}`}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <Button variant="outline" size="sm" onClick={async () => {
+                                                    try {
+                                                        const res = await fetch('/api/auth/forgot-password', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ email: user.email })
+                                                        });
+                                                        if (res.ok) {
+                                                            toast.success(`Password reset link sent to ${user.email}`);
+                                                        } else {
+                                                            toast.error("Failed to send reset link");
+                                                        }
+                                                    } catch (error) {
+                                                        toast.error("Error sending reset link");
+                                                    }
+                                                }}>
+                                                    Send Reset Link
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-slate-500">
+                                    No users found for this tenant.
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

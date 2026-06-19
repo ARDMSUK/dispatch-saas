@@ -12,7 +12,20 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         const tenant = await prisma.tenant.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                users: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        createdAt: true,
+                        lastPresenceUpdate: true,
+                        presenceStatus: true
+                    }
+                }
+            }
         });
 
         if (!tenant) {
