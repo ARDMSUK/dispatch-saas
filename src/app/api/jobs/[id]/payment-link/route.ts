@@ -47,6 +47,11 @@ export async function POST(
             });
         }
 
+        // Validate fare amount
+        if (job.fare === null || job.fare === undefined || isNaN(job.fare) || job.fare <= 0) {
+            return NextResponse.json({ error: 'Invalid or missing fare amount for this job' }, { status: 400 });
+        }
+
         const tenant = job.tenant;
         const stripeClient = tenant.stripeSecretKey ? getStripe(tenant.stripeSecretKey) : systemStripe;
 
@@ -69,7 +74,7 @@ export async function POST(
                             name: `Booking #${job.id} - ${tenant.name}`,
                             description: `${job.pickupAddress} to ${job.dropoffAddress}`,
                         },
-                        unit_amount: Math.round((job.price || 0) * 100), // convert to pence
+                        unit_amount: Math.round((job.fare || 0) * 100), // convert to pence
                     },
                     quantity: 1,
                 },
