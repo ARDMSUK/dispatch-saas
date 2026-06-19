@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, UserX, Send, Copy, Volume2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import QRCode from 'qrcode';
+import { Link as LinkIcon, QrCode } from "lucide-react";
 import { toast } from 'sonner';
 import {
     differenceInMinutes, parseISO, isToday, isTomorrow, isThisWeek, isSameMonth,
@@ -104,6 +106,11 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
     // Job Details State
     const [selectedDetailsJob, setSelectedDetailsJob] = useState<Job | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrJob, setQrJob] = useState<any>(null);
+    const [qrLoading, setQrLoading] = useState(false);
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+    const [qrLink, setQrLink] = useState<string | null>(null);
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
     const [logsLoading, setLogsLoading] = useState(false);
 
@@ -734,30 +741,21 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                     </Button>
                                 )}
 
-                                {/* Send Track & Pay SMS */}
-                                {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && (
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full justify-start h-8 text-xs font-normal"
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            try {
-                                                const res = await fetch(`/api/jobs/${job.id}/payment/sms`, { method: 'POST' });
-                                                if (res.ok) {
-                                                    toast.success("Track & Pay SMS sent successfully");
-                                                } else {
-                                                    const data = await res.json();
-                                                    toast.error(data.error || "Failed to send Track & Pay SMS");
-                                                }
-                                            } catch (err) {
-                                                console.error(err);
-                                                toast.error("Error sending Track & Pay SMS");
-                                            }
-                                        }}
-                                    >
-                                        <Send className="mr-2 h-3.5 w-3.5 text-teal-500" /> Send SMS Pay Link
-                                    </Button>
-                                )}
+                                
+                                    {/* Payment Link / QR */}
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && (
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start h-8 text-xs font-normal"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleOpenQr(job);
+                                            }}
+                                        >
+                                            <QrCode className="mr-2 h-3.5 w-3.5 text-indigo-500" /> Payment Link / QR
+                                        </Button>
+                                    )}
+
 
                                 {/* Driver Simulation Actions */}
                                 {job.status === 'DISPATCHED' && (
