@@ -29,7 +29,50 @@ export async function POST(req: NextRequest) {
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session;
 
-                if (session.metadata?.tenantId) {
+                // 1. Job Payment Classification
+                if (session.metadata?.jobId) {
+                    const jobId = parseInt(session.metadata.jobId, 10);
+                    const tenantId = session.metadata.tenantId;
+
+                    if (isNaN(jobId) || !tenantId) {
+                        console.warn(`[Webhook] Job payment invalid metadata. jobId: ${session.metadata.jobId}, tenantId: ${tenantId}`);
+                        break;
+                    }
+
+                    const job = await prisma.job.findUnique({ where: { id: jobId } });
+
+                    if (!job) {
+                        console.warn(`[Webhook] Job ${jobId} not found.`);
+                        break;
+                    }
+
+                    if (job.tenantId !== tenantId) {
+                        console.warn(`[Webhook] Job ${jobId} tenant mismatch. Expected ${job.tenantId}, got ${tenantId}.`);
+                        break;
+                    }
+
+                    if (job.paymentStatus === 'PAID') {
+                        console.log(`[Webhook] Job ${jobId} already paid. Skipping duplicate side effects.`);
+                        break;
+                    }
+
+                    if (session.payment_status === 'paid') {
+                        await prisma.job.update({
+                            where: { id: jobId },
+                            data: {
+                                paymentStatus: 'PAID',
+                                paymentType: 'CARD',
+                                paymentProvider: 'STRIPE',
+                                paymentReferenceId: (session.payment_intent as string) || session.id
+                            }
+                        });
+                        console.log(`✅ Marked Job ${jobId} as PAID`);
+                    } else {
+                        console.warn(`[Webhook] Job ${jobId} session completed but payment_status is ${session.payment_status}.`);
+                    }
+                }
+                // 2. SaaS Subscription Classification
+                else if (session.mode === 'subscription' && session.metadata?.tenantId && session.metadata?.planId) {
                     const rawInterval = session.metadata.billingInterval;
                     const billingInterval = rawInterval === "month" ? "month" : "week";
 
@@ -46,16 +89,14 @@ export async function POST(req: NextRequest) {
                         billingInterval,
                     };
 
-                    if (session.metadata.planId) {
-                        const planExists = await prisma.saasPlan.findUnique({
-                            where: { id: session.metadata.planId },
-                        });
+                    const planExists = await prisma.saasPlan.findUnique({
+                        where: { id: session.metadata.planId },
+                    });
 
-                        if (planExists) {
-                            updateData.subscriptionPlanId = session.metadata.planId;
-                        } else {
-                            console.warn(`Webhook Warning: Invalid planId '${session.metadata.planId}' passed for Tenant ${session.metadata.tenantId}. Activating without a specific plan.`);
-                        }
+                    if (planExists) {
+                        updateData.subscriptionPlanId = session.metadata.planId;
+                    } else {
+                        console.warn(`[Webhook] Warning: Invalid planId '${session.metadata.planId}' passed for Tenant ${session.metadata.tenantId}. Activating without a specific plan.`);
                     }
 
                     await prisma.tenant.update({
@@ -63,6 +104,10 @@ export async function POST(req: NextRequest) {
                         data: updateData,
                     });
                     console.log(`✅ Activated subscription for Tenant ${session.metadata.tenantId} on ${billingInterval}ly cycle`);
+                } 
+                // 3. Ambiguous session
+                else if (session.metadata?.tenantId) {
+                    console.warn(`[Webhook] Ambiguous session for tenant ${session.metadata.tenantId}. No jobId, and not a clear subscription checkout.`);
                 }
                 break;
             }
