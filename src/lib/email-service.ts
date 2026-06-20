@@ -98,11 +98,23 @@ export const EmailService = {
     },
 
     async sendPaymentLink(booking: any, orgSettings?: any) {
-        const companyName = orgSettings?.name || 'CABAI System';
+        const companyName = orgSettings?.name || 'us';
         const replyTo = orgSettings?.email;
-        const subject = `Payment Request - Booking #${booking.id.toString().padStart(6, '0')}`;
         
-        const html = EmailTemplates.paymentLink(booking, orgSettings);
+        const subject = orgSettings?.name 
+            ? `${orgSettings.name} payment link` 
+            : `Payment link for your taxi booking`;
+        
+        const checkoutUrl = booking.paymentLink;
+        
+        const html = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2>Payment Request</h2>
+                <p>Please pay for your taxi booking with ${companyName} here:</p>
+                <p><a href="${checkoutUrl}" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px;">Pay Now</a></p>
+                <p style="color: #666; font-size: 14px; margin-top: 20px;">Or use this link: <a href="${checkoutUrl}">${checkoutUrl}</a></p>
+            </div>
+        `;
 
         const to = booking.passengerEmail || booking.customer?.email || booking.email;
 
@@ -111,7 +123,7 @@ export const EmailService = {
             return { success: false, error: 'No email address found' };
         }
 
-        return this.sendEmail(to, subject, html, companyName, replyTo);
+        return this.sendEmail(to, subject, html, companyName === 'us' ? 'CABAI System' : companyName, replyTo);
     },
 
     async sendEmail(to: string, subject: string, html: string, companyName: string = 'CABAI System', replyTo?: string) {
