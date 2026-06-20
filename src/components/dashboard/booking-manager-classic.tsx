@@ -820,38 +820,40 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                     <CheckCircle className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Mark Completed
                                 </Button>
                                 
-                                {/* Cancel & Refund (For card-paid, active bookings) */}
-                                {(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') && job.status !== 'CANCELLED' ? (
+                                {/* Cancel Action */}
+                                {job.status !== 'CANCELLED' && (
                                     <Button
                                         variant="ghost"
                                         className="w-full justify-start h-8 text-xs font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
                                         onClick={async (e) => {
                                             e.stopPropagation();
-                                            if (confirm("Are you sure you want to cancel this booking and issue a full refund?")) {
+                                            const isPaid = job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED';
+                                            const confirmMessage = isPaid 
+                                                ? "Are you sure you want to cancel this booking? NOTE: Refund must be processed separately." 
+                                                : "Are you sure you want to cancel this booking?";
+                                                
+                                            if (confirm(confirmMessage)) {
                                                 try {
                                                     const res = await fetch(`/api/jobs/${job.id}`, {
                                                         method: 'PATCH',
                                                         headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ status: 'CANCELLED', paymentStatus: 'REFUNDED' })
+                                                        body: JSON.stringify({ status: 'CANCELLED' })
                                                     });
                                                     if (res.ok) {
-                                                        toast.success("Booking cancelled and refunded successfully");
+                                                        toast.success("Booking cancelled successfully");
                                                         fetchJobs();
                                                     } else {
-                                                        toast.error("Failed to cancel and refund booking");
+                                                        toast.error("Failed to cancel booking");
                                                     }
                                                 } catch (err) {
                                                     console.error(err);
-                                                    toast.error("Error cancelling and refunding booking");
+                                                    toast.error("Error cancelling booking");
                                                 }
                                             }
                                         }}
                                     >
-                                        <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> Cancel & Refund
-                                    </Button>
-                                ) : (
-                                    <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'CANCELLED'); }}>
-                                        <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> Mark Cancelled
+                                        <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> 
+                                        {(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') ? 'Cancel (Refund separately)' : 'Cancel Booking'}
                                     </Button>
                                 )}
 

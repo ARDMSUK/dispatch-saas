@@ -34,7 +34,7 @@ const UpdateJobSchema = z.object({
     luggage: z.number().optional(),
     flightNumber: z.string().optional().nullable(),
     preAssignedDriverId: z.string().optional().nullable(),
-    paymentStatus: z.enum(["UNPAID", "AUTHORIZED", "PAID", "REFUNDED"]).optional(),
+    paymentStatus: z.enum(["UNPAID", "AUTHORIZED", "PAID"]).optional(),
 });
 
 export async function PATCH(
