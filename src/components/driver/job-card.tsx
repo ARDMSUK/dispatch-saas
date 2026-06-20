@@ -2,12 +2,68 @@
 'use client';
 
 import { useState } from 'react';
+import QRCode from 'qrcode';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, Phone, User, Clock, MapPin } from 'lucide-react';
+import { Navigation, Phone, User, Clock, MapPin, QrCode, Send, CheckCircle, RefreshCw, Copy } from 'lucide-react';
 
 export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusUpdate: (id: number, status: string, paymentType?: string) => void, onReject?: (id: number) => void }) {
     const [showPayment, setShowPayment] = useState(false);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrLink, setQrLink] = useState<string | null>(null);
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+    const [qrLoading, setQrLoading] = useState(false);
+
+    const handleGenerateQr = async () => {
+        setQrModalOpen(true);
+        setQrLink(null);
+        setQrCodeDataUrl(null);
+        
+        if (job.paymentStatus === 'PAID') {
+            return;
+        }
+
+        setQrLoading(true);
+        try {
+            const res = await fetch(`/api/mobile/driver/jobs/${job.id}/payment-link`, { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.success && data.url) {
+                setQrLink(data.url);
+                try {
+                    const qrDataUrl = await QRCode.toDataURL(data.url, { width: 300, margin: 2 });
+                    setQrCodeDataUrl(qrDataUrl);
+                } catch (qrErr) {
+                    console.error('QR Generate Error', qrErr);
+                }
+            } else {
+                toast.error(data.error || 'Failed to generate payment link');
+                setQrModalOpen(false);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Error generating payment link');
+            setQrModalOpen(false);
+        } finally {
+            setQrLoading(false);
+        }
+    };
+
+    const handleSendSms = async () => {
+        try {
+            const res = await fetch(`/api/mobile/driver/jobs/${job.id}/payment/sms`, { method: 'POST' });
+            if (res.ok) {
+                toast.success("Track & Pay SMS sent successfully");
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Failed to send Track & Pay SMS");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Error sending Track & Pay SMS");
+        }
+    };
 
     if (!job) return (
         <div className="flex flex-col items-center justify-center p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl bg-zinc-900/20">
@@ -184,31 +240,148 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
 
             {showPayment && (
                 <div className="absolute inset-0 z-50 bg-zinc-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Payment Collection</h3>
-                    <p className="text-4xl font-black text-emerald-600 mb-2">£{job.fare?.toFixed(2)}</p>
-                    <p className="text-slate-500 text-sm mb-8">Please process payment or confirm cash received.</p>
+                    <h3 className="text-xl font-bold text-slate-100 mb-2">Payment Collection</h3>
+                    <p className="text-4xl font-black text-emerald-500 mb-2">£{job.fare?.toFixed(2)}</p>
+                    
+                    {job.paymentStatus === 'PAID' ? (
+                        <div className="w-full space-y-6">
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-xl text-center mb-6">
+                                <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                                <p className="font-bold text-lg text-emerald-400">Payment Completed</p>
+                                <p className="text-emerald-500/70 text-sm">Stripe Card Payment</p>
+                            </div>
+                            <Button
+                                className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-slate-900"
+                                onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'STRIPE')}
+                            >
+                                FINISH JOB
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="w-full h-12 text-slate-400 mt-4"
+                                onClick={() => setShowPayment(false)}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    ) : job.paymentStatus === 'REFUNDED' ? (
+                        <div className="w-full space-y-6">
+                            <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-xl text-center mb-6">
+                                <p className="font-bold text-lg text-amber-400">Payment Refunded</p>
+                            </div>
+                            <Button
+                                className="w-full h-14 text-lg font-bold bg-slate-200 hover:bg-zinc-700 text-slate-900 border border-slate-300"
+                                onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'CASH')}
+                            >
+                                💵 Collect Cash Instead
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="w-full h-12 text-slate-400 mt-4"
+                                onClick={() => setShowPayment(false)}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    ) : job.status === 'CANCELLED' ? (
+                        <div className="w-full space-y-6">
+                            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-xl text-center mb-6">
+                                <p className="font-bold text-lg text-red-400">Job Cancelled</p>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                className="w-full h-12 text-slate-400 mt-4"
+                                onClick={() => setShowPayment(false)}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    ) : (
+                        <>
+                            <p className="text-slate-400 text-sm mb-8">Please process payment or confirm cash received.</p>
+                            <div className="w-full space-y-3">
+                                <Button
+                                    className="w-full h-14 text-lg font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20"
+                                    onClick={handleGenerateQr}
+                                >
+                                    <QrCode className="mr-2 h-5 w-5" /> Show QR Code
+                                </Button>
+                                <Button
+                                    className="w-full h-14 text-lg font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-lg shadow-teal-900/20"
+                                    onClick={handleSendSms}
+                                >
+                                    <Send className="mr-2 h-5 w-5" /> Send SMS Payment Link
+                                </Button>
+                                
+                                <div className="py-2 flex items-center justify-center">
+                                    <div className="h-px w-full bg-slate-800"></div>
+                                    <span className="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest">OR</span>
+                                    <div className="h-px w-full bg-slate-800"></div>
+                                </div>
+                                
+                                <Button
+                                    className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+                                    onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'CASH')}
+                                >
+                                    💵 Collect Cash
+                                </Button>
+                                <Button
+                                    className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+                                    onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'IN_CAR_TERMINAL')}
+                                >
+                                    💳 Card Terminal
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full h-12 text-slate-400 mt-4"
+                                    onClick={() => setShowPayment(false)}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
 
-                    <div className="w-full space-y-3">
-                        <Button
-                            className="w-full h-14 text-lg font-bold bg-slate-200 hover:bg-zinc-700 text-slate-900 border border-slate-300"
-                            onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'CASH')}
-                        >
-                            💵 Collect Cash
-                        </Button>
-                        <Button
-                            className="w-full h-14 text-lg font-bold bg-blue-500 hover:bg-blue-500 text-slate-900 shadow-lg shadow-blue-900/20"
-                            onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'IN_CAR_TERMINAL')}
-                        >
-                            💳 Card Terminal
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            className="w-full h-12 text-slate-400 mt-4"
-                            onClick={() => setShowPayment(false)}
-                        >
-                            Cancel
-                        </Button>
+            {/* Payment QR Modal */}
+            {qrModalOpen && (
+                <div className="absolute inset-0 z-[60] bg-zinc-950 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95">
+                    <h3 className="text-xl font-bold text-slate-100 mb-2 flex items-center justify-center gap-2">
+                        <QrCode className="w-5 h-5 text-indigo-400" /> Payment Link
+                    </h3>
+                    <div className="text-center space-y-1 mb-6">
+                        <p className="text-sm text-slate-400">{job.passengerName || 'Passenger'}</p>
+                        <p className="text-3xl font-black text-emerald-400">£{(job.fare || job.price || 0).toFixed(2)}</p>
                     </div>
+
+                    {qrLoading ? (
+                        <div className="flex justify-center items-center h-64 w-full max-w-sm bg-slate-900 rounded-2xl border border-slate-800">
+                            <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin" />
+                        </div>
+                    ) : (
+                        <div className="w-full max-w-sm space-y-4">
+                            {qrCodeDataUrl ? (
+                                <div className="flex justify-center p-6 bg-white rounded-2xl shadow-xl">
+                                    <img src={qrCodeDataUrl} alt="Payment QR Code" className="w-64 h-64" />
+                                </div>
+                            ) : (
+                                <div className="flex justify-center items-center h-64 bg-slate-900 rounded-2xl border border-slate-800">
+                                    <p className="text-slate-500 text-sm">QR Code unavailable</p>
+                                </div>
+                            )}
+                            
+                            <p className="text-slate-400 text-sm mt-4">Ask passenger to scan code</p>
+
+                            <Button
+                                variant="ghost"
+                                className="w-full h-14 text-lg mt-4 text-slate-400 hover:text-white"
+                                onClick={() => setQrModalOpen(false)}
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

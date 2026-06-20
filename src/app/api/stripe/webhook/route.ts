@@ -108,6 +108,7 @@ export async function POST(req: NextRequest) {
                 // 3. Ambiguous session
                 else if (session.metadata?.tenantId) {
                     console.warn(`[Webhook] Ambiguous session for tenant ${session.metadata.tenantId}. No jobId, and not a clear subscription checkout.`);
+                }
                 break;
             }
             case "payment_intent.succeeded": {

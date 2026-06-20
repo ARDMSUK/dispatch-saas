@@ -208,6 +208,46 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         }
     };
 
+    const handleOpenQr = async (job: any) => {
+        setQrJob(job);
+        setQrModalOpen(true);
+        setQrLink(null);
+        setQrCodeDataUrl(null);
+        
+        if (job.paymentStatus === 'PAID') {
+            return;
+        }
+
+        setQrLoading(true);
+        try {
+            const res = await fetch(`/api/jobs/${job.id}/payment-link`, { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.success && data.url) {
+                setQrLink(data.url);
+                try {
+                    const qrDataUrl = await QRCode.toDataURL(data.url, { width: 300, margin: 2 });
+                    setQrCodeDataUrl(qrDataUrl);
+                } catch (qrErr) {
+                    console.error('QR Generate Error', qrErr);
+                }
+                
+                if (!data.reused) {
+                    setJobs(jobs.map(j => j.id === job.id ? { ...j, paymentLink: data.url, paymentProvider: 'STRIPE' } : j));
+                }
+            } else {
+                toast.error(data.error || 'Failed to generate payment link');
+                setQrModalOpen(false);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Error generating payment link');
+            setQrModalOpen(false);
+        } finally {
+            setQrLoading(false);
+        }
+    };
+
     const handleStatusUpdate = async (jobId: number, newStatus: string) => {
         try {
             const res = await fetch(`/api/jobs/${jobId}`, {
@@ -624,7 +664,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
                                     
                                     {/* Payment Link / QR */}
-                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && (
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (
                                         <Button
                                             variant="ghost"
                                             className="w-full justify-start h-8 text-xs font-normal"
@@ -639,7 +679,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
 
 {/* Send Track & Pay SMS */}
-                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && (
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (
                                         <Button
                                             variant="ghost"
                                             className="w-full justify-start h-8 text-xs font-normal"
@@ -1095,6 +1135,69 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     setDispatchJob(null);
                 }}
             />
+
+            {/* Payment QR Modal */}
+            <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
+                <DialogContent className="max-w-sm bg-white text-slate-900 border border-slate-200 shadow-xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-black text-slate-950 flex items-center gap-2">
+                            <QrCode className="w-5 h-5 text-indigo-600" />
+                            Payment Link
+                        </DialogTitle>
+                    </DialogHeader>
+                    {qrJob && (
+                        <div className="space-y-4 pt-2">
+                            <div className="text-center space-y-1">
+                                <h3 className="font-bold text-slate-800">Booking #{qrJob.id}</h3>
+                                <p className="text-sm text-slate-500">{qrJob.passengerName || 'Passenger'}</p>
+                                <p className="text-xl font-black text-slate-900">£{(qrJob.fare || qrJob.price || 0).toFixed(2)}</p>
+                            </div>
+
+                            {qrJob.paymentStatus === 'PAID' ? (
+                                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
+                                    <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+                                    <p className="font-bold text-emerald-700">Already Paid</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {qrLoading ? (
+                                        <div className="flex justify-center items-center h-48">
+                                            <RefreshCw className="w-8 h-8 text-indigo-300 animate-spin" />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {qrCodeDataUrl ? (
+                                                <div className="flex justify-center p-4 bg-white border border-slate-100 rounded-xl shadow-inner">
+                                                    <img src={qrCodeDataUrl} alt="Payment QR Code" className="w-48 h-48" />
+                                                </div>
+                                            ) : (
+                                                <div className="flex justify-center items-center h-48 bg-slate-50 rounded-xl border border-slate-100">
+                                                    <p className="text-slate-400 text-sm">QR Code unavailable</p>
+                                                </div>
+                                            )}
+                                            
+                                            {qrLink && (
+                                                <div className="space-y-2 pt-2">
+                                                    <Button 
+                                                        variant="outline" 
+                                                        className="w-full flex items-center gap-2"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(qrLink);
+                                                            toast.success('Link copied to clipboard');
+                                                        }}
+                                                    >
+                                                        <Copy className="w-4 h-4 text-slate-500" /> Copy Payment Link
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
                 <DialogContent className="max-w-2xl bg-white text-slate-900 border border-slate-200 shadow-xl max-h-[85vh] overflow-y-auto">
