@@ -1,57 +1,73 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyMobileToken } from '@/lib/mobile-auth';
 import { SmsService } from '@/lib/sms-service';
-import { auth } from '@/auth';
 import { getStripe, systemStripe } from '@/lib/stripe';
 
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "OPTIONS,POST",
+    "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+};
+
+export async function OPTIONS() {
+    return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 export async function POST(
-    req: Request,
+    request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const authHeader = request.headers.get('authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
         }
 
-        const id = parseInt((await params).id);
-        if (isNaN(id)) {
-            return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400 });
+        const token = authHeader.split(' ')[1];
+        const payload = await verifyMobileToken(token);
+
+        if (!payload || (!payload.id && !payload.driverId)) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders });
+        }
+
+        const driverId = payload.driverId || payload.id;
+        const { id } = await params;
+        const jobId = parseInt(id);
+
+        if (isNaN(jobId)) {
+            return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400, headers: corsHeaders });
         }
 
         let job = await prisma.job.findUnique({
-            where: { id },
-            include: {
-                tenant: true,
-                customer: true
-            }
+            where: { id: jobId },
+            include: { tenant: true, customer: true }
         });
 
         if (!job || !job.tenant) {
-            return NextResponse.json({ error: 'Job or tenant not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Job or tenant not found' }, { status: 404, headers: corsHeaders });
         }
 
-        // Check tenant isolation
-        if (job.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: 'Forbidden: You are not authorized for this job' }, { status: 403 });
+        if (job.driverId !== driverId) {
+            return NextResponse.json({ error: 'Forbidden: You are not assigned to this job' }, { status: 403, headers: corsHeaders });
         }
 
         if (!job.passengerPhone && !job.customerPhone && !job.customer?.phone) {
-            return NextResponse.json({ error: 'Customer phone number is required to send SMS' }, { status: 400 });
+            return NextResponse.json({ error: 'Customer phone number is required to send SMS' }, { status: 400, headers: corsHeaders });
         }
 
         // Block if paid, refunded, or cancelled
         if (job.paymentStatus === 'PAID' || job.paymentStatus === 'REFUNDED') {
-            return NextResponse.json({ error: 'Job is already paid or refunded', isPaid: true }, { status: 400 });
+            return NextResponse.json({ error: 'Job is already paid or refunded', isPaid: true }, { status: 400, headers: corsHeaders });
         }
 
         if (job.status === 'CANCELLED') {
-            return NextResponse.json({ error: 'Cannot send payment link for a cancelled job' }, { status: 400 });
+            return NextResponse.json({ error: 'Cannot send payment link for a cancelled job' }, { status: 400, headers: corsHeaders });
         }
 
         // Validate fare amount
         if (job.fare === null || job.fare === undefined || isNaN(job.fare) || job.fare <= 0) {
-            return NextResponse.json({ error: 'Invalid or missing fare amount for this job' }, { status: 400 });
+            return NextResponse.json({ error: 'Invalid or missing fare amount for this job' }, { status: 400, headers: corsHeaders });
         }
 
         let paymentLink = job.paymentLink;
@@ -74,7 +90,7 @@ export async function POST(
             const stripeClient = validTenantKey ? getStripe(validTenantKey) : systemStripe;
 
             if (!stripeClient) {
-                return NextResponse.json({ error: 'Stripe is not configured or unavailable' }, { status: 500 });
+                return NextResponse.json({ error: 'Stripe is not configured or unavailable' }, { status: 500, headers: corsHeaders });
             }
 
             // Safe base URL builder
@@ -82,8 +98,8 @@ export async function POST(
             if (process.env.NEXT_PUBLIC_APP_URL) {
                 baseUrl = process.env.NEXT_PUBLIC_APP_URL;
             } else {
-                const host = req.headers.get("host") || "";
-                const origin = req.headers.get("origin") || "";
+                const host = request.headers.get("host") || "";
+                const origin = request.headers.get("origin") || "";
                 const derivedHost = host || (origin ? new URL(origin).host : "");
                 
                 if (derivedHost === "app.cabai.co.uk" || derivedHost.endsWith(".vercel.app")) {
@@ -125,7 +141,7 @@ export async function POST(
             });
 
             if (!stripeSession.url) {
-                return NextResponse.json({ error: 'Failed to generate checkout session' }, { status: 500 });
+                return NextResponse.json({ error: 'Failed to generate checkout session' }, { status: 500, headers: corsHeaders });
             }
 
             paymentLink = stripeSession.url;
@@ -145,7 +161,7 @@ export async function POST(
         }
 
         const tenantSettings = await prisma.tenant.findUnique({
-            where: { id: session.user.tenantId }
+            where: { id: job.tenantId }
         });
 
         // Ensure passengerPhone is explicitly passed down if not on top level
@@ -153,20 +169,21 @@ export async function POST(
 
         const smsResult = await SmsService.sendPaymentLink(jobForSms, tenantSettings);
 
-        return NextResponse.json({ success: true, smsResult, reused: !!job.paymentLink && job.paymentLink === paymentLink });
+        return NextResponse.json({ success: true, smsResult, reused: !!job.paymentLink && job.paymentLink === paymentLink }, { headers: corsHeaders });
+
     } catch (error: any) {
         let rawMessage = error instanceof Error ? error.message : 'Unknown error';
         
         // Redact any potential keys from the log
         const redactedMessage = rawMessage.replace(/(sk_live|sk_test|rk_live|rk_test|mk)_[a-zA-Z0-9]+/g, '[REDACTED_KEY]');
-        console.error('POST /api/jobs/[id]/payment/sms error:', redactedMessage);
+        console.error("POST /api/mobile/driver/jobs/[id]/payment/sms error:", redactedMessage);
         
         // Return only safe generic error message to frontend
         let safeErrorMessage = 'Unable to send payment link SMS for this job.';
         if (rawMessage.includes('API Key') || rawMessage.includes('Invalid API Key')) {
             safeErrorMessage = 'Stripe checkout creation failed. Please check payment configuration.';
         }
-
-        return NextResponse.json({ error: safeErrorMessage }, { status: 500 });
+        
+        return NextResponse.json({ error: safeErrorMessage }, { status: 500, headers: corsHeaders });
     }
 }
