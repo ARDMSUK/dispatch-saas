@@ -91,7 +91,7 @@ export async function POST(
         }
         
         baseUrl = baseUrl.replace(/\/$/, "");
-        const successUrl = `${baseUrl}/payment-success`;
+        const successUrl = `${baseUrl}/job-payment-success?jobId=${job.id}`;
         const cancelUrl = `${baseUrl}/dashboard`; // fallback page if canceled
 
         // Create Checkout Session
