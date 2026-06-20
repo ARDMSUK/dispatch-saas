@@ -391,7 +391,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                 });
 
             case 'DISPATCHED':
-                return jobs.filter(j => ['DISPATCHED', 'EN_ROUTE', 'ARRIVED'].includes(j.status));
+                return jobs.filter(j => ['DISPATCHED', 'EN_ROUTE', 'ARRIVED', 'ACTIVE'].includes(j.status));
             case 'POB':
                 return jobs.filter(j => j.status === 'POB');
             case 'COMPLETED':
@@ -484,6 +484,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                     <span className={`font-bold text-[9px] px-1.5 py-0.5 rounded w-full text-center ${getStatusColor(job.status)}`}>
                         {job.status === 'UNASSIGNED' ? 'CONFIRMED' : job.status}
                     </span>
+                    <span className="font-mono text-[9px] font-bold text-slate-400">#{job.id}</span>
                     {job.driver ? (
                         <span className="bg-purple-100 text-purple-700 font-bold text-[10px] px-1.5 py-0.5 rounded w-full text-center truncate">DRV: {job.driver.callsign}</span>
                     ) : job.preAssignedDriver && job.status === 'PENDING' ? (
@@ -1120,7 +1121,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                 <DialogContent className="max-w-2xl bg-white text-slate-900 border border-slate-200 shadow-xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-black text-slate-950 flex items-center gap-2">
-                            <span>Booking Details: TRIP-{selectedDetailsJob?.id}</span>
+                            <span>Booking Details: Job #{selectedDetailsJob?.id}</span>
                             {selectedDetailsJob && (
                                 <Badge variant="outline" className={`${getStatusColor(selectedDetailsJob.status)} font-mono text-[10px] tracking-wider`}>
                                     {selectedDetailsJob.status}

@@ -23,6 +23,9 @@ export async function GET(req: Request) {
         const status = searchParams.get('status'); // Optional filter
         const search = searchParams.get('search'); // Search query
 
+        const cleanedSearch = search ? search.trim().replace(/^#/, '') : '';
+        const numericSearch = Number(cleanedSearch);
+
         try {
             // Run Smart Dispatch Engine
             // This will respect the autoDispatch flag inside
@@ -43,7 +46,7 @@ export async function GET(req: Request) {
                         { passengerPhone: { contains: search, mode: 'insensitive' } },
                         { pickupAddress: { contains: search, mode: 'insensitive' } },
                         { dropoffAddress: { contains: search, mode: 'insensitive' } },
-                        ...(!isNaN(Number(search)) ? [{ id: Number(search) }] : [])
+                        ...(!isNaN(numericSearch) && cleanedSearch !== '' ? [{ id: numericSearch }] : [])
                     ]
                 } : {})
             },

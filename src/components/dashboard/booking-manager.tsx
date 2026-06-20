@@ -387,7 +387,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 });
 
             case 'DISPATCHED':
-                return jobs.filter(j => ['DISPATCHED', 'EN_ROUTE', 'ARRIVED'].includes(j.status));
+                return jobs.filter(j => ['DISPATCHED', 'EN_ROUTE', 'ARRIVED', 'ACTIVE'].includes(j.status));
             case 'POB':
                 return jobs.filter(j => j.status === 'POB');
             case 'COMPLETED':
@@ -472,6 +472,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         <Badge variant="outline" className={`${getStatusColor(job.status)} font-mono text-[10px] tracking-wider`}>
                             {job.status === 'UNASSIGNED' ? 'CONFIRMED' : job.status}
                         </Badge>
+                        <span className="font-mono text-slate-300 font-bold text-sm">#{job.id}</span>
                         {job.emergencyActive && (
                             <Badge variant="outline" className="bg-red-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1 flex items-center gap-1 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
                                 <AlertCircle className="w-4 h-4 animate-bounce" /> PANIC ALERT
@@ -1238,7 +1239,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 <DialogContent className="max-w-2xl bg-white text-slate-900 border border-slate-200 shadow-xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-black text-slate-950 flex items-center gap-2">
-                            <span>Booking Details: TRIP-{selectedDetailsJob?.id}</span>
+                            <span>Booking Details: Job #{selectedDetailsJob?.id}</span>
                             {selectedDetailsJob && (
                                 <Badge variant="outline" className={`${getStatusColor(selectedDetailsJob.status)} font-mono text-[10px] tracking-wider`}>
                                     {selectedDetailsJob.status}
