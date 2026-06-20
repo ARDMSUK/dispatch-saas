@@ -71,13 +71,32 @@ export async function POST(
             return NextResponse.json({ error: 'Stripe is not configured or unavailable' }, { status: 500 });
         }
 
-        // Base App URL
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk';
+        // Safe base URL builder for Stripe success/cancel redirects
+        let baseUrl = 'https://app.cabai.co.uk'; // Safe production default
+
+        if (process.env.NEXT_PUBLIC_APP_URL) {
+            baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+        } else {
+            const host = request.headers.get("host") || "";
+            const origin = request.headers.get("origin") || "";
+            const derivedHost = host || (origin ? new URL(origin).host : "");
+            
+            if (derivedHost === "app.cabai.co.uk") {
+                baseUrl = `https://${derivedHost}`;
+            } else if (derivedHost.endsWith(".vercel.app")) {
+                baseUrl = `https://${derivedHost}`;
+            } else if (process.env.NODE_ENV !== "production" && (derivedHost.startsWith("localhost:") || derivedHost.startsWith("127.0.0.1:"))) {
+                baseUrl = `http://${derivedHost}`;
+            }
+        }
+        
+        baseUrl = baseUrl.replace(/\/$/, "");
         const successUrl = `${baseUrl}/payment-success`;
+        const cancelUrl = `${baseUrl}/dashboard`; // fallback page if canceled
 
         // Create Checkout Session
         const stripeSession = await stripeClient.checkout.sessions.create({
-            payment_method_types: ['card', 'link', 'apple_pay', 'google_pay'],
+            payment_method_types: ['card'],
             line_items: [
                 {
                     price_data: {
@@ -93,6 +112,7 @@ export async function POST(
             ],
             mode: 'payment',
             success_url: successUrl,
+            cancel_url: cancelUrl,
             client_reference_id: job.id.toString(),
             metadata: {
                 jobId: job.id.toString(),
