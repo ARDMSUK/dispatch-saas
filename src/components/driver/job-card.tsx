@@ -6,7 +6,7 @@ import QRCode from 'qrcode';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Navigation, Phone, User, Clock, MapPin, QrCode, Send, CheckCircle, RefreshCw, Copy } from 'lucide-react';
+import { Navigation, Phone, User, Clock, MapPin, QrCode, Send, CheckCircle, RefreshCw, Copy, Mail } from 'lucide-react';
 
 export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusUpdate: (id: number, status: string, paymentType?: string) => void, onReject?: (id: number) => void }) {
     const [showPayment, setShowPayment] = useState(false);
@@ -14,6 +14,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
     const [qrLink, setQrLink] = useState<string | null>(null);
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
     const [qrLoading, setQrLoading] = useState(false);
+    const [isSendingEmail, setIsSendingEmail] = useState(false);
 
     const handleGenerateQr = async () => {
         setQrModalOpen(true);
@@ -62,6 +63,28 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
         } catch (err) {
             console.error(err);
             toast.error("Error sending Track & Pay SMS");
+        }
+    };
+
+    const handleSendEmail = async () => {
+        if (!job.passengerEmail && !job.customer?.email) {
+            toast.error("No customer email available");
+            return;
+        }
+        setIsSendingEmail(true);
+        try {
+            const res = await fetch(`/api/mobile/driver/jobs/${job.id}/payment/email`, { method: 'POST' });
+            if (res.ok) {
+                toast.success("Payment Link email sent successfully");
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Failed to send Payment Link email");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Error sending Payment Link email");
+        } finally {
+            setIsSendingEmail(false);
         }
     };
 
@@ -311,6 +334,13 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                                     onClick={handleSendSms}
                                 >
                                     <Send className="mr-2 h-5 w-5" /> Send SMS Payment Link
+                                </Button>
+                                <Button
+                                    className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20"
+                                    disabled={isSendingEmail}
+                                    onClick={handleSendEmail}
+                                >
+                                    <Mail className="mr-2 h-5 w-5" /> {isSendingEmail ? "Sending..." : "Send Email Payment Link"}
                                 </Button>
                                 
                                 <div className="py-2 flex items-center justify-center">
