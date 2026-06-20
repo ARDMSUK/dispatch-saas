@@ -108,7 +108,62 @@ export async function POST(req: NextRequest) {
                 // 3. Ambiguous session
                 else if (session.metadata?.tenantId) {
                     console.warn(`[Webhook] Ambiguous session for tenant ${session.metadata.tenantId}. No jobId, and not a clear subscription checkout.`);
+                break;
+            }
+            case "payment_intent.succeeded": {
+                const intent = event.data.object as Stripe.PaymentIntent;
+                const metaBookingId = intent.metadata?.bookingId || intent.metadata?.jobId;
+                const metaTenantId = intent.metadata?.tenantId;
+                const isBookingPayment = intent.metadata?.paymentType === 'booking_payment' || (metaBookingId && metaTenantId);
+
+                if (!isBookingPayment) {
+                    console.warn(`[Webhook] Ambiguous or missing metadata for payment_intent ${intent.id}. Skipping.`);
+                    break;
                 }
+
+                const jobId = parseInt(metaBookingId!, 10);
+                if (isNaN(jobId) || !metaTenantId) {
+                    console.warn(`[Webhook] Invalid jobId or tenantId for payment_intent ${intent.id}. Skipping.`);
+                    break;
+                }
+
+                const job = await prisma.job.findUnique({ where: { id: jobId } });
+                if (!job) {
+                    console.warn(`[Webhook] Job ${jobId} not found for payment_intent ${intent.id}.`);
+                    break;
+                }
+
+                if (job.tenantId !== metaTenantId) {
+                    console.warn(`[Webhook] Job ${jobId} tenant mismatch. Expected ${job.tenantId}, got ${metaTenantId}.`);
+                    break;
+                }
+
+                // Amount check safely (job.fare in pounds vs intent.amount in pence)
+                const expectedAmount = Math.round((job.fare || 0) * 100);
+                if (intent.amount !== expectedAmount) {
+                    console.warn(`[Webhook] Amount mismatch for Job ${job.id}. Expected ${expectedAmount}, got ${intent.amount}. Skipping payment auto-sync.`);
+                    break;
+                }
+
+                if (job.paymentStatus === 'PAID') {
+                    if (job.paymentReferenceId && job.paymentReferenceId !== intent.id) {
+                        console.warn(`[Webhook] Job ${jobId} is already paid with reference ${job.paymentReferenceId}. Skipping intent ${intent.id}.`);
+                    } else {
+                        console.log(`[Webhook] Job ${jobId} already paid with same reference. No-op.`);
+                    }
+                    break;
+                }
+
+                await prisma.job.update({
+                    where: { id: jobId },
+                    data: {
+                        paymentStatus: 'PAID',
+                        paymentType: 'CARD',
+                        paymentProvider: 'STRIPE',
+                        paymentReferenceId: intent.id
+                    }
+                });
+                console.log(`✅ [Webhook] Marked Job ${jobId} as PAID from payment_intent.succeeded`);
                 break;
             }
             case "customer.subscription.updated": {

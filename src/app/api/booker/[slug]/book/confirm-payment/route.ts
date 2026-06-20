@@ -52,6 +52,21 @@ export async function POST(
             return NextResponse.json({ error: 'Payment has not been completed successfully' }, { status: 400, headers: corsHeaders });
         }
 
+        // Verify metadata ownership
+        const metaBookingId = paymentIntent.metadata?.bookingId;
+        const metaJobId = paymentIntent.metadata?.jobId;
+        const metaTenantId = paymentIntent.metadata?.tenantId;
+
+        if (String(jobId) !== metaBookingId && String(jobId) !== metaJobId) {
+            console.warn(`[ConfirmPayment] Intent mismatch. Expected Job ID ${jobId}, got ${metaBookingId || metaJobId}`);
+            return NextResponse.json({ error: 'Payment Intent does not match this booking' }, { status: 400, headers: corsHeaders });
+        }
+
+        if (String(tenant.id) !== metaTenantId) {
+            console.warn(`[ConfirmPayment] Tenant mismatch. Expected ${tenant.id}, got ${metaTenantId}`);
+            return NextResponse.json({ error: 'Payment Intent does not match this tenant' }, { status: 400, headers: corsHeaders });
+        }
+
         // 2. Fetch Job and ensure it belongs to the tenant
         const job = await prisma.job.findFirst({
             where: {
@@ -64,11 +79,36 @@ export async function POST(
             return NextResponse.json({ error: 'Booking not found' }, { status: 404, headers: corsHeaders });
         }
 
+        // Amount safety check
+        const expectedAmount = Math.round((job.fare || 0) * 100);
+        if (paymentIntent.amount !== expectedAmount) {
+            console.warn(`[ConfirmPayment] Amount mismatch for Job ${job.id}. Expected ${expectedAmount}, got ${paymentIntent.amount}`);
+            return NextResponse.json({ error: 'Payment amount does not match expected fare' }, { status: 400, headers: corsHeaders });
+        }
+
+        // Idempotency check
+        if (job.paymentStatus === 'PAID') {
+            if (job.paymentReferenceId && job.paymentReferenceId !== paymentIntentId) {
+                console.warn(`[ConfirmPayment] Job ${job.id} already paid with different reference ${job.paymentReferenceId}`);
+                return NextResponse.json({ error: 'Job is already paid with a different payment reference' }, { status: 400, headers: corsHeaders });
+            }
+            // If it's already paid with the SAME reference, return success but DO NOT trigger side effects again
+            return NextResponse.json({
+                success: true,
+                alreadyPaid: true,
+                bookingId: job.id,
+                paymentStatus: job.paymentStatus
+            }, { headers: corsHeaders });
+        }
+
         // 3. Update Job Payment Status to PAID
         const updatedJob = await prisma.job.update({
             where: { id: job.id },
             data: {
                 paymentStatus: 'PAID',
+                paymentType: 'CARD',
+                paymentProvider: 'STRIPE',
+                paymentReferenceId: paymentIntentId,
                 stripePaymentIntentId: paymentIntentId
             }
         });

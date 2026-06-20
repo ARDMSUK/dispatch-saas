@@ -125,8 +125,10 @@ export async function POST(
                     amount,
                     currency: 'gbp',
                     metadata: {
-                        bookingId: job.id,
-                        tenantId: tenant.id
+                        bookingId: String(job.id),
+                        jobId: String(job.id),
+                        tenantId: String(tenant.id),
+                        paymentType: 'booking_payment'
                     }
                 });
                 clientSecret = paymentIntent.client_secret;
