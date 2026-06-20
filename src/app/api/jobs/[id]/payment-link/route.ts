@@ -53,10 +53,22 @@ export async function POST(
         }
 
         const tenant = job.tenant;
-        const stripeClient = tenant.stripeSecretKey ? getStripe(tenant.stripeSecretKey) : systemStripe;
+        let validTenantKey = null;
+        if (tenant.stripeSecretKey) {
+            if (tenant.stripeSecretKey.startsWith('sk_live_') || 
+                tenant.stripeSecretKey.startsWith('sk_test_') || 
+                tenant.stripeSecretKey.startsWith('rk_live_') || 
+                tenant.stripeSecretKey.startsWith('rk_test_')) {
+                validTenantKey = tenant.stripeSecretKey;
+            } else {
+                console.warn(`Invalid Stripe key format for tenant ${tenant.id}. Falling back to system Stripe.`);
+            }
+        }
+
+        const stripeClient = validTenantKey ? getStripe(validTenantKey) : systemStripe;
 
         if (!stripeClient) {
-            return NextResponse.json({ error: 'Stripe is not configured for this tenant' }, { status: 500 });
+            return NextResponse.json({ error: 'Stripe is not configured or unavailable' }, { status: 500 });
         }
 
         // Base App URL
@@ -109,7 +121,18 @@ export async function POST(
         });
 
     } catch (error) {
-        console.error("POST /api/jobs/[id]/payment-link error:", error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        let rawMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        // Redact any potential keys from the log
+        const redactedMessage = rawMessage.replace(/(sk_live|sk_test|rk_live|rk_test|mk)_[a-zA-Z0-9]+/g, '[REDACTED_KEY]');
+        console.error("POST /api/jobs/[id]/payment-link error:", redactedMessage);
+        
+        // Return only safe generic error message to frontend
+        let safeErrorMessage = 'Unable to create payment link for this job.';
+        if (rawMessage.includes('API Key') || rawMessage.includes('Invalid API Key')) {
+            safeErrorMessage = 'Stripe checkout creation failed. Please check payment configuration.';
+        }
+        
+        return NextResponse.json({ error: safeErrorMessage }, { status: 500 });
     }
 }
