@@ -685,41 +685,73 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                         <CheckCircle className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Mark Completed
                                     </Button>
                                     
-                                    {/* Cancel Action */}
+                                    {/* Cancel Action / Stripe Refund */}
                                     {job.status !== 'CANCELLED' && (
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start h-8 text-xs font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                const isPaid = job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED';
-                                                const confirmMessage = isPaid 
-                                                    ? "Are you sure you want to cancel this booking? NOTE: Refund must be processed separately." 
-                                                    : "Are you sure you want to cancel this booking?";
-                                                    
-                                                if (confirm(confirmMessage)) {
-                                                    try {
-                                                        const res = await fetch(`/api/jobs/${job.id}`, {
-                                                            method: 'PATCH',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ status: 'CANCELLED' })
-                                                        });
-                                                        if (res.ok) {
-                                                            toast.success("Booking cancelled successfully");
-                                                            fetchJobs();
-                                                        } else {
-                                                            toast.error("Failed to cancel booking");
+                                        <>
+                                            {(job.paymentStatus === 'PAID' && job.paymentProvider === 'STRIPE') ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start h-8 text-xs font-normal text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm("This will issue a real Stripe refund and cancel the booking. Continue?")) {
+                                                            try {
+                                                                const res = await fetch(`/api/jobs/${job.id}/refund`, {
+                                                                    method: 'POST',
+                                                                });
+                                                                const data = await res.json();
+                                                                if (res.ok) {
+                                                                    toast.success("Stripe refund created and booking cancelled");
+                                                                    fetchJobs();
+                                                                } else {
+                                                                    toast.error(data.error || "Failed to process refund");
+                                                                }
+                                                            } catch (err) {
+                                                                console.error(err);
+                                                                toast.error("Error processing refund");
+                                                            }
                                                         }
-                                                    } catch (err) {
-                                                        console.error(err);
-                                                        toast.error("Error cancelling booking");
-                                                    }
-                                                }
-                                            }}
-                                        >
-                                            <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> 
-                                            {(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') ? 'Cancel (Refund separately)' : 'Cancel Booking'}
-                                        </Button>
+                                                    }}
+                                                >
+                                                    <RefreshCcw className="mr-2 h-3.5 w-3.5 text-purple-500" /> 
+                                                    Stripe Refund & Cancel
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start h-8 text-xs font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        const isPaid = job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED';
+                                                        const confirmMessage = isPaid 
+                                                            ? "Are you sure you want to cancel this booking? NOTE: Refund must be processed separately." 
+                                                            : "Are you sure you want to cancel this booking?";
+                                                            
+                                                        if (confirm(confirmMessage)) {
+                                                            try {
+                                                                const res = await fetch(`/api/jobs/${job.id}`, {
+                                                                    method: 'PATCH',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ status: 'CANCELLED' })
+                                                                });
+                                                                if (res.ok) {
+                                                                    toast.success("Booking cancelled successfully");
+                                                                    fetchJobs();
+                                                                } else {
+                                                                    toast.error("Failed to cancel booking");
+                                                                }
+                                                            } catch (err) {
+                                                                console.error(err);
+                                                                toast.error("Error cancelling booking");
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> 
+                                                    {(job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') ? 'Cancel (Refund separately)' : 'Cancel Booking'}
+                                                </Button>
+                                            )}
+                                        </>
                                     )}
 
                                     <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'NO_SHOW'); }}>
