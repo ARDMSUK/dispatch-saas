@@ -15,6 +15,38 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
     const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
     const [qrLoading, setQrLoading] = useState(false);
     const [isSendingEmail, setIsSendingEmail] = useState(false);
+    const [isManualConfirming, setIsManualConfirming] = useState<'CASH' | 'TERMINAL' | null>(null);
+    const [selectedTerminal, setSelectedTerminal] = useState<'SUMUP' | 'ZETTLE' | 'OTHER_TERMINAL'>('SUMUP');
+    const [isProcessingManual, setIsProcessingManual] = useState(false);
+
+    const handleManualPayment = async (method: 'CASH' | 'SUMUP' | 'ZETTLE' | 'OTHER_TERMINAL') => {
+        setIsProcessingManual(true);
+        try {
+            const token = localStorage.getItem('driver_token');
+            const res = await fetch(`/api/mobile/driver/jobs/${job.id}/manual-payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ method })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Payment confirmed successfully');
+                setIsManualConfirming(null);
+                setShowPayment(false);
+                onStatusUpdate(job.id, 'COMPLETED', method === 'CASH' ? 'CASH' : 'IN_CAR_TERMINAL');
+            } else {
+                toast.error(data.error || 'Failed to confirm payment');
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Network error during manual confirmation');
+        } finally {
+            setIsProcessingManual(false);
+        }
+    };
 
     const handleGenerateQr = async () => {
         setQrModalOpen(true);
@@ -349,25 +381,89 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                                     <div className="h-px w-full bg-slate-800"></div>
                                 </div>
                                 
-                                <Button
-                                    className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                                    onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'CASH')}
-                                >
-                                    💵 Collect Cash
-                                </Button>
-                                <Button
-                                    className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                                    onClick={() => onStatusUpdate(job.id, 'COMPLETED', 'IN_CAR_TERMINAL')}
-                                >
-                                    💳 Card Terminal
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    className="w-full h-12 text-slate-400 mt-4"
-                                    onClick={() => setShowPayment(false)}
-                                >
-                                    Cancel
-                                </Button>
+                                {!isManualConfirming ? (
+                                    <>
+                                        <Button
+                                            className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+                                            onClick={() => setIsManualConfirming('CASH')}
+                                        >
+                                            💵 Collect Cash
+                                        </Button>
+                                        <Button
+                                            className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+                                            onClick={() => setIsManualConfirming('TERMINAL')}
+                                        >
+                                            💳 Card Terminal
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full h-12 text-slate-400 mt-4"
+                                            onClick={() => setShowPayment(false)}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <div className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl mt-4 space-y-4">
+                                        {isManualConfirming === 'CASH' ? (
+                                            <>
+                                                <p className="font-bold text-center text-slate-200">Confirm customer has paid cash?</p>
+                                                <Button
+                                                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+                                                    onClick={() => handleManualPayment('CASH')}
+                                                    disabled={isProcessingManual}
+                                                >
+                                                    {isProcessingManual ? "Confirming..." : "Yes, Confirm Cash Payment"}
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="font-bold text-center text-slate-200 mb-1">Confirm payment was taken on this terminal?</p>
+                                                <div className="text-center mb-4">
+                                                    <span className="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded">Manual confirmation — CabAI has not verified this terminal payment automatically.</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2 py-2">
+                                                    <Button
+                                                        variant={selectedTerminal === 'SUMUP' ? 'default' : 'outline'}
+                                                        className={`h-10 text-xs ${selectedTerminal === 'SUMUP' ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-700 text-slate-400'}`}
+                                                        onClick={() => setSelectedTerminal('SUMUP')}
+                                                    >
+                                                        SumUp
+                                                    </Button>
+                                                    <Button
+                                                        variant={selectedTerminal === 'ZETTLE' ? 'default' : 'outline'}
+                                                        className={`h-10 text-xs ${selectedTerminal === 'ZETTLE' ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-700 text-slate-400'}`}
+                                                        onClick={() => setSelectedTerminal('ZETTLE')}
+                                                    >
+                                                        Zettle
+                                                    </Button>
+                                                    <Button
+                                                        variant={selectedTerminal === 'OTHER_TERMINAL' ? 'default' : 'outline'}
+                                                        className={`h-10 text-xs px-1 ${selectedTerminal === 'OTHER_TERMINAL' ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-700 text-slate-400'}`}
+                                                        onClick={() => setSelectedTerminal('OTHER_TERMINAL')}
+                                                    >
+                                                        Other
+                                                    </Button>
+                                                </div>
+                                                <Button
+                                                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold mt-2"
+                                                    onClick={() => handleManualPayment(selectedTerminal)}
+                                                    disabled={isProcessingManual}
+                                                >
+                                                    {isProcessingManual ? "Confirming..." : `Confirm ${selectedTerminal === 'OTHER_TERMINAL' ? 'Terminal' : selectedTerminal} Payment`}
+                                                </Button>
+                                            </>
+                                        )}
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full h-10 text-slate-400 mt-2 hover:bg-slate-800"
+                                            onClick={() => setIsManualConfirming(null)}
+                                            disabled={isProcessingManual}
+                                        >
+                                            Go Back
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}
