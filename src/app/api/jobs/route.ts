@@ -136,6 +136,7 @@ export async function GET(req: Request) {
             dropoffLng: j.dropoffLng,
             passengerName: j.passengerName || j.customer?.name || "Unknown",
             passengerPhone: j.passengerPhone || j.customer?.phone || "Unknown",
+            passengerEmail: j.passengerEmail || j.customer?.email || "",
             pickupTime: j.pickupTime.toISOString(),
             fare: j.fare,
             status: j.status,
