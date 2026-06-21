@@ -60,6 +60,7 @@ export async function GET(req: Request) {
                 dropoffLng: true,
                 passengerName: true,
                 passengerPhone: true,
+                passengerEmail: true,
                 pickupTime: true,
                 fare: true,
                 status: true,
@@ -81,7 +82,8 @@ export async function GET(req: Request) {
                 customer: {
                     select: {
                         name: true,
-                        phone: true
+                        phone: true,
+                        email: true
                     }
                 },
                 bookedBy: {
