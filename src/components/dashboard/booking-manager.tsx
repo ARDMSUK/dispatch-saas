@@ -1008,7 +1008,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         <div className="mt-1">
                             {(() => {
                                 if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
-                                    return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType} ✓</Badge>;
+                                    return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 text-[9px] rounded-sm">{(job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : (job.paymentType || '')).toUpperCase()} ✓</Badge>;
                                 }
                                 if (job.paymentType === 'CARD') {
                                     return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">CARD UNPAID</Badge>;

@@ -599,9 +599,9 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                             
                             {/* Notes parsing */}
                             {job.notes && (
-                                <span className="text-slate-500 flex items-center gap-1 truncate max-w-[200px]" title={job.notes.replace(/\[.*?\]\s*/g, '')}>
+                                <span className="text-slate-500 flex items-center gap-1 truncate max-w-[200px]" title={job.notes?.replace(/\[.*?\]\s*/g, '')}>
                                     <AlertCircle className="h-3 w-3 shrink-0" />
-                                    {job.notes.replace(/\[.*?\]\s*/g, '')}
+                                    {job.notes?.replace(/\[.*?\]\s*/g, '')}
                                 </span>
                             )}
                         </div>
@@ -644,7 +644,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                     <div className="mt-0.5">
                         {(() => {
                             if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
-                                return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1 text-[9px] rounded-sm">{job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : job.paymentType} ✓</Badge>;
+                                return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1 text-[9px] rounded-sm">{(job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : (job.paymentType || '')).toUpperCase()} ✓</Badge>;
                             }
                             if (job.paymentType === 'CARD') {
                                 return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1 text-[9px] font-extrabold rounded-sm">CARD UNPAID</Badge>;

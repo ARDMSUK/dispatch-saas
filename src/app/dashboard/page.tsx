@@ -102,7 +102,9 @@ const DARK_MAP_STYLE = [
     },
 ];
 
-export default function DashboardPage() {
+import { Suspense } from 'react';
+
+function DashboardContent() {
     // State
     const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [user, setUser] = useState<any>(null);
@@ -503,5 +505,13 @@ export default function DashboardPage() {
             {isClassicLayout && classicView}
             {modernView}
         </>
+    );
+}
+
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={<div className="h-full w-full flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div></div>}>
+            <DashboardContent />
+        </Suspense>
     );
 }
