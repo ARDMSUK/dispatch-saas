@@ -107,14 +107,7 @@ export const EmailService = {
         
         const checkoutUrl = booking.paymentLink;
         
-        const html = `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2>Payment Request</h2>
-                <p>Please pay for your taxi booking with ${companyName} here:</p>
-                <p><a href="${checkoutUrl}" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px;">Pay Now</a></p>
-                <p style="color: #666; font-size: 14px; margin-top: 20px;">Or use this link: <a href="${checkoutUrl}">${checkoutUrl}</a></p>
-            </div>
-        `;
+        const html = EmailTemplates.paymentLink(booking, orgSettings);
 
         const to = booking.passengerEmail || booking.customer?.email || booking.email;
 
