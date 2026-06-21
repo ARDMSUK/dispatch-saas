@@ -1007,6 +1007,9 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         <span className={`text-[10px] uppercase tracking-wider font-bold ${getVehicleTextColor(job.vehicleType)}`}>{job.vehicleType}</span>
                         <div className="mt-1">
                             {(() => {
+                                if (job.paymentStatus === 'REFUNDED') {
+                                    return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">{(job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : (job.paymentType || '')).toUpperCase()} REFUNDED</Badge>;
+                                }
                                 if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
                                     return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 text-[9px] rounded-sm">{(job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : (job.paymentType || '')).toUpperCase()} ✓</Badge>;
                                 }
