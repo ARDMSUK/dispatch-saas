@@ -785,7 +785,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
 
                                 
                                     {/* Payment Link / QR */}
-                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && (
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (
                                         <Button
                                             variant="ghost"
                                             className="w-full justify-start h-8 text-xs font-normal"
