@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, RefreshCcw, UserX, Send, Copy, Volume2 } from "lucide-react";
+import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, RefreshCcw, UserX, Send, Copy, Volume2, Mail } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import QRCode from 'qrcode';
 import { Link as LinkIcon, QrCode } from "lucide-react";
@@ -113,6 +113,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
     const [qrLink, setQrLink] = useState<string | null>(null);
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
     const [logsLoading, setLogsLoading] = useState(false);
+    const [isSendingEmail, setIsSendingEmail] = useState<Record<number, boolean>>({});
 
     // Fetch Logs for the details dialog
     useEffect(() => {
@@ -786,16 +787,73 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                 
                                     {/* Payment Link / QR */}
                                     {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (
-                                        <Button
-                                            variant="ghost"
-                                            className="w-full justify-start h-8 text-xs font-normal"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleOpenQr(job);
-                                            }}
-                                        >
-                                            <QrCode className="mr-2 h-3.5 w-3.5 text-indigo-500" /> Payment Link / QR
-                                        </Button>
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                className="w-full justify-start h-8 text-xs font-normal"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenQr(job);
+                                                }}
+                                            >
+                                                <QrCode className="mr-2 h-3.5 w-3.5 text-indigo-500" /> Payment Link / QR
+                                            </Button>
+
+                                            {/* Send Track & Pay SMS */}
+                                            {(job.passengerPhone || (job as any).customerPhone || (job as any).customer?.phone) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start h-8 text-xs font-normal"
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        try {
+                                                            const res = await fetch(`/api/jobs/${job.id}/payment/sms`, { method: 'POST' });
+                                                            if (res.ok) {
+                                                                toast.success("Track & Pay SMS sent successfully");
+                                                            } else {
+                                                                const data = await res.json();
+                                                                toast.error(data.error || "Failed to send Track & Pay SMS");
+                                                            }
+                                                        } catch (err) {
+                                                            console.error(err);
+                                                            toast.error("Error sending Track & Pay SMS");
+                                                        }
+                                                    }}
+                                                >
+                                                    <Send className="mr-2 h-3.5 w-3.5 text-teal-500" /> Send SMS Pay Link
+                                                </Button>
+                                            )}
+
+                                            {/* Send Track & Pay Email */}
+                                            {((job as any).passengerEmail || (job as any).customer?.email) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full justify-start h-8 text-xs font-normal"
+                                                    disabled={isSendingEmail[job.id]}
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        setIsSendingEmail(prev => ({...prev, [job.id]: true}));
+                                                        try {
+                                                            const res = await fetch(`/api/jobs/${job.id}/payment/email`, { method: 'POST' });
+                                                            if (res.ok) {
+                                                                toast.success("Payment Link email sent successfully");
+                                                            } else {
+                                                                const data = await res.json();
+                                                                toast.error(data.error || "Failed to send Payment Link email");
+                                                            }
+                                                        } catch (err) {
+                                                            console.error(err);
+                                                            toast.error("Error sending Payment Link email");
+                                                        } finally {
+                                                            setIsSendingEmail(prev => ({...prev, [job.id]: false}));
+                                                        }
+                                                    }}
+                                                >
+                                                    <Mail className="mr-2 h-3.5 w-3.5 text-blue-500" /> 
+                                                    {isSendingEmail[job.id] ? "Sending..." : "Send Email Pay Link"}
+                                                </Button>
+                                            )}
+                                        </>
                                     )}
 
 

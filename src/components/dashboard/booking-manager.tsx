@@ -681,7 +681,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
 
 {/* Send Track & Pay SMS */}
-                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (job.passengerPhone || (job as any).customerPhone || job.customer?.phone) && (
                                         <Button
                                             variant="ghost"
                                             className="w-full justify-start h-8 text-xs font-normal"
@@ -706,7 +706,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     )}
 
                                     {/* Send Track & Pay Email */}
-                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (
+                                    {job.fare && job.status !== 'CANCELLED' && job.status !== 'COMPLETED' && job.paymentStatus !== 'PAID' && job.paymentStatus !== 'REFUNDED' && (job.passengerEmail || job.customer?.email) && (
                                         <Button
                                             variant="ghost"
                                             className="w-full justify-start h-8 text-xs font-normal"
