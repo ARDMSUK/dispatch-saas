@@ -153,6 +153,10 @@ export async function POST(
 
         const smsResult = await SmsService.sendPaymentLink(jobForSms, tenantSettings);
 
+        if (smsResult && smsResult.success === false) {
+            return NextResponse.json({ error: smsResult.error || 'SMS failed' }, { status: 500 });
+        }
+
         return NextResponse.json({ success: true, smsResult, reused: !!job.paymentLink && job.paymentLink === paymentLink });
     } catch (error: any) {
         let rawMessage = error instanceof Error ? error.message : 'Unknown error';

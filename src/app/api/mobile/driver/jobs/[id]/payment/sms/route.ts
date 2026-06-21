@@ -169,6 +169,10 @@ export async function POST(
 
         const smsResult = await SmsService.sendPaymentLink(jobForSms, tenantSettings);
 
+        if (smsResult && smsResult.success === false) {
+            return NextResponse.json({ error: smsResult.error || 'SMS failed' }, { status: 500, headers: corsHeaders });
+        }
+
         return NextResponse.json({ success: true, smsResult, reused: !!job.paymentLink && job.paymentLink === paymentLink }, { headers: corsHeaders });
 
     } catch (error: any) {

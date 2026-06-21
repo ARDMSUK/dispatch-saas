@@ -9,6 +9,18 @@ const client = (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN)
     ? twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     : null;
 
+function formatPhoneNumber(number: string | undefined | null): string | null {
+    if (!number) return null;
+    let cleaned = number.replace(/[\s\-\(\)]/g, '');
+    if (cleaned.startsWith('+')) {
+        return cleaned;
+    }
+    if (cleaned.startsWith('07')) {
+        return '+44' + cleaned.substring(1);
+    }
+    return cleaned;
+}
+
 export const SmsService = {
     parseTemplate(template: string, booking: any, driver?: any) {
         const vehicle = driver?.vehicles?.[0] || driver?.vehicle;
@@ -187,6 +199,11 @@ export const SmsService = {
     },
 
     async sendSms(to: string, body: string, config?: { accountSid?: string, authToken?: string, fromNumber?: string } | null) {
+        const formattedTo = formatPhoneNumber(to);
+        if (!formattedTo) {
+            console.error("[SmsService] Failed to send SMS: Invalid or missing phone number", to);
+            return { success: false, error: 'Invalid or missing phone number' };
+        }
 
         // Priority: Passed Config > Global Env
         const accountSid = config?.accountSid || process.env.TWILIO_ACCOUNT_SID;
@@ -198,11 +215,11 @@ export const SmsService = {
                 // Initialize client dynamically
                 const dynamicClient = twilio(accountSid, authToken);
 
-                console.log(`[SmsService] Sending real SMS to ${to} via ${fromNumber}...`);
+                console.log(`[SmsService] Sending real SMS to ${formattedTo} via ${fromNumber}...`);
                 const message = await dynamicClient.messages.create({
                     body: body,
                     from: fromNumber,
-                    to: to
+                    to: formattedTo
                 });
                 return { success: true, sid: message.sid };
             } catch (error) {
@@ -212,7 +229,7 @@ export const SmsService = {
         } else {
             // Mock Sending Logic
             console.log("==================================================");
-            console.log(`[MOCK SMS] To: ${to}`);
+            console.log(`[MOCK SMS] To: ${formattedTo}`);
             console.log(`[MOCK SMS] Message: ${body}`);
             console.log(`[MOCK SMS] Config Missing: SID=${!!accountSid}, Auth=${!!authToken}, From=${!!fromNumber}`);
             console.log("==================================================");
