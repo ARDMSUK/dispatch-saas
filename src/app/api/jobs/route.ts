@@ -244,6 +244,7 @@ export async function POST(request: Request) {
             bookedById: session.user.id || null,
             passengerName: body.passengerName || "Unknown",
             passengerPhone: body.passengerPhone || "Unknown",
+            passengerEmail: body.passengerEmail || null,
             passengers: body.passengers ? parseInt(body.passengers) : 1,
             luggage: body.luggage ? parseInt(body.luggage) : 0,
             vehicleType: body.vehicleType || 'Saloon',
