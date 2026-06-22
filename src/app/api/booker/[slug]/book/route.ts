@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -141,6 +143,23 @@ export async function POST(
                     }
                 });
             }
+        }
+
+        // Send confirmations immediately if it's a CASH booking (no stripe flow)
+        if (!clientSecret) {
+            const jobWithCustomer = { ...job, customer: { email: job.passengerEmail } };
+            const notificationPromises = [
+                EmailService.sendBookingConfirmation(jobWithCustomer as any, tenant),
+                SmsService.sendBookingConfirmation(job as any, tenant)
+            ];
+
+            await Promise.allSettled(notificationPromises).then((results) => {
+                results.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        console.error(`CASH booking notification ${index} failed:`, result.reason);
+                    }
+                });
+            });
         }
 
         return NextResponse.json({
