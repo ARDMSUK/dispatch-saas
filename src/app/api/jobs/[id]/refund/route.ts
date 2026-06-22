@@ -139,13 +139,24 @@ export async function POST(
 
         if (alreadyRefunded) {
             // Ensure local DB reflects the refunded status since Stripe says it is fully refunded
-            await prisma.job.update({
-                where: { id: jobId },
-                data: {
-                    paymentStatus: 'REFUNDED',
-                    status: 'CANCELLED'
-                }
-            });
+            await prisma.$transaction([
+                prisma.job.update({
+                    where: { id: jobId },
+                    data: {
+                        paymentStatus: 'REFUNDED',
+                        status: 'CANCELLED'
+                    }
+                }),
+                ...(job.driverId ? [
+                    prisma.driver.updateMany({
+                        where: { 
+                            id: job.driverId,
+                            tenantId: job.tenantId
+                        },
+                        data: { status: 'FREE' }
+                    })
+                ] : [])
+            ]);
             return NextResponse.json({ 
                 success: true, 
                 message: 'Payment was already refunded on Stripe. CabAI has been updated.' 
@@ -160,13 +171,24 @@ export async function POST(
 
             if (refund.status === 'succeeded' || refund.status === 'pending') {
                 // Update CabAI database
-                await prisma.job.update({
-                    where: { id: jobId },
-                    data: {
-                        paymentStatus: 'REFUNDED',
-                        status: 'CANCELLED'
-                    }
-                });
+                await prisma.$transaction([
+                    prisma.job.update({
+                        where: { id: jobId },
+                        data: {
+                            paymentStatus: 'REFUNDED',
+                            status: 'CANCELLED'
+                        }
+                    }),
+                    ...(job.driverId ? [
+                        prisma.driver.updateMany({
+                            where: { 
+                                id: job.driverId,
+                                tenantId: job.tenantId
+                            },
+                            data: { status: 'FREE' }
+                        })
+                    ] : [])
+                ]);
 
                 return NextResponse.json({ 
                     success: true, 

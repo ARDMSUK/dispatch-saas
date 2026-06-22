@@ -71,6 +71,10 @@ export async function PATCH(
             return NextResponse.json({ error: 'Cannot update cancelled, completed, no-show, or refunded jobs from this route.' }, { status: 400 });
         }
 
+        if (status === 'CANCELLED' && jobToCheck.paymentProvider === 'STRIPE' && jobToCheck.paymentStatus === 'PAID') {
+            return NextResponse.json({ error: 'Cannot cancel a paid Stripe job from this route. Use the dedicated refund route.' }, { status: 400 });
+        }
+
         if (driverId) {
             const driverToCheck = await prisma.driver.findUnique({ where: { id: driverId } });
             if (!driverToCheck || driverToCheck.tenantId !== session.user.tenantId) {
