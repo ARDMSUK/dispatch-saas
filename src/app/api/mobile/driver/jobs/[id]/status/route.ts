@@ -22,7 +22,8 @@ const UpdateJobSchema = z.object({
         "ARRIVED",
         "POB",
         "CLEARED",
-        "UNASSIGNED"
+        "UNASSIGNED",
+        "NO_SHOW"
     ])
 });
 
@@ -44,6 +45,14 @@ export async function PATCH(
         }
 
         const driverId = payload.driverId || payload.id;
+
+        const driver = await prisma.driver.findUnique({
+            where: { id: driverId as string }
+        });
+
+        if (!driver) {
+            return NextResponse.json({ error: 'Driver not found' }, { status: 404, headers: corsHeaders });
+        }
 
         const body = await request.json();
         const validation = UpdateJobSchema.safeParse(body);
@@ -69,12 +78,36 @@ export async function PATCH(
             return NextResponse.json({ error: 'Forbidden or Job not found' }, { status: 403, headers: corsHeaders });
         }
 
+        // Explicit tenant isolation
+        if (existingJob.tenantId !== driver.tenantId) {
+            return NextResponse.json({ error: 'Forbidden (tenant mismatch)' }, { status: 403, headers: corsHeaders });
+        }
+
+        // Block invalid job states
+        const blockedStates = ['CANCELLED', 'COMPLETED', 'NO_SHOW', 'REFUNDED'];
+        if (blockedStates.includes(existingJob.status) || existingJob.paymentStatus === 'REFUNDED') {
+            return NextResponse.json({ error: 'Cannot update job in this state' }, { status: 400, headers: corsHeaders });
+        }
+
         const realStatus = status === 'CLEARED' ? 'COMPLETED' : status;
+
+        // Block nonsensical transitions
+        const validTransitions: Record<string, string[]> = {
+            'PENDING': ['UNASSIGNED'], 
+            'DISPATCHED': ['EN_ROUTE', 'UNASSIGNED'],
+            'EN_ROUTE': ['ARRIVED', 'UNASSIGNED'],
+            'ARRIVED': ['POB', 'NO_SHOW', 'UNASSIGNED'],
+            'POB': ['COMPLETED', 'UNASSIGNED']
+        };
+
+        if (validTransitions[existingJob.status] && !validTransitions[existingJob.status].includes(realStatus)) {
+            return NextResponse.json({ error: `Invalid transition from ${existingJob.status} to ${realStatus}` }, { status: 400, headers: corsHeaders });
+        }
 
         let updatedJob;
 
         if (realStatus === 'COMPLETED' || realStatus === 'CANCELLED' || realStatus === 'NO_SHOW') {
-            const [job, driver] = await prisma.$transaction([
+            const [job, updatedDriver] = await prisma.$transaction([
                 prisma.job.update({
                     where: { id: jobId },
                     data: { status: realStatus },
@@ -86,16 +119,16 @@ export async function PATCH(
                     }
                 }),
                 prisma.driver.update({
-                    where: { id: driverId as string },
-                    data: { status: 'ONLINE' }
+                    where: { id: driver.id },
+                    data: { status: 'FREE' }
                 })
             ]);
             updatedJob = job;
         } else if (realStatus === 'UNASSIGNED') {
-            const [job, driver] = await prisma.$transaction([
+            const [job, updatedDriver] = await prisma.$transaction([
                 prisma.job.update({
                     where: { id: jobId },
-                    data: { status: 'UNASSIGNED', driverId: null },
+                    data: { status: 'PENDING', driverId: null },
                     include: {
                         driver: {
                             include: { vehicles: true }
@@ -104,8 +137,8 @@ export async function PATCH(
                     }
                 }),
                 prisma.driver.update({
-                    where: { id: driverId as string },
-                    data: { status: 'ONLINE' }
+                    where: { id: driver.id },
+                    data: { status: 'FREE' }
                 })
             ]);
             updatedJob = job;
