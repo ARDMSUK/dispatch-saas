@@ -33,9 +33,14 @@ export async function POST(
             return NextResponse.json({ error: "Job not found" }, { status: 404 });
         }
 
-        // Verify ownership
-        if (job.driverId !== driver.driverId) {
-            return NextResponse.json({ error: "Not assigned to this job" }, { status: 403 });
+        // Verify ownership and tenant isolation
+        if (job.driverId !== driver.driverId || job.tenantId !== driver.tenantId) {
+            return NextResponse.json({ error: "Not assigned to this job or tenant mismatch" }, { status: 403 });
+        }
+
+        // Only allow manual payment confirmation on valid active job states
+        if (!['POB', 'ARRIVED'].includes(job.status)) {
+            return NextResponse.json({ error: "Manual payment can only be collected when passenger is on board or arrived" }, { status: 400 });
         }
 
         // Reject if already paid/refunded/cancelled
@@ -73,16 +78,12 @@ export async function POST(
                 paymentStatus: 'PAID',
                 paymentType: newPaymentType,
                 paymentProvider: newPaymentProvider,
-                status: 'COMPLETED', // Complete the job as the previous flow did
                 notes: updatedNotes
+                // Decoupled: We no longer set status to COMPLETED or touch paymentReferenceId
             }
         });
 
-        // Free the driver
-        await prisma.driver.update({
-            where: { id: driver.driverId },
-            data: { status: 'FREE' }
-        });
+        // Decoupled: We no longer update the driver status to FREE here
 
         return NextResponse.json({ success: true, job: updatedJob });
 
