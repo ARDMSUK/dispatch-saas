@@ -42,6 +42,11 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const validation = UpdateJobSchema.safeParse(body);
 
@@ -55,6 +60,22 @@ export async function PATCH(
 
         if (isNaN(jobId)) {
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400 });
+        }
+
+        const jobToCheck = await prisma.job.findUnique({ where: { id: jobId } });
+        if (!jobToCheck || jobToCheck.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+        }
+
+        if (['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(jobToCheck.status) || jobToCheck.paymentStatus === 'REFUNDED') {
+            return NextResponse.json({ error: 'Cannot update cancelled, completed, no-show, or refunded jobs from this route.' }, { status: 400 });
+        }
+
+        if (driverId) {
+            const driverToCheck = await prisma.driver.findUnique({ where: { id: driverId } });
+            if (!driverToCheck || driverToCheck.tenantId !== session.user.tenantId) {
+                return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
+            }
         }
 
         const updateData = {
@@ -98,7 +119,7 @@ export async function PATCH(
                 updates.push(
                     prisma.driver.update({
                         where: { id: oldDriverId },
-                        data: { status: 'ONLINE' }
+                        data: { status: 'FREE' }
                     })
                 );
             }
@@ -128,7 +149,7 @@ export async function PATCH(
                 }),
                 prisma.driver.update({
                     where: { id: updateData.driverId },
-                    data: { status: 'ONLINE' }
+                    data: { status: 'FREE' }
                 })
             ]);
             updatedJob = job;
@@ -149,7 +170,7 @@ export async function PATCH(
                     }),
                     prisma.driver.update({
                         where: { id: currentJob.driverId },
-                        data: { status: 'ONLINE' }
+                        data: { status: 'FREE' }
                     })
                 ]);
                 updatedJob = job;
@@ -185,7 +206,7 @@ export async function PATCH(
                     }),
                     prisma.driver.update({
                         where: { id: currentJob.driverId },
-                        data: { status: 'ONLINE' }
+                        data: { status: 'FREE' }
                     })
                 ]);
                 updatedJob = job;
