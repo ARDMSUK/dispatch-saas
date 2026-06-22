@@ -255,18 +255,25 @@ export function LocationInput({
                             {/* FREQUENT LOCATIONS */}
                             {filteredFrequent.length > 0 && (
                                 <CommandGroup heading="Most Used" className="text-emerald-500 dark:text-emerald-400">
-                                    {filteredFrequent.map((item, i) => (
+                                    {filteredFrequent.map((item, i) => {
+                                        const parts = item.address.split(",");
+                                        const mainText = parts[0].trim();
+                                        const secondaryText = parts.length > 1 ? parts.slice(1).join(",").trim() : "";
+                                        return (
                                         <CommandItem
                                             key={`freq-${i}`}
                                             value={item.address}
                                             onSelect={() => handleFrequentSelect(item.address)}
-                                            className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white dark:data-[selected=true]:bg-white/10 cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-emerald-500/10 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 mb-1 rounded-sm border border-emerald-500/20"
+                                            className="data-[selected=true]:bg-zinc-800 data-[selected=true]:text-white dark:data-[selected=true]:bg-white/10 cursor-pointer p-2 text-slate-900 dark:text-slate-200 bg-emerald-500/10 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 mb-1 rounded-sm border border-emerald-500/20 flex items-start"
                                         >
-                                            <MapPin className="mr-2 h-4 w-4 text-emerald-500 dark:text-emerald-400" />
-                                            <span className="font-medium truncate">{item.address}</span>
-                                            <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-1 rounded">{item.count}</span>
+                                            <MapPin className="mr-2 mt-0.5 h-4 w-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                                            <div className="flex flex-col overflow-hidden w-full pr-2">
+                                                <span className="font-medium">{mainText}</span>
+                                                {secondaryText && <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{secondaryText}</span>}
+                                            </div>
+                                            <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-1 rounded shrink-0 mt-0.5">{item.count}</span>
                                         </CommandItem>
-                                    ))}
+                                    )})}
                                 </CommandGroup>
                             )}
 
@@ -290,20 +297,25 @@ export function LocationInput({
                             {/* SUGGESTED LOCATIONS */}
                             {suggestions.length > 0 && (
                                 <CommandGroup heading="Suggested Locations" className="dark:text-slate-400">
-                                    {suggestions.map((item, i) => (
+                                    {suggestions.map((item, i) => {
+                                        const parts = item.label.split(",");
+                                        const mainText = parts[0].trim();
+                                        const secondaryText = parts.length > 1 ? parts.slice(1).join(",").trim() : "";
+                                        return (
                                         <CommandItem
                                             key={`sugg-${i}`}
                                             value={item.label}
                                             onSelect={() => handleSelect(item)}
-                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-white dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200"
+                                            className="data-[selected=true]:bg-zinc-800 dark:data-[selected=true]:bg-white/10 data-[selected=true]:text-white dark:data-[selected=true]:text-white cursor-pointer p-2 text-slate-900 dark:text-slate-200 flex items-start"
                                         >
-                                            <MapPin className="mr-2 h-4 w-4 opacity-50 dark:opacity-70" />
-                                            <span className="truncate">
-                                                <span className="font-medium">{item.label}</span>
-                                            </span>
-                                            {value === item.label && <Check className="ml-auto h-4 w-4 opacity-50" />}
+                                            <MapPin className="mr-2 mt-0.5 h-4 w-4 opacity-50 dark:opacity-70 shrink-0" />
+                                            <div className="flex flex-col overflow-hidden w-full pr-2">
+                                                <span className="font-medium">{mainText}</span>
+                                                {secondaryText && <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{secondaryText}</span>}
+                                            </div>
+                                            {value === item.label && <Check className="ml-auto h-4 w-4 opacity-50 shrink-0 mt-0.5" />}
                                         </CommandItem>
-                                    ))}
+                                    )})}
                                 </CommandGroup>
                             )}
                         </CommandList>

@@ -51,10 +51,14 @@ export async function GET(request: Request) {
                                 return {
                                     label: details.ADDRESS,
                                     value: details.ADDRESS,
-                                    lat: String(details.Y_COORDINATE),
-                                    lng: String(details.X_COORDINATE),
-                                    lon: String(details.X_COORDINATE)
+                                    lat: String(details.LAT),
+                                    lng: String(details.LNG),
+                                    lon: String(details.LNG)
                                 };
+                            }).filter((m: any) => {
+                                const latNum = parseFloat(m.lat);
+                                const lngNum = parseFloat(m.lng);
+                                return !isNaN(latNum) && !isNaN(lngNum) && latNum >= -90 && latNum <= 90 && lngNum >= -180 && lngNum <= 180;
                             });
 
                             // Filter locally by house name or number if specified
@@ -90,10 +94,14 @@ export async function GET(request: Request) {
                             return {
                                 label: details.ADDRESS,
                                 value: details.ADDRESS,
-                                lat: String(details.Y_COORDINATE),
-                                lng: String(details.X_COORDINATE),
-                                lon: String(details.X_COORDINATE)
+                                lat: String(details.LAT),
+                                lng: String(details.LNG),
+                                lon: String(details.LNG)
                             };
+                        }).filter((m: any) => {
+                            const latNum = parseFloat(m.lat);
+                            const lngNum = parseFloat(m.lng);
+                            return !isNaN(latNum) && !isNaN(lngNum) && latNum >= -90 && latNum <= 90 && lngNum >= -180 && lngNum <= 180;
                         });
                         return NextResponse.json({ results }, { headers: corsHeaders });
                     }
