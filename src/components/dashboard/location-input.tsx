@@ -249,7 +249,7 @@ export function LocationInput({
             </div>
             
             {open && (suggestions.length > 0 || filteredFrequent.length > 0 || customSuggestions.length > 0) && (
-                <div className="absolute top-[calc(100%+4px)] left-0 md:left-[-104px] w-full md:w-[410px] z-[10000] bg-slate-100 dark:bg-[#1e1e24] border border-slate-200 dark:border-white/10 shadow-2xl rounded-md overflow-hidden">
+                <div className="absolute top-[calc(100%+4px)] left-0 w-full z-[10000] bg-slate-100 dark:bg-[#1e1e24] border border-slate-200 dark:border-white/10 shadow-2xl rounded-md overflow-hidden">
                     <Command shouldFilter={false} className="bg-slate-100 dark:bg-[#1e1e24] w-full max-h-80 overflow-y-auto overflow-x-hidden">
                         <CommandList>
                             {/* FREQUENT LOCATIONS */}
@@ -269,7 +269,7 @@ export function LocationInput({
                                             <MapPin className="mr-2 mt-0.5 h-4 w-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                                             <div className="flex flex-col overflow-hidden w-full pr-2">
                                                 <span className="font-medium">{mainText}</span>
-                                                {secondaryText && <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{secondaryText}</span>}
+                                                {secondaryText && <span className="text-xs text-slate-500 dark:text-slate-400">{secondaryText}</span>}
                                             </div>
                                             <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-1 rounded shrink-0 mt-0.5">{item.count}</span>
                                         </CommandItem>
@@ -311,7 +311,7 @@ export function LocationInput({
                                             <MapPin className="mr-2 mt-0.5 h-4 w-4 opacity-50 dark:opacity-70 shrink-0" />
                                             <div className="flex flex-col overflow-hidden w-full pr-2">
                                                 <span className="font-medium">{mainText}</span>
-                                                {secondaryText && <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{secondaryText}</span>}
+                                                {secondaryText && <span className="text-xs text-slate-500 dark:text-slate-400">{secondaryText}</span>}
                                             </div>
                                             {value === item.label && <Check className="ml-auto h-4 w-4 opacity-50 shrink-0 mt-0.5" />}
                                         </CommandItem>

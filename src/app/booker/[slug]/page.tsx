@@ -396,14 +396,14 @@ export default function BookerPage() {
                                                     type="datetime-local"
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner [color-scheme:dark]"
                                                     value={formData.pickupTime}
-                                                    onChange={(e) => setFormData({ ...formData, pickupTime: e.target.value })}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, pickupTime: e.target.value }))}
                                                 />
                                             </div>
                                             <div className="relative group">
                                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-white transition-colors z-10 pointer-events-none">
                                                     <Car className="w-5 h-5" />
                                                 </div>
-                                                <Select value={formData.vehicleType} onValueChange={(val) => setFormData({ ...formData, vehicleType: val })}>
+                                                <Select value={formData.vehicleType} onValueChange={(val) => setFormData(prev => ({ ...prev, vehicleType: val }))}>
                                                     <SelectTrigger className="h-14 pl-12 bg-black/40 border-white/10 text-white focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner">
                                                         <SelectValue />
                                                     </SelectTrigger>
@@ -461,7 +461,7 @@ export default function BookerPage() {
                                                     placeholder="Full Name"
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
                                                     value={formData.passengerName}
-                                                    onChange={(e) => setFormData({ ...formData, passengerName: e.target.value })}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, passengerName: e.target.value }))}
                                                 />
                                             </div>
                                             <div className="relative group">
@@ -473,7 +473,7 @@ export default function BookerPage() {
                                                     placeholder="Phone Number"
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
                                                     value={formData.passengerPhone}
-                                                    onChange={(e) => setFormData({ ...formData, passengerPhone: e.target.value })}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, passengerPhone: e.target.value }))}
                                                 />
                                             </div>
                                         </div>
@@ -487,7 +487,7 @@ export default function BookerPage() {
                                                 placeholder="Email Address"
                                                 className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
                                                 value={formData.passengerEmail}
-                                                onChange={(e) => setFormData({ ...formData, passengerEmail: e.target.value })}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, passengerEmail: e.target.value }))}
                                             />
                                         </div>
 
@@ -502,7 +502,7 @@ export default function BookerPage() {
                                                     placeholder="Passengers"
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
                                                     value={formData.passengers}
-                                                    onChange={(e) => setFormData({ ...formData, passengers: e.target.value })}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, passengers: e.target.value }))}
                                                 />
                                             </div>
                                             <div className="relative group">
@@ -515,7 +515,7 @@ export default function BookerPage() {
                                                     placeholder="Luggage"
                                                     className="h-14 pl-12 bg-black/40 border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner"
                                                     value={formData.luggage}
-                                                    onChange={(e) => setFormData({ ...formData, luggage: e.target.value })}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, luggage: e.target.value }))}
                                                 />
                                             </div>
                                         </div>
@@ -535,7 +535,7 @@ export default function BookerPage() {
                                                         placeholder="Flight Number (Optional)"
                                                         className="h-14 pl-12 bg-indigo-600/5 border-indigo-600/20 text-white placeholder:text-indigo-600/50 focus:bg-indigo-600/10 focus:ring-1 focus:ring-indigo-600/50 transition-all rounded-2xl uppercase font-mono shadow-inner"
                                                         value={formData.flightNumber}
-                                                        onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, flightNumber: e.target.value.toUpperCase() }))}
                                                     />
                                                 </motion.div>
                                             )}
@@ -549,7 +549,7 @@ export default function BookerPage() {
                                                 placeholder="Notes for driver (child seat, extra luggage...)"
                                                 className="w-full min-h-[100px] pl-12 pr-4 py-4 bg-black/40 border border-white/10 text-white placeholder:text-slate-500 focus:bg-white/5 focus:ring-1 focus:ring-white/30 focus:border-white/20 transition-all rounded-2xl shadow-inner resize-none outline-none"
                                                 value={formData.notes}
-                                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                                             />
                                         </div>
                                         
