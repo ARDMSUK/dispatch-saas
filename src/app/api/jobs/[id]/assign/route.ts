@@ -22,6 +22,16 @@ export async function PATCH(
         const job = await prisma.job.findUnique({ where: { id: jobId } });
         if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
         
+        // Tenant Isolation: Job
+        if (job.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+        }
+
+        // Validate Job Status
+        if (['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(job.status) || job.paymentStatus === 'REFUNDED') {
+            return NextResponse.json({ error: 'Cannot assign cancelled, completed, no-show, or refunded jobs.' }, { status: 400 });
+        }
+
         const expectedVersion = currentVersion || job.version;
 
         // 1. Validate Driver Status
@@ -34,8 +44,17 @@ export async function PATCH(
             return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
         }
 
+        // Tenant Isolation: Driver
+        if (driver.tenantId !== session.user.tenantId) {
+            return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
+        }
+
         if (driver.status === 'BUSY') {
             return NextResponse.json({ error: 'Driver is currently BUSY' }, { status: 400 });
+        }
+
+        if (driver.status === 'OFF_DUTY') {
+            return NextResponse.json({ error: 'Driver is currently OFFLINE/OFF_DUTY' }, { status: 400 });
         }
 
         // 2. Transaction: Update Job + Update Driver Status
