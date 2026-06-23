@@ -51,6 +51,12 @@ export async function POST(req: NextRequest) {
                         break;
                     }
 
+                    const terminalJobStatuses = ['CANCELLED', 'COMPLETED', 'NO_SHOW'];
+                    if (terminalJobStatuses.includes(job.status) || job.paymentStatus === 'REFUNDED') {
+                        console.warn(`[Webhook] Job ${jobId} is in terminal state (${job.status} / ${job.paymentStatus}). Refusing to mark as PAID.`);
+                        break;
+                    }
+
                     if (job.paymentStatus === 'PAID') {
                         console.log(`[Webhook] Job ${jobId} already paid. Skipping duplicate side effects.`);
                         break;
@@ -143,6 +149,12 @@ export async function POST(req: NextRequest) {
                 const expectedAmount = Math.round((job.fare || 0) * 100);
                 if (intent.amount !== expectedAmount) {
                     console.warn(`[Webhook] Amount mismatch for Job ${job.id}. Expected ${expectedAmount}, got ${intent.amount}. Skipping payment auto-sync.`);
+                    break;
+                }
+
+                const terminalJobStatuses = ['CANCELLED', 'COMPLETED', 'NO_SHOW'];
+                if (terminalJobStatuses.includes(job.status) || job.paymentStatus === 'REFUNDED') {
+                    console.warn(`[Webhook] Job ${jobId} is in terminal state (${job.status} / ${job.paymentStatus}). Refusing to mark as PAID from payment_intent.succeeded.`);
                     break;
                 }
 
