@@ -33,9 +33,13 @@ export async function POST(
             return NextResponse.json({ error: 'Forbidden: You are not authorized for this job' }, { status: 403 });
         }
 
-        // Prevent generating a session if already paid
-        if (job.paymentStatus === 'PAID') {
-            return NextResponse.json({ error: 'Job is already paid', isPaid: true }, { status: 400 });
+        // Prevent generating a session if already paid or in terminal states
+        if (job.paymentStatus === 'PAID' || job.paymentStatus === 'REFUNDED') {
+            return NextResponse.json({ error: 'Job is already paid or refunded', isPaid: true }, { status: 400 });
+        }
+
+        if (['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(job.status)) {
+            return NextResponse.json({ error: `Cannot generate payment link for a ${job.status} job` }, { status: 400 });
         }
 
         // Reuse existing Stripe payment link if unpaid
@@ -94,32 +98,63 @@ export async function POST(
         const successUrl = `${baseUrl}/job-payment-success?jobId=${job.id}`;
         const cancelUrl = `${baseUrl}/dashboard`; // fallback page if canceled
 
-        // Create Checkout Session
-        const stripeSession = await stripeClient.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [
-                {
-                    price_data: {
-                        currency: 'gbp',
-                        product_data: {
-                            name: `Booking #${job.id} - ${tenant.name}`,
-                            description: `${job.pickupAddress} to ${job.dropoffAddress}`,
-                        },
-                        unit_amount: Math.round((job.fare || 0) * 100), // convert to pence
-                    },
-                    quantity: 1,
-                },
-            ],
-            mode: 'payment',
-            success_url: successUrl,
-            cancel_url: cancelUrl,
-            client_reference_id: job.id.toString(),
-            metadata: {
-                jobId: job.id.toString(),
-                tenantId: tenant.id.toString(),
-                paymentType: "job_payment"
+        // Cancel stale Web Booker PaymentIntent if present
+        if (job.stripePaymentIntentId && !job.paymentReferenceId && job.stripePaymentIntentId.startsWith('pi_')) {
+            try {
+                const intent = await stripeClient.paymentIntents.retrieve(job.stripePaymentIntentId);
+                if (intent) {
+                    if (intent.status === 'requires_payment_method') {
+                        await stripeClient.paymentIntents.cancel(job.stripePaymentIntentId);
+                        console.log(`[Stripe] Cancelled stale PaymentIntent ${job.stripePaymentIntentId.substring(0, 14)}... for Job ${job.id}`);
+                    } else if (intent.status === 'canceled') {
+                        console.log(`[Stripe] Existing PaymentIntent ${job.stripePaymentIntentId.substring(0, 14)}... is already canceled for Job ${job.id}; continuing to Checkout Session.`);
+                    } else {
+                        return NextResponse.json(
+                            { error: 'Existing card payment is already in progress or not safely cancellable for this job. Please wait for the payment to complete or fail before generating another payment link.' },
+                            { status: 409 }
+                        );
+                    }
+                }
+            } catch (cancelError: any) {
+                console.warn(`[Stripe] Failed to retrieve or cancel stale PaymentIntent ${job.stripePaymentIntentId.substring(0, 14)}...`, cancelError.message);
+                const errorCode = cancelError.raw?.code || cancelError.code;
+                if (errorCode !== 'resource_missing') {
+                    return NextResponse.json({ error: 'Failed to verify existing payment status with Stripe. Please try again.' }, { status: 502 });
+                }
             }
-        });
+        }
+
+        // Create Checkout Session
+        const stripeSession = await stripeClient.checkout.sessions.create(
+            {
+                payment_method_types: ['card'],
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'gbp',
+                            product_data: {
+                                name: `Booking #${job.id} - ${tenant.name}`,
+                                description: `${job.pickupAddress} to ${job.dropoffAddress}`,
+                            },
+                            unit_amount: Math.round((job.fare || 0) * 100), // convert to pence
+                        },
+                        quantity: 1,
+                    },
+                ],
+                mode: 'payment',
+                success_url: successUrl,
+                cancel_url: cancelUrl,
+                client_reference_id: job.id.toString(),
+                metadata: {
+                    jobId: job.id.toString(),
+                    tenantId: tenant.id.toString(),
+                    paymentType: "job_payment"
+                }
+            },
+            {
+                idempotencyKey: `checkout_session_job_${job.id}`,
+            }
+        );
 
         if (!stripeSession.url) {
              return NextResponse.json({ error: 'Failed to generate checkout session' }, { status: 500 });
@@ -141,7 +176,7 @@ export async function POST(
         });
 
     } catch (error) {
-        let rawMessage = error instanceof Error ? error.message : 'Unknown error';
+        const rawMessage = error instanceof Error ? error.message : 'Unknown error';
         
         // Redact any potential keys from the log
         const redactedMessage = rawMessage.replace(/(sk_live|sk_test|rk_live|rk_test|mk)_[a-zA-Z0-9]+/g, '[REDACTED_KEY]');

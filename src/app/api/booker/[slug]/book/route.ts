@@ -123,16 +123,21 @@ export async function POST(
             const amount = Math.round((parseFloat(price) || 0) * 100);
 
             if (amount > 0) {
-                const paymentIntent = await stripe.paymentIntents.create({
-                    amount,
-                    currency: 'gbp',
-                    metadata: {
-                        bookingId: String(job.id),
-                        jobId: String(job.id),
-                        tenantId: String(tenant.id),
-                        paymentType: 'booking_payment'
+                const paymentIntent = await stripe.paymentIntents.create(
+                    {
+                        amount,
+                        currency: 'gbp',
+                        metadata: {
+                            bookingId: String(job.id),
+                            jobId: String(job.id),
+                            tenantId: String(tenant.id),
+                            paymentType: 'booking_payment'
+                        }
+                    },
+                    {
+                        idempotencyKey: `payment_intent_job_${job.id}`,
                     }
-                });
+                );
                 clientSecret = paymentIntent.client_secret;
 
                 // Update booking with the intent ID
