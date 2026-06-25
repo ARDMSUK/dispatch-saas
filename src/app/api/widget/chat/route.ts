@@ -372,7 +372,7 @@ Never mention that you are an AI model. You are CABAI.`;
                             return { success: false, error: "Invalid booking ID format. Must be a number." };
                         }
 
-                        const job = await prisma.job.findUnique({ where: { id: idNum } });
+                        const job = await prisma.job.findFirst({ where: { id: idNum, tenantId: tenant.id } });
 
                         if (!job) {
                             return { success: false, error: `Booking ID ${bookingId} not found.` };
@@ -413,10 +413,17 @@ Never mention that you are an AI model. You are CABAI.`;
                                     } catch (e) {}
                                 }
 
-                                await prisma.job.update({
-                                    where: { id: idNum },
+                                const updateResult = await prisma.job.updateMany({
+                                    where: { id: idNum, tenantId: tenant.id },
                                     data: updateData
                                 });
+
+                                if (updateResult.count !== 1) {
+                                    return {
+                                        success: false,
+                                        error: `Booking ID ${bookingId} could not be updated or no longer belongs to this tenant.`
+                                    };
+                                }
 
                                 return {
                                     success: true,
