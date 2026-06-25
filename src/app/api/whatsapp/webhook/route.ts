@@ -195,7 +195,7 @@ If the passenger wants to modify booking details (time, pickup, destination) or 
                                     properties: {
                                         passengerPhone: { type: "string", description: "Optional phone number. Fallback to caller number." }
                                     }
-                                }
+                                } as any
                             }
                         },
                         {
@@ -214,7 +214,7 @@ If the passenger wants to modify booking details (time, pickup, destination) or 
                                         newDropoffLocation: { type: "string", description: "Optional. New destination address." }
                                     },
                                     required: ["bookingId", "requestType", "details"]
-                                }
+                                } as any
                             }
                         }
                     );

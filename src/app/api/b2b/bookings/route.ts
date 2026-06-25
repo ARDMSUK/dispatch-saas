@@ -10,12 +10,12 @@ export async function GET() {
         const session = await auth();
 
         // Must be B2B Admin with a linked account
-        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !session.user.accountId) {
+        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !(session.user as any).accountId) {
             return NextResponse.json({ error: 'Unauthorized B2B Access' }, { status: 401 });
         }
 
         const tenantId = session.user.tenantId;
-        const accountId = session.user.accountId;
+        const accountId = (session.user as any).accountId;
 
         // Fetch bookings for this exact account
         const bookings = await prisma.job.findMany({
@@ -46,12 +46,12 @@ export async function POST(req: Request) {
     try {
         const session = await auth();
 
-        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !session.user.accountId) {
+        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !(session.user as any).accountId) {
             return NextResponse.json({ error: 'Unauthorized B2B Access' }, { status: 401 });
         }
 
         const tenantId = session.user.tenantId;
-        const accountId = session.user.accountId;
+        const accountId = (session.user as any).accountId;
 
         const body = await req.json();
         const validation = BookingSchema.omit({ tenantId: true }).safeParse(body);
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
         // 2. Fetch Account for customer reference
         const account = await prisma.account.findFirst({
             where: {
-                id: session.user.accountId,
+                id: (session.user as any).accountId,
                 tenantId: session.user.tenantId
             }
         });

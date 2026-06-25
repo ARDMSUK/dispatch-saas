@@ -27,7 +27,7 @@ export async function sendPushNotification(message: PushMessage) {
             }),
         });
 
-        const receipt = await response.json();
+        const receipt = await response.json() as any;
         if (receipt.errors) {
             console.error('Expo Push Notification Validation Errors:', receipt.errors);
             return { success: false, error: receipt.errors[0]?.message };

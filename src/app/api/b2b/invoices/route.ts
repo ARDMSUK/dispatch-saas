@@ -8,12 +8,12 @@ export async function GET() {
     try {
         const session = await auth();
 
-        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !session.user.accountId) {
+        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !(session.user as any).accountId) {
             return NextResponse.json({ error: 'Unauthorized B2B Access' }, { status: 401 });
         }
 
         const tenantId = session.user.tenantId;
-        const accountId = session.user.accountId;
+        const accountId = (session.user as any).accountId;
 
         const invoices = await prisma.invoice.findMany({
             where: {

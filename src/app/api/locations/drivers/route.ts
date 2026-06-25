@@ -26,7 +26,6 @@ export async function GET(req: Request) {
                 callsign: true,
                 status: true,
                 location: true, // JSON string
-                vehicleType: true, // We might need to join Vehicle table if not on Driver
             }
         });
 

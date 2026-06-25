@@ -28,10 +28,10 @@ export async function GET(req: Request) {
         };
 
         if (session.user.role !== 'SUPER_ADMIN' && session.user.role === 'B2B_ADMIN') {
-            if (!session.user.accountId) {
+            if (!(session.user as any).accountId) {
                 return NextResponse.json({ found: false });
             }
-            whereClause.accountId = session.user.accountId;
+            whereClause.accountId = (session.user as any).accountId;
         }
 
         // Find customer

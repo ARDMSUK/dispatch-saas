@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: any) {
     try {
         const session = await auth();
         if (session?.user?.role !== 'SUPER_ADMIN') {
@@ -33,7 +33,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: any) {
     try {
         const session = await auth();
         if (session?.user?.role !== 'SUPER_ADMIN') {
@@ -70,7 +70,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: any) {
     try {
         const session = await auth();
         if (session?.user?.role !== 'SUPER_ADMIN') {

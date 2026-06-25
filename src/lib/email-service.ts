@@ -41,7 +41,7 @@ export const EmailService = {
         const companyName = orgSettings?.name || 'CABAI System';
         const replyTo = orgSettings?.email;
         const subject = `Driver Assigned - ${driver.name} is on the way`;
-        const html = EmailTemplates.driverAssigned(booking, driver, orgSettings, orgSettings?.enableLiveTracking !== false);
+        const html = (EmailTemplates as any).driverAssigned(booking, driver, orgSettings, orgSettings?.enableLiveTracking !== false);
         const to = booking.customer?.email || booking.passengerEmail || booking.email;
 
         if (!to) {

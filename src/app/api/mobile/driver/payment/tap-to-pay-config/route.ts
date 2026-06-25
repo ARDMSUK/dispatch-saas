@@ -29,15 +29,15 @@ export async function GET(request: Request) {
         const driverId = payload.driverId || payload.id;
 
         const driver = await prisma.driver.findUnique({
-            where: { id: driverId },
+            where: { id: driverId as string },
             include: { tenant: true }
         });
 
-        if (!driver || !driver.tenant) {
+        if (!driver || !(driver as any).tenant) {
             return NextResponse.json({ error: 'Driver or Tenant not found' }, { status: 404, headers: corsHeaders });
         }
 
-        const tenant = driver.tenant;
+        const tenant = (driver as any).tenant;
         console.log(`[TapToPay Config] Driver: ${driver.id}, Tenant: ${tenant.id}, hasTapToPay: ${tenant.hasTapToPay}`);
 
         // Entitlement Lockout: Check if Tap to Pay add-on is toggled on in the Super Admin

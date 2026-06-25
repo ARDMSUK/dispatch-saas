@@ -72,6 +72,6 @@ export async function GET(req: Request) {
         return NextResponse.redirect(`${url.origin}/dashboard/settings?success=sumup_connected`);
     } catch (error) {
         console.error("GET /api/integrations/sumup/callback error:", error);
-        return NextResponse.redirect(`${url.origin}/dashboard/settings?error=Internal_Server_Error`);
+        return NextResponse.redirect(`${new URL(req.url).origin}/dashboard/settings?error=Internal_Server_Error`);
     }
 }
