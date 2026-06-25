@@ -17,10 +17,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 });
         }
 
-        const invoice = await prisma.invoice.findUnique({
+        const invoice = await prisma.invoice.findFirst({
             where: {
                 id: invoiceId,
-                tenantId: session.user.tenantId, // Guard against cross-tenant sniffing
+                ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId }) // Super Admin explicit bypass
             },
             include: {
                 tenant: true,

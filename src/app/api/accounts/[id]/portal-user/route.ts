@@ -26,11 +26,11 @@ export async function POST(
         const tenantId = session.user.tenantId;
 
         // Verify account exists and belongs to this tenant
-        const account = await prisma.account.findUnique({
-            where: { id: accountId }
+        const account = await prisma.account.findFirst({
+            where: { id: accountId, ...(session.user.role !== 'SUPER_ADMIN' && { tenantId }) }
         });
 
-        if (!account || account.tenantId !== tenantId) {
+        if (!account) {
             return NextResponse.json({ error: 'Account not found' }, { status: 404 });
         }
 
@@ -60,7 +60,7 @@ export async function POST(
                 password: hashedPassword,
                 name: name || account.name, // Default to account name
                 role: 'B2B_ADMIN',
-                tenantId,
+                tenantId: account.tenantId,
                 accountId
             }
         });

@@ -70,33 +70,39 @@ export async function POST(req: Request) {
         const dropoffLng = -0.1500;
 
         // 2. Fetch Account for customer reference
-        const account = await prisma.account.findUnique({ where: { id: accountId } });
+        const account = await prisma.account.findFirst({
+            where: {
+                id: session.user.accountId,
+                tenantId: session.user.tenantId
+            }
+        });
 
-        let customerId = undefined;
-        if (account) {
-            const customer = await prisma.customer.upsert({
-                where: {
-                    tenantId_phone: {
-                        tenantId,
-                        phone: data.passengerPhone
-                    }
-                },
-                update: {
-                    name: data.passengerName || "Corporate Staff",
-                    // Ensure it's permanently linked to the account if they book again
-                    isAccount: true,
-                    accountId: accountId
-                },
-                create: {
-                    tenantId,
-                    phone: data.passengerPhone,
-                    name: data.passengerName || "Corporate Staff",
-                    isAccount: true,
-                    accountId: accountId
-                }
-            });
-            customerId = customer.id;
+        if (!account) {
+            return NextResponse.json({ error: 'Account not found or access denied' }, { status: 404 });
         }
+
+        const customer = await prisma.customer.upsert({
+            where: {
+                tenantId_phone: {
+                    tenantId,
+                    phone: data.passengerPhone
+                }
+            },
+            update: {
+                name: data.passengerName || "Corporate Staff",
+                // Ensure it's permanently linked to the account if they book again
+                isAccount: true,
+                accountId: account.id
+            },
+            create: {
+                tenantId,
+                phone: data.passengerPhone,
+                name: data.passengerName || "Corporate Staff",
+                isAccount: true,
+                accountId: account.id
+            }
+        });
+        const customerId = customer.id;
 
         // 3. Create the Job
         const newBooking = await prisma.job.create({
@@ -117,7 +123,7 @@ export async function POST(req: Request) {
                 paymentType: "ACCOUNT",
                 paymentStatus: "UNPAID",
                 tenantId,
-                accountId,
+                accountId: account.id,
                 customerId,
                 // Default Pricing info (could be calculated via pricing engine)
                 isFixedPrice: false,

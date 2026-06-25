@@ -79,13 +79,27 @@ export async function PATCH(
         if (startDate !== undefined) prismaData.startDate = startDate ? new Date(startDate) : null;
         if (endDate !== undefined) prismaData.endDate = endDate ? new Date(endDate) : null;
 
-        const updatedAccount = await prisma.account.update({
-            where: { id },
-            data: prismaData
+        const updatedAccount = await prisma.$transaction(async (tx) => {
+            const res = await tx.account.updateMany({
+                where: { 
+                    id, 
+                    ...(session.user.role !== 'SUPER_ADMIN' && { tenantId }) 
+                },
+                data: prismaData
+            });
+            if (res.count !== 1) throw new Error('NOT_FOUND');
+            return tx.account.findUnique({ where: { id } });
         });
 
+        if (!updatedAccount) {
+            return NextResponse.json({ error: 'Account not found or access denied' }, { status: 404 });
+        }
+
         return NextResponse.json(updatedAccount);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'NOT_FOUND') {
+            return NextResponse.json({ error: 'Account not found or access denied' }, { status: 404 });
+        }
         console.error('Error updating account:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
@@ -104,17 +118,26 @@ export async function DELETE(
         }
 
         // Verify ownership
-        const existing = await prisma.account.findUnique({ where: { id } });
-        if (!existing || existing.tenantId !== session.user.tenantId) {
+        const existing = await prisma.account.findFirst({ where: { id, ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId }) } });
+        if (!existing) {
             return NextResponse.json({ error: 'Account not found' }, { status: 404 });
         }
 
-        await prisma.account.delete({
-            where: { id }
+        const res = await prisma.account.deleteMany({
+            where: {
+                id,
+                ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId })
+            }
         });
+        if (res.count !== 1) {
+            return NextResponse.json({ error: 'Account not found or access denied' }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'NOT_FOUND') {
+            return NextResponse.json({ error: 'Account not found or access denied' }, { status: 404 });
+        }
         console.error('Error deleting account:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
