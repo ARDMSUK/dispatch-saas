@@ -39,8 +39,8 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400, headers: corsHeaders });
         }
 
-        let job = await prisma.job.findUnique({
-            where: { id: jobId },
+        let job = await prisma.job.findFirst({
+            where: { id: jobId, driverId: driver.driverId },
             include: { tenant: true, customer: true }
         });
 

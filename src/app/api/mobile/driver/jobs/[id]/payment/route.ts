@@ -42,9 +42,7 @@ export async function POST(
         const { paymentType } = body;
 
         // Verify Job Ownership
-        const job = await prisma.job.findUnique({
-            where: { id: jobId }
-        });
+        const job = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId } });
 
         if (!job) {
             return NextResponse.json({ error: 'Job not found' }, { status: 404, headers: corsHeaders });

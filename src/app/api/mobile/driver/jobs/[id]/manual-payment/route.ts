@@ -25,9 +25,7 @@ export async function POST(
             return NextResponse.json({ error: "Invalid manual payment method" }, { status: 400 });
         }
 
-        const job = await prisma.job.findUnique({
-            where: { id: jobId }
-        });
+        const job = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId } });
 
         if (!job) {
             return NextResponse.json({ error: "Job not found" }, { status: 404 });

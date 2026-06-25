@@ -39,8 +39,8 @@ export async function POST(
         }
 
         // Verify Job Ownership
-        const job = await prisma.job.findUnique({
-            where: { id: jobId },
+        const job = await prisma.job.findFirst({
+            where: { id: jobId, driverId: driver.driverId },
             include: { tenant: true }
         });
 

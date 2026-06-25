@@ -70,9 +70,7 @@ export async function PATCH(
         }
 
         // Verify that this job actually belongs to this driver
-        const existingJob = await prisma.job.findUnique({
-            where: { id: jobId }
-        });
+        const existingJob = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId } });
 
         if (!existingJob || existingJob.driverId !== driverId) {
             return NextResponse.json({ error: 'Forbidden or Job not found' }, { status: 403, headers: corsHeaders });
@@ -106,53 +104,55 @@ export async function PATCH(
 
         let updatedJob;
 
-        if (realStatus === 'COMPLETED' || realStatus === 'CANCELLED' || realStatus === 'NO_SHOW') {
-            const [job, updatedDriver] = await prisma.$transaction([
-                prisma.job.update({
-                    where: { id: jobId },
-                    data: { status: realStatus },
-                    include: {
-                        driver: {
-                            include: { vehicles: true }
-                        },
-                        customer: true
-                    }
-                }),
-                prisma.driver.update({
-                    where: { id: driver.id },
-                    data: { status: 'FREE' }
-                })
-            ]);
-            updatedJob = job;
-        } else if (realStatus === 'UNASSIGNED') {
-            const [job, updatedDriver] = await prisma.$transaction([
-                prisma.job.update({
-                    where: { id: jobId },
-                    data: { status: 'PENDING', driverId: null },
-                    include: {
-                        driver: {
-                            include: { vehicles: true }
-                        },
-                        customer: true
-                    }
-                }),
-                prisma.driver.update({
-                    where: { id: driver.id },
-                    data: { status: 'FREE' }
-                })
-            ]);
-            updatedJob = job;
-        } else {
-            updatedJob = await prisma.job.update({
-                where: { id: jobId },
-                data: { status: realStatus },
-                include: {
-                    driver: {
-                        include: { vehicles: true }
-                    },
-                    customer: true
+        try {
+            updatedJob = await prisma.$transaction(async (tx) => {
+                if (realStatus === 'COMPLETED' || realStatus === 'CANCELLED' || realStatus === 'NO_SHOW') {
+                    const jobUpdate = await tx.job.updateMany({
+                        where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                        data: { status: realStatus }
+                    });
+                    if (jobUpdate.count !== 1) throw new Error("Failed to update job");
+
+                    const driverUpdate = await tx.driver.updateMany({
+                        where: { id: driver.id, tenantId: driver.tenantId },
+                        data: { status: 'FREE' }
+                    });
+                    if (driverUpdate.count !== 1) throw new Error("Failed to release driver");
+
+                } else if (realStatus === 'UNASSIGNED') {
+                    const jobUpdate = await tx.job.updateMany({
+                        where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                        data: { status: 'PENDING', driverId: null }
+                    });
+                    if (jobUpdate.count !== 1) throw new Error("Failed to unassign job");
+
+                    const driverUpdate = await tx.driver.updateMany({
+                        where: { id: driver.id, tenantId: driver.tenantId },
+                        data: { status: 'FREE' }
+                    });
+                    if (driverUpdate.count !== 1) throw new Error("Failed to release driver");
+
+                } else {
+                    const jobUpdate = await tx.job.updateMany({
+                        where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                        data: { status: realStatus }
+                    });
+                    if (jobUpdate.count !== 1) throw new Error("Failed to update job");
                 }
+
+                const job = await tx.job.findFirst({
+                    where: { id: jobId, driverId: realStatus === 'UNASSIGNED' ? null : driver.driverId, tenantId: driver.tenantId },
+                    include: {
+                        driver: { include: { vehicles: true } },
+                        customer: true
+                    }
+                });
+
+                if (!job) throw new Error("Job not found after update");
+                return job;
             });
+        } catch (e: any) {
+            return NextResponse.json({ error: e.message || "Transaction failed" }, { status: 500, headers: corsHeaders });
         }
 
         // Fetch Tenant Settings to apply custom templates

@@ -79,17 +79,16 @@ export async function DELETE(request: Request) {
         }
 
         // Verify zone belongs to tenant
-        const zone = await prisma.zone.findUnique({
-            where: { id }
-        });
+        const zone = await prisma.zone.findFirst({ where: { id, tenantId: session.user.tenantId } });
 
         if (!zone || zone.tenantId !== session.user.tenantId) {
             return NextResponse.json({ error: 'Zone not found or access denied' }, { status: 403 });
         }
 
-        await prisma.zone.delete({
-            where: { id }
-        });
+        const deleteResult = await prisma.zone.deleteMany({ where: { id, tenantId: session.user.tenantId } });
+        if (deleteResult.count !== 1) {
+            return NextResponse.json({ error: "Zone not found or access denied" }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

@@ -39,9 +39,7 @@ export async function PATCH(
         const tenantId = session.user.tenantId;
 
         // Check if driver exists
-        const existingDriver = await prisma.driver.findUnique({
-            where: { id }
-        });
+        const existingDriver = await prisma.driver.findFirst({ where: { id, tenantId: session.user.tenantId } });
 
         if (!existingDriver) {
             return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
@@ -79,11 +77,16 @@ export async function PATCH(
             }
         }
 
-        const updatedDriver = await prisma.driver.update({
-            where: { id },
+        const updateResult = await prisma.driver.updateMany({
+            where: { id, tenantId: session.user.tenantId },
             data: dataToUpdate
         });
 
+        if (updateResult.count !== 1) {
+            return NextResponse.json({ error: 'Driver not found or update failed' }, { status: 404 });
+        }
+
+        const updatedDriver = await prisma.driver.findFirst({ where: { id, tenantId: session.user.tenantId } });
         return NextResponse.json(updatedDriver);
     } catch (error) {
         console.error('Error updating driver:', error);
@@ -104,7 +107,7 @@ export async function DELETE(
         // const tenantId = session.user.tenantId; // Not strictly needed for delete if ID is unique, but good for ownership check?
         // Actually driver IDs are CUIDs so unique globaly, but we should verify ownership.
 
-        const existingDriver = await prisma.driver.findUnique({ where: { id } });
+        const existingDriver = await prisma.driver.findFirst({ where: { id, tenantId: session.user.tenantId } });
         if (!existingDriver || existingDriver.tenantId !== session.user.tenantId) {
             return NextResponse.json({ error: 'Driver not found or access denied' }, { status: 404 });
         }
@@ -112,9 +115,10 @@ export async function DELETE(
         // Optional: Check for active jobs or dependencies before delete
         // For now, we allow delete.
 
-        await prisma.driver.delete({
-            where: { id }
-        });
+        const deleteResult = await prisma.driver.deleteMany({ where: { id, tenantId: session.user.tenantId } });
+        if (deleteResult.count !== 1) {
+            return NextResponse.json({ error: "Driver not found or access denied" }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

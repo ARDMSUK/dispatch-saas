@@ -92,14 +92,18 @@ export async function POST(req: Request) {
             }
         }
 
-        const updatedDriver = await prisma.driver.update({
-            where: { id: driver.id },
+        const updateResult = await prisma.driver.updateMany({
+            where: { id: driver.id, tenantId: driver.tenantId },
             data: { status }
         });
 
+        if (updateResult.count !== 1) {
+            return NextResponse.json({ error: "Failed to update status" }, { status: 403 });
+        }
+
         return NextResponse.json({
             success: true,
-            status: updatedDriver.status,
+            status: status,
             warnings
         });
 

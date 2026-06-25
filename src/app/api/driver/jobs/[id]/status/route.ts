@@ -24,15 +24,13 @@ export async function POST(
         const { status, lat, lng, paymentType } = body;
 
         // Verify Job Ownership
-        const job = await prisma.job.findUnique({
-            where: { id: jobId }
-        });
+        const existingJob = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId } });
 
-        if (!job) {
+        if (!existingJob) {
             return NextResponse.json({ error: "Job not found" }, { status: 404 });
         }
 
-        if (job.driverId !== driver.driverId) {
+        if (existingJob.driverId !== driver.driverId) {
             return NextResponse.json({ error: "Not assigned to this job" }, { status: 403 });
         }
 
@@ -46,45 +44,60 @@ export async function POST(
             }
         }
 
-        const updatedJob = await prisma.job.update({
-            where: { id: jobId },
-            data: updateData
-        });
+        let updatedJob;
+        
+        try {
+            updatedJob = await prisma.$transaction(async (tx) => {
+                const jobUpdate = await tx.job.updateMany({
+                    where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                    data: updateData
+                });
 
-        // Automatically free the driver if the job is finished
-        const driverUpdateData: any = {};
+                if (jobUpdate.count !== 1) throw new Error("Failed to update job");
 
-        if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(status)) {
-            driverUpdateData.status = 'FREE';
-        }
+                // Automatically free the driver if the job is finished
+                const driverUpdateData: any = {};
 
-        // If location provided, we could update driver location too
-        if (lat && lng) {
-            driverUpdateData.location = JSON.stringify({ lat, lng });
-        }
+                if (['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(status)) {
+                    driverUpdateData.status = 'FREE';
+                }
 
-        if (Object.keys(driverUpdateData).length > 0) {
-            await prisma.driver.update({
-                where: { id: driver.driverId },
-                data: driverUpdateData
+                // If location provided, we could update driver location too
+                if (lat && lng) {
+                    driverUpdateData.location = JSON.stringify({ lat, lng });
+                }
+
+                if (Object.keys(driverUpdateData).length > 0) {
+                    const driverUpdate = await tx.driver.updateMany({
+                        where: { id: driver.driverId, tenantId: driver.tenantId },
+                        data: driverUpdateData
+                    });
+                    if (driverUpdate.count !== 1) throw new Error("Failed to release driver");
+                }
+
+                const fetchedJob = await tx.job.findFirst({ where: { id: jobId, tenantId: driver.tenantId } });
+                if (!fetchedJob) throw new Error("Job not found after update");
+                return fetchedJob;
             });
+        } catch (e: any) {
+            return NextResponse.json({ error: e.message || "Failed to update job status" }, { status: 500 });
         }
 
         // Send Notifications based on new status
         try {
             // Need full job info with customer and driver for templates
-            const fullJob = await prisma.job.findUnique({
-                where: { id: jobId },
+            const fullJob = await prisma.job.findFirst({
+                where: { id: jobId, tenantId: driver.tenantId },
                 include: { customer: true }
             });
 
-            const fullDriver = await prisma.driver.findUnique({
-                where: { id: driver.driverId },
+            const fullDriver = await prisma.driver.findFirst({
+                where: { id: driver.driverId, tenantId: driver.tenantId },
                 include: { vehicles: true }
             });
 
             const tenantSettings = await prisma.tenant.findUnique({
-                where: { id: job.tenantId }
+                where: { id: driver.tenantId }
             });
 
             if (fullJob && fullDriver) {

@@ -16,9 +16,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const { name, callsign, phone, email, gender, status, payRatePerHour } = body;
 
         // Verify ownership
-        const pa = await prisma.passengerAssistant.findUnique({
-            where: { id }
-        });
+        const pa = await prisma.passengerAssistant.findFirst({ where: { id, tenantId: session.user.tenantId } });
 
         if (!pa || pa.tenantId !== session.user.tenantId) {
             return NextResponse.json({ error: 'PA not found or access denied' }, { status: 403 });
@@ -40,8 +38,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             }
         }
 
-        const updatedPa = await prisma.passengerAssistant.update({
-            where: { id },
+        const updateResult = await prisma.passengerAssistant.updateMany({
+            where: { id, tenantId: session.user.tenantId },
             data: {
                 name: name !== undefined ? name : undefined,
                 callsign: callsign !== undefined ? callsign : undefined,
@@ -53,6 +51,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             }
         });
 
+        if (updateResult.count !== 1) {
+            return NextResponse.json({ error: 'PA not found or update failed' }, { status: 404 });
+        }
+
+        const updatedPa = await prisma.passengerAssistant.findFirst({ where: { id, tenantId: session.user.tenantId } });
         return NextResponse.json(updatedPa);
     } catch (error) {
         console.error('Failed to update PA:', error);
@@ -69,17 +72,16 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
         const { id } = await params;
         // Verify ownership
-        const pa = await prisma.passengerAssistant.findUnique({
-            where: { id }
-        });
+        const pa = await prisma.passengerAssistant.findFirst({ where: { id, tenantId: session.user.tenantId } });
 
         if (!pa || pa.tenantId !== session.user.tenantId) {
             return NextResponse.json({ error: 'PA not found or access denied' }, { status: 403 });
         }
 
-        await prisma.passengerAssistant.delete({
-            where: { id }
-        });
+        const deleteResult = await prisma.passengerAssistant.deleteMany({ where: { id, tenantId: session.user.tenantId } });
+        if (deleteResult.count !== 1) {
+            return NextResponse.json({ error: "PA not found or access denied" }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

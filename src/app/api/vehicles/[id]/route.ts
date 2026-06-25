@@ -71,9 +71,10 @@ export async function DELETE(
     try {
         const { id } = await params;
 
-        await prisma.vehicle.delete({
-            where: { id }
-        });
+        const deleteResult = await prisma.vehicle.deleteMany({ where: { id, tenantId: session.user.tenantId } });
+        if (deleteResult.count !== 1) {
+            return NextResponse.json({ error: "Vehicle not found or access denied" }, { status: 404 });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
