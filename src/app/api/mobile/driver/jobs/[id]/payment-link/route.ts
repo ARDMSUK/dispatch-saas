@@ -52,6 +52,15 @@ export async function POST(
             return NextResponse.json({ error: 'Forbidden: You are not assigned to this job' }, { status: 403, headers: corsHeaders });
         }
 
+        const driver = await prisma.driver.findUnique({ where: { id: driverId } });
+        if (!driver) {
+             return NextResponse.json({ error: 'Driver not found' }, { status: 404, headers: corsHeaders });
+        }
+        
+        if (job.tenantId !== driver.tenantId) {
+             return NextResponse.json({ error: 'Forbidden (tenant mismatch)' }, { status: 403, headers: corsHeaders });
+        }
+
         // Block if paid, refunded, or cancelled
         if (job.paymentStatus === 'PAID' || job.paymentStatus === 'REFUNDED') {
             return NextResponse.json({ error: 'Job is already paid or refunded', isPaid: true }, { status: 400, headers: corsHeaders });
@@ -177,13 +186,18 @@ export async function POST(
         }
 
         // Save the generated link and update provider to STRIPE, but do NOT mark as paid
-        await prisma.job.update({
-            where: { id: job.id },
+        const updateResult = await prisma.job.updateMany({
+            where: { id: job.id, tenantId: driver.tenantId, driverId: driver.id },
             data: {
                 paymentLink: stripeSession.url,
                 paymentProvider: 'STRIPE'
             }
         });
+
+        if (updateResult.count !== 1) {
+            await stripeClient.checkout.sessions.expire(stripeSession.id).catch(e => console.error("Failed to expire session", e));
+            return NextResponse.json({ error: 'Failed to save payment link to job due to state change or tenant mismatch' }, { status: 409, headers: corsHeaders });
+        }
 
         return NextResponse.json({ 
             success: true, 

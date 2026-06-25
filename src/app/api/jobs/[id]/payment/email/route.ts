@@ -162,17 +162,23 @@ export async function POST(
             paymentLink = stripeSession.url;
 
             // Save the generated link and update provider to STRIPE, but do NOT mark as paid
-            job = await prisma.job.update({
-                where: { id: job.id },
+            const updateResult = await prisma.job.updateMany({
+                where: { 
+                    id: job.id,
+                    ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId })
+                },
                 data: {
                     paymentLink: stripeSession.url,
                     paymentProvider: 'STRIPE'
-                },
-                include: {
-                    tenant: true,
-                    customer: true
                 }
             });
+
+            if (updateResult.count !== 1) {
+                await stripeClient.checkout.sessions.expire(stripeSession.id).catch(e => console.error("Failed to expire session", e));
+                return NextResponse.json({ error: 'Failed to save payment link to job due to state change or tenant mismatch' }, { status: 409 });
+            }
+            job.paymentLink = stripeSession.url;
+            job.paymentProvider = 'STRIPE';
         }
 
         const tenantSettings = await prisma.tenant.findUnique({

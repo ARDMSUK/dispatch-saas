@@ -43,7 +43,10 @@ export async function PATCH(
 ) {
     try {
         const session = await auth();
-        if (!session?.user?.tenantId) {
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        if (!session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -63,7 +66,7 @@ export async function PATCH(
         }
 
         const jobToCheck = await prisma.job.findUnique({ where: { id: jobId } });
-        if (!jobToCheck || jobToCheck.tenantId !== session.user.tenantId) {
+        if (!jobToCheck || (jobToCheck.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Job not found' }, { status: 404 });
         }
 
@@ -77,7 +80,7 @@ export async function PATCH(
 
         if (driverId) {
             const driverToCheck = await prisma.driver.findUnique({ where: { id: driverId } });
-            if (!driverToCheck || driverToCheck.tenantId !== session.user.tenantId) {
+            if (!driverToCheck || (driverToCheck.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
                 return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
             }
         }

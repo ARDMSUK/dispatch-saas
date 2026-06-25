@@ -19,11 +19,14 @@ export async function PATCH(
         const jobId = parseInt(id);
         const { driverId, currentVersion } = await req.json();
 
-        const job = await prisma.job.findUnique({ where: { id: jobId } });
+        const job = await prisma.job.findUnique({ 
+            where: { id: jobId },
+            include: { customer: true }
+        });
         if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
         
         // Tenant Isolation: Job
-        if (job.tenantId !== session.user.tenantId) {
+        if (job.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
             return NextResponse.json({ error: 'Job not found' }, { status: 404 });
         }
 
@@ -45,7 +48,7 @@ export async function PATCH(
         }
 
         // Tenant Isolation: Driver
-        if (driver.tenantId !== session.user.tenantId) {
+        if (driver.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
             return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
         }
 
@@ -58,23 +61,47 @@ export async function PATCH(
         }
 
         // 2. Transaction: Update Job + Update Driver Status
-        const [updatedJob] = await prisma.$transaction([
-            prisma.job.update({
-                where: { id: jobId, version: expectedVersion },
+        const updatedJob = await prisma.$transaction(async (tx) => {
+            const jobUpdate = await tx.job.updateMany({
+                where: { 
+                    id: jobId, 
+                    version: expectedVersion,
+                    ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId })
+                },
                 data: {
                     driverId,
                     status: 'DISPATCHED',
                     version: { increment: 1 }
-                },
-                include: { customer: true }
-            }),
-            prisma.driver.update({
-                where: { id: driverId },
-                data: { status: 'BUSY' }
-            })
-        ]);
+                }
+            });
 
-        const tenantSettings = await prisma.tenant.findUnique({ where: { id: session.user.tenantId } });
+            if (jobUpdate.count !== 1) {
+                throw new Error('JOB_UPDATE_FAILED');
+            }
+
+            const driverUpdate = await tx.driver.updateMany({
+                where: { 
+                    id: driverId,
+                    ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId })
+                },
+                data: { status: 'BUSY' }
+            });
+
+            if (driverUpdate.count !== 1) {
+                throw new Error('DRIVER_UPDATE_FAILED');
+            }
+
+            return tx.job.findUnique({
+                where: { id: jobId },
+                include: { customer: true }
+            });
+        });
+
+        if (!updatedJob) {
+            throw new Error('JOB_UPDATE_FAILED');
+        }
+
+        const tenantSettings = await prisma.tenant.findUnique({ where: { id: updatedJob.tenantId } });
 
         // Notifications
         // 1. Notify Driver of Job Offer
@@ -91,8 +118,11 @@ export async function PATCH(
 
         return NextResponse.json(updatedJob);
     } catch (error: any) {
-        if (error.code === 'P2025') {
+        if (error.code === 'P2025' || error.message === 'JOB_UPDATE_FAILED') {
             return NextResponse.json({ error: 'Job was already modified or taken by someone else' }, { status: 409 });
+        }
+        if (error.message === 'DRIVER_UPDATE_FAILED') {
+            return NextResponse.json({ error: 'Failed to update driver status or driver belongs to another tenant' }, { status: 409 });
         }
         console.error("Assign failed", error);
         return NextResponse.json({ error: 'Assignment Failed' }, { status: 500 });

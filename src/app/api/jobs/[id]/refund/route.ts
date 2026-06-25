@@ -139,24 +139,43 @@ export async function POST(
 
         if (alreadyRefunded) {
             // Ensure local DB reflects the refunded status since Stripe says it is fully refunded
-            await prisma.$transaction([
-                prisma.job.update({
-                    where: { id: jobId },
+            const jobUpdateResult = await prisma.$transaction(async (tx) => {
+                const jobUpdate = await tx.job.updateMany({
+                    where: { 
+                        id: jobId, 
+                        ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId }) 
+                    },
                     data: {
                         paymentStatus: 'REFUNDED',
                         status: 'CANCELLED'
                     }
-                }),
-                ...(job.driverId ? [
-                    prisma.driver.updateMany({
+                });
+
+                if (jobUpdate.count !== 1) {
+                    throw new Error('JOB_UPDATE_FAILED');
+                }
+
+                if (job.driverId) {
+                    const driverUpdate = await tx.driver.updateMany({
                         where: { 
                             id: job.driverId,
-                            tenantId: job.tenantId
+                            ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: job.tenantId })
                         },
                         data: { status: 'FREE' }
-                    })
-                ] : [])
-            ]);
+                    });
+
+                    if (driverUpdate.count !== 1) {
+                        throw new Error('DRIVER_UPDATE_FAILED');
+                    }
+                }
+                return true;
+            }).catch(e => e.message);
+
+            if (jobUpdateResult === 'JOB_UPDATE_FAILED' || jobUpdateResult === 'DRIVER_UPDATE_FAILED') {
+                console.error(`[CRITICAL] Stripe says Job ${jobId} is already refunded, but local DB sync failed (${jobUpdateResult}).`);
+                return NextResponse.json({ error: 'Stripe refund is complete, but local database sync failed.' }, { status: 500 });
+            }
+
             return NextResponse.json({ 
                 success: true, 
                 message: 'Payment was already refunded on Stripe. CabAI has been updated.' 
@@ -171,24 +190,42 @@ export async function POST(
 
             if (refund.status === 'succeeded' || refund.status === 'pending') {
                 // Update CabAI database
-                await prisma.$transaction([
-                    prisma.job.update({
-                        where: { id: jobId },
+                const jobUpdateResult = await prisma.$transaction(async (tx) => {
+                    const jobUpdate = await tx.job.updateMany({
+                        where: { 
+                            id: jobId, 
+                            ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: session.user.tenantId }) 
+                        },
                         data: {
                             paymentStatus: 'REFUNDED',
                             status: 'CANCELLED'
                         }
-                    }),
-                    ...(job.driverId ? [
-                        prisma.driver.updateMany({
+                    });
+
+                    if (jobUpdate.count !== 1) {
+                        throw new Error('JOB_UPDATE_FAILED');
+                    }
+
+                    if (job.driverId) {
+                        const driverUpdate = await tx.driver.updateMany({
                             where: { 
                                 id: job.driverId,
-                                tenantId: job.tenantId
+                                ...(session.user.role !== 'SUPER_ADMIN' && { tenantId: job.tenantId })
                             },
                             data: { status: 'FREE' }
-                        })
-                    ] : [])
-                ]);
+                        });
+
+                        if (driverUpdate.count !== 1) {
+                            throw new Error('DRIVER_UPDATE_FAILED');
+                        }
+                    }
+                    return true;
+                }).catch(e => e.message);
+
+                if (jobUpdateResult === 'JOB_UPDATE_FAILED' || jobUpdateResult === 'DRIVER_UPDATE_FAILED') {
+                    console.error(`[CRITICAL] Stripe refund succeeded for Job ${jobId}, but local DB sync failed (${jobUpdateResult}).`);
+                    return NextResponse.json({ error: 'Refund succeeded with Stripe, but database sync failed.' }, { status: 500 });
+                }
 
                 return NextResponse.json({ 
                     success: true, 
