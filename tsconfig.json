@@ -30,5 +30,17 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "scripts/**/*.ts",
+    "check-min-fare.ts",
+    "debug-pricing-rules.ts",
+    "debug-tenants.ts",
+    "enable-web-booker.ts",
+    "get-driver-creds.ts",
+    "seed_tracking_test.ts",
+    "test-usechat.tsx",
+    "testp.ts",
+    "verify-fixes.ts"
+  ]
 }
