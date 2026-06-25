@@ -10,15 +10,20 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const phone = searchParams.get("phone");
 
+    const whereClause: any = { tenantId };
+
+    if (session.user.role !== 'SUPER_ADMIN' && session.user.role === 'B2B_ADMIN') {
+        if (!session.user.accountId) {
+            return NextResponse.json({ customers: [] });
+        }
+        whereClause.accountId = session.user.accountId;
+    }
+
     if (phone) {
+        whereClause.phone = phone;
         // Find existing customer by phone within tenant
-        const customer = await prisma.customer.findUnique({
-            where: {
-                tenantId_phone: {
-                    tenantId,
-                    phone
-                }
-            },
+        const customer = await prisma.customer.findFirst({
+            where: whereClause,
             include: { account: true }
         });
         return NextResponse.json({ customer: customer || null });
@@ -26,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     // List recent customers? Or just empty for now if no query
     const customers = await prisma.customer.findMany({
-        where: { tenantId },
+        where: whereClause,
         take: 10,
         orderBy: { updatedAt: 'desc' }
     });

@@ -19,15 +19,24 @@ export async function GET(req: Request) {
 
         const tenantId = session.user.tenantId;
 
+        const whereClause: any = {
+            tenantId,
+            phone: {
+                contains: phone, // Allow partial match for standard search
+                mode: 'insensitive'
+            }
+        };
+
+        if (session.user.role !== 'SUPER_ADMIN' && session.user.role === 'B2B_ADMIN') {
+            if (!session.user.accountId) {
+                return NextResponse.json({ found: false });
+            }
+            whereClause.accountId = session.user.accountId;
+        }
+
         // Find customer
         const customer = await prisma.customer.findFirst({
-            where: {
-                tenantId,
-                phone: {
-                    contains: phone, // Allow partial match for standard search
-                    mode: 'insensitive'
-                }
-            },
+            where: whereClause,
             include: {
                 _count: {
                     select: { jobs: true }
