@@ -6,7 +6,6 @@ import { auth } from '@/auth';
 
 export async function POST(req: Request) {
     try {
-        console.log(`[Phase20Z-DIAG] POST /api/create-payment-intent hit`);
         const session = await auth();
         const isAuthenticated = !!session?.user?.tenantId;
 
@@ -17,20 +16,15 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid amount (Minimum £0.50)" }, { status: 400 });
         }
 
-        let tenantIdSource = 'fallback/env';
         let tenantId = null;
 
         if (isAuthenticated) {
             tenantId = session?.user?.tenantId;
-            tenantIdSource = 'JWT/session';
         } else if (bookingDetails?.tenantId) {
             tenantId = bookingDetails.tenantId;
-            tenantIdSource = 'bookingDetails.tenantId';
         } else if (body.bookingId) {
-            tenantIdSource = 'slug/bookingId';
+            // No direct tenant id mapping for slug alone here, fallback
         }
-
-        console.log(`[Phase20Z-DIAG] isAuthenticated: ${isAuthenticated}, tenantIdSource: ${tenantIdSource}, resolved tenantId: ${tenantId}`);
 
         let tenant = null;
         if (tenantId) {
@@ -39,35 +33,19 @@ export async function POST(req: Request) {
             });
         }
 
-        let stripeKeySource = 'unknown';
         let apiKey = null;
 
         if (tenant?.stripeSecretKey) {
             apiKey = tenant.stripeSecretKey;
-            stripeKeySource = 'tenant DB key';
         } else if (process.env.STRIPE_SECRET_KEY) {
             apiKey = process.env.STRIPE_SECRET_KEY;
-            stripeKeySource = 'environment STRIPE_SECRET_KEY';
         }
 
         if (!apiKey) {
-            console.log(`[Phase20Z-DIAG] No API key found for this request.`);
             return NextResponse.json({ error: "Payment configuration missing for this tenant" }, { status: 500 });
         }
 
-        const maskedKey = apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4);
-        console.log(`[Phase20Z-DIAG] stripeKeySource: ${stripeKeySource}, maskedKey: ${maskedKey}, tenantName: ${tenant?.name || 'System'}`);
-
         const stripe = getStripe(apiKey);
-        let accountId = 'unknown';
-        try {
-            const acc = await stripe.accounts.retrieve();
-            accountId = acc.id;
-        } catch (err: any) {
-            accountId = `error: ${err.code || err.type}`;
-        }
-        
-        console.log(`[Phase20Z-DIAG] Stripe account ID: ${accountId}`);
 
         const paymentPurpose = isAuthenticated ? 'operator_console_card_booking' : 'web_booker_card_payment';
 
@@ -83,8 +61,6 @@ export async function POST(req: Request) {
                 paymentPurpose: paymentPurpose
             }
         });
-
-        console.log(`[Phase20Z-DIAG] Created PaymentIntent: ${paymentIntent.id}, amount: ${paymentIntent.amount}, currency: ${paymentIntent.currency}, paymentPurpose: ${paymentIntent.metadata.paymentPurpose}`);
 
         return NextResponse.json({
             clientSecret: paymentIntent.client_secret,
