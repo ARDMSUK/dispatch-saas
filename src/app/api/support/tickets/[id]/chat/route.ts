@@ -142,7 +142,7 @@ Rules:
                     try {
                         const { sendEmail, getSupportEscalationEmail } = await import('@/lib/email');
                         const html = getSupportEscalationEmail(ticket.id, ticket.tenant.slug, ticket.subject);
-                        await sendEmail("support@cabai.co.uk", `Escalated Ticket [${ticket.id.slice(-8)}] - ${ticket.tenant.slug}`, html);
+                        await sendEmail({ to: "support@cabai.co.uk", subject: `Escalated Ticket [${ticket.id.slice(-8)}] - ${ticket.tenant.slug}`, html });
                         
                         // Twilio SMS Notification to Super Admin
                         if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.SUPPORT_PHONE_NUMBER) {

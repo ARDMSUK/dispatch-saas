@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Plus, Trash2, Edit2, CheckCircle2, XCircle, Save, X } from "lucide-react";
+import { Plus, Trash2, Edit2, CheckCircle2, XCircle, Save, X, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

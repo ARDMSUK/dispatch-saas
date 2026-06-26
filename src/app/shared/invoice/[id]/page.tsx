@@ -163,7 +163,7 @@ export default function InvoiceViewer() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {jobs && jobs.map((job: Job, idx: number) => (
+                                {jobs && jobs.map((job: any, idx: number) => (
                                     <tr key={job.id} className={`border-b border-neutral-200 text-sm ${idx % 2 === 0 ? 'bg-neutral-50/50' : 'bg-white'}`}>
                                         <td className="py-4 px-2 whitespace-nowrap text-neutral-600">
                                             {format(new Date(job.pickupTime), "dd/MM/yy HH:mm")}

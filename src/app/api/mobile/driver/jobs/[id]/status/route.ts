@@ -70,7 +70,7 @@ export async function PATCH(
         }
 
         // Verify that this job actually belongs to this driver
-        const existingJob = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId } });
+        const existingJob = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId } });
 
         if (!existingJob || existingJob.driverId !== driverId) {
             return NextResponse.json({ error: 'Forbidden or Job not found' }, { status: 403, headers: corsHeaders });
@@ -106,9 +106,9 @@ export async function PATCH(
 
         try {
             updatedJob = await prisma.$transaction(async (tx) => {
-                if (realStatus === 'COMPLETED' || realStatus === 'CANCELLED' || realStatus === 'NO_SHOW') {
+                if (realStatus === 'COMPLETED' || (realStatus as string) === 'CANCELLED' || realStatus === 'NO_SHOW') {
                     const jobUpdate = await tx.job.updateMany({
-                        where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                        where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId },
                         data: { status: realStatus }
                     });
                     if (jobUpdate.count !== 1) throw new Error("Failed to update job");
@@ -121,7 +121,7 @@ export async function PATCH(
 
                 } else if (realStatus === 'UNASSIGNED') {
                     const jobUpdate = await tx.job.updateMany({
-                        where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                        where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId },
                         data: { status: 'PENDING', driverId: null }
                     });
                     if (jobUpdate.count !== 1) throw new Error("Failed to unassign job");
@@ -134,14 +134,14 @@ export async function PATCH(
 
                 } else {
                     const jobUpdate = await tx.job.updateMany({
-                        where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId },
+                        where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId },
                         data: { status: realStatus }
                     });
                     if (jobUpdate.count !== 1) throw new Error("Failed to update job");
                 }
 
                 const job = await tx.job.findFirst({
-                    where: { id: jobId, driverId: realStatus === 'UNASSIGNED' ? null : driver.driverId, tenantId: driver.tenantId },
+                    where: { id: jobId, driverId: realStatus === 'UNASSIGNED' ? null : driver.id, tenantId: driver.tenantId },
                     include: {
                         driver: { include: { vehicles: true } },
                         customer: true

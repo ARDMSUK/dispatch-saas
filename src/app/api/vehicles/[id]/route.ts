@@ -70,6 +70,10 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
+        const session = await auth();
+        if (!session?.user?.tenantId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
         const deleteResult = await prisma.vehicle.deleteMany({ where: { id, tenantId: session.user.tenantId } });
         if (deleteResult.count !== 1) {
