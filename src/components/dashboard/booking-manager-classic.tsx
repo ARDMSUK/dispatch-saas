@@ -35,8 +35,8 @@ interface Job {
     passengers: number;
     luggage: number;
     paymentType: string;
-    preAssignedDriver?: { id: string; name: string; callsign: string }; // Populated from API
-    driver?: { id: string; name: string; callsign: string }; // Populated from API
+    preAssignedDriver?: { id: string; name: string; callsign: string; phone?: string }; // Populated from API
+    driver?: { id: string; name: string; callsign: string; phone?: string }; // Populated from API
     driverInstructions?: string;
     isPrebooked: boolean;
     isReturn: boolean;
@@ -53,6 +53,13 @@ interface Job {
     driverPaymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
     createdAt: string;
     updatedAt: string;
+    paymentProvider?: string;
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
+    passengerEmail?: string;
+    autoDispatch?: boolean;
     bookedBy?: { name: string | null; email: string } | null;
     calls?: Array<{
         id: string;
