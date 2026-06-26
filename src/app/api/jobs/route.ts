@@ -247,50 +247,88 @@ export async function POST(request: Request) {
         let verifiedStripePaymentIntentId = null;
         let verifiedPaymentReferenceId = null;
 
+        console.log(`[Phase20Z-DIAG] POST /api/jobs hit`);
+        console.log(`[Phase20Z-DIAG] authenticated tenantId: ${tenantId}`);
+        console.log(`[Phase20Z-DIAG] body.paymentType: ${body.paymentType}, body.stripePaymentIntentId exists: ${!!body.stripePaymentIntentId}, ID: ${body.stripePaymentIntentId}`);
+
         if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
             const tenantSettings = await prisma.tenant.findUnique({ where: { id: tenantId } });
-            const apiKey = tenantSettings?.stripeSecretKey || process.env.STRIPE_SECRET_KEY;
+            
+            let stripeKeySource = 'unknown';
+            let apiKey = null;
+
+            if (tenantSettings?.stripeSecretKey) {
+                apiKey = tenantSettings.stripeSecretKey;
+                stripeKeySource = 'tenant DB key';
+            } else if (process.env.STRIPE_SECRET_KEY) {
+                apiKey = process.env.STRIPE_SECRET_KEY;
+                stripeKeySource = 'environment STRIPE_SECRET_KEY';
+            }
 
             if (!apiKey) {
+                console.log(`[Phase20Z-DIAG] No API key found for this request.`);
                 return NextResponse.json({ error: "Payment configuration missing for this tenant" }, { status: 500 });
             }
 
+            const maskedKey = apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4);
+            console.log(`[Phase20Z-DIAG] stripeKeySource: ${stripeKeySource}, maskedKey: ${maskedKey}`);
+
             const stripe = getStripe(apiKey);
+            
+            let accountId = 'unknown';
+            try {
+                const acc = await stripe.accounts.retrieve();
+                accountId = acc.id;
+            } catch (err: any) {
+                accountId = `error: ${err.code || err.type}`;
+            }
+            
+            console.log(`[Phase20Z-DIAG] Stripe account ID: ${accountId}`);
+
             try {
                 const paymentIntent = await stripe.paymentIntents.retrieve(body.stripePaymentIntentId);
+                console.log(`[Phase20Z-DIAG] PaymentIntent retrieve success! status: ${paymentIntent.status}, amount: ${paymentIntent.amount}, currency: ${paymentIntent.currency}`);
 
                 // Verify status
                 if (paymentIntent.status !== 'succeeded') {
+                    console.log(`[Phase20Z-DIAG] Verification failed: Payment has not succeeded (${paymentIntent.status})`);
                     return NextResponse.json({ error: "Payment has not succeeded" }, { status: 400 });
                 }
 
                 // Verify amount
                 if (!fare || fare < 0.50) {
+                    console.log(`[Phase20Z-DIAG] Verification failed: Invalid fare amount for card payment (${fare})`);
                     return NextResponse.json({ error: "Invalid fare amount for card payment" }, { status: 400 });
                 }
                 if (paymentIntent.amount !== Math.round(fare * 100)) {
+                    console.log(`[Phase20Z-DIAG] Verification failed: Payment amount mismatch (PI: ${paymentIntent.amount}, Fare: ${Math.round(fare * 100)})`);
                     return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 });
                 }
 
                 // Verify currency
                 if (paymentIntent.currency !== 'gbp') {
+                    console.log(`[Phase20Z-DIAG] Verification failed: Payment currency mismatch (${paymentIntent.currency})`);
                     return NextResponse.json({ error: "Payment currency mismatch" }, { status: 400 });
                 }
 
                 // Verify tenant metadata if exists
-                if (paymentIntent.metadata?.tenantId && paymentIntent.metadata.tenantId !== tenantId) {
+                if (paymentIntent.metadata?.tenantId && paymentIntent.metadata.tenantId !== tenantId && paymentIntent.metadata.tenantId !== 'system') {
+                    console.log(`[Phase20Z-DIAG] Verification failed: Payment tenant mismatch (${paymentIntent.metadata.tenantId} != ${tenantId})`);
                     return NextResponse.json({ error: "Payment tenant mismatch" }, { status: 400 });
                 }
 
+                console.log(`[Phase20Z-DIAG] Verification result: ALL CHECKS PASSED. Setting status to PAID.`);
                 verifiedPaymentStatus = 'PAID';
                 verifiedPaymentProvider = 'STRIPE';
                 verifiedStripePaymentIntentId = paymentIntent.id;
                 verifiedPaymentReferenceId = paymentIntent.id;
 
-            } catch (error) {
-                console.error("Payment Verification Error:", error);
+            } catch (error: any) {
+                console.error("[Phase20Z-DIAG] Payment Verification Error:", error.message || error);
                 return NextResponse.json({ error: "Failed to verify payment intent" }, { status: 400 });
             }
+        } else {
+            console.log(`[Phase20Z-DIAG] Verification bypassed or no stripePaymentIntentId supplied. Decision: create job as ${verifiedPaymentStatus}`);
         }
 
         // 3. Prepare Common Job Data

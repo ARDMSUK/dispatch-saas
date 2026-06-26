@@ -1596,8 +1596,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     // Toast already handled in modal usually, but we can double up
                 }}
                 bookingDetails={{
-                    passengerEmail,
-                    tenantId: 'demo-taxis' // Should be dynamic
+                    passengerEmail
                 }}
             />
 
