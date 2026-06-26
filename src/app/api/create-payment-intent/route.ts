@@ -48,6 +48,7 @@ export async function POST(req: Request) {
             metadata: {
                 tenantId: tenantId,
                 customerEmail: bookingDetails?.passengerEmail || 'unknown',
+                paymentPurpose: 'operator_console_card_booking'
             }
         });
 

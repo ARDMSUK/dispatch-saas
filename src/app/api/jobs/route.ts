@@ -7,6 +7,7 @@ import { EmailService } from '@/lib/email-service';
 import { SmsService } from '@/lib/sms-service';
 import { DispatchEngine } from '@/lib/dispatch-engine';
 import { linkRecentCallToBooking } from '@/lib/call-matching';
+import { getStripe } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 
@@ -240,6 +241,58 @@ export async function POST(request: Request) {
 
         const isWavType = body.vehicleType ? body.vehicleType.toLowerCase().includes('wav') : false;
 
+        // NEW: Payment Verification
+        let verifiedPaymentStatus = 'UNPAID';
+        let verifiedPaymentProvider = null;
+        let verifiedStripePaymentIntentId = null;
+        let verifiedPaymentReferenceId = null;
+
+        if (body.paymentType === 'CARD' && body.stripePaymentIntentId) {
+            const tenantSettings = await prisma.tenant.findUnique({ where: { id: tenantId } });
+            const apiKey = tenantSettings?.stripeSecretKey || process.env.STRIPE_SECRET_KEY;
+
+            if (!apiKey) {
+                return NextResponse.json({ error: "Payment configuration missing for this tenant" }, { status: 500 });
+            }
+
+            const stripe = getStripe(apiKey);
+            try {
+                const paymentIntent = await stripe.paymentIntents.retrieve(body.stripePaymentIntentId);
+
+                // Verify status
+                if (paymentIntent.status !== 'succeeded') {
+                    return NextResponse.json({ error: "Payment has not succeeded" }, { status: 400 });
+                }
+
+                // Verify amount
+                if (!fare || fare < 0.50) {
+                    return NextResponse.json({ error: "Invalid fare amount for card payment" }, { status: 400 });
+                }
+                if (paymentIntent.amount !== Math.round(fare * 100)) {
+                    return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 });
+                }
+
+                // Verify currency
+                if (paymentIntent.currency !== 'gbp') {
+                    return NextResponse.json({ error: "Payment currency mismatch" }, { status: 400 });
+                }
+
+                // Verify tenant metadata if exists
+                if (paymentIntent.metadata?.tenantId && paymentIntent.metadata.tenantId !== tenantId) {
+                    return NextResponse.json({ error: "Payment tenant mismatch" }, { status: 400 });
+                }
+
+                verifiedPaymentStatus = 'PAID';
+                verifiedPaymentProvider = 'STRIPE';
+                verifiedStripePaymentIntentId = paymentIntent.id;
+                verifiedPaymentReferenceId = paymentIntent.id;
+
+            } catch (error) {
+                console.error("Payment Verification Error:", error);
+                return NextResponse.json({ error: "Failed to verify payment intent" }, { status: 400 });
+            }
+        }
+
         // 3. Prepare Common Job Data
         const commonJobData = {
             tenantId,
@@ -373,7 +426,14 @@ export async function POST(request: Request) {
 
 
         for (const jobData of jobsToCreate) {
-            const job = await prisma.job.create({ data: jobData });
+            // Apply verified payment ONLY to the primary (first) generated job
+            if (createdCount === 0) {
+                (jobData as any).paymentStatus = verifiedPaymentStatus;
+                (jobData as any).paymentProvider = verifiedPaymentProvider;
+                (jobData as any).paymentReferenceId = verifiedPaymentReferenceId;
+                (jobData as any).stripePaymentIntentId = verifiedStripePaymentIntentId;
+            }
+            const job = await prisma.job.create({ data: jobData as any });
             if (!firstJob) firstJob = job;
             createdCount++;
         }
@@ -397,7 +457,13 @@ export async function POST(request: Request) {
                     pickupTime: returnTime,
                     fare: returnFare,
                     isReturn: true,
-                    parentJobId: newJob!.id
+                    parentJobId: newJob!.id,
+                    // Return bookings must always be created unpaid initially 
+                    // unless a separate payment intent is explicitly captured for them.
+                    paymentStatus: 'UNPAID',
+                    paymentProvider: null,
+                    paymentReferenceId: null,
+                    stripePaymentIntentId: null
                 }
             });
         }
