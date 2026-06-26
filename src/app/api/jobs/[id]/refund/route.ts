@@ -124,8 +124,8 @@ export async function POST(
             } else if (charge.amount_refunded > 0 && charge.amount_refunded < charge.amount) {
                 requiresManualReview = true;
             }
-        } else if (intent.charges?.data && intent.charges.data.length > 0) {
-            const firstCharge = intent.charges.data[0];
+        } else if ((intent as any).charges?.data && (intent as any).charges.data.length > 0) {
+            const firstCharge = (intent as any).charges.data[0];
             if (firstCharge.refunded === true || firstCharge.amount_refunded >= firstCharge.amount) {
                 alreadyRefunded = true;
             } else if (firstCharge.amount_refunded > 0 && firstCharge.amount_refunded < firstCharge.amount) {

@@ -31,7 +31,7 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders });
         }
 
-        const driverId = payload.driverId || payload.id;
+        const driverId = (payload.driverId || payload.id) as string;
         const { id } = await params;
         const jobId = parseInt(id);
 
@@ -39,19 +39,19 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400, headers: corsHeaders });
         }
 
+        const driver = await prisma.driver.findUnique({ where: { id: driverId } });
+        if (!driver) {
+             return NextResponse.json({ error: 'Driver not found' }, { status: 404, headers: corsHeaders });
+        }
+
         let job = await prisma.job.findFirst({
-            where: { id: jobId, driverId: driver.driverId },
+            where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId },
             include: { tenant: true, customer: true }
         });
 
         if (!job || !job.tenant) {
             return NextResponse.json({ error: 'Job or tenant not found' }, { status: 404, headers: corsHeaders });
         }
-
-        if (job.driverId !== driverId) {
-            return NextResponse.json({ error: 'Forbidden: You are not assigned to this job' }, { status: 403, headers: corsHeaders });
-        }
-
         if (!job.passengerEmail && !job.customer?.email) {
             return NextResponse.json({ error: 'Customer email address is required to send payment link email' }, { status: 400, headers: corsHeaders });
         }

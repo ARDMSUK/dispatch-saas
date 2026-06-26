@@ -30,7 +30,7 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders });
         }
 
-        const driverId = payload.driverId || payload.id;
+        const driverId = (payload.driverId || payload.id) as string;
         const { id } = await params;
         const jobId = parseInt(id);
 
@@ -41,33 +41,63 @@ export async function POST(
         const body = await request.json();
         const { paymentType } = body;
 
+        const driver = await prisma.driver.findUnique({ where: { id: driverId } });
+        if (!driver) {
+             return NextResponse.json({ error: 'Driver not found' }, { status: 404, headers: corsHeaders });
+        }
+
         // Verify Job Ownership
-        const job = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId } });
+        const job = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId } });
 
         if (!job) {
             return NextResponse.json({ error: 'Job not found' }, { status: 404, headers: corsHeaders });
         }
 
-        if (job.driverId !== driverId) {
-            return NextResponse.json({ error: 'Forbidden: You are not assigned to this job' }, { status: 403, headers: corsHeaders });
-        }
-
         // Run updates in transaction
-        const [updatedJob, updatedDriver] = await prisma.$transaction([
-            prisma.job.update({
-                where: { id: jobId },
+        const updatedJob = await prisma.$transaction(async (tx) => {
+            const jobUpdate = await tx.job.updateMany({
+                where: {
+                    id: jobId,
+                    driverId: driver.id,
+                    tenantId: driver.tenantId
+                },
                 data: {
                     status: 'COMPLETED',
                     paymentType: paymentType || 'IN_CAR_TERMINAL',
                     paymentStatus: 'PAID'
+                }
+            });
+
+            if (jobUpdate.count !== 1) {
+                throw new Error('Failed to update job or job ownership changed');
+            }
+
+            const driverUpdate = await tx.driver.updateMany({
+                where: {
+                    id: driver.id,
+                    tenantId: driver.tenantId
+                },
+                data: { status: 'FREE' }
+            });
+
+            if (driverUpdate.count !== 1) {
+                throw new Error('Failed to update driver');
+            }
+
+            const finalJob = await tx.job.findFirst({
+                where: {
+                    id: jobId,
+                    tenantId: driver.tenantId
                 },
                 include: { customer: true }
-            }),
-            prisma.driver.update({
-                where: { id: driverId },
-                data: { status: 'FREE' }
-            })
-        ]);
+            });
+
+            if (!finalJob) {
+                throw new Error('Failed to fetch updated job');
+            }
+
+            return finalJob;
+        });
 
         // Trigger Receipt Notifications
         try {

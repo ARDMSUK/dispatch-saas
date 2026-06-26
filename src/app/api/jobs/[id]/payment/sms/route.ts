@@ -36,7 +36,7 @@ export async function POST(
             return NextResponse.json({ error: 'Forbidden: You are not authorized for this job' }, { status: 403 });
         }
 
-        if (!job.passengerPhone && !job.customerPhone && !job.customer?.phone) {
+        if (!job.passengerPhone && !(job as any).customerPhone && !job.customer?.phone) {
             return NextResponse.json({ error: 'Customer phone number is required to send SMS' }, { status: 400 });
         }
 
@@ -186,7 +186,7 @@ export async function POST(
         });
 
         // Ensure passengerPhone is explicitly passed down if not on top level
-        const jobForSms = { ...job, passengerPhone: job.passengerPhone || job.customerPhone || job.customer?.phone };
+        const jobForSms = { ...job, passengerPhone: job.passengerPhone || (job as any).customerPhone || job.customer?.phone };
 
         const smsResult = await SmsService.sendPaymentLink(jobForSms, tenantSettings);
 

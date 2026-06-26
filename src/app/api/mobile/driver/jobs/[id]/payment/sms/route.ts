@@ -31,7 +31,7 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders });
         }
 
-        const driverId = payload.driverId || payload.id;
+        const driverId = (payload.driverId || payload.id) as string;
         const { id } = await params;
         const jobId = parseInt(id);
 
@@ -39,8 +39,13 @@ export async function POST(
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400, headers: corsHeaders });
         }
 
+        const driver = await prisma.driver.findUnique({ where: { id: driverId } });
+        if (!driver) {
+             return NextResponse.json({ error: 'Driver not found' }, { status: 404, headers: corsHeaders });
+        }
+
         let job = await prisma.job.findFirst({
-            where: { id: jobId, driverId: driver.driverId },
+            where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId },
             include: { tenant: true, customer: true }
         });
 
@@ -48,11 +53,7 @@ export async function POST(
             return NextResponse.json({ error: 'Job or tenant not found' }, { status: 404, headers: corsHeaders });
         }
 
-        if (job.driverId !== driverId) {
-            return NextResponse.json({ error: 'Forbidden: You are not assigned to this job' }, { status: 403, headers: corsHeaders });
-        }
-
-        if (!job.passengerPhone && !job.customerPhone && !job.customer?.phone) {
+        if (!(job as any).passengerPhone && !(job as any).customerPhone && !job.customer?.phone) {
             return NextResponse.json({ error: 'Customer phone number is required to send SMS' }, { status: 400, headers: corsHeaders });
         }
 
@@ -165,7 +166,7 @@ export async function POST(
         });
 
         // Ensure passengerPhone is explicitly passed down if not on top level
-        const jobForSms = { ...job, passengerPhone: job.passengerPhone || job.customerPhone || job.customer?.phone };
+        const jobForSms = { ...job, passengerPhone: (job as any).passengerPhone || (job as any).customerPhone || job.customer?.phone };
 
         const smsResult = await SmsService.sendPaymentLink(jobForSms, tenantSettings);
 

@@ -43,7 +43,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
         // Additional B2B Authorization Guard
         // If they are a B2B user, ensure this invoice actually belongs to their specific account
-        if (session.user.role === 'B2B_ADMIN' && invoice.accountId !== session.user.accountId) {
+        if (session.user.role === 'B2B_ADMIN' && invoice.accountId !== (session.user as any).accountId) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
