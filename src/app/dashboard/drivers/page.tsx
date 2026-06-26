@@ -536,7 +536,7 @@ function DriverDocuments({
                     <TableBody className="bg-card">
                         {loading ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Loading...</TableCell></TableRow> :
                          allDocs.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No documents found</TableCell></TableRow> :
-                         allDocs.map((doc, docIdx) => (
+                         allDocs.map((doc: any, docIdx: number) => (
                              <TableRow key={doc.id || docIdx} className="border-border hover:bg-muted/50">
                                  <TableCell className="font-medium text-foreground">{doc.type.replace('_', ' ')}</TableCell>
                                  <TableCell>

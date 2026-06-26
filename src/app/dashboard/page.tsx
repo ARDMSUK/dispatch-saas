@@ -189,7 +189,7 @@ function DashboardContent() {
                 }
             });
 
-            channel.subscribe((status) => {
+            channel.subscribe((status: any) => {
                 console.log(`[Supabase Dashboard] Realtime subscription status: ${status}`);
             });
 

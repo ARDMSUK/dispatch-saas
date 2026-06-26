@@ -219,7 +219,7 @@ export default function ReportsPage() {
                                             <Tooltip
                                                 contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
                                                 itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
-                                                formatter={(value: number) => [`£${value.toFixed(2)}`, 'Revenue']}
+                                                formatter={((value: number) => [`£${value.toFixed(2)}`, 'Revenue']) as any}
                                             />
                                             <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: "#6366f1", strokeWidth: 0 }} activeDot={{ r: 6, fill: "#818cf8" }} />
                                         </LineChart>
@@ -241,7 +241,7 @@ export default function ReportsPage() {
                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 12 }} />
                                             <Tooltip
                                                 contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
-                                                formatter={(value: number) => [value, 'Completed Jobs']}
+                                                formatter={((value: number) => [value, 'Completed Jobs']) as any}
                                                 cursor={{ fill: '#27272a', opacity: 0.4 }}
                                             />
                                             <Bar dataKey="jobs" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -375,7 +375,7 @@ export default function ReportsPage() {
                                             <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 12 }} />
                                             <Tooltip
                                                 contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#fff' }}
-                                                formatter={(value: number) => [`${value} Rides`, 'Frequency']}
+                                                formatter={((value: number) => [`${value} Rides`, 'Frequency']) as any}
                                                 labelFormatter={(label) => `Hour block starting: ${label}`}
                                                 cursor={{ fill: '#27272a', opacity: 0.4 }}
                                             />
