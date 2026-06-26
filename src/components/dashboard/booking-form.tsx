@@ -409,7 +409,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                     const prefix = notesText.substring(1, closeBracketIdx);
                     notesText = notesText.substring(closeBracketIdx + 1).trim();
                     const parts = prefix.split(' | ');
-                    parts.forEach(part => {
+                    parts.forEach((part: string) => {
                         if (part.startsWith('REMINDER:')) {
                             setReminders(part.replace('REMINDER:', '').trim());
                         } else if (part === 'MEET & GREET p/u') {
