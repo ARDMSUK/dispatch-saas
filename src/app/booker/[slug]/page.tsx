@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { LocationInput } from "@/components/dashboard/location-input";
 import { motion, AnimatePresence } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Turnstile } from '@marsidev/react-turnstile';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
 
 export default function BookerPage() {
     const params = useParams();
@@ -20,6 +22,8 @@ export default function BookerPage() {
     const [loading, setLoading] = useState(false);
     const [bookingComplete, setBookingComplete] = useState(false);
     const [isEmbed, setIsEmbed] = useState(false);
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileInstance | null>(null);
 
     // Stripe Integration States
     const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -207,7 +211,8 @@ export default function BookerPage() {
                     price: quote,
                     pickupLat: formData.pickupLat, pickupLng: formData.pickupLng,
                     dropoffLat: formData.dropoffLat, dropoffLng: formData.dropoffLng,
-                    pickupTime: new Date(formData.pickupTime).toISOString()
+                    pickupTime: new Date(formData.pickupTime).toISOString(),
+                    turnstileToken
                 })
             });
 
@@ -224,9 +229,13 @@ export default function BookerPage() {
                 }
             } else {
                 toast.error(data.error || "Failed to confirm booking.");
+                turnstileRef.current?.reset();
+                setTurnstileToken(null);
             }
         } catch (e) {
             toast.error("Connection error while booking.");
+            turnstileRef.current?.reset();
+            setTurnstileToken(null);
         } finally {
             setLoading(false);
         }
@@ -572,6 +581,16 @@ export default function BookerPage() {
                                             </div>
                                         </div>
 
+                                        <div className="pt-4 flex justify-center">
+                                            <Turnstile 
+                                                ref={turnstileRef}
+                                                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                                                onSuccess={(token) => setTurnstileToken(token)}
+                                                onExpire={() => setTurnstileToken(null)}
+                                                options={{ theme: 'dark' }}
+                                            />
+                                        </div>
+
                                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                             <Button
                                                 variant="outline"
@@ -582,7 +601,7 @@ export default function BookerPage() {
                                             </Button>
                                             <Button
                                                 onClick={handleSumbitBooking}
-                                                disabled={loading || !formData.passengerName || !formData.passengerPhone}
+                                                disabled={loading || !formData.passengerName || !formData.passengerPhone || !turnstileToken}
                                                 className="h-14 sm:w-2/3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg rounded-2xl shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
                                             >
                                                 {loading ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : "Confirm & Book"}
@@ -626,7 +645,11 @@ export default function BookerPage() {
                                                             if (res.ok && data.success) {
                                                                 setShowStripePay(false);
                                                                 setBookingComplete(true);
-                                                                toast.success("Payment Confirmed & Job Booked!");
+                                                                if (data.status === 'PROCESSING') {
+                                                                    toast.success("Payment received. We are confirming your booking. This may take a few seconds.");
+                                                                } else {
+                                                                    toast.success("Payment Confirmed & Job Booked!");
+                                                                }
                                                             } else {
                                                                 toast.error(data.error || "Failed to confirm payment with dispatch console.");
                                                             }

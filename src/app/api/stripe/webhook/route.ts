@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { systemStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { EmailService } from '@/lib/email-service';
+import { SmsService } from '@/lib/sms-service';
+import { DispatchEngine } from '@/lib/dispatch-engine';
 
 export async function POST(req: NextRequest) {
     const rawBody = await req.text();
@@ -145,6 +148,12 @@ export async function POST(req: NextRequest) {
                     break;
                 }
 
+                // Currency check for public web booker
+                if (intent.metadata?.paymentPurpose === 'PUBLIC_BOOKING' && intent.currency !== 'gbp') {
+                    console.warn(`[Webhook] Currency mismatch for public job ${job.id}. Expected gbp, got ${intent.currency}.`);
+                    break;
+                }
+
                 // Amount check safely (job.fare in pounds vs intent.amount in pence)
                 const expectedAmount = Math.round((job.fare || 0) * 100);
                 if (intent.amount !== expectedAmount) {
@@ -158,25 +167,66 @@ export async function POST(req: NextRequest) {
                     break;
                 }
 
-                if (job.paymentStatus === 'PAID') {
-                    if (job.paymentReferenceId && job.paymentReferenceId !== intent.id) {
-                        console.warn(`[Webhook] Job ${jobId} is already paid with reference ${job.paymentReferenceId}. Skipping intent ${intent.id}.`);
-                    } else {
-                        console.log(`[Webhook] Job ${jobId} already paid with same reference. No-op.`);
-                    }
-                    break;
-                }
+                if (intent.metadata?.paymentPurpose === 'PUBLIC_BOOKING') {
+                    const result = await prisma.job.updateMany({
+                        where: {
+                            id: jobId,
+                            tenantId: metaTenantId,
+                            paymentStatus: 'UNPAID'
+                        },
+                        data: {
+                            paymentStatus: 'PAID',
+                            paymentType: 'CARD',
+                            paymentProvider: 'STRIPE',
+                            paymentReferenceId: intent.id,
+                            stripePaymentIntentId: intent.id
+                        }
+                    });
 
-                await prisma.job.update({
-                    where: { id: jobId },
-                    data: {
-                        paymentStatus: 'PAID',
-                        paymentType: 'CARD',
-                        paymentProvider: 'STRIPE',
-                        paymentReferenceId: intent.id
+                    if (result.count === 1) {
+                        console.log(`✅ [Webhook] Marked PUBLIC Job ${jobId} as PAID. Triggering side effects.`);
+                        const tenant = await prisma.tenant.findUnique({ where: { id: metaTenantId } });
+                        if (tenant) {
+                            const updatedJob = await prisma.job.findUnique({ where: { id: jobId } });
+                            if (updatedJob && !updatedJob.notes?.includes('[NO_NOTIFICATIONS]')) {
+                                const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
+                                const notificationPromises = [
+                                    EmailService.sendBookingRequestReceived(jobWithCustomer as any, tenant),
+                                    SmsService.sendBookingRequestReceived(updatedJob, tenant),
+                                    EmailService.sendPaymentConfirmation(jobWithCustomer as any, tenant)
+                                ];
+                                Promise.allSettled(notificationPromises).catch(console.error);
+
+                                if (updatedJob.autoDispatch) {
+                                    DispatchEngine.runDispatchLoop(tenant.id).catch(e => console.error("Auto dispatch run failed", e));
+                                }
+                            }
+                        }
+                    } else {
+                        console.log(`[Webhook] PUBLIC Job ${jobId} already paid or duplicate webhook. No-op.`);
                     }
-                });
-                console.log(`✅ [Webhook] Marked Job ${jobId} as PAID from payment_intent.succeeded`);
+                } else {
+                    if (job.paymentStatus === 'PAID') {
+                        if (job.paymentReferenceId && job.paymentReferenceId !== intent.id) {
+                            console.warn(`[Webhook] Job ${jobId} is already paid with reference ${job.paymentReferenceId}. Skipping intent ${intent.id}.`);
+                        } else {
+                            console.log(`[Webhook] Job ${jobId} already paid with same reference. No-op.`);
+                        }
+                        break;
+                    }
+
+                    await prisma.job.update({
+                        where: { id: jobId },
+                        data: {
+                            paymentStatus: 'PAID',
+                            paymentType: 'CARD',
+                            paymentProvider: 'STRIPE',
+                            paymentReferenceId: intent.id,
+                            stripePaymentIntentId: intent.id
+                        }
+                    });
+                    console.log(`✅ [Webhook] Marked OPERATOR Job ${jobId} as PAID from payment_intent.succeeded`);
+                }
                 break;
             }
             case "customer.subscription.updated": {

@@ -52,12 +52,22 @@ export async function POST(
             return NextResponse.json({ error: 'Missing required fields (pickup, dropoff, pickupTime)' }, { status: 400, headers: corsHeaders });
         }
 
+        const requestedDate = new Date(pickupTime);
+        if (isNaN(requestedDate.getTime())) {
+            return NextResponse.json({ error: 'Invalid pickup time.' }, { status: 400, headers: corsHeaders });
+        }
+
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (requestedDate < fiveMinutesAgo) {
+            return NextResponse.json({ error: 'Pickup time cannot be in the past.' }, { status: 400, headers: corsHeaders });
+        }
+
         const baseContext = {
             pickup,
             dropoff,
             vias,
             distanceMiles,
-            pickupTime: new Date(pickupTime),
+            pickupTime: requestedDate,
             companyId: tenant.id, // Auth-less injection
             isWaitAndReturn,
             waitingTime,

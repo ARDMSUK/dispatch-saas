@@ -80,6 +80,25 @@ export const SmsService = {
         return this.sendSms(booking.passengerPhone, message, config);
     },
 
+    async sendBookingRequestReceived(booking: any, orgSettings?: any) {
+        if (!booking.passengerPhone) return;
+
+        const date = new Date(booking.pickupTime || booking.pickupDate).toLocaleString([], {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        const company = orgSettings?.name || 'Dispatch';
+        
+        const message = `${company}: Booking request received. We have received your booking request for ${date} and will confirm it shortly once reviewed by our team.`;
+        
+        const config = orgSettings ? {
+            accountSid: orgSettings.twilioAccountSid,
+            authToken: orgSettings.twilioAuthToken,
+            fromNumber: orgSettings.twilioFromNumber
+        } : null;
+
+        return this.sendSms(booking.passengerPhone, message, config);
+    },
+
     async sendDriverAssigned(booking: any, driver: any, orgSettings?: any) {
         if (!booking.passengerPhone) return;
 

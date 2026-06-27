@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { SmsService } from '@/lib/sms-service';
+import { EmailService } from '@/lib/email-service';
 import { sendPushNotification } from '@/lib/push-notifications';
 import { auth } from "@/auth";
 
@@ -114,6 +115,38 @@ export async function PATCH(
                 body: `Pickup at ${updatedJob.pickupAddress}. Open app to Accept or Reject.`,
                 data: { route: 'home', jobId: updatedJob.id }
             });
+        }
+
+        // 3. Confirm public web bookings
+        if (
+            updatedJob.notes?.includes('[WEB_BOOKER]') && 
+            !updatedJob.notes?.includes('[CONFIRMATION_SENT]') && 
+            !updatedJob.notes?.includes('[NO_NOTIFICATIONS]')
+        ) {
+            const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
+            
+            const results = await Promise.allSettled([
+                EmailService.sendBookingConfirmation(jobWithCustomer as any, tenantSettings),
+                SmsService.sendBookingConfirmation(updatedJob as any, tenantSettings)
+            ]);
+
+            const atLeastOneSent = results.some(result => result.status === 'fulfilled');
+
+            if (atLeastOneSent) {
+                // Re-read job notes to ensure we don't accidentally duplicate the marker if another process wrote it
+                const currentJob = await prisma.job.findUnique({ where: { id: jobId }, select: { notes: true } });
+                if (currentJob && !currentJob.notes?.includes('[CONFIRMATION_SENT]')) {
+                    await prisma.job.update({
+                        where: { id: jobId },
+                        data: { notes: `${currentJob.notes || ''} [CONFIRMATION_SENT]`.trim() }
+                    });
+                }
+            } else {
+                console.error('Public web booker confirmation failed on all channels', {
+                    jobId: updatedJob.id,
+                    results
+                });
+            }
         }
 
         return NextResponse.json(updatedJob);

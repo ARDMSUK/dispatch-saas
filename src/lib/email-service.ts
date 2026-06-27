@@ -22,6 +22,37 @@ export const EmailService = {
         return this.sendEmail(to, subject, html, companyName, replyTo);
     },
 
+    async sendBookingRequestReceived(booking: any, orgSettings?: any) {
+        const companyName = orgSettings?.name || 'CABAI System';
+        const replyTo = orgSettings?.email;
+        const subject = `Booking Request Received #${booking.id.toString().padStart(6, '0')}`;
+        
+        // Inline basic HTML template for request received
+        const html = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Booking Request Received</h2>
+            <p>Hi ${booking.passengerName || 'there'},</p>
+            <p>We have received your taxi booking request and will confirm it shortly once reviewed by our team.</p>
+            <div style="background: #f4f4f5; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Booking ID:</strong> #${booking.id}</p>
+                <p><strong>Pickup Time:</strong> ${new Date(booking.pickupTime || booking.pickupDate).toLocaleString()}</p>
+                <p><strong>From:</strong> ${booking.pickupAddress || booking.pickup}</p>
+                <p><strong>To:</strong> ${booking.dropoffAddress || booking.dropoff}</p>
+            </div>
+            <p>Thank you for choosing ${companyName}.</p>
+        </div>
+        `;
+        
+        const to = booking.customer?.email || booking.passengerEmail || booking.email;
+
+        if (!to) {
+            console.warn(`[EmailService] No email address found for booking #${booking.id}`);
+            return { success: false, error: 'No email address found' };
+        }
+
+        return this.sendEmail(to, subject, html, companyName, replyTo);
+    },
+
     async sendPaymentConfirmation(booking: any, orgSettings?: any) {
         const companyName = orgSettings?.name || 'CABAI System';
         const replyTo = orgSettings?.email;

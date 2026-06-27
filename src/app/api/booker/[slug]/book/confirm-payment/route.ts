@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
-import { EmailService } from '@/lib/email-service';
-import { SmsService } from '@/lib/sms-service';
-import { DispatchEngine } from '@/lib/dispatch-engine';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -101,43 +98,12 @@ export async function POST(
             }, { headers: corsHeaders });
         }
 
-        // 3. Update Job Payment Status to PAID
-        const updatedJob = await prisma.job.update({
-            where: { id: job.id },
-            data: {
-                paymentStatus: 'PAID',
-                paymentType: 'CARD',
-                paymentProvider: 'STRIPE',
-                paymentReferenceId: paymentIntentId,
-                stripePaymentIntentId: paymentIntentId
-            }
-        });
-
-        // 4. Trigger Notifications (Confirmation + Receipt)
-        const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
-        const notificationPromises = [
-            EmailService.sendBookingConfirmation(jobWithCustomer as any, tenant),
-            SmsService.sendBookingConfirmation(updatedJob, tenant),
-            EmailService.sendPaymentConfirmation(jobWithCustomer as any, tenant)
-        ];
-
-        await Promise.allSettled(notificationPromises).then((results) => {
-            results.forEach((result, index) => {
-                if (result.status === 'rejected') {
-                    console.error(`Confirm Payment notification ${index} failed:`, result.reason);
-                }
-            });
-        });
-
-        // 5. Trigger Auto-Dispatch Engine
-        if (updatedJob.autoDispatch) {
-            DispatchEngine.runDispatchLoop(tenant.id).catch(e => console.error("Auto dispatch run failed after payment confirmation", e));
-        }
-
+        // 3. Delegate DB update and notifications to Stripe webhook.
         return NextResponse.json({
             success: true,
-            bookingId: updatedJob.id,
-            paymentStatus: updatedJob.paymentStatus
+            status: 'PROCESSING',
+            bookingId: job.id,
+            paymentStatus: 'PROCESSING'
         }, { headers: corsHeaders });
 
     } catch (error: any) {

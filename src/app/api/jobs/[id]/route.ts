@@ -248,6 +248,39 @@ export async function PATCH(
         // --- Notifications ---
         const muteNotifications = updatedJob.notes && updatedJob.notes.includes('NO_NOTIFICATIONS');
 
+        // 0. Confirm public web bookings when accepted (UNASSIGNED or DISPATCHED)
+        if (
+            (status === 'UNASSIGNED' || status === 'DISPATCHED') &&
+            updatedJob.notes?.includes('[WEB_BOOKER]') && 
+            !updatedJob.notes?.includes('[CONFIRMATION_SENT]') && 
+            !muteNotifications
+        ) {
+            console.log(`[API] Job ${jobId} Accepted/Dispatched. Sending Public Confirmation...`);
+            const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
+            
+            const results = await Promise.allSettled([
+                EmailService.sendBookingConfirmation(jobWithCustomer as any, tenantSettings),
+                SmsService.sendBookingConfirmation(updatedJob as any, tenantSettings)
+            ]);
+
+            const atLeastOneSent = results.some(result => result.status === 'fulfilled');
+
+            if (atLeastOneSent) {
+                const currentJob = await prisma.job.findUnique({ where: { id: jobId }, select: { notes: true } });
+                if (currentJob && !currentJob.notes?.includes('[CONFIRMATION_SENT]')) {
+                    await prisma.job.update({
+                        where: { id: jobId },
+                        data: { notes: `${currentJob.notes || ''} [CONFIRMATION_SENT]`.trim() }
+                    });
+                }
+            } else {
+                console.error('Public web booker confirmation failed on all channels', {
+                    jobId: updatedJob.id,
+                    results
+                });
+            }
+        }
+
         // 1. Job Offered to Driver (Dispatched)
         if (status === 'DISPATCHED' && updatedJob.driverId && updatedJob.driver) {
             console.log(`[API] Job ${jobId} Dispatched. Sending Notification to Driver...`);
