@@ -310,7 +310,8 @@ export async function POST(
             success: true,
             bookingId: job.id,
             clientSecret,
-            publishableKey
+            publishableKey,
+            fare: serverFare
         }, { headers: corsHeaders });
 
     } catch (error: any) {

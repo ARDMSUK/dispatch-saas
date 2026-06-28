@@ -55,6 +55,7 @@ export default function BookerPage() {
         pickupLng: undefined as number | undefined,
         dropoffLat: undefined as number | undefined,
         dropoffLng: undefined as number | undefined,
+        distanceMiles: undefined as number | undefined,
         pickupTime: "",
         vehicleType: "Saloon",
         passengerName: "",
@@ -158,6 +159,7 @@ export default function BookerPage() {
                         totalMeters += leg.distance?.value || 0;
                     });
                     distanceMiles = totalMeters / 1609.34;
+                    setFormData(prev => ({ ...prev, distanceMiles }));
                 }
             }
         } catch (error) {
@@ -219,6 +221,9 @@ export default function BookerPage() {
 
             const data = await res.json();
             if (res.ok) {
+                if (data.fare !== undefined) {
+                    setQuote(data.fare);
+                }
                 if (formData.paymentType === 'CARD' && data.clientSecret && data.publishableKey) {
                     setClientSecret(data.clientSecret);
                     setPublishableKey(data.publishableKey);
