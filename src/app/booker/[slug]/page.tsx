@@ -23,6 +23,7 @@ export default function BookerPage() {
     const [bookingComplete, setBookingComplete] = useState(false);
     const [isEmbed, setIsEmbed] = useState(false);
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const [turnstileError, setTurnstileError] = useState(false);
     const turnstileRef = useRef<TurnstileInstance | null>(null);
 
     // Stripe Integration States
@@ -581,14 +582,23 @@ export default function BookerPage() {
                                             </div>
                                         </div>
 
-                                        <div className="pt-4 flex justify-center">
+                                        <div className="pt-4 flex flex-col items-center justify-center min-h-[70px] z-20 relative">
                                             <Turnstile 
                                                 ref={turnstileRef}
                                                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                                                onSuccess={(token) => setTurnstileToken(token)}
+                                                onSuccess={(token) => {
+                                                    setTurnstileToken(token);
+                                                    setTurnstileError(false);
+                                                }}
                                                 onExpire={() => setTurnstileToken(null)}
+                                                onError={() => setTurnstileError(true)}
                                                 options={{ theme: 'dark' }}
                                             />
+                                            {turnstileError && (
+                                                <p className="text-rose-400 text-sm mt-2 text-center font-medium">
+                                                    Security check could not load. Please refresh the page or contact us.
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
