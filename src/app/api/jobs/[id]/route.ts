@@ -256,16 +256,38 @@ export async function PATCH(
             !muteNotifications
         ) {
             console.log(`[API] Job ${jobId} Accepted/Dispatched. Sending Public Confirmation...`);
-            const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
             
-            const results = await Promise.allSettled([
-                EmailService.sendBookingConfirmation(jobWithCustomer as any, tenantSettings),
-                SmsService.sendBookingConfirmation(updatedJob as any, tenantSettings)
-            ]);
+            // Skip sending standard confirmation if this is a CARD job that requires payment.
+            // The frontend will trigger the Payment Link email instead, which acts as the confirmation.
+            const isCardUnpaid = updatedJob.paymentType === 'CARD' && updatedJob.paymentStatus === 'UNPAID';
+            
+            if (!isCardUnpaid) {
+                const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
+                
+                const results = await Promise.allSettled([
+                    EmailService.sendBookingConfirmation(jobWithCustomer as any, tenantSettings),
+                    SmsService.sendBookingConfirmation(updatedJob as any, tenantSettings)
+                ]);
 
-            const atLeastOneSent = results.some(result => result.status === 'fulfilled');
+                const atLeastOneSent = results.some(result => result.status === 'fulfilled');
 
-            if (atLeastOneSent) {
+                if (atLeastOneSent) {
+                    const currentJob = await prisma.job.findUnique({ where: { id: jobId }, select: { notes: true } });
+                    if (currentJob && !currentJob.notes?.includes('[CONFIRMATION_SENT]')) {
+                        await prisma.job.update({
+                            where: { id: jobId },
+                            data: { notes: `${currentJob.notes || ''} [CONFIRMATION_SENT]`.trim() }
+                        });
+                    }
+                } else {
+                    console.error('Public web booker confirmation failed on all channels', {
+                        jobId: updatedJob.id,
+                        results
+                    });
+                }
+            } else {
+                console.log(`[API] Job ${jobId} is CARD + UNPAID. Standard confirmation suppressed in favor of Payment Link email.`);
+                // Still mark as confirmation sent so we don't try to send it again if the status updates later
                 const currentJob = await prisma.job.findUnique({ where: { id: jobId }, select: { notes: true } });
                 if (currentJob && !currentJob.notes?.includes('[CONFIRMATION_SENT]')) {
                     await prisma.job.update({
@@ -273,11 +295,6 @@ export async function PATCH(
                         data: { notes: `${currentJob.notes || ''} [CONFIRMATION_SENT]`.trim() }
                     });
                 }
-            } else {
-                console.error('Public web booker confirmation failed on all channels', {
-                    jobId: updatedJob.id,
-                    results
-                });
             }
         }
 

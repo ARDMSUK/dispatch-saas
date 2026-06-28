@@ -343,8 +343,21 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 body: JSON.stringify({ status: 'UNASSIGNED' })
             });
             if (res.ok) {
-                toast.success("Booking accepted. Confirmation SMS/Email sent.");
-                handleSendNotification('CONFIRMATION', job.id);
+                if (job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID') {
+                    toast.success("Booking accepted. Requesting payment link...");
+                    try {
+                        const emailRes = await fetch(`/api/jobs/${job.id}/payment/email`, { method: 'POST' });
+                        if (emailRes.ok) {
+                            toast.success("Payment Link email sent automatically");
+                        } else {
+                            toast.error("Failed to auto-send payment link");
+                        }
+                    } catch (err) {
+                        toast.error("Failed to auto-send payment link");
+                    }
+                } else {
+                    toast.success("Booking accepted. Confirmation SMS/Email sent.");
+                }
                 fetchJobs();
             } else {
                 toast.error("Failed to accept booking");
@@ -463,6 +476,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     const JobCard = ({ job }: { job: Job }) => {
         const hasMeetGreet = job.notes?.includes('MEET & GREET');
         const hasReminder = job.notes?.includes('REMINDER:');
+        const isWebRequest = job.notes?.includes('[WEB_BOOKER]') && job.status === 'PENDING';
 
         return (
             <div
@@ -484,6 +498,16 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         {job.emergencyActive && (
                             <Badge variant="outline" className="bg-red-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1 flex items-center gap-1 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
                                 <AlertCircle className="w-4 h-4 animate-bounce" /> PANIC ALERT
+                            </Badge>
+                        )}
+                        {isWebRequest && (
+                            <Badge variant="outline" className="bg-orange-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1 flex items-center gap-1 shadow-[0_0_15px_rgba(249,115,22,0.5)]">
+                                <AlertCircle className="w-4 h-4 animate-bounce" /> WEB REQUEST — ACTION REQUIRED
+                            </Badge>
+                        )}
+                        {isWebRequest && job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID' && (
+                            <Badge variant="outline" className="bg-rose-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1">
+                                CARD PAYMENT REQUIRED
                             </Badge>
                         )}
                         {/* M&G Badge */}
@@ -849,6 +873,30 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         </Popover>
                     </div>
                 </div>
+
+                {/* Inline Action Buttons for Web Requests */}
+                {isWebRequest && (
+                    <div className="mt-3 flex gap-2">
+                        <Button
+                            size="sm"
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white h-9 font-bold"
+                            onClick={(e) => { e.stopPropagation(); handleAcceptBooking(job); }}
+                        >
+                            <CheckCircle className="mr-2 h-4 w-4" /> Accept & Confirm
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            className="flex-1 h-9 font-bold bg-rose-500 hover:bg-rose-600"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setEditJob(job); setEditOpen(true);
+                            }}
+                        >
+                            Reject / Cancel
+                        </Button>
+                    </div>
+                )}
 
                 {/* Quick Actions (Mobile Layout) */}
                 <div className="flex gap-2 mb-3">

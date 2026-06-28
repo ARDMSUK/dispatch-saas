@@ -144,7 +144,7 @@ export function BaseEmailLayout(contentHtml: string, orgSettings: any = {}, titl
 }
 
 export const EmailTemplates = {
-  bookingConfirmation: (booking: any, orgSettings: any = {}) => {
+  bookingConfirmation: (booking: any, orgSettings: any = {}, options: { isRequest?: boolean } = {}) => {
     const isLegacy = typeof orgSettings === 'string';
     const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');
     const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
@@ -165,21 +165,29 @@ export const EmailTemplates = {
       `).join('');
     }
 
-    const notesHtml = booking?.notes ? `
+    const displayNotes = booking?.notes ? booking.notes.replace(/\[.*?\]/g, '').trim() : '';
+    const notesHtml = displayNotes ? `
       <tr>
         <td style="padding: 10px 15px; border-bottom: 1px solid #eeeeee;">
           <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Notes</strong><br/>
-          <span style="color: #333333; font-size: 16px;">${booking.notes}</span>
+          <span style="color: #333333; font-size: 16px;">${displayNotes}</span>
         </td>
       </tr>
     ` : '';
 
+    const badgeText = options.isRequest ? 'Booking Request Received' : '✓ Booking Confirmed';
+    const badgeBg = options.isRequest ? '#fef3c7' : '#d1fae5';
+    const badgeColor = options.isRequest ? '#92400e' : '#065f46';
+    const subText = options.isRequest
+      ? `Hi ${passengerName}, we have received your booking request and will confirm it shortly once reviewed by our team.`
+      : `Hi ${passengerName}, your ride is successfully booked.`;
+
     const contentHtml = `
       <!-- Intro -->
       <div style="text-align: center; margin-bottom: 20px;">
-        <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">✓ Booking Confirmed</span>
+        <span style="display: inline-block; background-color: ${badgeBg}; color: ${badgeColor}; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">${badgeText}</span>
         <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Booking Reference: ${bookingRef}</h2>
-        <p style="margin: 0; color: #666666; font-size: 16px;">Hi ${passengerName}, your ride is successfully booked.</p>
+        <p style="margin: 0; color: #666666; font-size: 16px;">${subText}</p>
       </div>
 
       <!-- Details Card -->
