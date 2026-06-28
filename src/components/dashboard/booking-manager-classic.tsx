@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, RefreshCcw, UserX, Send, Copy, Volume2, Mail } from "lucide-react";
+import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, RefreshCcw, UserX, Send, Copy, Volume2, Mail, Globe } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import QRCode from 'qrcode';
 import { Link as LinkIcon, QrCode } from "lucide-react";
@@ -342,8 +342,27 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                 body: JSON.stringify({ status: 'UNASSIGNED' })
             });
             if (res.ok) {
-                toast.success("Booking accepted. Confirmation SMS/Email sent.");
-                handleSendNotification('CONFIRMATION', job.id);
+                toast.success("Booking accepted.");
+                
+                const isCardUnpaid = job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID';
+                const isWebRequest = job.notes?.includes('[WEB_BOOKER]');
+
+                if (isCardUnpaid && isWebRequest) {
+                    toast.success("Sending payment link...");
+                    try {
+                        const emailRes = await fetch(`/api/jobs/${job.id}/payment/email`, {
+                            method: 'POST'
+                        });
+                        if (emailRes.ok) {
+                            toast.success("Payment link sent to customer.");
+                        } else {
+                            toast.error("Failed to send payment link automatically.");
+                        }
+                    } catch(err) {
+                        toast.error("Error sending payment link.");
+                    }
+                }
+
                 fetchJobs();
             } else {
                 toast.error("Failed to accept booking");
@@ -351,6 +370,26 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
         } catch (error) {
             console.error(error);
             toast.error("Error accepting booking");
+        }
+    };
+
+    const handleRejectBooking = async (job: Job) => {
+        if (!confirm("Are you sure you want to reject this booking request?")) return;
+        try {
+            const res = await fetch(`/api/jobs/${job.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'CANCELLED' })
+            });
+            if (res.ok) {
+                toast.success("Booking request rejected & cancelled");
+                fetchJobs();
+            } else {
+                toast.error("Failed to reject booking");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error rejecting booking");
         }
     };
 
@@ -460,23 +499,32 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
     const JobCard = ({ job }: { job: Job }) => {
         const hasMeetGreet = job.notes?.includes('MEET & GREET');
         const hasReminder = job.notes?.includes('REMINDER:');
+        const isWebRequest = job.notes?.includes('[WEB_BOOKER]') && job.status === 'PENDING';
 
         return (
-            <div
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectJob(job);
-                }}
-                className={`
-                    flex items-center gap-3 border p-2 rounded-lg shadow-sm hover:border-blue-400 cursor-pointer transition-all group 
-                    ${selectedJobId === job.id 
-                        ? 'bg-blue-50 border-blue-400' 
-                        : job.vehicleType !== 'Saloon' 
-                            ? getVehicleStyle(job.vehicleType) 
-                            : 'bg-white border-slate-200'
-                    }
-                `}
-            >
+            <div className="flex flex-col gap-0 shadow-sm rounded-lg relative overflow-hidden">
+                {isWebRequest && (
+                    <div className="bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold px-3 py-1 flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        WEB REQUEST — ACTION REQUIRED
+                    </div>
+                )}
+                <div
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectJob(job);
+                    }}
+                    className={`
+                        flex items-center gap-3 border p-2 hover:border-blue-400 cursor-pointer transition-all group 
+                        ${isWebRequest ? 'rounded-b-lg border-t-0' : 'rounded-lg'}
+                        ${selectedJobId === job.id 
+                            ? 'bg-blue-50 border-blue-400' 
+                            : job.vehicleType !== 'Saloon' 
+                                ? getVehicleStyle(job.vehicleType) 
+                                : 'bg-white border-slate-200'
+                        }
+                    `}
+                >
                 {/* COL: TIME & STATUS */}
                 <div className="w-16 flex flex-col justify-center border-r border-slate-100 pr-2 h-full">
                     <div className="font-black text-blue-500 text-base leading-none">
@@ -658,6 +706,9 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                 return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1 text-[9px] rounded-sm">{(job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : (job.paymentType || '')).toUpperCase()} ✓</Badge>;
                             }
                             if (job.paymentType === 'CARD') {
+                                if (isWebRequest) {
+                                    return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300 px-1 text-[9px] font-extrabold rounded-sm animate-pulse">CARD PAYMENT REQUIRED</Badge>;
+                                }
                                 return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1 text-[9px] font-extrabold rounded-sm">CARD UNPAID</Badge>;
                             }
                             if (job.paymentType === 'IN_CAR_TERMINAL') {
@@ -968,8 +1019,36 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                         </PopoverContent>
                     </Popover>
                 </div>
+                </div>
+                {isWebRequest && (
+                    <div className="bg-orange-50 border-t border-orange-100 p-2 flex justify-end gap-2 rounded-b-lg">
+                        <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 h-8 text-xs"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleRejectBooking(job);
+                            }}
+                        >
+                            <XCircle className="h-3.5 w-3.5 mr-1" />
+                            Reject / Cancel
+                        </Button>
+                        <Button 
+                            size="sm" 
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white h-8 text-xs"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleAcceptBooking(job);
+                            }}
+                        >
+                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                            Accept & Confirm
+                        </Button>
+                    </div>
+                )}
             </div>
-        )
+        );
     };
 
     const displayedJobs = searchQuery ? jobs : filterJobs(activeTab);

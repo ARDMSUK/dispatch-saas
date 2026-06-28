@@ -246,64 +246,21 @@ export async function POST(
         let clientSecret = null;
         let publishableKey = tenant.stripePublishableKey;
 
-        // If customer requested to pay by card AND tenant has stripe connected
-        if (paymentType === 'CARD' && tenant.stripeSecretKey) {
-            const stripe = new Stripe(tenant.stripeSecretKey, {
-                apiVersion: '2025-02-24.acacia' as any, // Cast to any to bypass strict version match temporarily
+        // Send Request Received immediately for all bookings
+        if (!job.notes?.includes('[NO_NOTIFICATIONS]')) {
+            const jobWithCustomer = { ...job, customer: { email: job.passengerEmail } };
+            const notificationPromises = [
+                EmailService.sendBookingRequestReceived(jobWithCustomer as any, tenant),
+                SmsService.sendBookingRequestReceived(job as any, tenant)
+            ];
+
+            await Promise.allSettled(notificationPromises).then((results) => {
+                results.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        console.error(`Booking notification ${index} failed:`, result.reason);
+                    }
+                });
             });
-
-            // Convert fare to smallest currency unit (pence/cents)
-            const amount = Math.round(serverFare * 100);
-
-            if (amount > 0) {
-                const paymentIntent = await stripe.paymentIntents.create(
-                    {
-                        amount,
-                        currency: 'gbp',
-                        metadata: {
-                            bookingId: String(job.id),
-                            jobId: String(job.id),
-                            tenantId: String(tenant.id),
-                            paymentType: 'booking_payment',
-                            paymentPurpose: 'PUBLIC_BOOKING',
-                            bookingSource: 'WEB_BOOKER',
-                            amount: String(amount),
-                            currency: 'gbp'
-                        }
-                    },
-                    {
-                        idempotencyKey: `payment_intent_job_${job.id}`,
-                    }
-                );
-                clientSecret = paymentIntent.client_secret;
-
-                // Update booking with the intent ID
-                await prisma.job.update({
-                    where: { id: job.id },
-                    data: {
-                        stripePaymentIntentId: paymentIntent.id
-                    }
-                });
-            }
-        }
-
-        // Send Request Received immediately if it's a CASH booking (no stripe flow)
-        if (!clientSecret) {
-            if (!job.notes?.includes('[NO_NOTIFICATIONS]')) {
-                const jobWithCustomer = { ...job, customer: { email: job.passengerEmail } };
-                const notificationPromises = [
-                    EmailService.sendBookingRequestReceived(jobWithCustomer as any, tenant),
-                    SmsService.sendBookingRequestReceived(job as any, tenant)
-                ];
-
-                await Promise.allSettled(notificationPromises).then((results) => {
-                    results.forEach((result, index) => {
-                        if (result.status === 'rejected') {
-                            console.error(`CASH booking notification ${index} failed:`, result.reason);
-                        }
-                    });
-                });
-            }
         }
 
         return NextResponse.json({

@@ -224,15 +224,8 @@ export default function BookerPage() {
                 if (data.fare !== undefined) {
                     setQuote(data.fare);
                 }
-                if (formData.paymentType === 'CARD' && data.clientSecret && data.publishableKey) {
-                    setClientSecret(data.clientSecret);
-                    setPublishableKey(data.publishableKey);
-                    setCreatedJobId(data.bookingId);
-                    setShowStripePay(true);
-                } else {
-                    setBookingComplete(true);
-                    toast.success("Booking Confirmed!");
-                }
+                setBookingComplete(true);
+                toast.success("Booking Request Received");
             } else {
                 toast.error(data.error || "Failed to confirm booking.");
                 turnstileRef.current?.reset();
@@ -708,9 +701,9 @@ export default function BookerPage() {
                                             <CheckCircle2 className="w-12 h-12 text-emerald-500" />
                                         </motion.div>
                                         
-                                        <h2 className="text-3xl font-bold text-white mb-3">Booking Confirmed!</h2>
+                                        <h2 className="text-3xl font-bold text-white mb-3">Booking Request Received</h2>
                                         <p className="text-slate-400 mb-8 max-w-sm">
-                                            Your ride is booked. The dispatcher will assign a driver and you will receive updates shortly via SMS.
+                                            We have received your booking request and will confirm it shortly once reviewed by our team.
                                         </p>
 
                                         <div className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 mb-8">
