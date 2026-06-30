@@ -151,16 +151,27 @@ export default function StandaloneMapPage() {
 
         loadInitialData();
 
-        const interval = setInterval(async () => {
+        const fetchDrivers = async () => {
+            if (document.hidden) return;
             try {
                 const res = await fetch('/api/drivers');
                 if (res.ok) setDrivers(await res.json());
             } catch (e) {
                 console.error("Failed to poll drivers", e);
             }
-        }, 15000);
+        };
 
-        return () => clearInterval(interval);
+        const interval = setInterval(fetchDrivers, 15000);
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchDrivers();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     // Realtime Supabase coordinate listening

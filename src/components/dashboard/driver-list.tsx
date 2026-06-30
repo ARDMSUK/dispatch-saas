@@ -26,6 +26,7 @@ export function DriverList({ onAssign, selectedJobId }: DriverListProps) {
 
     // Mock data for now if API isn't ready, but let's try to fetch
     const fetchDrivers = async () => {
+        if (document.hidden) return;
         try {
             // TODO: Create/Verify /api/drivers endpoint
             // For now, let's mock if it fails or returns empty, for the demo UI
@@ -46,10 +47,19 @@ export function DriverList({ onAssign, selectedJobId }: DriverListProps) {
     };
 
     useEffect(() => {
-        fetchDrivers();
+        if (!document.hidden) fetchDrivers();
         // Poll regularly
         const interval = setInterval(fetchDrivers, 15000);
-        return () => clearInterval(interval);
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchDrivers();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     // Helper for status colors

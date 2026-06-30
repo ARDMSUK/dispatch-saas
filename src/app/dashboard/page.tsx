@@ -145,10 +145,18 @@ function DashboardContent() {
 
         // Poll for driver status updates every 15 seconds
         const interval = setInterval(() => {
-            fetchFleet();
+            if (!document.hidden) fetchFleet();
         }, 15000);
 
-        return () => clearInterval(interval);
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchFleet();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [refreshTrigger]);
 
     // WebSocket real-time subscription for driver coordinates

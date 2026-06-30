@@ -34,12 +34,17 @@ export default function DriverDashboard() {
         setOnline(driverData.status !== 'OFF_DUTY'); // Initial state guess
 
         // Initial Fetch
-        fetchActiveJob(driverData.id);
+        if (!document.hidden) fetchActiveJob(driverData.id);
 
         // Polling (Every 10s)
         const interval = setInterval(() => {
-            fetchActiveJob(driverData.id);
+            if (!document.hidden) fetchActiveJob(driverData.id);
         }, 10000);
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchActiveJob(driverData.id);
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         // Location Tracking
         let watchId: number;
@@ -56,6 +61,7 @@ export default function DriverDashboard() {
 
         return () => {
             clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             if (watchId) navigator.geolocation.clearWatch(watchId);
         };
     }, [online]); // Re-run when online status changes

@@ -52,6 +52,7 @@ function TrackingContent() {
     // Polling for updates
     useEffect(() => {
         const fetchBooking = async () => {
+            if (document.hidden) return;
             try {
                 const res = await fetch(`/api/booking/${bookingId}`);
                 if (res.ok) {
@@ -63,9 +64,18 @@ function TrackingContent() {
             }
         };
 
-        fetchBooking();
+        if (!document.hidden) fetchBooking();
         const interval = setInterval(fetchBooking, 10000); // Poll every 10s
-        return () => clearInterval(interval);
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchBooking();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [bookingId]);
 
     // Calculate Route once pickup/dropoff are known

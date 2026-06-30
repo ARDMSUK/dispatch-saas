@@ -154,13 +154,21 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     }, [searchQuery]);
 
     useEffect(() => {
-        fetchJobs(true, debouncedSearchQuery); // Initial load and on query change
+        if (!document.hidden) fetchJobs(true, debouncedSearchQuery); // Initial load and on query change
 
         const interval = setInterval(() => {
-            fetchJobs(false, debouncedSearchQuery); // Silent background refresh
+            if (!document.hidden) fetchJobs(false, debouncedSearchQuery); // Silent background refresh
         }, 30000); // 30 seconds
 
-        return () => clearInterval(interval);
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchJobs(false, debouncedSearchQuery);
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [refreshTrigger, debouncedSearchQuery]);
 
     // Fetch Flight Data for active jobs with flight numbers

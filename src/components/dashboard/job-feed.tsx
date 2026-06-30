@@ -28,6 +28,7 @@ export function JobFeed({ onSelectJob, selectedJobId }: JobFeedProps) {
     const [loading, setLoading] = useState(true);
 
     const fetchJobs = async () => {
+        if (document.hidden) return;
         try {
             // Fetch PENDING or UNASSIGNED jobs
             const res = await fetch('/api/jobs?status=PENDING');
@@ -43,9 +44,18 @@ export function JobFeed({ onSelectJob, selectedJobId }: JobFeedProps) {
 
     // Polling every 10 seconds
     useEffect(() => {
-        fetchJobs();
+        if (!document.hidden) fetchJobs();
         const interval = setInterval(fetchJobs, 10000);
-        return () => clearInterval(interval);
+        
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchJobs();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     return (

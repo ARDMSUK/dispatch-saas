@@ -21,8 +21,8 @@ export function CliPopListener() {
     const router = useRouter();
 
     useEffect(() => {
-        // Poll for active calls
-        const interval = setInterval(async () => {
+        const fetchActiveCalls = async () => {
+            if (document.hidden) return;
             try {
                 // FORCE CACHE BYPASS: Explicitly append a random timestamp to crack Edge nodes
                 const res = await fetch(`/api/dispatch/calls/active?_t=${Date.now()}`, {
@@ -98,10 +98,21 @@ export function CliPopListener() {
             } catch (err) {
                 console.error("Failed to poll CLI", err);
             }
-        }, 3000); // Poll every 3 seconds
+        };
 
-        return () => clearInterval(interval);
-    }, [activeCall]);
+        // Poll for active calls
+        const interval = setInterval(fetchActiveCalls, 3000); // Poll every 3 seconds
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchActiveCalls();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [activeCall, router]);
 
     const handleDismiss = async () => {
         if (!activeCall) return;

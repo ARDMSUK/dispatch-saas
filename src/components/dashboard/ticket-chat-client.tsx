@@ -86,8 +86,8 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
 
     // Poll the server for new messages (e.g. from Human Support)
     useEffect(() => {
-        const interval = setInterval(async () => {
-            if (isLoading) return; // Don't poll while AI is typing
+        const fetchMessages = async () => {
+            if (document.hidden || isLoading) return; // Don't poll while hidden or AI is typing
             try {
                 const res = await fetch(`/api/support/tickets/${ticketId}`);
                 if (!res.ok) return;
@@ -106,9 +106,19 @@ export default function TicketChatClient({ ticketId, subject, status, initialMes
             } catch (err) {
                 console.error("Failed to poll messages:", err);
             }
-        }, 5000); // Poll every 5 seconds
+        };
 
-        return () => clearInterval(interval);
+        const interval = setInterval(fetchMessages, 5000); // Poll every 5 seconds
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) fetchMessages();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [ticketId, messages.length, isLoading, setMessages]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
