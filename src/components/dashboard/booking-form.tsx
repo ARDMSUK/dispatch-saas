@@ -613,23 +613,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 throw new Error(errData.details || errData.error || "Failed to create job");
             }
 
-            let toastTitle = isReturn ? "Bookings Saved" : "Booking Saved";
-            let toastDesc = `Booking for ${passengerName || 'customer'} has been saved.`;
-
-            if (isReturn) {
-                toastDesc = "Outbound and return bookings have been saved.";
-            } else if (paymentType === 'CASH') {
-                toastDesc = `Cash booking for ${passengerName || 'customer'} has been saved.`;
-            } else if (paymentType === 'CARD') {
-                if (paymentIntentId) {
-                    toastDesc = `Card booking for ${passengerName || 'customer'} has been saved and paid.`;
-                } else {
-                    toastDesc = `Card booking for ${passengerName || 'customer'} has been saved. Payment link sent.`;
-                }
-            }
-
-            toast.success(toastTitle, {
-                description: toastDesc
+            toast.success(isReturn ? "Outbound & Return Jobs Dispatched" : "Job Dispatched Successfully", {
+                description: `Booking for ${passengerName} created.`
             });
 
             onJobCreated();
