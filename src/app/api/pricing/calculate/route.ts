@@ -46,14 +46,10 @@ export async function POST(request: Request) {
         }
 
         // Determine Tenant
-        let companyId = session?.user?.tenantId;
+        const companyId = session?.user?.tenantId;
 
-        // If public (no session), try to find tenant from slug (or default to zercabs for MVP)
         if (!companyId) {
-            // In real app, maybe pass tenantSlug in body?
-            const publicSlug = 'demo-taxis';
-            const tenant = await prisma.tenant.findUnique({ where: { slug: publicSlug } });
-            if (tenant) companyId = tenant.id;
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const { pickup, dropoff, vias, date: dateStr, vehicleType, distance, pickupLat, pickupLng, dropoffLat, dropoffLng } = validation.data;

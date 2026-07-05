@@ -5,6 +5,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export async function broadcastOperatorPresence(payload: {
     userId: string;
+    tenantId: string;
     name: string | null;
     sipExtension: string | null;
     status: string;
@@ -18,7 +19,7 @@ export async function broadcastOperatorPresence(payload: {
 
     try {
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
-        const channel = supabase.channel('operator-presence');
+        const channel = supabase.channel(`operator-presence-${payload.tenantId}`);
 
         return new Promise<void>((resolve) => {
             channel.subscribe(async (status) => {

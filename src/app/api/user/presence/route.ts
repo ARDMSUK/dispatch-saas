@@ -38,6 +38,7 @@ export async function POST(req: Request) {
         // Trigger Broadcast
         await broadcastOperatorPresence({
             userId: updatedUser.id,
+            tenantId: session.user.tenantId,
             name: updatedUser.name,
             sipExtension: updatedUser.sipExtension,
             status: updatedUser.presenceStatus

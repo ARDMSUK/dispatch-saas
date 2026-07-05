@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { createClient } from '@/utils/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,8 @@ export default function OperatorPerformanceDashboard() {
     const [loading, setLoading] = useState(true);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [myUser, setMyUser] = useState<Operator | null>(null);
+    const { data: session } = useSession();
+    const tenantId = (session?.user as any)?.tenantId;
     
     // Live call duration ticker state
     const [secondsTicker, setSecondsTicker] = useState(0);
@@ -115,13 +118,14 @@ export default function OperatorPerformanceDashboard() {
 
     // 3. Supabase WebSocket Listener for Operator Status Changes
     useEffect(() => {
+        if (!tenantId) return;
         const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         if (!url || !key) return;
 
         try {
             const supabase = createClient();
-            const channel = supabase.channel('operator-presence');
+            const channel = supabase.channel(`operator-presence-${tenantId}`);
 
             channel.on('broadcast', { event: 'status-change' }, (payload: any) => {
                 const data = payload.payload;
@@ -156,7 +160,7 @@ export default function OperatorPerformanceDashboard() {
         } catch (err) {
             console.error('[WebSockets] Setup failed:', err);
         }
-    }, []);
+    }, [tenantId]);
 
     // 4. Manual Presence Trigger
     const handlePresenceChange = async (newStatus: string) => {

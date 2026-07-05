@@ -141,6 +141,7 @@ async function handleWebhook(req: Request) {
 
                     await broadcastOperatorPresence({
                         userId: answeredUser.id,
+                        tenantId: tenant.id,
                         name: answeredUser.name,
                         sipExtension: answeredUser.sipExtension,
                         status: 'BUSY',
@@ -218,6 +219,7 @@ async function handleWebhook(req: Request) {
 
                         await broadcastOperatorPresence({
                             userId: activeUser.id,
+                            tenantId: tenant.id,
                             name: activeUser.name,
                             sipExtension: activeUser.sipExtension,
                             status: 'ONLINE'
@@ -237,6 +239,7 @@ async function handleWebhook(req: Request) {
                         });
                         await broadcastOperatorPresence({
                             userId: activeUser.id,
+                            tenantId: tenant.id,
                             name: activeUser.name,
                             sipExtension: activeUser.sipExtension,
                             status: 'ONLINE'
