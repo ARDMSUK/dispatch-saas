@@ -27,9 +27,10 @@ import { auth } from "@/auth";
 export async function POST(request: Request) {
     try {
         const session = await auth();
+        const companyId = session?.user?.tenantId;
 
-        if (!session) {
-            console.error('Authentication session not found for pricing calculation.'); // Log session check failure
+        if (!companyId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await request.json();
@@ -42,14 +43,7 @@ export async function POST(request: Request) {
                 breakdown: { base: 15.00, isFixed: false },
                 error: 'Invalid data',
                 details: validation.error
-            }, { status: 200 }); // Return 200 so frontend shows the price/error
-        }
-
-        // Determine Tenant
-        const companyId = session?.user?.tenantId;
-
-        if (!companyId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }, { status: 400 }); 
         }
 
         const { pickup, dropoff, vias, date: dateStr, vehicleType, distance, pickupLat, pickupLng, dropoffLat, dropoffLng } = validation.data;
