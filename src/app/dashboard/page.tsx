@@ -168,9 +168,14 @@ function DashboardContent() {
             return;
         }
 
+        if (!user?.tenant?.id) {
+            console.warn("[Dashboard WebSockets] Waiting for tenant ID before subscribing.");
+            return;
+        }
+
         try {
             const supabase = createClient();
-            const channel = supabase.channel('drivers-location');
+            const channel = supabase.channel(`drivers-location-${user.tenant.id}`);
 
             channel.on('broadcast', { event: 'location' }, (payload: any) => {
                 const data = payload.payload;
@@ -207,7 +212,7 @@ function DashboardContent() {
         } catch (err) {
             console.error("[Dashboard WebSockets] Failed to subscribe to location updates:", err);
         }
-    }, []);
+    }, [user?.tenant?.id]);
 
     const handleAssignDriver = async (driverId: string) => {
         if (!selectedJob) return;

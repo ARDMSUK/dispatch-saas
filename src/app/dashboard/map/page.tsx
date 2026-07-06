@@ -180,9 +180,14 @@ export default function StandaloneMapPage() {
         const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         if (!url || !key) return;
 
+        if (!user?.tenant?.id) {
+            console.warn("Standalone Map: Waiting for tenant ID before subscribing.");
+            return;
+        }
+
         try {
             const supabase = createClient();
-            const channel = supabase.channel('drivers-location-standalone');
+            const channel = supabase.channel(`drivers-location-${user.tenant.id}`);
 
             channel.on('broadcast', { event: 'location' }, (payload: any) => {
                 const data = payload.payload;
@@ -217,7 +222,7 @@ export default function StandaloneMapPage() {
         } catch (err) {
             console.error("Standalone map websocket subscription error", err);
         }
-    }, []);
+    }, [user?.tenant?.id]);
 
     // Fit bounds or track selected
     useEffect(() => {
