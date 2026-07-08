@@ -9,6 +9,10 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
+            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+        }
+
         const drivers = await prisma.driver.findMany({
             where: { tenantId: session.user.tenantId },
             include: {

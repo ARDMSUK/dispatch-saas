@@ -10,6 +10,9 @@ export async function GET(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
+            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+        }
         const tenantId = session.user.tenantId;
 
         const accounts = await prisma.account.findMany({
@@ -83,6 +86,9 @@ export async function POST(req: Request) {
         const session = await auth();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
+            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
         }
         const tenantId = session.user.tenantId;
 

@@ -26,6 +26,14 @@ export default async function DashboardLayout({
 
     const role = session?.user?.role || "DISPATCHER";
 
+    // Strict role blocks for operator dashboard
+    if (role === "B2B_ADMIN") {
+        redirect('/b2b');
+    }
+    if (role === "DRIVER") {
+        redirect('/login');
+    }
+
     const isImpersonating = session?.user?.isImpersonating || false;
 
     const tenant = await prisma.tenant.findUnique({
