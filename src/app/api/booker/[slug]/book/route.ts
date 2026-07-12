@@ -55,6 +55,10 @@ export async function POST(
             return NextResponse.json({ error: 'Web booking is disabled' }, { status: 403, headers: corsHeaders });
         }
 
+        if (tenant.subscriptionStatus === 'PAST_DUE' || tenant.subscriptionStatus === 'CANCELED') {
+            return NextResponse.json({ error: 'Online bookings are temporarily unavailable for this operator.' }, { status: 403, headers: corsHeaders });
+        }
+
         const {
             pickup,
             dropoff,

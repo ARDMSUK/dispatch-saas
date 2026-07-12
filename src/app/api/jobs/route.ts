@@ -199,6 +199,15 @@ export async function POST(request: Request) {
         const body = await request.json();
 
 
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: tenantId },
+            select: { subscriptionStatus: true }
+        });
+
+        if (tenant && (tenant.subscriptionStatus === 'PAST_DUE' || tenant.subscriptionStatus === 'CANCELED')) {
+            return NextResponse.json({ error: 'Platform booking is disabled due to a billing issue.' }, { status: 403 });
+        }
+
         // 1. Find or Create Customer
         let customerId: string | undefined = body.customerId;
 

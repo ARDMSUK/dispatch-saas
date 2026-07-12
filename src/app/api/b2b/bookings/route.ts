@@ -53,6 +53,15 @@ export async function POST(req: Request) {
         const tenantId = session.user.tenantId;
         const accountId = (session.user as any).accountId;
 
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: tenantId },
+            select: { subscriptionStatus: true }
+        });
+
+        if (tenant && (tenant.subscriptionStatus === 'PAST_DUE' || tenant.subscriptionStatus === 'CANCELED')) {
+            return NextResponse.json({ error: 'Corporate bookings are temporarily suspended due to a platform billing issue.' }, { status: 403 });
+        }
+
         const body = await req.json();
         const validation = BookingSchema.omit({ tenantId: true }).safeParse(body);
 

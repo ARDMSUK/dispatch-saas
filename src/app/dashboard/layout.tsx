@@ -52,12 +52,15 @@ export default async function DashboardLayout({
     });
 
     const status = tenant?.subscriptionStatus || "TRIALING";
+    const isLocked = (status === "PAST_DUE" || status === "CANCELED") && role !== "SUPER_ADMIN";
+
     const hasSchoolContracts = tenant?.hasSchoolContracts || tenant?.subscriptionPlan?.incSchoolContracts || false;
     const hasDataImport = tenant?.hasDataImport || tenant?.subscriptionPlan?.incDataImport || false;
 
     return (
         <DashboardShell userName={userName} tenantSlug={tenantSlug} userRole={role} isImpersonating={isImpersonating} hasSchoolContracts={hasSchoolContracts} hasDataImport={hasDataImport}>
             <GoogleMapsLoader>
+                {isLocked && <BillingLockoutOverlay status={status} />}
                 {children}
                 <CliPopListener />
             </GoogleMapsLoader>

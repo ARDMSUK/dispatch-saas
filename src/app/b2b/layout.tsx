@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LogOut, Building2, Calendar, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { prisma } from "@/lib/prisma";
 
 export default async function B2BLayout({
     children,
@@ -13,6 +14,25 @@ export default async function B2BLayout({
 
     if (!session || session.user?.role !== "B2B_ADMIN") {
         redirect("/login");
+    }
+
+
+    const tenant = await prisma.tenant.findUnique({
+        where: { id: session.user.tenantId! },
+        select: { subscriptionStatus: true }
+    });
+
+    if (tenant && (tenant.subscriptionStatus === "PAST_DUE" || tenant.subscriptionStatus === "CANCELED")) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center bg-slate-50 text-slate-900 font-sans">
+                <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center space-y-4">
+                    <h2 className="text-2xl font-bold text-red-600">Portal Suspended</h2>
+                    <p className="text-slate-600">
+                        Corporate booking access is temporarily suspended due to a platform billing issue. Please contact your transport provider.
+                    </p>
+                </div>
+            </div>
+        );
     }
 
     return (
