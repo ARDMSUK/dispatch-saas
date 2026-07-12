@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyMobileToken } from '@/lib/mobile-auth';
 import { getStripe } from '@/lib/stripe';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
         }
 
         // Check if Stripe credentials are present
-        const apiKey = tenant.stripeSecretKey || process.env.STRIPE_SECRET_KEY;
+        const apiKey = decrypt(tenant.stripeSecretKey) || process.env.STRIPE_SECRET_KEY;
         if (!apiKey) {
             return NextResponse.json({ error: "Stripe not configured for this tenant" }, { status: 400, headers: corsHeaders });
         }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { encrypt, decrypt } from '@/lib/encryption';
 
 export async function GET(req: Request) {
     try {
@@ -21,8 +22,8 @@ export async function GET(req: Request) {
         await prisma.driver.update({
             where: { id: driverId },
             data: {
-                sumupAccessToken: dummyAccessToken,
-                sumupRefreshToken: dummyRefreshToken,
+                sumupAccessToken: encrypt(dummyAccessToken),
+                sumupRefreshToken: encrypt(dummyRefreshToken),
                 sumupTokenExpiry: new Date(Date.now() + 3600 * 1000)
             }
         });

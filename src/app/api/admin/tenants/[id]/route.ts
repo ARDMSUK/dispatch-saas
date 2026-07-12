@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { encrypt } from '@/lib/encryption';
 
 // GET /api/admin/tenants/[id]
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -65,7 +66,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             where: { id },
             data: {
                 name, email, phone, address,
-                stripeSecretKey, stripePublishableKey,
+                stripeSecretKey: stripeSecretKey !== undefined ? encrypt(stripeSecretKey) : undefined,
+                stripePublishableKey,
                 twilioAccountSid, twilioAuthToken, twilioFromNumber, twilioSubaccountId,
                 resendApiKey, aviationStackApiKey,
                 hasWebChatAi, hasWhatsAppAi, hasVoiceAi, hasTapToPay, hasAiCopilot, enableAiCopilot,

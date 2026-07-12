@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyMobileToken } from '@/lib/mobile-auth';
 import { SmsService } from '@/lib/sms-service';
 import { getStripe, systemStripe } from '@/lib/stripe';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -77,12 +78,12 @@ export async function POST(
         if (!paymentLink || job.paymentProvider !== 'STRIPE' || paymentLink.includes('sumup')) {
             const tenant = job.tenant;
             let validTenantKey = null;
-            if (tenant.stripeSecretKey) {
-                if (tenant.stripeSecretKey.startsWith('sk_live_') || 
-                    tenant.stripeSecretKey.startsWith('sk_test_') || 
-                    tenant.stripeSecretKey.startsWith('rk_live_') || 
-                    tenant.stripeSecretKey.startsWith('rk_test_')) {
-                    validTenantKey = tenant.stripeSecretKey;
+            if ((decrypt(tenant.stripeSecretKey) as string)) {
+                if ((decrypt(tenant.stripeSecretKey) as string).startsWith('sk_live_') || 
+                    (decrypt(tenant.stripeSecretKey) as string).startsWith('sk_test_') || 
+                    (decrypt(tenant.stripeSecretKey) as string).startsWith('rk_live_') || 
+                    (decrypt(tenant.stripeSecretKey) as string).startsWith('rk_test_')) {
+                    validTenantKey = (decrypt(tenant.stripeSecretKey) as string);
                 } else {
                     console.warn(`Invalid Stripe key format for tenant ${tenant.id}. Falling back to system Stripe.`);
                 }

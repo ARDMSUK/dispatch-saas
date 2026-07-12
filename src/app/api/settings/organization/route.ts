@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { encrypt, maskSecret, isMaskedValue } from '@/lib/encryption';
 
 // GET: Fetch current organization details
 export async function GET(req: Request) {
@@ -26,16 +27,22 @@ export async function GET(req: Request) {
             delete (safeTenant as any).apiKey;
         }
 
+        // Unconditionally mask secrets so no user (including ADMIN/SUPER_ADMIN) gets raw values
+        safeTenant.stripeSecretKey = maskSecret(safeTenant.stripeSecretKey);
+        safeTenant.sumupClientSecret = maskSecret(safeTenant.sumupClientSecret);
+        safeTenant.zettleClientSecret = maskSecret(safeTenant.zettleClientSecret);
+
         if (!isAdmin) {
-            delete (safeTenant as any).stripeSecretKey;
             delete (safeTenant as any).stripePublishableKey;
-            delete (safeTenant as any).sumupClientSecret;
-            delete (safeTenant as any).zettleClientSecret;
             delete (safeTenant as any).twilioAccountSid;
             delete (safeTenant as any).twilioAuthToken;
             delete (safeTenant as any).twilioSubaccountId;
             delete (safeTenant as any).resendApiKey;
             delete (safeTenant as any).aviationStackApiKey;
+            // Also delete the masked ones to be completely hidden for non-admins
+            delete (safeTenant as any).stripeSecretKey;
+            delete (safeTenant as any).sumupClientSecret;
+            delete (safeTenant as any).zettleClientSecret;
         }
 
         return NextResponse.json(safeTenant);
@@ -61,6 +68,16 @@ export async function PATCH(req: Request) {
         const { name, email, phone, address, lat, lng, useZonePricing, autoDispatch, enableDynamicPricing, enableWaitCalculations, enableWebBooker } = body;
 
         // Validation: Ensure required fields if needed, but schema allows optional
+
+        // Prevent masked placeholder values from overwriting real secrets
+        if (isMaskedValue(body.stripeSecretKey)) delete body.stripeSecretKey;
+        if (isMaskedValue(body.sumupClientSecret)) delete body.sumupClientSecret;
+        if (isMaskedValue(body.zettleClientSecret)) delete body.zettleClientSecret;
+
+        // Encrypt new values (encrypt returns null for empty string/null)
+        if (body.stripeSecretKey !== undefined) body.stripeSecretKey = encrypt(body.stripeSecretKey);
+        if (body.sumupClientSecret !== undefined) body.sumupClientSecret = encrypt(body.sumupClientSecret);
+        if (body.zettleClientSecret !== undefined) body.zettleClientSecret = encrypt(body.zettleClientSecret);
 
         const updateData: any = {
             name,
@@ -125,7 +142,12 @@ export async function PATCH(req: Request) {
             data: updateData
         });
 
-        return NextResponse.json(updatedTenant);
+        const safeUpdatedTenant = { ...updatedTenant };
+        safeUpdatedTenant.stripeSecretKey = maskSecret(safeUpdatedTenant.stripeSecretKey);
+        safeUpdatedTenant.sumupClientSecret = maskSecret(safeUpdatedTenant.sumupClientSecret);
+        safeUpdatedTenant.zettleClientSecret = maskSecret(safeUpdatedTenant.zettleClientSecret);
+
+        return NextResponse.json(safeUpdatedTenant);
 
     } catch (error: any) {
         console.error("PATCH /api/settings/organization error:", error);

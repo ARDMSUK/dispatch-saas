@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -29,7 +30,7 @@ export async function GET(
             where: { slug: slug }
         });
 
-        if (!tenant || !tenant.stripeSecretKey) {
+        if (!tenant || !(decrypt(tenant.stripeSecretKey) as string)) {
             return NextResponse.json({ error: 'Tenant or Stripe configuration not found' }, { status: 404, headers: corsHeaders });
         }
 
@@ -46,7 +47,7 @@ export async function GET(
             return NextResponse.json({ paymentMethods: [] }, { headers: corsHeaders });
         }
 
-        const stripe = new Stripe(tenant.stripeSecretKey, {
+        const stripe = new Stripe((decrypt(tenant.stripeSecretKey) as string), {
             apiVersion: '2025-02-24.acacia' as any,
         });
 

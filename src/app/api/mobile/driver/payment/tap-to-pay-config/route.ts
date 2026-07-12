@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyMobileToken } from '@/lib/mobile-auth';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -55,16 +56,16 @@ export async function GET(request: Request) {
         let sumupAccessToken = null;
 
         // Check if Stripe is configured
-        const hasStripe = !!tenant.stripeSecretKey;
+        const hasStripe = !!(decrypt(tenant.stripeSecretKey) as string);
         
         // Check if SumUp is configured
         let hasSumUp = false;
         if (tenant.paymentRouting === 'CENTRAL') {
-            sumupAccessToken = tenant.sumupAccessToken;
-            hasSumUp = !!tenant.sumupAccessToken;
+            sumupAccessToken = decrypt(tenant.sumupAccessToken);
+            hasSumUp = !!decrypt(tenant.sumupAccessToken);
         } else {
-            sumupAccessToken = driver.sumupAccessToken;
-            hasSumUp = !!driver.sumupAccessToken;
+            sumupAccessToken = decrypt(driver.sumupAccessToken);
+            hasSumUp = !!decrypt(driver.sumupAccessToken);
         }
 
         if (!hasStripe && hasSumUp) {

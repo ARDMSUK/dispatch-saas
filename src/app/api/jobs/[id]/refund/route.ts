@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { getStripe, systemStripe } from '@/lib/stripe';
 import Stripe from 'stripe';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 export async function POST(
     request: Request,
@@ -50,12 +51,12 @@ export async function POST(
 
         let validTenantKey = null;
         const tenant = job.tenant;
-        if (tenant.stripeSecretKey) {
-            if (tenant.stripeSecretKey.startsWith('sk_live_') || 
-                tenant.stripeSecretKey.startsWith('sk_test_') || 
-                tenant.stripeSecretKey.startsWith('rk_live_') || 
-                tenant.stripeSecretKey.startsWith('rk_test_')) {
-                validTenantKey = tenant.stripeSecretKey;
+        if ((decrypt(tenant.stripeSecretKey) as string)) {
+            if ((decrypt(tenant.stripeSecretKey) as string).startsWith('sk_live_') || 
+                (decrypt(tenant.stripeSecretKey) as string).startsWith('sk_test_') || 
+                (decrypt(tenant.stripeSecretKey) as string).startsWith('rk_live_') || 
+                (decrypt(tenant.stripeSecretKey) as string).startsWith('rk_test_')) {
+                validTenantKey = (decrypt(tenant.stripeSecretKey) as string);
             }
         }
 

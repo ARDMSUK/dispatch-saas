@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { encrypt, decrypt } from '@/lib/encryption';
 
 export async function GET(req: Request) {
     try {
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
         }
 
         const clientId = tenant.zettleClientId || process.env.ZETTLE_CLIENT_ID;
-        const clientSecret = tenant.zettleClientSecret || process.env.ZETTLE_CLIENT_SECRET;
+        const clientSecret = decrypt(tenant.zettleClientSecret) || process.env.ZETTLE_CLIENT_SECRET;
 
         // Ensure we have required configuration
         if (!clientId || !clientSecret) {
@@ -89,8 +90,8 @@ export async function GET(req: Request) {
         await prisma.tenant.update({
             where: { id: tenantId },
             data: {
-                zettleAccessToken: accessToken,
-                zettleRefreshToken: refreshToken,
+                zettleAccessToken: encrypt(accessToken),
+                zettleRefreshToken: encrypt(refreshToken),
                 zettleTokenExpiry: expiryDate
             }
         });

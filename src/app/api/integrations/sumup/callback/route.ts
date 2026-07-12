@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { encrypt, decrypt } from '@/lib/encryption';
 
 export async function GET(req: Request) {
     try {
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
         }
 
         const clientId = tenant.sumupClientId || process.env.SUMUP_CLIENT_ID;
-        const clientSecret = tenant.sumupClientSecret || process.env.SUMUP_CLIENT_SECRET;
+        const clientSecret = decrypt(tenant.sumupClientSecret) || process.env.SUMUP_CLIENT_SECRET;
 
         let accessToken = `sumup_at_${Math.random().toString(36).substring(7)}`;
         let refreshToken = `sumup_rt_${Math.random().toString(36).substring(7)}`;
@@ -62,8 +63,8 @@ export async function GET(req: Request) {
         await prisma.tenant.update({
             where: { id: tenantId },
             data: {
-                sumupAccessToken: accessToken,
-                sumupRefreshToken: refreshToken,
+                sumupAccessToken: encrypt(accessToken),
+                sumupRefreshToken: encrypt(refreshToken),
                 sumupTokenExpiry: expiryDate
             }
         });

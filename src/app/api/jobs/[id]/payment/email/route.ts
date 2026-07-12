@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { EmailService } from '@/lib/email-service';
 import { auth } from '@/auth';
 import { getStripe, systemStripe } from '@/lib/stripe';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 export async function POST(
     req: Request,
@@ -60,12 +61,12 @@ export async function POST(
         if (!paymentLink || job.paymentProvider !== 'STRIPE' || paymentLink.includes('sumup')) {
             const tenant = job.tenant;
             let validTenantKey = null;
-            if (tenant.stripeSecretKey) {
-                if (tenant.stripeSecretKey.startsWith('sk_live_') || 
-                    tenant.stripeSecretKey.startsWith('sk_test_') || 
-                    tenant.stripeSecretKey.startsWith('rk_live_') || 
-                    tenant.stripeSecretKey.startsWith('rk_test_')) {
-                    validTenantKey = tenant.stripeSecretKey;
+            if ((decrypt(tenant.stripeSecretKey) as string)) {
+                if ((decrypt(tenant.stripeSecretKey) as string).startsWith('sk_live_') || 
+                    (decrypt(tenant.stripeSecretKey) as string).startsWith('sk_test_') || 
+                    (decrypt(tenant.stripeSecretKey) as string).startsWith('rk_live_') || 
+                    (decrypt(tenant.stripeSecretKey) as string).startsWith('rk_test_')) {
+                    validTenantKey = (decrypt(tenant.stripeSecretKey) as string);
                 } else {
                     console.warn(`Invalid Stripe key format for tenant ${tenant.id}.`);
                 }

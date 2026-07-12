@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
 import { sendEmail, getWelcomeEmail } from '@/lib/email';
+import { encrypt } from '@/lib/encryption';
 
 // POST /api/admin/tenants
 export async function POST(req: Request) {
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
                     address,
                     lat,
                     lng,
-                    stripeSecretKey,
+                    stripeSecretKey: encrypt(stripeSecretKey),
                     stripePublishableKey,
                     twilioAccountSid,
                     twilioAuthToken,

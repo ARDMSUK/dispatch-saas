@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -32,12 +33,12 @@ export async function POST(
             return NextResponse.json({ error: 'Tenant not found' }, { status: 404, headers: corsHeaders });
         }
 
-        if (!tenant.stripeSecretKey) {
+        if (!(decrypt(tenant.stripeSecretKey) as string)) {
             return NextResponse.json({ error: 'Stripe is not configured for this tenant' }, { status: 400, headers: corsHeaders });
         }
 
         // 1. Verify Payment Intent on Stripe directly using Tenant's keys
-        const stripe = new Stripe(tenant.stripeSecretKey, {
+        const stripe = new Stripe((decrypt(tenant.stripeSecretKey) as string), {
             apiVersion: '2025-02-24.acacia' as any,
         });
 

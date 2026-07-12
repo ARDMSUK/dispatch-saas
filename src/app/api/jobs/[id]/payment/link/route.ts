@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { encrypt, decrypt } from '@/lib/encryption';
 
 // POST: Generate a remote payment link for a job
 export async function POST(
@@ -33,9 +34,9 @@ export async function POST(
         let provider = "SUMUP"; // Defaulting to SumUp for this example
 
         if (routing === "CENTRAL") {
-            accessToken = job.tenant.sumupAccessToken;
+            accessToken = decrypt(job.tenant.sumupAccessToken);
         } else if (routing === "DRIVER" && job.driver) {
-            accessToken = job.driver.sumupAccessToken;
+            accessToken = decrypt(job.driver.sumupAccessToken);
         } else if (routing === "DRIVER" && !job.driver) {
             return NextResponse.json({ error: "No driver assigned to process payment" }, { status: 400 });
         }

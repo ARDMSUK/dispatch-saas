@@ -814,7 +814,7 @@ export default function SettingsPage() {
                         <div>
                             <Label className="text-muted-foreground font-medium">Stripe Secret Key</Label>
                             <Input
-                                type="password"
+                                type={stripeSecretKey.includes('••••') ? "text" : "password"}
                                 value={stripeSecretKey}
                                 onChange={(e) => setStripeSecretKey(e.target.value)}
                                 placeholder="sk_live_..."
@@ -854,7 +854,7 @@ export default function SettingsPage() {
                                         <div>
                                             <Label className="text-[11px] text-muted-foreground font-medium">SumUp Client Secret</Label>
                                             <Input
-                                                type="password"
+                                                type={sumupClientSecret.includes('••••') ? "text" : "password"}
                                                 value={sumupClientSecret}
                                                 onChange={(e) => setSumupClientSecret(e.target.value)}
                                                 placeholder="e.g. client-secret-..."
@@ -914,7 +914,7 @@ export default function SettingsPage() {
                                         <div>
                                             <Label className="text-[11px] text-muted-foreground font-medium">Zettle Client Secret</Label>
                                             <Input
-                                                type="password"
+                                                type={zettleClientSecret.includes('••••') ? "text" : "password"}
                                                 value={zettleClientSecret}
                                                 onChange={(e) => setZettleClientSecret(e.target.value)}
                                                 placeholder="e.g. client-secret-..."

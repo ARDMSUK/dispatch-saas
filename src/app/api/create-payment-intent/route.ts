@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { encrypt, decrypt } from '@/lib/encryption';
 
 export async function POST(req: Request) {
     try {
@@ -35,8 +36,8 @@ export async function POST(req: Request) {
 
         let apiKey = null;
 
-        if (tenant?.stripeSecretKey) {
-            apiKey = tenant.stripeSecretKey;
+        if ((decrypt(tenant!.stripeSecretKey) as string)) {
+            apiKey = (decrypt(tenant!.stripeSecretKey) as string);
         }
 
         if (!apiKey) {
