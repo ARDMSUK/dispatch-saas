@@ -59,10 +59,10 @@ export async function POST(
             }
         }
 
-        const stripeClient = validTenantKey ? getStripe(validTenantKey) : systemStripe;
+        const stripeClient = validTenantKey ? getStripe(validTenantKey) : null;
 
         if (!stripeClient) {
-            return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 });
+            return NextResponse.json({ error: 'Card payments are not configured for this operator.' }, { status: 400 });
         }
 
         let paymentIntentId = paymentReferenceId;
@@ -97,15 +97,7 @@ export async function POST(
             console.error('Error fetching PI with primary key', err);
         }
 
-        // Fallback to system Stripe if tenant key didn't find it and we have a valid tenant key (meaning primary was tenant key)
-        if (!intent && validTenantKey && systemStripe) {
-            try {
-                activeStripeClient = systemStripe;
-                intent = await getPaymentIntent(activeStripeClient);
-            } catch (err) {
-                console.error('Error fetching PI with fallback key', err);
-            }
-        }
+
 
         if (!intent) {
             return NextResponse.json({ error: 'Payment Intent not found on Stripe. Invalid reference format or incorrect Stripe account.' }, { status: 400 });

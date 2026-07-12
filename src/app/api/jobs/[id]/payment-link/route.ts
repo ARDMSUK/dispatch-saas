@@ -65,14 +65,14 @@ export async function POST(
                 tenant.stripeSecretKey.startsWith('rk_test_')) {
                 validTenantKey = tenant.stripeSecretKey;
             } else {
-                console.warn(`Invalid Stripe key format for tenant ${tenant.id}. Falling back to system Stripe.`);
+                console.warn(`Invalid Stripe key format for tenant ${tenant.id}.`);
             }
         }
 
-        const stripeClient = validTenantKey ? getStripe(validTenantKey) : systemStripe;
+        const stripeClient = validTenantKey ? getStripe(validTenantKey) : null;
 
         if (!stripeClient) {
-            return NextResponse.json({ error: 'Stripe is not configured or unavailable' }, { status: 500 });
+            return NextResponse.json({ error: 'Card payments are not configured for this operator.' }, { status: 400 });
         }
 
         // Safe base URL builder for Stripe success/cancel redirects

@@ -274,11 +274,31 @@ export default function StandaloneMapPage() {
 
     const handleSearchMap = () => {
         if (!map || !mapSearchTerm) return;
-        const driver = drivers.find(d => 
-            d.callsign?.toLowerCase() === mapSearchTerm.toLowerCase() || 
-            d.name?.toLowerCase().includes(mapSearchTerm.toLowerCase()) ||
-            d.callsign?.toLowerCase().includes(mapSearchTerm.toLowerCase())
-        );
+        const searchLower = mapSearchTerm.toLowerCase();
+        
+        let driver = drivers.find(d => d.callsign?.toLowerCase() === searchLower);
+        
+        if (!driver) {
+            driver = drivers.find(d => d.id === mapSearchTerm);
+        }
+        
+        if (!driver) {
+            driver = drivers.find(d => d.name?.toLowerCase() === searchLower);
+        }
+        
+        if (!driver) {
+            const fuzzyMatches = drivers.filter(d => 
+                d.name?.toLowerCase().includes(searchLower) ||
+                d.callsign?.toLowerCase().includes(searchLower)
+            );
+            
+            if (fuzzyMatches.length > 0) {
+                const bestMatch = fuzzyMatches.find(d => 
+                    isDriverOnline(d) && ((d.currentLat && d.currentLng) || d.location)
+                );
+                driver = bestMatch || fuzzyMatches[0];
+            }
+        }
         
         if (driver && isDriverOnline(driver)) {
             try {

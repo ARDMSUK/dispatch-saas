@@ -37,12 +37,10 @@ export async function POST(req: Request) {
 
         if (tenant?.stripeSecretKey) {
             apiKey = tenant.stripeSecretKey;
-        } else if (process.env.STRIPE_SECRET_KEY) {
-            apiKey = process.env.STRIPE_SECRET_KEY;
         }
 
         if (!apiKey) {
-            return NextResponse.json({ error: "Payment configuration missing for this tenant" }, { status: 500 });
+            return NextResponse.json({ error: "Card payments are not configured for this operator." }, { status: 503 });
         }
 
         const stripe = getStripe(apiKey);

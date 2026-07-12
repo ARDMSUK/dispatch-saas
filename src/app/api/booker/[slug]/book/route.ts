@@ -85,6 +85,10 @@ export async function POST(
             return NextResponse.json({ error: 'Missing required configuration' }, { status: 400, headers: corsHeaders });
         }
 
+        if (paymentType === 'CARD' && !tenant.stripeSecretKey) {
+            return NextResponse.json({ error: 'Card payments are not configured for this operator.' }, { status: 400, headers: corsHeaders });
+        }
+
         const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
 
         // Turnstile Verification
