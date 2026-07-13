@@ -43,10 +43,19 @@ export async function POST(
             return NextResponse.json({ error: 'Can only automatically refund STRIPE payments' }, { status: 400 });
         }
 
-        let paymentReferenceId = job.paymentReferenceId || job.stripePaymentIntentId;
+        let paymentIntentId: string | null = null;
+        let checkoutSessionIdToResolve: string | null = null;
 
-        if (!paymentReferenceId) {
-            return NextResponse.json({ error: 'Missing Stripe payment reference ID' }, { status: 400 });
+        if (job.stripePaymentIntentId && job.stripePaymentIntentId.startsWith('pi_')) {
+            paymentIntentId = job.stripePaymentIntentId;
+        } else if (job.paymentReferenceId && job.paymentReferenceId.startsWith('pi_')) {
+            paymentIntentId = job.paymentReferenceId;
+        } else if (job.stripeCheckoutSessionId && job.stripeCheckoutSessionId.startsWith('cs_')) {
+            checkoutSessionIdToResolve = job.stripeCheckoutSessionId;
+        } else if (job.paymentReferenceId && job.paymentReferenceId.startsWith('cs_')) {
+            checkoutSessionIdToResolve = job.paymentReferenceId;
+        } else {
+            return NextResponse.json({ error: 'No valid Stripe payment reference found to refund' }, { status: 400 });
         }
 
         let validTenantKey = null;
@@ -65,19 +74,17 @@ export async function POST(
         if (!stripeClient) {
             return NextResponse.json({ error: 'Card payments are not configured for this operator.' }, { status: 400 });
         }
-
-        let paymentIntentId = paymentReferenceId;
         
         async function getPaymentIntent(client: Stripe): Promise<Stripe.PaymentIntent | null> {
             try {
-                if (paymentReferenceId!.startsWith('cs_')) {
-                    const checkoutSession = await client.checkout.sessions.retrieve(paymentReferenceId!);
+                if (checkoutSessionIdToResolve) {
+                    const checkoutSession = await client.checkout.sessions.retrieve(checkoutSessionIdToResolve);
                     if (checkoutSession.payment_intent && typeof checkoutSession.payment_intent === 'string') {
                         return await client.paymentIntents.retrieve(checkoutSession.payment_intent, { expand: ['latest_charge'] });
                     }
                     return null;
-                } else if (paymentReferenceId!.startsWith('pi_')) {
-                    return await client.paymentIntents.retrieve(paymentReferenceId!, { expand: ['latest_charge'] });
+                } else if (paymentIntentId) {
+                    return await client.paymentIntents.retrieve(paymentIntentId, { expand: ['latest_charge'] });
                 }
                 return null;
             } catch (err: any) {

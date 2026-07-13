@@ -43,8 +43,10 @@ export async function POST(
             return NextResponse.json({ error: `Cannot generate payment link for a ${job.status} job` }, { status: 400 });
         }
 
-        // Reuse existing Stripe payment link if unpaid
-        if (job.paymentLink && job.paymentProvider === 'STRIPE' && !job.paymentLink.includes('sumup')) {
+        // Reuse existing Stripe payment link if unpaid and valid
+        const isExpiredLink = job.paymentLinkExpiresAt ? new Date() >= job.paymentLinkExpiresAt : false;
+        const hasPaymentProblem = ['FAILED', 'EXPIRED', 'MISMATCH'].includes(job.paymentProblemStatus || '');
+        if (job.paymentLink && job.paymentProvider === 'STRIPE' && !job.paymentLink.includes('sumup') && !isExpiredLink && !hasPaymentProblem) {
             return NextResponse.json({
                 success: true,
                 url: job.paymentLink,
@@ -169,6 +171,8 @@ export async function POST(
             },
             data: {
                 paymentLink: stripeSession.url,
+                paymentLinkExpiresAt: stripeSession.expires_at ? new Date(stripeSession.expires_at * 1000) : null,
+                stripeCheckoutSessionId: stripeSession.id,
                 paymentProvider: 'STRIPE'
             }
         });

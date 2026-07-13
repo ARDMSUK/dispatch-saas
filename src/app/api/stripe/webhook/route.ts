@@ -72,7 +72,12 @@ export async function POST(req: NextRequest) {
                                 paymentStatus: 'PAID',
                                 paymentType: 'CARD',
                                 paymentProvider: 'STRIPE',
-                                paymentReferenceId: (session.payment_intent as string) || session.id
+                                paymentReferenceId: (session.payment_intent as string) || session.id,
+                                stripeCheckoutSessionId: session.id,
+                                stripePaymentIntentId: session.payment_intent as string | undefined,
+                                paymentProblemStatus: null,
+                                paymentProblemReason: null,
+                                paymentProblemAt: null
                             }
                         });
                         console.log(`✅ Marked Job ${jobId} as PAID`);
@@ -158,6 +163,14 @@ export async function POST(req: NextRequest) {
                 const expectedAmount = Math.round((job.fare || 0) * 100);
                 if (intent.amount !== expectedAmount) {
                     console.warn(`[Webhook] Amount mismatch for Job ${job.id}. Expected ${expectedAmount}, got ${intent.amount}. Skipping payment auto-sync.`);
+                    await prisma.job.update({
+                        where: { id: jobId },
+                        data: {
+                            paymentProblemStatus: 'MISMATCH',
+                            paymentProblemReason: `Amount mismatch: Expected ${expectedAmount}, got ${intent.amount}`,
+                            paymentProblemAt: new Date()
+                        }
+                    });
                     break;
                 }
 
@@ -179,7 +192,11 @@ export async function POST(req: NextRequest) {
                             paymentType: 'CARD',
                             paymentProvider: 'STRIPE',
                             paymentReferenceId: intent.id,
-                            stripePaymentIntentId: intent.id
+                            stripePaymentIntentId: intent.id,
+                            stripeChargeId: intent.latest_charge as string | undefined,
+                            paymentProblemStatus: null,
+                            paymentProblemReason: null,
+                            paymentProblemAt: null
                         }
                     });
 
@@ -222,7 +239,11 @@ export async function POST(req: NextRequest) {
                             paymentType: 'CARD',
                             paymentProvider: 'STRIPE',
                             paymentReferenceId: intent.id,
-                            stripePaymentIntentId: intent.id
+                            stripePaymentIntentId: intent.id,
+                            stripeChargeId: intent.latest_charge as string | undefined,
+                            paymentProblemStatus: null,
+                            paymentProblemReason: null,
+                            paymentProblemAt: null
                         }
                     });
                     console.log(`✅ [Webhook] Marked OPERATOR Job ${jobId} as PAID from payment_intent.succeeded`);
@@ -248,6 +269,50 @@ export async function POST(req: NextRequest) {
                     },
                 });
                 console.log(`❌ Subscription canceled for ${subscription.id}`);
+                break;
+            }
+            case "payment_intent.payment_failed": {
+                const intent = event.data.object as Stripe.PaymentIntent;
+                const metaBookingId = intent.metadata?.bookingId || intent.metadata?.jobId;
+                const metaTenantId = intent.metadata?.tenantId;
+                if (!metaBookingId || !metaTenantId) break;
+
+                const jobId = parseInt(metaBookingId, 10);
+                if (isNaN(jobId)) break;
+
+                const job = await prisma.job.findUnique({ where: { id: jobId } });
+                if (!job || job.tenantId !== metaTenantId || job.paymentStatus === 'PAID') break;
+
+                await prisma.job.update({
+                    where: { id: jobId },
+                    data: {
+                        paymentProblemStatus: 'FAILED',
+                        paymentProblemReason: intent.last_payment_error?.message || 'Payment failed',
+                        paymentProblemAt: new Date()
+                    }
+                });
+                console.warn(`❌ [Webhook] Job ${jobId} payment failed: ${intent.last_payment_error?.message}`);
+                break;
+            }
+            case "checkout.session.expired": {
+                const session = event.data.object as Stripe.Checkout.Session;
+                if (!session.metadata?.jobId) break;
+
+                const jobId = parseInt(session.metadata.jobId, 10);
+                if (isNaN(jobId)) break;
+
+                const job = await prisma.job.findUnique({ where: { id: jobId } });
+                if (!job || job.paymentStatus === 'PAID') break;
+
+                await prisma.job.update({
+                    where: { id: jobId },
+                    data: {
+                        paymentProblemStatus: 'EXPIRED',
+                        paymentProblemReason: 'Payment link expired',
+                        paymentProblemAt: new Date()
+                    }
+                });
+                console.warn(`❌ [Webhook] Job ${jobId} checkout session expired`);
                 break;
             }
             default:

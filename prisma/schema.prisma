@@ -426,8 +426,16 @@ model Job {
   paymentProvider       String? // STRIPE, SUMUP, ZETTLE
   paymentReferenceId    String? // Transaction ID from provider
   paymentLink           String? // Remote payment link URL
-  stripePaymentIntentId String?
-  stripeClientSecret    String?
+  paymentLinkExpiresAt  DateTime?
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId   String?
+  stripeChargeId          String?
+  stripeClientSecret      String?
+  
+  paymentProblemStatus    String? // FAILED, EXPIRED, MISMATCH
+  paymentProblemReason    String?
+  paymentProblemAt        DateTime?
+
   isFixedPrice          Boolean @default(false)
 
   // Wait & Return Details

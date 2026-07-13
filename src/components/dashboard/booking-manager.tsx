@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, RefreshCcw, UserX, Send, Copy, Volume2, Mail } from "lucide-react";
+import { Plus, Search, MapPin, Calendar as CalendarIcon, Clock, Filter, ChevronDown, User, Phone, Briefcase, Car, MoreVertical, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Play, Ban, RefreshCw, RefreshCcw, UserX, Send, Copy, Volume2, Mail, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import QRCode from 'qrcode';
 import { Link as LinkIcon, QrCode } from "lucide-react";
@@ -55,6 +57,10 @@ interface Job {
     createdAt: string;
     updatedAt: string;
     paymentProvider?: string;
+    paymentProblemStatus?: 'FAILED' | 'EXPIRED' | 'MISMATCH' | null;
+    paymentProblemReason?: string | null;
+    paymentProblemAt?: string | null;
+    paymentLinkExpiresAt?: string | null;
     pickupLat?: number;
     pickupLng?: number;
     dropoffLat?: number;
@@ -1077,6 +1083,15 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 if (job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED') {
                                     return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none px-1.5 text-[9px] rounded-sm">{(job.paymentType === 'IN_CAR_TERMINAL' ? 'TERMINAL' : (job.paymentType || '')).toUpperCase()} ✓</Badge>;
                                 }
+                                if (job.paymentProblemStatus === 'FAILED') {
+                                    return <Badge className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">PAYMENT FAILED</Badge>;
+                                }
+                                if (job.paymentProblemStatus === 'EXPIRED') {
+                                    return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">LINK EXPIRED</Badge>;
+                                }
+                                if (job.paymentProblemStatus === 'MISMATCH') {
+                                    return <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">AMT MISMATCH</Badge>;
+                                }
                                 if (job.paymentType === 'CARD') {
                                     return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-200/50 px-1.5 text-[9px] font-extrabold rounded-sm">CARD UNPAID</Badge>;
                                 }
@@ -1393,7 +1408,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             </div>
 
                             {/* Financials */}
-                            <div className="grid grid-cols-3 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <div className="grid grid-cols-3 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4">
                                 <div>
                                     <h4 className="text-[10px] uppercase font-bold text-slate-400">Quoted Fare</h4>
                                     <p className="text-lg font-bold text-slate-900">£{selectedDetailsJob.fare?.toFixed(2) || '0.00'}</p>
@@ -1409,6 +1424,35 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     </Badge>
                                 </div>
                             </div>
+                            
+                            {selectedDetailsJob.paymentProblemStatus && (
+                                <div className="bg-red-50 p-3 rounded-lg border border-red-200 mb-4">
+                                    <h4 className="text-[10px] uppercase font-bold text-red-600 mb-1 flex items-center gap-1">
+                                        <AlertTriangle className="w-3 h-3" />
+                                        Payment Issue: {selectedDetailsJob.paymentProblemStatus}
+                                    </h4>
+                                    <p className="text-xs text-red-800 font-medium">
+                                        {selectedDetailsJob.paymentProblemReason || 'Unknown error occurred during payment processing.'}
+                                    </p>
+                                    {selectedDetailsJob.paymentProblemAt && (
+                                        <p className="text-[10px] text-red-500 mt-1">
+                                            Occurred: {new Date(selectedDetailsJob.paymentProblemAt).toLocaleString()}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {selectedDetailsJob.paymentLinkExpiresAt && selectedDetailsJob.paymentStatus === 'UNPAID' && !selectedDetailsJob.paymentProblemStatus && (
+                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-4">
+                                    <h4 className="text-[10px] uppercase font-bold text-blue-600 mb-1 flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        Payment Link Expiry
+                                    </h4>
+                                    <p className="text-xs text-blue-800">
+                                        Valid until: {new Date(selectedDetailsJob.paymentLinkExpiresAt).toLocaleString()}
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Notes & Extra Info */}
                             {(selectedDetailsJob.notes || selectedDetailsJob.flightNumber) && (

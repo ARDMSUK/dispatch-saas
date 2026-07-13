@@ -183,6 +183,8 @@ export async function POST(
             where: { id: job.id, tenantId: driver.tenantId, driverId: driver.id },
             data: {
                 paymentLink: stripeSession.url,
+                paymentLinkExpiresAt: stripeSession.expires_at ? new Date(stripeSession.expires_at * 1000) : null,
+                stripeCheckoutSessionId: stripeSession.id,
                 paymentProvider: 'STRIPE'
             }
         });

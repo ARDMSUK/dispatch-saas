@@ -75,7 +75,9 @@ export async function POST(
         let paymentLink = job.paymentLink;
 
         // Reuse existing unpaid Stripe payment link
-        if (!paymentLink || job.paymentProvider !== 'STRIPE' || paymentLink.includes('sumup')) {
+        const isExpiredLink = job.paymentLinkExpiresAt ? new Date() >= job.paymentLinkExpiresAt : false;
+        const hasPaymentProblem = ['FAILED', 'EXPIRED', 'MISMATCH'].includes(job.paymentProblemStatus || '');
+        if (!paymentLink || job.paymentProvider !== 'STRIPE' || paymentLink.includes('sumup') || isExpiredLink || hasPaymentProblem) {
             const tenant = job.tenant;
             let validTenantKey = null;
             if ((decrypt(tenant.stripeSecretKey) as string)) {
@@ -153,7 +155,9 @@ export async function POST(
                 where: { id: job.id },
                 data: {
                     paymentLink: stripeSession.url,
-                    paymentProvider: 'STRIPE'
+                paymentLinkExpiresAt: stripeSession.expires_at ? new Date(stripeSession.expires_at * 1000) : null,
+                stripeCheckoutSessionId: stripeSession.id,
+                paymentProvider: 'STRIPE'
                 },
                 include: {
                     tenant: true,
