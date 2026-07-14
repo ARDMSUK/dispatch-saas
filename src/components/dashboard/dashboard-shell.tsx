@@ -290,7 +290,7 @@ export function DashboardShell({ children, userName, tenantSlug, userRole, isImp
                 </header>
 
                 {/* CONTENT */}
-                <main className="flex-1 overflow-hidden relative bg-background">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden relative bg-background">
                     {children}
                 </main>
             </div>
