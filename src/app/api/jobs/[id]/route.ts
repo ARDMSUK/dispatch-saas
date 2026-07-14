@@ -120,10 +120,28 @@ export async function PATCH(
                     updateData.stripeCheckoutSessionId = null;
                     updateData.stripePaymentIntentId = null;
                     updateData.paymentLinkExpiresAt = null;
+                    updateData.paymentProblemStatus = null;
+                    updateData.paymentProblemReason = null;
+                    updateData.paymentProblemAt = null;
                     updateData.notes = `${updateData.notes || jobToCheck.notes || ''}\n[SYSTEM] Payment type changed from CARD to ${validation.data.paymentType}. Stale payment link cleared.`.trim();
                 }
             } else if (validation.data.paymentType === 'CARD') {
                  updateData.notes = `${updateData.notes || jobToCheck.notes || ''}\n[SYSTEM] Payment type changed to CARD.`.trim();
+            }
+        }
+
+        if (validation.data.fare !== undefined && validation.data.fare !== jobToCheck.fare) {
+            if (jobToCheck.paymentType === 'CARD' && jobToCheck.paymentStatus === 'UNPAID') {
+                if (jobToCheck.paymentLink || jobToCheck.stripeCheckoutSessionId || jobToCheck.stripePaymentIntentId) {
+                    updateData.paymentLink = null;
+                    updateData.stripeCheckoutSessionId = null;
+                    updateData.stripePaymentIntentId = null;
+                    updateData.paymentLinkExpiresAt = null;
+                    updateData.paymentProblemStatus = null;
+                    updateData.paymentProblemReason = null;
+                    updateData.paymentProblemAt = null;
+                    updateData.notes = `${updateData.notes || jobToCheck.notes || ''}\n[SYSTEM] Fare changed. Stale payment link cleared.`.trim();
+                }
             }
         }
 

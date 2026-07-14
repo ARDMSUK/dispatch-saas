@@ -46,7 +46,10 @@ export async function POST(
         // Reuse existing Stripe payment link if unpaid and valid
         const isExpiredLink = job.paymentLinkExpiresAt ? new Date() >= job.paymentLinkExpiresAt : false;
         const hasPaymentProblem = ['FAILED', 'EXPIRED', 'MISMATCH'].includes(job.paymentProblemStatus || '');
-        if (job.paymentLink && job.paymentProvider === 'STRIPE' && !job.paymentLink.includes('sumup') && !isExpiredLink && !hasPaymentProblem) {
+        
+        // We will do a strict check on the session below if there's a stripeCheckoutSessionId.
+        // For sumup or non-stripe links, we can reuse if not expired.
+        if (job.paymentLink && job.paymentProvider !== 'STRIPE' && !isExpiredLink && !hasPaymentProblem) {
             return NextResponse.json({
                 success: true,
                 url: job.paymentLink,
@@ -124,6 +127,40 @@ export async function POST(
                 if (errorCode !== 'resource_missing') {
                     return NextResponse.json({ error: 'Failed to verify existing payment status with Stripe. Please try again.' }, { status: 502 });
                 }
+            }
+        }
+
+        // Check existing Stripe Checkout Session for reuse or expiration
+        if (job.stripeCheckoutSessionId && !isExpiredLink && !hasPaymentProblem) {
+            try {
+                const session = await stripeClient.checkout.sessions.retrieve(job.stripeCheckoutSessionId);
+                if (session && session.status === 'open') {
+                    const expectedAmount = Math.round((job.fare || 0) * 100);
+                    if (session.amount_total === expectedAmount) {
+                        return NextResponse.json({
+                            success: true,
+                            url: session.url || job.paymentLink,
+                            reused: true
+                        });
+                    } else {
+                        console.log(`[Stripe] Session amount mismatch for Job ${job.id}. Expected ${expectedAmount}, got ${session.amount_total}. Expiring session.`);
+                        await stripeClient.checkout.sessions.expire(job.stripeCheckoutSessionId);
+                        // Clear the stale link
+                        await prisma.job.update({
+                            where: { id: job.id },
+                            data: {
+                                paymentLink: null,
+                                stripeCheckoutSessionId: null,
+                                paymentLinkExpiresAt: null,
+                                paymentProblemStatus: null,
+                                paymentProblemReason: null,
+                                paymentProblemAt: null
+                            }
+                        });
+                    }
+                }
+            } catch (sessionError: any) {
+                console.warn(`[Stripe] Failed to retrieve existing Checkout Session ${job.stripeCheckoutSessionId.substring(0, 14)}...`, sessionError.message);
             }
         }
 
