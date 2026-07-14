@@ -19,8 +19,10 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
     const [dropoff, setDropoff] = useState('');
     const [passengerName, setPassengerName] = useState('');
     const [passengerPhone, setPassengerPhone] = useState('');
+    const [passengerEmail, setPassengerEmail] = useState('');
     const [pickupTime, setPickupTime] = useState('');
     const [vehicleType, setVehicleType] = useState('Saloon');
+    const [paymentType, setPaymentType] = useState('CASH');
     const [fare, setFare] = useState<string>('0');
     const [notes, setNotes] = useState('');
     const [preAssignedDriverId, setPreAssignedDriverId] = useState<string>('');
@@ -36,8 +38,10 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
             setDropoff(job.dropoffAddress || '');
             setPassengerName(job.passengerName || '');
             setPassengerPhone(job.passengerPhone || '');
+            setPassengerEmail(job.passengerEmail || '');
             setPickupTime(job.pickupTime ? new Date(job.pickupTime).toISOString().slice(0, 16) : '');
             setVehicleType(job.vehicleType || 'Saloon');
+            setPaymentType(job.paymentType || 'CASH');
             setFare(job.fare?.toString() || '0');
             setNotes(job.notes || '');
             setPreAssignedDriverId(job.preAssignedDriver?.id || 'none');
@@ -64,8 +68,10 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                 dropoffAddress: dropoff,
                 passengerName,
                 passengerPhone,
+                passengerEmail,
                 pickupTime: new Date(pickupTime).toISOString(),
                 vehicleType,
+                paymentType,
                 fare: parseFloat(fare),
                 notes
             };
@@ -149,11 +155,20 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                                 />
                             </div>
                         </div>
+                        <div className="relative mt-3">
+                            <input
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
+                                type="email"
+                                value={passengerEmail}
+                                onChange={e => setPassengerEmail(e.target.value)}
+                                placeholder="Passenger Email"
+                            />
+                        </div>
                     </div>
 
                     {/* Details */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-slate-400 uppercase">Details</label>
+                        <label className="text-xs font-bold text-slate-400 uppercase">Details & Payment</label>
                         <div className="grid grid-cols-2 gap-3">
                             <input
                                 type="datetime-local"
@@ -174,16 +189,27 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                                 <option value="Minibus">Minibus</option>
                             </select>
                         </div>
-                        <div className="relative">
-                            <span className="absolute left-3 top-2.5 text-slate-400 text-sm">£</span>
-                            <input
-                                type="number"
-                                step="0.01"
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-8 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
-                                value={fare}
-                                onChange={e => setFare(e.target.value)}
-                                placeholder="Fare"
-                            />
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="relative">
+                                <span className="absolute left-3 top-2.5 text-slate-400 text-sm">£</span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-8 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
+                                    value={fare}
+                                    onChange={e => setFare(e.target.value)}
+                                    placeholder="Fare"
+                                />
+                            </div>
+                            <select
+                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 appearance-none"
+                                value={paymentType}
+                                onChange={e => setPaymentType(e.target.value)}
+                            >
+                                <option value="CASH">CASH</option>
+                                <option value="CARD">CARD</option>
+                                <option value="ACCOUNT">ACCOUNT</option>
+                            </select>
                         </div>
                         <textarea
                             className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 px-3 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50 min-h-[80px]"

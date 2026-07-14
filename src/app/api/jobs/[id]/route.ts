@@ -27,6 +27,7 @@ const UpdateJobSchema = z.object({
     pickupTime: z.string().optional(),
     passengerName: z.string().optional(),
     passengerPhone: z.string().optional(),
+    passengerEmail: z.string().email().optional().or(z.literal('')),
     vehicleType: z.string().optional(),
     notes: z.string().optional().nullable(),
     paymentType: z.enum(["CASH", "CARD", "ACCOUNT"]).optional(),
@@ -85,7 +86,7 @@ export async function PATCH(
             }
         }
 
-        const updateData = {
+        const updateData: any = {
             ...(status && { status }),
             ...(driverId !== undefined && { driverId }), // Allow null
             ...(fare && { fare }),
@@ -94,6 +95,7 @@ export async function PATCH(
             ...(validation.data.pickupTime && { pickupTime: validation.data.pickupTime }),
             ...(validation.data.passengerName && { passengerName: validation.data.passengerName }),
             ...(validation.data.passengerPhone && { passengerPhone: validation.data.passengerPhone }),
+            ...(validation.data.passengerEmail !== undefined && { passengerEmail: validation.data.passengerEmail }),
             ...(validation.data.vehicleType && { vehicleType: validation.data.vehicleType }),
             ...(validation.data.notes !== undefined && { notes: validation.data.notes }),
             ...(validation.data.paymentType && { paymentType: validation.data.paymentType }),
@@ -103,6 +105,27 @@ export async function PATCH(
             ...(validation.data.preAssignedDriverId !== undefined && { preAssignedDriverId: validation.data.preAssignedDriverId }),
             ...(validation.data.paymentStatus && { paymentStatus: validation.data.paymentStatus }),
         };
+
+        // Payment Safety Checks
+        if (validation.data.paymentType && validation.data.paymentType !== jobToCheck.paymentType) {
+            if (jobToCheck.paymentStatus === 'PAID') {
+                if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+                    return NextResponse.json({ error: 'Cannot change payment type of a PAID job unless you are an Admin.' }, { status: 403 });
+                }
+            }
+
+            if (validation.data.paymentType !== 'CARD') {
+                if (jobToCheck.paymentLink || jobToCheck.stripeCheckoutSessionId || jobToCheck.stripePaymentIntentId) {
+                    updateData.paymentLink = null;
+                    updateData.stripeCheckoutSessionId = null;
+                    updateData.stripePaymentIntentId = null;
+                    updateData.paymentLinkExpiresAt = null;
+                    updateData.notes = `${updateData.notes || jobToCheck.notes || ''}\n[SYSTEM] Payment type changed from CARD to ${validation.data.paymentType}. Stale payment link cleared.`.trim();
+                }
+            } else if (validation.data.paymentType === 'CARD') {
+                 updateData.notes = `${updateData.notes || jobToCheck.notes || ''}\n[SYSTEM] Payment type changed to CARD.`.trim();
+            }
+        }
 
         let updatedJob;
         
