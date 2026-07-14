@@ -155,7 +155,7 @@ export default function DriversPage() {
     const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session?.user?.role as string);
 
     return (
-        <div className="h-full flex flex-col p-6 bg-background text-foreground gap-4 overflow-y-auto">
+        <div className="flex flex-col p-6 bg-background text-foreground gap-4 min-h-full">
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Fleet Management</h1>
