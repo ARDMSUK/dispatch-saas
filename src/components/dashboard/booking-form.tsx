@@ -528,15 +528,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             }
         }
 
-        if (paymentType === 'CARD') {
-            if (!quotedPrice || quotedPrice <= 0) {
-                toast.error("Price not calculated yet");
-                return;
-            }
-            setShowPaymentModal(true);
-        } else {
-            handleCreateJob();
-        }
+        handleCreateJob();
     };
 
     // Fix: Separate the event handler from the logic
