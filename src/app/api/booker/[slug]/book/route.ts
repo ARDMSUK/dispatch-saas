@@ -247,7 +247,8 @@ export async function POST(
                 isReturn: isWaitAndReturn || false,
                 waitingTime: waitingTime || 0,
                 paymentType: paymentType || 'CASH',
-                paymentStatus: 'UNPAID'
+                paymentStatus: 'UNPAID',
+                autoDispatch: tenant.autoDispatch
             }
         });
 
