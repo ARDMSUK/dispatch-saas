@@ -37,9 +37,20 @@ export async function POST(
         // Update Job
         const updateData: any = { status };
 
-        if (status === 'COMPLETED' && paymentType) {
-            updateData.paymentType = paymentType;
-            if (['CASH', 'IN_CAR_TERMINAL', 'ACCOUNT'].includes(paymentType)) {
+        const effectivePaymentType = paymentType || existingJob.paymentType;
+
+        if (status === 'COMPLETED') {
+            if (paymentType) {
+                updateData.paymentType = paymentType;
+            }
+
+            // For CASH jobs, the current driver app completion flow requires the driver 
+            // to press Cash Collected before sending COMPLETED, so the backend treats 
+            // completed CASH jobs as PAID.
+            // 
+            // Future improvement: Add explicit cashCollected/paymentCollected boolean 
+            // from the driver app so backend does not rely on this UI-flow assumption.
+            if (effectivePaymentType === 'CASH') {
                 updateData.paymentStatus = 'PAID';
             }
         }
