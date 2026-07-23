@@ -57,7 +57,9 @@ export async function GET(request: Request) {
             dropoffLng: job.dropoffLng,
             price: job.fare,
             customerName: job.customer?.name,
-            customerPhone: job.customer?.phone
+            customerPhone: job.customer?.phone,
+            paymentType: job.paymentType,
+            paymentStatus: job.paymentStatus
         }));
 
         return NextResponse.json(formattedJobs, { headers: corsHeaders });
