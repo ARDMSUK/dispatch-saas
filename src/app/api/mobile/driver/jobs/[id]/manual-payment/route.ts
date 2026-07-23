@@ -31,6 +31,10 @@ export async function POST(
             return NextResponse.json({ error: "Job not found" }, { status: 404 });
         }
 
+        if (job.paymentType !== 'CASH') {
+            return NextResponse.json({ error: "Manual payment confirmation is only available for CASH jobs" }, { status: 400 });
+        }
+
         // Verify ownership and tenant isolation
         if (job.driverId !== driver.driverId || job.tenantId !== driver.tenantId) {
             return NextResponse.json({ error: "Not assigned to this job or tenant mismatch" }, { status: 403 });

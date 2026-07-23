@@ -21,7 +21,7 @@ export async function POST(
         }
 
         const body = await req.json();
-        const { status, lat, lng, paymentType } = body;
+        const { status, lat, lng, paymentType, completeUnpaid } = body;
 
         // Verify Job Ownership
         const existingJob = await prisma.job.findFirst({ where: { id: jobId, driverId: driver.driverId, tenantId: driver.tenantId } });
@@ -38,6 +38,14 @@ export async function POST(
         const updateData: any = { status };
 
         const effectivePaymentType = paymentType || existingJob.paymentType;
+
+        if (status === 'COMPLETED' && existingJob.paymentStatus === 'UNPAID') {
+            if (existingJob.paymentType === 'CASH') {
+                return NextResponse.json({ error: 'CASH jobs require payment collection before completion' }, { status: 400 });
+            } else if (!completeUnpaid) {
+                return NextResponse.json({ error: 'Explicit office authorisation required to complete unpaid jobs' }, { status: 400 });
+            }
+        }
 
         if (status === 'COMPLETED') {
             if (paymentType) {

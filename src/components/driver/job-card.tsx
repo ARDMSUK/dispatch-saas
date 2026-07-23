@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Navigation, Phone, User, Clock, MapPin, QrCode, Send, CheckCircle, RefreshCw, Copy, Mail } from 'lucide-react';
 
-export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusUpdate: (id: number, status: string, paymentType?: string) => void, onReject?: (id: number) => void }) {
+export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusUpdate: (id: number, status: string, paymentType?: string, options?: any) => void, onReject?: (id: number) => void }) {
     const [showPayment, setShowPayment] = useState(false);
     const [qrModalOpen, setQrModalOpen] = useState(false);
     const [qrLink, setQrLink] = useState<string | null>(null);
@@ -279,11 +279,7 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                             )}
                             {job.status === 'POB' && (
                                 <Button className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-slate-900" onClick={() => {
-                                    if (job.paymentType === 'ACCOUNT') {
-                                        onStatusUpdate(job.id, 'COMPLETED', 'ACCOUNT');
-                                    } else {
-                                        setShowPayment(true);
-                                    }
+                                    setShowPayment(true);
                                 }}>
                                     COMPLETE JOB
                                 </Button>
@@ -383,18 +379,30 @@ export function JobCard({ job, onStatusUpdate, onReject }: { job: any, onStatusU
                                 
                                 {!isManualConfirming ? (
                                     <>
-                                        <Button
-                                            className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                                            onClick={() => setIsManualConfirming('CASH')}
-                                        >
-                                            💵 Collect Cash
-                                        </Button>
-                                        <Button
-                                            className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                                            onClick={() => setIsManualConfirming('TERMINAL')}
-                                        >
-                                            💳 Card Terminal
-                                        </Button>
+                                        {job.paymentType === 'CASH' && (
+                                            <>
+                                                <Button
+                                                    className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+                                                    onClick={() => setIsManualConfirming('CASH')}
+                                                >
+                                                    💵 Collect Cash
+                                                </Button>
+                                                <Button
+                                                    className="w-full h-14 text-lg font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+                                                    onClick={() => setIsManualConfirming('TERMINAL')}
+                                                >
+                                                    💳 Card Terminal
+                                                </Button>
+                                            </>
+                                        )}
+                                        {job.paymentType !== 'CASH' && (
+                                            <Button
+                                                className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-slate-900"
+                                                onClick={() => onStatusUpdate(job.id, 'COMPLETED', job.paymentType, { completeUnpaid: true })}
+                                            >
+                                                {job.paymentType === 'ACCOUNT' ? 'Complete Account Job' : 'Complete Unpaid / Office Authorised'}
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="ghost"
                                             className="w-full h-12 text-slate-400 mt-4"

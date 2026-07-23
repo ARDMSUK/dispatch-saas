@@ -24,7 +24,8 @@ const UpdateJobSchema = z.object({
         "CLEARED",
         "UNASSIGNED",
         "NO_SHOW"
-    ])
+    ]),
+    completeUnpaid: z.boolean().optional()
 });
 
 export async function PATCH(
@@ -61,7 +62,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400, headers: corsHeaders });
         }
 
-        const { status } = validation.data;
+        const { status, completeUnpaid } = validation.data;
         const { id } = await params;
         const jobId = parseInt(id);
 
@@ -100,6 +101,16 @@ export async function PATCH(
 
         if (validTransitions[existingJob.status] && !validTransitions[existingJob.status].includes(realStatus)) {
             return NextResponse.json({ error: `Invalid transition from ${existingJob.status} to ${realStatus}` }, { status: 400, headers: corsHeaders });
+        }
+
+        if (realStatus === 'COMPLETED' && existingJob.paymentStatus === 'UNPAID') {
+            if (status !== 'CLEARED') {
+                if (existingJob.paymentType === 'CASH') {
+                    return NextResponse.json({ error: 'CASH jobs require payment collection before completion' }, { status: 400, headers: corsHeaders });
+                } else if (!completeUnpaid) {
+                    return NextResponse.json({ error: 'Explicit office authorisation required to complete unpaid jobs' }, { status: 400, headers: corsHeaders });
+                }
+            }
         }
 
         let updatedJob;
