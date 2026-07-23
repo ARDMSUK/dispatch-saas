@@ -107,9 +107,22 @@ export async function PATCH(
         try {
             updatedJob = await prisma.$transaction(async (tx) => {
                 if (realStatus === 'COMPLETED' || (realStatus as string) === 'CANCELLED' || realStatus === 'NO_SHOW') {
+                    const isCashPayment = existingJob.paymentType === 'CASH';
+                    const updateData: any = { status: realStatus };
+
+                    // For CASH jobs, the current mobile app sends CLEARED after the driver completes
+                    // the Cash Collected flow. Therefore the backend treats CLEARED/COMPLETED for
+                    // CASH jobs as payment collected and marks paymentStatus PAID.
+                    //
+                    // Future improvement: Driver app should send explicit cashCollected/paymentCollected
+                    // boolean so the backend does not rely on this UI-flow assumption.
+                    if (realStatus === 'COMPLETED' && isCashPayment) {
+                        updateData.paymentStatus = 'PAID';
+                    }
+
                     const jobUpdate = await tx.job.updateMany({
                         where: { id: jobId, driverId: driver.id, tenantId: driver.tenantId },
-                        data: { status: realStatus }
+                        data: updateData
                     });
                     if (jobUpdate.count !== 1) throw new Error("Failed to update job");
 
