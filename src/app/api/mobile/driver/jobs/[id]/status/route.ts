@@ -22,6 +22,7 @@ const UpdateJobSchema = z.object({
         "ARRIVED",
         "POB",
         "CLEARED",
+        "COMPLETED",
         "UNASSIGNED",
         "NO_SHOW"
     ]),
