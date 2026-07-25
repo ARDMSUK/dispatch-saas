@@ -51,6 +51,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Service unavailable (Invalid Tenant)" }, { status: 404 });
         }
 
+        if (tenant.subscriptionStatus !== 'ACTIVE' && tenant.subscriptionStatus !== 'TRIALING') {
+            return NextResponse.json({ error: "Service temporarily unavailable. Please try again later." }, { status: 403 });
+        }
+
+        if (body.paymentType === 'TERMINAL' || body.paymentProvider === 'SUMUP' || body.paymentProvider === 'ZETTLE') {
+            return NextResponse.json({ error: "Hardware payment methods are temporarily unavailable." }, { status: 400 });
+        }
+
         const tenantId = tenant.id;
 
         // 1. Validate / Find Customer

@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { requireRole } from "@/utils/rbac";
+import { requireActiveTenant } from "@/utils/lockout";
 
 export async function GET() {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { session, error } = await requireActiveTenant('READ');
+        if (error) return error;
 
-        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
+             return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
         }
 
         const drivers = await prisma.driver.findMany({
@@ -35,14 +37,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
 
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
-        }
+        const { error: rbacError } = await requireRole("ADMIN");
+        if (rbacError) return rbacError;
 
         const body = await req.json();
         const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin, commissionRate } = body;
@@ -76,6 +75,16 @@ export async function POST(req: Request) {
                 tenantId: session.user.tenantId,
                 status: 'OFF_DUTY',
             }
+        });
+
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: 'CREATE_DRIVER',
+            resource: 'Driver',
+            resourceId: driver.id,
+            details: { name: driver.name, callsign: driver.callsign }
         });
 
         return NextResponse.json(driver);

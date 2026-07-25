@@ -3,12 +3,21 @@ import { prisma } from '@/lib/prisma';
 import { auth } from "@/auth";
 import { revalidatePath } from 'next/cache';
 
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
+
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
         const tenantId = session.user.tenantId;
 
         const { id } = await params;

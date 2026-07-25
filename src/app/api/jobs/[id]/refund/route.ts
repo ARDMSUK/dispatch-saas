@@ -5,14 +5,22 @@ import { getStripe, systemStripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { encrypt, decrypt } from '@/lib/encryption';
 
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
+
 export async function POST(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { id } = await params;
@@ -226,6 +234,16 @@ export async function POST(
                     console.error(`[CRITICAL] Stripe refund succeeded for Job ${jobId}, but local DB sync failed (${jobUpdateResult}).`);
                     return NextResponse.json({ error: 'Refund succeeded with Stripe, but database sync failed.' }, { status: 500 });
                 }
+
+                const { logAuditEvent } = await import('@/lib/audit-logger');
+                await logAuditEvent({
+                    tenantId: session.user.tenantId,
+                    userId: session.user.id,
+                    action: 'REFUND_BOOKING',
+                    resource: 'Job',
+                    resourceId: jobId,
+                    details: { amount: amountToRefund, currency: 'GBP', refundId: refund.id }
+                });
 
                 return NextResponse.json({ 
                     success: true, 

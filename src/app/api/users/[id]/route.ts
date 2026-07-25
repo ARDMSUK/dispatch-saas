@@ -44,6 +44,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             }
         });
 
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: 'UPDATE_USER_ROLE',
+            resource: 'User',
+            resourceId: id,
+            details: { ...body }
+        });
+
         return NextResponse.json(user);
 
     } catch (error) {

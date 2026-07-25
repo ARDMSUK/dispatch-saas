@@ -1,6 +1,8 @@
 /* eslint-disable */
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
 import { calculatePrice } from '@/lib/pricing';
 import { auth } from "@/auth";
 import { EmailService } from '@/lib/email-service';
@@ -14,11 +16,13 @@ export const dynamic = 'force-dynamic';
 // GET /api/jobs
 export async function GET(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
+        const { session, error } = await requireActiveTenant('READ');
+        if (error) return error;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
             return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
         }
         const tenantId = session.user.tenantId;
@@ -188,24 +192,21 @@ export async function GET(req: Request) {
 // POST /api/jobs
 export async function POST(request: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
             return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
         }
+
         const tenantId = session.user.tenantId;
         const body = await request.json();
 
-
-        const tenant = await prisma.tenant.findUnique({
-            where: { id: tenantId },
-            select: { subscriptionStatus: true }
-        });
-
-        if (tenant && (tenant.subscriptionStatus === 'PAST_DUE' || tenant.subscriptionStatus === 'CANCELED')) {
-            return NextResponse.json({ error: 'Platform booking is disabled due to a billing issue.' }, { status: 403 });
+        if (body.paymentType === 'TERMINAL' || body.paymentProvider === 'SUMUP' || body.paymentProvider === 'ZETTLE') {
+            return NextResponse.json({ error: "Hardware payment methods are temporarily disabled." }, { status: 400 });
         }
 
         // 1. Find or Create Customer

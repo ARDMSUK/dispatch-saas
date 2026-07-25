@@ -4,14 +4,22 @@ import { auth } from '@/auth';
 import { getStripe, systemStripe } from '@/lib/stripe';
 import { encrypt, decrypt } from '@/lib/encryption';
 
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
+
 export async function POST(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const id = parseInt((await params).id);
@@ -218,6 +226,16 @@ export async function POST(
             await stripeClient.checkout.sessions.expire(stripeSession.id).catch(e => console.error("Failed to expire session", e));
             return NextResponse.json({ error: 'Failed to save payment link to job due to state change or tenant mismatch' }, { status: 409 });
         }
+
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: 'CREATE_PAYMENT_LINK',
+            resource: 'Job',
+            resourceId: job.id,
+            details: { amount: job.fare, session_id: stripeSession.id }
+        });
 
         return NextResponse.json({ 
             success: true, 

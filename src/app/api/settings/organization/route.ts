@@ -1,13 +1,16 @@
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { encrypt, maskSecret, isMaskedValue } from '@/lib/encryption';
+import { requireRole } from "@/utils/rbac";
+import { requireActiveTenant } from "@/utils/lockout";
 
 // GET: Fetch current organization details
 export async function GET(req: Request) {
     try {
-        const session = await auth();
+        const { session, error } = await requireActiveTenant('READ');
+        if (error) return error;
+        
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -55,17 +58,23 @@ export async function GET(req: Request) {
 // PATCH: Update organization details
 export async function PATCH(req: Request) {
     try {
-        const session = await auth();
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("ADMIN");
+        if (rbacError) return rbacError;
+
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
-        }
-
         const body = await req.json();
         const { name, email, phone, address, lat, lng, useZonePricing, autoDispatch, enableDynamicPricing, enableWaitCalculations, enableWebBooker } = body;
+
+        // Terminal hardware explicitly blocked in Workstream 1
+        if (body.sumupClientId || body.sumupClientSecret || body.zettleClientId || body.zettleClientSecret) {
+            return NextResponse.json({ error: "Hardware integration is temporarily disabled." }, { status: 400 });
+        }
 
         // Validation: Ensure required fields if needed, but schema allows optional
 
@@ -105,10 +114,11 @@ export async function PATCH(req: Request) {
             aviationStackApiKey: body.aviationStackApiKey !== undefined ? body.aviationStackApiKey : undefined,
             outOfHoursStart: body.outOfHoursStart !== undefined ? body.outOfHoursStart : undefined,
             outOfHoursEnd: body.outOfHoursEnd !== undefined ? body.outOfHoursEnd : undefined,
-            sumupClientId: body.sumupClientId !== undefined ? body.sumupClientId : undefined,
-            sumupClientSecret: body.sumupClientSecret !== undefined ? body.sumupClientSecret : undefined,
-            zettleClientId: body.zettleClientId !== undefined ? body.zettleClientId : undefined,
-            zettleClientSecret: body.zettleClientSecret !== undefined ? body.zettleClientSecret : undefined
+            // Terminal hardware is explicitly blocked in Workstream 1
+            // sumupClientId: body.sumupClientId !== undefined ? body.sumupClientId : undefined,
+            // sumupClientSecret: body.sumupClientSecret !== undefined ? body.sumupClientSecret : undefined,
+            // zettleClientId: body.zettleClientId !== undefined ? body.zettleClientId : undefined,
+            // zettleClientSecret: body.zettleClientSecret !== undefined ? body.zettleClientSecret : undefined
         };
 
         if (body.disconnectSumup === true) {
@@ -140,6 +150,16 @@ export async function PATCH(req: Request) {
         const updatedTenant = await prisma.tenant.update({
             where: { id: session.user.tenantId },
             data: updateData
+        });
+
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: 'UPDATE_TENANT_SETTINGS',
+            resource: 'Tenant',
+            resourceId: session.user.tenantId,
+            details: { ...body }
         });
 
         const safeUpdatedTenant = { ...updatedTenant };

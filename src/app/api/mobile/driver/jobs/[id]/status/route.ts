@@ -108,6 +108,8 @@ export async function PATCH(
             if (status !== 'CLEARED') {
                 if (existingJob.paymentType === 'CASH') {
                     return NextResponse.json({ error: 'CASH jobs require payment collection before completion' }, { status: 400, headers: corsHeaders });
+                } else if (existingJob.paymentType === 'TERMINAL' || existingJob.paymentProvider === 'SUMUP' || existingJob.paymentProvider === 'ZETTLE') {
+                    return NextResponse.json({ error: 'Hardware terminals are temporarily disabled.' }, { status: 400, headers: corsHeaders });
                 } else if (!completeUnpaid) {
                     return NextResponse.json({ error: 'Explicit office authorisation required to complete unpaid jobs' }, { status: 400, headers: corsHeaders });
                 }

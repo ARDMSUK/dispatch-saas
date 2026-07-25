@@ -2,14 +2,23 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { session, error: lockoutError } = await requireActiveTenant('READ');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
         const tenantId = session.user.tenantId;
 
         const now = new Date();

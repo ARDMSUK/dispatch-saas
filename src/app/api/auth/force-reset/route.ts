@@ -32,6 +32,16 @@ export async function POST(req: Request) {
             },
         });
 
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            action: "UPDATE",
+            resource: "AUTH",
+            details: { message: "User successfully reset their password via force-reset." },
+            userId: session.user.id,
+            req: req as any,
+            tenantId: session.user.tenantId
+        });
+
         return NextResponse.json({ success: true, message: "Password updated successfully" }, { status: 200 });
     } catch (error) {
         console.error("Force Reset Error:", error);

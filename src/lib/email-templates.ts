@@ -352,6 +352,61 @@ export const EmailTemplates = {
     return BaseEmailLayout(contentHtml, orgSettings, "Payment Request");
   },
 
+  driverAssigned: (booking: any, driver: any, orgSettings: any = {}, enableLiveTracking = true) => {
+    const isLegacy = typeof orgSettings === 'string';
+    const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
+    const bookingRef = booking?.id ? `#${booking.id.toString().padStart(6, '0')}` : 'Pending';
+    const trackingLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/track/${booking.id}`;
+    const vehicle = driver?.vehicles && driver.vehicles.length > 0 ? driver.vehicles[0] : null;
+    const vehicleString = vehicle ? `${vehicle.model} (${vehicle.reg})` : 'Your assigned vehicle';
+    const driverName = driver?.name || 'A driver';
+    const driverPhone = driver?.phone || 'Not provided';
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">🚗 Driver Assigned</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Booking Reference: ${bookingRef}</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">${driverName} is on the way to pick you up!</p>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <tr>
+          <td style="padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="50%" valign="top">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Driver</strong><br/>
+                  <span style="color: #333333; font-size: 16px; font-weight: bold;">${driverName}</span>
+                </td>
+                <td width="50%" valign="top" align="right">
+                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Vehicle</strong><br/>
+                  <span style="color: #333333; font-size: 16px; font-weight: bold;">${vehicleString}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 15px;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Pickup Location</strong><br/>
+            <span style="color: #333333; font-size: 16px;">${formatAddressForDisplay(booking?.pickupAddress)}</span>
+          </td>
+        </tr>
+      </table>
+
+      ${enableLiveTracking ? `
+      <div style="text-align: center; margin-top: 25px;">
+        <a href="${trackingLink}" style="background-color: ${safeBrandColor}; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">
+          Track My Driver
+        </a>
+      </div>
+      ` : ''}
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, "Driver Assigned");
+  },
+
   driverArrived: (booking: any, driver: any, orgSettings: any = {}, enableLiveTracking = true) => {
     const isLegacy = typeof orgSettings === 'string';
     const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');

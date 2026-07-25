@@ -827,158 +827,19 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="border-t border-border pt-6 mt-6">
-                        <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">📱 In-Car Terminals</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-muted/30 p-4 rounded-lg border border-border flex flex-col justify-between gap-2">
-                                <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <Label className="text-foreground font-bold block">SumUp</Label>
-                                        {sumupConnected && (
-                                            <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded border border-emerald-500/20">
-                                                Connected
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mb-3">Process payments using your SumUp Air card reader via the driver app.</p>
-                                    <div className="space-y-3 mb-2">
-                                        <div>
-                                            <Label className="text-[11px] text-muted-foreground font-medium">SumUp Client ID</Label>
-                                            <Input
-                                                value={sumupClientId}
-                                                onChange={(e) => setSumupClientId(e.target.value)}
-                                                placeholder="e.g. client-id-..."
-                                                className="bg-background border-input text-xs h-8 text-foreground"
-                                                disabled={paymentRouting === 'DRIVER'}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label className="text-[11px] text-muted-foreground font-medium">SumUp Client Secret</Label>
-                                            <Input
-                                                type={sumupClientSecret.includes('••••') ? "text" : "password"}
-                                                value={sumupClientSecret}
-                                                onChange={(e) => setSumupClientSecret(e.target.value)}
-                                                placeholder="e.g. client-secret-..."
-                                                className="bg-background border-input text-xs h-8 text-foreground"
-                                                disabled={paymentRouting === 'DRIVER'}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                {sumupConnected ? (
-                                    <Button 
-                                        onClick={handleDisconnectSumUp}
-                                        variant="destructive"
-                                        className="mt-2 w-full font-medium"
-                                        disabled={paymentRouting === 'DRIVER'}
-                                    >
-                                        Disconnect SumUp
-                                    </Button>
-                                ) : (
-                                    <Button 
-                                        onClick={() => {
-                                            if (!sumupClientId || !sumupClientSecret) {
-                                                toast.error("Please enter and save your SumUp Client ID and Client Secret first.");
-                                                return;
-                                            }
-                                            window.location.href = '/api/integrations/sumup/connect';
-                                        }}
-                                        className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
-                                        disabled={paymentRouting === 'DRIVER'}
-                                    >
-                                        Connect SumUp
-                                    </Button>
-                                )}
-                            </div>
-                            <div className="bg-muted/30 p-4 rounded-lg border border-border flex flex-col justify-between gap-2">
-                                <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <Label className="text-foreground font-bold block">Zettle</Label>
-                                        {zettleConnected && (
-                                            <span className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded border border-emerald-500/20">
-                                                Connected
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mb-3">Process payments using your Zettle card reader via the driver app.</p>
-                                    <div className="space-y-3 mb-2">
-                                        <div>
-                                            <Label className="text-[11px] text-muted-foreground font-medium">Zettle Client ID</Label>
-                                            <Input
-                                                value={zettleClientId}
-                                                onChange={(e) => setZettleClientId(e.target.value)}
-                                                placeholder="e.g. client-id-..."
-                                                className="bg-background border-input text-xs h-8 text-foreground"
-                                                disabled={paymentRouting === 'DRIVER'}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label className="text-[11px] text-muted-foreground font-medium">Zettle Client Secret</Label>
-                                            <Input
-                                                type={zettleClientSecret.includes('••••') ? "text" : "password"}
-                                                value={zettleClientSecret}
-                                                onChange={(e) => setZettleClientSecret(e.target.value)}
-                                                placeholder="e.g. client-secret-..."
-                                                className="bg-background border-input text-xs h-8 text-foreground"
-                                                disabled={paymentRouting === 'DRIVER'}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                {zettleConnected ? (
-                                    <Button 
-                                        onClick={handleDisconnectZettle}
-                                        variant="destructive"
-                                        className="mt-2 w-full font-medium"
-                                        disabled={paymentRouting === 'DRIVER'}
-                                    >
-                                        Disconnect Zettle
-                                    </Button>
-                                ) : (
-                                    <Button 
-                                        onClick={() => {
-                                            if (!zettleClientId || !zettleClientSecret) {
-                                                toast.error("Please enter and save your Zettle Client ID and Client Secret first.");
-                                                return;
-                                            }
-                                            window.location.href = '/api/integrations/zettle/connect';
-                                        }}
-                                        className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 w-full font-medium"
-                                        disabled={paymentRouting === 'DRIVER'}
-                                    >
-                                        Connect Zettle
-                                    </Button>
-                                )}
-                            </div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <h3 className="text-lg font-medium text-foreground">📱 In-Car Terminals</h3>
+                            <span className="text-[10px] font-semibold bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded border border-amber-500/20">
+                                Hardware integration coming soon
+                            </span>
                         </div>
-
-                        <div className="mt-6 bg-muted/30 p-4 rounded-lg border border-border">
-                            <Label className="text-foreground font-medium">Payment Routing Configuration</Label>
-                            <p className="text-xs text-muted-foreground mb-3">
-                                Decide whose accounts are used for in-car terminal payments and remote payment links.
+                        <div className="bg-muted/30 p-6 rounded-lg border border-border text-center opacity-70">
+                            <p className="text-sm text-muted-foreground mb-2">
+                                SumUp and Zettle native SDK integration is scheduled for Workstream 2.
                             </p>
-                            <Select value={paymentRouting} onValueChange={setPaymentRouting}>
-                                <SelectTrigger className="w-full bg-background border-input text-foreground">
-                                    <SelectValue placeholder="Select Routing Method" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-popover border-border text-popover-foreground" position="popper">
-                                    <SelectItem value="CENTRAL">
-                                        Central Account (Company)
-                                    </SelectItem>
-                                    <SelectItem value="DRIVER">
-                                        Driver Accounts (Individual)
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {paymentRouting === "CENTRAL" && (
-                                <p className="text-xs text-muted-foreground mt-2">
-                                    Payments are processed through the company's central SumUp/Zettle accounts.
-                                </p>
-                            )}
-                            {paymentRouting === "DRIVER" && (
-                                <p className="text-xs text-muted-foreground mt-2">
-                                    Drivers will connect their own accounts in the Driver App to process payments directly.
-                                </p>
-                            )}
+                            <p className="text-xs text-muted-foreground">
+                                For now, drivers should collect payments manually and use the CASH/ACCOUNT or remote CARD payment link options.
+                            </p>
                         </div>
                     </div>
                 </div>

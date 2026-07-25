@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
 import { hash } from 'bcryptjs';
 import { sendEmail, getWelcomeEmail } from '@/lib/email';
 
@@ -8,14 +9,11 @@ import { sendEmail, getWelcomeEmail } from '@/lib/email';
 // GET /api/users
 export async function GET() {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { session, error: lockoutError } = await requireActiveTenant('READ');
+        if (lockoutError) return lockoutError;
 
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        const { error: rbacError } = await requireRole("ADMIN");
+        if (rbacError) return rbacError;
 
         const users = await prisma.user.findMany({
             where: { tenantId: session.user.tenantId },
@@ -41,14 +39,11 @@ export async function GET() {
 // POST /api/users
 export async function POST(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.tenantId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
 
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        const { error: rbacError } = await requireRole("ADMIN");
+        if (rbacError) return rbacError;
 
         const body = await req.json();
         const { name, email, password, role, permissions, sipExtension } = body;

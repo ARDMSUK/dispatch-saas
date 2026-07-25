@@ -87,6 +87,17 @@ export async function PATCH(
         }
 
         const updatedDriver = await prisma.driver.findFirst({ where: { id, tenantId: session.user.tenantId } });
+
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: 'UPDATE_DRIVER',
+            resource: 'Driver',
+            resourceId: id,
+            details: { ...dataToUpdate }
+        });
+
         return NextResponse.json(updatedDriver);
     } catch (error) {
         console.error('Error updating driver:', error);
@@ -119,6 +130,16 @@ export async function DELETE(
         if (deleteResult.count !== 1) {
             return NextResponse.json({ error: "Driver not found or access denied" }, { status: 404 });
         }
+
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: 'DELETE_DRIVER',
+            resource: 'Driver',
+            resourceId: id,
+            details: { name: existingDriver.name, callsign: existingDriver.callsign }
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {

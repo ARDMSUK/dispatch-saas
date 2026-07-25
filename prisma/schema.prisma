@@ -141,6 +141,7 @@ model Tenant {
   students            Student[]            @relation("TenantStudents")
   incidentReports     IncidentReport[]     @relation("TenantIncidents")
   DriverMessage       DriverMessage[]
+  auditLogs           AuditLog[]
 
   @@map("companies")
   @@schema("public")
@@ -216,6 +217,7 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  auditLogs AuditLog[]
 
   @@map("users")
   @@schema("public")
@@ -983,5 +985,25 @@ model SystemSetting {
   updatedAt DateTime @updatedAt
 
   @@map("system_settings")
+  @@schema("public")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  userId     String?
+  actorRole  String?
+  action     String
+  resource   String
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
   @@schema("public")
 }

@@ -38,17 +38,22 @@ const UpdateJobSchema = z.object({
     paymentStatus: z.enum(["UNPAID", "AUTHORIZED", "PAID"]).optional(),
 });
 
+import { requireRole } from '@/utils/rbac';
+import { requireActiveTenant } from '@/utils/lockout';
+
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-        if (!session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+        if (lockoutError) return lockoutError;
+
+        const { error: rbacError } = await requireRole("DISPATCHER");
+        if (rbacError) return rbacError;
+
+        if (session.user.role === 'B2B_ADMIN') {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const body = await request.json();
@@ -400,6 +405,16 @@ export async function PATCH(
             }
         }
         // ---------------------
+
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: session.user.tenantId,
+            userId: session.user.id,
+            action: status === 'CANCELLED' ? 'CANCEL_BOOKING' : 'UPDATE_BOOKING',
+            resource: 'Job',
+            resourceId: jobId.toString(),
+            details: { status: updatedJob.status, paymentStatus: updatedJob.paymentStatus }
+        });
 
         return NextResponse.json(updatedJob);
     } catch (error) {

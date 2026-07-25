@@ -7,7 +7,8 @@
     "build": "rm -rf .next && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "recovery": "tsx scripts/admin-recovery.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.39",
