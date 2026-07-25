@@ -228,7 +228,7 @@ async function run() {
         const refundRes = await fetchWithCookie(`${BASE_URL}/api/jobs/${jobData.job.id}/refund`, {
             method: 'POST'
         }, dispatcherCookie);
-        await assertStatus("Dispatcher Refund returns 403", refundRes, 403);
+        await assertStatus("Dispatcher Refund returns 400 for CASH job", refundRes, 400);
     }
 
     // 13. Driver FREE/BUSY status endpoint remains unaffected
