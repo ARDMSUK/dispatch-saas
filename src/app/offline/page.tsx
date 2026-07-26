@@ -43,7 +43,6 @@ export default function OfflinePage() {
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setJobs(loadedJobs);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLastSync(loadedSync);
     }, []);
 
