@@ -23,20 +23,28 @@ export default function OfflinePage() {
         const cachedManifest = localStorage.getItem('dispatch_offline_manifest');
         const cachedSyncTime = localStorage.getItem('dispatch_offline_last_sync');
 
+        let loadedJobs: LightJob[] = [];
+        let loadedSync: string | null = null;
+
         if (cachedManifest) {
             try {
-                setJobs(JSON.parse(cachedManifest));
+                loadedJobs = JSON.parse(cachedManifest);
             } catch (e) {
                 console.error("Failed to parse offline manifest");
             }
         }
         if (cachedSyncTime) {
             try {
-                setLastSync(format(new Date(cachedSyncTime), 'MMM dd, h:mm a'));
+                loadedSync = format(new Date(cachedSyncTime), 'MMM dd, h:mm a');
             } catch (e) {
-                setLastSync("Unknown");
+                loadedSync = "Unknown";
             }
         }
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setJobs(loadedJobs);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLastSync(loadedSync);
     }, []);
 
     // Helper to test if online again

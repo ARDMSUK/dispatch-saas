@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Car, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import Link from "next/link";
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -94,7 +95,7 @@ export default function LoginPage() {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <label className="text-sm font-bold text-slate-700">Password</label>
-                                        <a href="/forgot-password" className="text-xs font-semibold text-blue-500 hover:text-indigo-600">Forgot password?</a>
+                                        <Link href="/forgot-password" className="text-xs font-semibold text-blue-500 hover:text-indigo-600">Forgot password?</Link>
                                     </div>
                                     <Input
                                         type="password"

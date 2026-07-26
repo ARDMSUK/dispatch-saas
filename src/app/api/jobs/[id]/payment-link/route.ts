@@ -233,7 +233,7 @@ export async function POST(
             userId: session.user.id,
             action: 'CREATE_PAYMENT_LINK',
             resource: 'Job',
-            resourceId: job.id,
+            resourceId: String(job.id),
             details: { amount: job.fare, session_id: stripeSession.id }
         });
 

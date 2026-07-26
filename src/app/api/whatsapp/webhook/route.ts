@@ -94,7 +94,7 @@ export async function POST(req: Request) {
                 }
 
                 // Add user message
-                let openAiMessages = Array.isArray(session.messages) ? session.messages as any[] : [];
+                const openAiMessages = Array.isArray(session.messages) ? session.messages as any[] : [];
                 openAiMessages.push({ role: "user", content: textContent });
 
                 const openai = new OpenAI();
@@ -474,7 +474,7 @@ If the passenger wants to modify booking details (time, pickup, destination) or 
 
                                 if (isSafeToEdit) {
                                     const updateData: any = {};
-                                    let changeSummary = [];
+                                    const changeSummary = [];
                                     
                                     if (args.newPickupTime) {
                                         updateData.pickupTime = new Date(args.newPickupTime);

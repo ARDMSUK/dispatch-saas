@@ -317,7 +317,7 @@ export async function POST(req: Request) {
 
                     if (isSafeToEdit) {
                         const updateData: any = {};
-                        let changeSummary = [];
+                        const changeSummary = [];
                         
                         if (args.newPickupTime) {
                             updateData.pickupTime = new Date(args.newPickupTime);

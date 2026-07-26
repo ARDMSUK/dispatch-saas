@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         // Tenant db might store "+447..." or "whatsapp:+447..." 
         const cleanTo = to.replace('whatsapp:', '');
 
-        let tenant = await prisma.tenant.findFirst({
+        const tenant = await prisma.tenant.findFirst({
             where: {
                 OR: [
                     { twilioFromNumber: to },

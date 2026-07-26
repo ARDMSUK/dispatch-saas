@@ -31,7 +31,7 @@ export async function POST(
 
         const routing = job.tenant.paymentRouting; // "CENTRAL" or "DRIVER"
         let accessToken = null;
-        let provider = "SUMUP"; // Defaulting to SumUp for this example
+        const provider = "SUMUP"; // Defaulting to SumUp for this example
 
         if (routing === "CENTRAL") {
             accessToken = decrypt(job.tenant.sumupAccessToken);

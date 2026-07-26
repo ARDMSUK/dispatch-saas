@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Car, AlertTriangle, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 const formSchema = z.object({
     password: z.string().min(8, "Password must be at least 8 characters"),
@@ -37,9 +38,9 @@ function ResetPasswordForm() {
                 <AlertTriangle className="h-12 w-12 text-red-500" />
                 <p className="text-red-400 font-bold">Invalid Reset Link</p>
                 <p className="text-sm text-slate-500">The link you followed is missing a valid security token.</p>
-                <a href="/forgot-password" className="text-yellow-400 hover:text-yellow-300 transition-colors mt-4 text-sm font-bold block">
+                <Link href="/forgot-password" className="text-yellow-400 hover:text-yellow-300 transition-colors mt-4 text-sm font-bold block">
                     Request a new link
-                </a>
+                </Link>
             </div>
         );
     }

@@ -41,7 +41,7 @@ export async function checkPermission(permission: string) {
         return { session }
     }
 
-    const permissions = session.user.permissions as string[] || []
+    const permissions = (session.user as any).permissions as string[] || []
     if (!permissions.includes(permission)) {
         return { error: NextResponse.json({ error: "Forbidden: Missing permission" }, { status: 403 }) }
     }

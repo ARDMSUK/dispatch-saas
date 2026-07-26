@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 
         // Determine payment gateway provider based on keys configured
         let provider = 'STRIPE'; // Stripe is the default
-        let stripePublishableKey = tenant.stripePublishableKey || null;
+        const stripePublishableKey = tenant.stripePublishableKey || null;
         let sumupAccessToken = null;
 
         // Check if Stripe is configured

@@ -59,8 +59,8 @@ export async function POST(
         const expo = new Expo();
         const messages: any[] = [];
 
-        let alertContext = source === 'DRIVER' && job.driver ? `Driver ${job.driver.name}` : `Passenger ${job.passengerName}`;
-        let locationContext = lat && lng ? ` at roughly ${lat}, ${lng}` : ` near ${job.pickupAddress}`;
+        const alertContext = source === 'DRIVER' && job.driver ? `Driver ${job.driver.name}` : `Passenger ${job.passengerName}`;
+        const locationContext = lat && lng ? ` at roughly ${lat}, ${lng}` : ` near ${job.pickupAddress}`;
 
         console.error(`🚨 SOS ALERT FOR JOB ${job.id}: ${alertContext} triggered the emergency panic button${locationContext}.`);
 

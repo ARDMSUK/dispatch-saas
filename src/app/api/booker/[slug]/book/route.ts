@@ -252,8 +252,8 @@ export async function POST(
             }
         });
 
-        let clientSecret = null;
-        let publishableKey = tenant.stripePublishableKey;
+        const clientSecret = null;
+        const publishableKey = tenant.stripePublishableKey;
 
         // Send Request Received immediately for all bookings
         if (!job.notes?.includes('[NO_NOTIFICATIONS]')) {

@@ -104,7 +104,7 @@ export async function POST(
         }
 
         let intent: Stripe.PaymentIntent | null = null;
-        let activeStripeClient = stripeClient;
+        const activeStripeClient = stripeClient;
 
         // Try primary client
         try {
@@ -241,8 +241,8 @@ export async function POST(
                     userId: session.user.id,
                     action: 'REFUND_BOOKING',
                     resource: 'Job',
-                    resourceId: jobId,
-                    details: { amount: amountToRefund, currency: 'GBP', refundId: refund.id }
+                    resourceId: String(jobId),
+                    details: { amount: refund.amount, currency: 'GBP', refundId: refund.id }
                 });
 
                 return NextResponse.json({ 

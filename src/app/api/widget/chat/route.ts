@@ -383,7 +383,7 @@ Never mention that you are an AI model. You are CABAI.`;
 
                         if (isSafeToEdit) {
                             const updateData: any = {};
-                            let changeSummary = [];
+                            const changeSummary = [];
                             
                             if (newPickupTime) {
                                 updateData.pickupTime = new Date(newPickupTime);

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Car, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 const formSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -67,9 +68,9 @@ export default function ForgotPasswordPage() {
                             <CheckCircle2 className="h-12 w-12 text-green-500" />
                             <p className="text-emerald-600 font-medium">Reset link sent!</p>
                             <p className="text-sm text-slate-500">If an account exists for that email, we have sent a password reset link.</p>
-                            <a href="/login" className="text-yellow-400 hover:text-yellow-300 transition-colors mt-4 text-sm font-bold block">
+                            <Link href="/login" className="text-yellow-400 hover:text-yellow-300 transition-colors mt-4 text-sm font-bold block">
                                 Return to Login
-                            </a>
+                            </Link>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -94,9 +95,9 @@ export default function ForgotPasswordPage() {
                             </Button>
 
                             <div className="text-center mt-4">
-                                <a href="/login" className="text-slate-500 hover:text-slate-900 transition-colors text-sm">
+                                <Link href="/login" className="text-slate-500 hover:text-slate-900 transition-colors text-sm">
                                     &larr; Back to login
-                                </a>
+                                </Link>
                             </div>
                         </form>
                     )}

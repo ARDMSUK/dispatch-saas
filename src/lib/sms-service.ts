@@ -11,7 +11,7 @@ const client = (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN)
 
 function formatPhoneNumber(number: string | undefined | null): string | null {
     if (!number) return null;
-    let cleaned = number.replace(/[\s\-\(\)]/g, '');
+    const cleaned = number.replace(/[\s\-\(\)]/g, '');
     if (cleaned.startsWith('+')) {
         return cleaned;
     }

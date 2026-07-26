@@ -182,7 +182,7 @@ export async function POST(
         return NextResponse.json({ success: true, smsResult, reused: !!job.paymentLink && job.paymentLink === paymentLink }, { headers: corsHeaders });
 
     } catch (error: any) {
-        let rawMessage = error instanceof Error ? error.message : 'Unknown error';
+        const rawMessage = error instanceof Error ? error.message : 'Unknown error';
         
         // Redact any potential keys from the log
         const redactedMessage = rawMessage.replace(/(sk_live|sk_test|rk_live|rk_test|mk)_[a-zA-Z0-9]+/g, '[REDACTED_KEY]');
