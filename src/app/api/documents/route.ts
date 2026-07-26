@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export async function GET(request: Request) {
   try {
@@ -8,6 +9,8 @@ export async function GET(request: Request) {
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
     
     const { searchParams } = new URL(request.url);
     const driverId = searchParams.get('driverId');
@@ -42,11 +45,8 @@ export async function POST(request: Request) {
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-        return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
-    }
-
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
     const body = await request.json();
     const { type, fileUrl, expiryDate, status, notes, driverId, vehicleId, passengerAssistantId } = body;
 

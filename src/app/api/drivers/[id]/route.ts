@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,8 @@ export async function PATCH(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
 
         // Check if driver exists
@@ -115,6 +118,8 @@ export async function DELETE(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         // const tenantId = session.user.tenantId; // Not strictly needed for delete if ID is unique, but good for ownership check?
         // Actually driver IDs are CUIDs so unique globaly, but we should verify ownership.
 

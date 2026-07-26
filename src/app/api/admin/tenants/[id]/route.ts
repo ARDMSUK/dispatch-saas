@@ -2,16 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { encrypt } from '@/lib/encryption';
+import { requireSuperAdmin } from "@/utils/rbac";
 
 // GET /api/admin/tenants/[id]
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const tenant = await prisma.tenant.findUnique({
             where: { id },
             include: {
@@ -45,10 +43,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     try {
         const { id } = await params;
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const body = await req.json();
         const {
             name, email, phone, address,
@@ -89,10 +84,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     try {
         const { id } = await params;
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const tenant = await prisma.tenant.findUnique({
             where: { id }
         });

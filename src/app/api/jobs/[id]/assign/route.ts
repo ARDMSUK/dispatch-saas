@@ -5,6 +5,7 @@ import { SmsService } from '@/lib/sms-service';
 import { EmailService } from '@/lib/email-service';
 import { sendPushNotification } from '@/lib/push-notifications';
 import { auth } from "@/auth";
+import { requireDispatcher } from "@/utils/rbac";
 
 export async function PATCH(
     req: Request,
@@ -16,6 +17,8 @@ export async function PATCH(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
 
         const jobId = parseInt(id);
         const { driverId, currentVersion } = await req.json();

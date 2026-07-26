@@ -5,7 +5,7 @@ import { getStripe, systemStripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 import { encrypt, decrypt } from '@/lib/encryption';
 
-import { requireRole } from '@/utils/rbac';
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from '@/utils/lockout';
 
 export async function POST(
@@ -14,15 +14,9 @@ export async function POST(
 ) {
     try {
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         if (lockoutError) return lockoutError;
-
-        const { error: rbacError } = await requireRole("DISPATCHER");
-        if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
         const { id } = await params;
         const jobId = parseInt(id);
 

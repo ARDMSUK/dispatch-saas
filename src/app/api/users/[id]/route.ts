@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 // PATCH /api/users/[id]
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -10,11 +11,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const { id } = await params;
         const body = await req.json();
         const { name, role, password, permissions, sipExtension } = body;
@@ -69,11 +67,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const { id } = await params;
 
         // Prevent self-deletion

@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireSuperAdmin } from "@/utils/rbac";
 
 export async function GET(request: Request, { params }: any) {
     try {
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
+    const { error: rbacError } = await requireSuperAdmin();
+    if (rbacError) return rbacError;
         const resolvedParams = await params;
         const ticketId = resolvedParams.id;
 
@@ -35,11 +35,8 @@ export async function GET(request: Request, { params }: any) {
 
 export async function POST(request: Request, { params }: any) {
     try {
-        const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
-
+    const { session, error: rbacError } = await requireSuperAdmin();
+    if (rbacError || !session?.user) return rbacError || new NextResponse("Unauthorized", { status: 401 });
         const body = await request.json();
         const { content } = body;
 
@@ -73,10 +70,8 @@ export async function POST(request: Request, { params }: any) {
 export async function PATCH(request: Request, { params }: any) {
     try {
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
-
+    const { error: rbacError } = await requireSuperAdmin();
+    if (rbacError) return rbacError;
         const body = await request.json();
         const { status } = body;
 

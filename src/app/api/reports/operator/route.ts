@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { startOfDay, endOfDay, parseISO, subDays } from 'date-fns';
+import { requireDispatcher } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,8 @@ export async function GET(req: Request) {
         if (!session?.user?.tenantId || !['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'].includes(session.user.role as string)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
 
         const tenantId = session.user.tenantId;
 

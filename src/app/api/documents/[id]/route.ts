@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -8,11 +9,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-        return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
-    }
-
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
     const { id } = await params;
     const body = await request.json();
     const { type, fileUrl, expiryDate, status, notes } = body;
@@ -49,11 +47,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-        return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
-    }
-
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
     const { id } = await params;
     const existing = await prisma.document.findUnique({
       where: { id: id, tenantId: session.user.tenantId }

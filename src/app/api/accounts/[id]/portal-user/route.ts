@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,8 @@ export async function POST(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const tenantId = session.user.tenantId;
 

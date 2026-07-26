@@ -2,13 +2,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encrypt, maskSecret, isMaskedValue } from '@/lib/encryption';
-import { requireRole } from "@/utils/rbac";
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from "@/utils/lockout";
 
 // GET: Fetch current organization details
 export async function GET(req: Request) {
     try {
         const { session, error } = await requireActiveTenant('READ');
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         if (error) return error;
         
         if (!session?.user?.tenantId) {
@@ -61,9 +63,7 @@ export async function PATCH(req: Request) {
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("ADMIN");
-        if (rbacError) return rbacError;
-
+        const { error: rbacError } = await requireTenantAdmin();
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }

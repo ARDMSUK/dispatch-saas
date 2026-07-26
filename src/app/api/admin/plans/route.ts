@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireSuperAdmin } from "@/utils/rbac";
 
 export async function GET() {
     try {
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const plans = await prisma.saasPlan.findMany({
             orderBy: { priceMonthly: 'asc' }
         });
@@ -23,10 +21,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const body = await req.json();
         
         const newPlan = await prisma.saasPlan.create({

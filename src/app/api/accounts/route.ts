@@ -10,9 +10,8 @@ export async function GET(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
-        }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
 
         const accounts = await prisma.account.findMany({
@@ -52,6 +51,7 @@ export async function GET(req: Request) {
 }
 
 import { z } from 'zod';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 const CreateAccountSchema = z.object({
     code: z.string().min(1),
@@ -87,9 +87,8 @@ export async function POST(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        if (session.user.role === 'DRIVER' || session.user.role === 'B2B_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
-        }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
 
         const body = await req.json();

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireDispatcher } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +9,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     try {
         const session = await auth();
         // Since both Admins and B2B Clients view this page, we verify either exist
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -43,10 +46,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
         // Additional B2B Authorization Guard
         // If they are a B2B user, ensure this invoice actually belongs to their specific account
-        if (session.user.role === 'B2B_ADMIN' && invoice.accountId !== (session.user as any).accountId) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
-
         return new NextResponse(JSON.stringify(invoice, (_, v) => typeof v === 'bigint' ? v.toString() : v), {
             headers: { 'Content-Type': 'application/json' }
         });

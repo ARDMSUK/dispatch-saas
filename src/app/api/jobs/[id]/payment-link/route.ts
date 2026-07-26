@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { getStripe, systemStripe } from '@/lib/stripe';
 import { encrypt, decrypt } from '@/lib/encryption';
 
-import { requireRole } from '@/utils/rbac';
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from '@/utils/lockout';
 
 export async function POST(
@@ -15,13 +15,7 @@ export async function POST(
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("DISPATCHER");
-        if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
+        const { error: rbacError } = await requireDispatcher();
         const id = parseInt((await params).id);
         if (isNaN(id)) {
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400 });
@@ -38,10 +32,6 @@ export async function POST(
         }
 
         // Check tenant isolation (Super Admin logic could be added here if needed, but safe to restrict to tenant)
-        if (job.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: 'Forbidden: You are not authorized for this job' }, { status: 403 });
-        }
-
         // Prevent generating a session if already paid or in terminal states
         if (job.paymentStatus === 'PAID' || job.paymentStatus === 'REFUNDED') {
             return NextResponse.json({ error: 'Job is already paid or refunded', isPaid: true }, { status: 400 });

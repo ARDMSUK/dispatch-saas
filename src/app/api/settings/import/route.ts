@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export async function POST(req: Request) {
     try {
@@ -8,6 +9,8 @@ export async function POST(req: Request) {
         if (!session?.user?.id || !session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const tenantId = session.user.tenantId;
 

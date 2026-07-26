@@ -21,12 +21,15 @@ const CalculateSchema = z.object({
 }).passthrough();
 
 import { auth } from "@/auth";
+import { requireTenantAdmin } from "@/utils/rbac";
 
 // ...
 
 export async function POST(request: Request) {
     try {
         const session = await auth();
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const companyId = session?.user?.tenantId;
 
         if (!companyId) {

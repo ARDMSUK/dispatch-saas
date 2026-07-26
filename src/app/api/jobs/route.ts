@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireRole } from '@/utils/rbac';
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from '@/utils/lockout';
 import { calculatePrice } from '@/lib/pricing';
 import { auth } from "@/auth";
@@ -19,12 +19,7 @@ export async function GET(req: Request) {
         const { session, error } = await requireActiveTenant('READ');
         if (error) return error;
 
-        const { error: rbacError } = await requireRole("DISPATCHER");
-        if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
-        }
+        const { error: rbacError } = await requireDispatcher();
         const tenantId = session.user.tenantId;
 
         const { searchParams } = new URL(req.url);
@@ -195,13 +190,7 @@ export async function POST(request: Request) {
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("DISPATCHER");
-        if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireDispatcher();
         const tenantId = session.user.tenantId;
         const body = await request.json();
 

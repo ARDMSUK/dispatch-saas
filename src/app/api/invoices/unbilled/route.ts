@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireDispatcher } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
         const session = await auth();
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
         const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'];
         if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

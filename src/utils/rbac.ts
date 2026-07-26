@@ -1,33 +1,44 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
-export type RequiredRole = "SUPER_ADMIN" | "ADMIN" | "TENANT_ADMIN" | "OWNER" | "DISPATCHER" | "DRIVER" | "B2B_ADMIN";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "TENANT_ADMIN" | "OWNER" | "DISPATCHER" | "DRIVER" | "B2B_ADMIN";
 
-const roleHierarchy: Record<string, number> = {
-    "SUPER_ADMIN": 100,
-    "ADMIN": 90,
-    "OWNER": 90,
-    "TENANT_ADMIN": 90,
-    "B2B_ADMIN": 50,
-    "DISPATCHER": 40,
-    "DRIVER": 10,
-};
-
-export async function requireRole(minimumRole: RequiredRole) {
+export async function requireAnyRole(allowedRoles: Role[]) {
     const session = await auth()
     if (!session?.user) {
         return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
     }
 
-    const userRole = session.user.role as string
-    const minLevel = roleHierarchy[minimumRole] || 0
-    const userLevel = roleHierarchy[userRole] || 0
-
-    if (userLevel < minLevel) {
+    if (!allowedRoles.includes(session.user.role as Role)) {
         return { error: NextResponse.json({ error: "Forbidden: Insufficient privileges" }, { status: 403 }) }
     }
 
     return { session }
+}
+
+export async function requireSuperAdmin() {
+    return requireAnyRole(["SUPER_ADMIN"]);
+}
+
+export async function requireTenantAdmin() {
+    return requireAnyRole(["ADMIN", "OWNER", "TENANT_ADMIN", "SUPER_ADMIN"]);
+}
+
+export async function requireDispatcher() {
+    return requireAnyRole(["DISPATCHER", "ADMIN", "OWNER", "TENANT_ADMIN", "SUPER_ADMIN"]);
+}
+
+export async function requireExactRole(role: Role) {
+    return requireAnyRole([role]);
+}
+
+export async function requireB2BAccountScope() {
+    const session = await auth();
+    if (!session?.user) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+    if (session.user.role !== "B2B_ADMIN" || !(session.user as any).accountId) {
+        return { error: NextResponse.json({ error: "Forbidden: B2B Account Scope Required" }, { status: 403 }) };
+    }
+    return { session, accountId: (session.user as any).accountId, tenantId: session.user.tenantId };
 }
 
 export async function checkPermission(permission: string) {

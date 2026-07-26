@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireB2BAccountScope } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,13 +9,7 @@ export async function GET() {
     try {
         const session = await auth();
 
-        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !(session.user as any).accountId) {
-            return NextResponse.json({ error: 'Unauthorized B2B Access' }, { status: 401 });
-        }
-
-        const tenantId = session.user.tenantId;
-        const accountId = (session.user as any).accountId;
-
+        const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
         // Fetch historically completed or cancelled bookings for this exact account
         const ledger = await prisma.job.findMany({
             where: {

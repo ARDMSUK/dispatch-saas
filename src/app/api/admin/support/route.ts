@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireSuperAdmin } from "@/utils/rbac";
 
 export async function GET(request: Request) {
     try {
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
-
+    const { error: rbacError } = await requireSuperAdmin();
+    if (rbacError) return rbacError;
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
 

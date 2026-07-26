@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireDispatcher } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,8 @@ export async function GET() {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
 
         const calls = await prisma.incomingCall.findMany({
             where: { tenantId: session.user.tenantId },
@@ -38,6 +41,8 @@ export async function POST(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
 
         const body = await req.json();
         const { phone, status, answeredByExt, answeredById, recordingUrl, duration, transcript, summary, bookingId } = body;

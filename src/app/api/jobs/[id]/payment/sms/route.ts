@@ -4,6 +4,7 @@ import { SmsService } from '@/lib/sms-service';
 import { auth } from '@/auth';
 import { getStripe, systemStripe } from '@/lib/stripe';
 import { encrypt, decrypt } from '@/lib/encryption';
+import { requireDispatcher } from "@/utils/rbac";
 
 export async function POST(
     req: Request,
@@ -14,6 +15,8 @@ export async function POST(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
 
         const id = parseInt((await params).id);
         if (isNaN(id)) {
@@ -33,10 +36,6 @@ export async function POST(
         }
 
         // Check tenant isolation
-        if (job.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: 'Forbidden: You are not authorized for this job' }, { status: 403 });
-        }
-
         if (!job.passengerPhone && !(job as any).customerPhone && !job.customer?.phone) {
             return NextResponse.json({ error: 'Customer phone number is required to send SMS' }, { status: 400 });
         }

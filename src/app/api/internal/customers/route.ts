@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireDispatcher } from "@/utils/rbac";
 
 export async function GET(req: NextRequest) {
     const session = await auth();
+    const { error: rbacError } = await requireDispatcher();
+    if (rbacError) return rbacError;
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const tenantId = session.user.tenantId;
 

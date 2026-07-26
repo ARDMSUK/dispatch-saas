@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireRole } from '@/utils/rbac';
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from '@/utils/lockout';
 import { hash } from 'bcryptjs';
 import { sendEmail, getWelcomeEmail } from '@/lib/email';
@@ -12,9 +12,7 @@ export async function GET() {
         const { session, error: lockoutError } = await requireActiveTenant('READ');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("ADMIN");
-        if (rbacError) return rbacError;
-
+        const { error: rbacError } = await requireTenantAdmin();
         const users = await prisma.user.findMany({
             where: { tenantId: session.user.tenantId },
             select: {
@@ -42,9 +40,7 @@ export async function POST(req: Request) {
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("ADMIN");
-        if (rbacError) return rbacError;
-
+        const { error: rbacError } = await requireTenantAdmin();
         const body = await req.json();
         const { name, email, password, role, permissions, sipExtension } = body;
 

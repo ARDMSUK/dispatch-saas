@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 const CreateSurchargeSchema = z.object({
     name: z.string().min(1),
@@ -27,6 +28,8 @@ export async function POST(request: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
 
         const { name, type, value, startDate, endDate, startTime, endTime, daysOfWeek } = validation.data;

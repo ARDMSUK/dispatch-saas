@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,8 @@ export async function GET() {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const contracts = await prisma.contract.findMany({
             where: { tenantId: session.user.tenantId },
@@ -30,6 +33,8 @@ export async function POST(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const body = await req.json();
         const { reference, purchaseOrderNo, name, startDate, endDate, accountId, notes } = body;

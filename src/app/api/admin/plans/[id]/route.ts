@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireSuperAdmin } from "@/utils/rbac";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const body = await req.json();
 
         const updatedPlan = await prisma.saasPlan.update({
@@ -51,10 +49,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     try {
         const { id } = await params;
         const session = await auth();
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const plan = await prisma.saasPlan.findUnique({
             where: { id },
             include: { tenants: true }

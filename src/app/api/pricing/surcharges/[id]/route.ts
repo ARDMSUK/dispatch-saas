@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export async function DELETE(
     request: Request,
@@ -12,6 +13,8 @@ export async function DELETE(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const { id } = await params;
 

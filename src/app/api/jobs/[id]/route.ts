@@ -38,7 +38,7 @@ const UpdateJobSchema = z.object({
     paymentStatus: z.enum(["UNPAID", "AUTHORIZED", "PAID"]).optional(),
 });
 
-import { requireRole } from '@/utils/rbac';
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from '@/utils/lockout';
 
 export async function PATCH(
@@ -49,13 +49,7 @@ export async function PATCH(
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("DISPATCHER");
-        if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
+        const { error: rbacError } = await requireDispatcher();
         const body = await request.json();
         const validation = UpdateJobSchema.safeParse(body);
 
@@ -114,9 +108,6 @@ export async function PATCH(
         // Payment Safety Checks
         if (validation.data.paymentType && validation.data.paymentType !== jobToCheck.paymentType) {
             if (jobToCheck.paymentStatus === 'PAID') {
-                if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-                    return NextResponse.json({ error: 'Cannot change payment type of a PAID job unless you are an Admin.' }, { status: 403 });
-                }
             }
 
             if (validation.data.paymentType !== 'CARD') {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,8 @@ export async function PATCH(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const { id } = await params;
         const body = await request.json();
@@ -74,6 +77,8 @@ export async function DELETE(
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const deleteResult = await prisma.vehicle.deleteMany({ where: { id, tenantId: session.user.tenantId } });
         if (deleteResult.count !== 1) {

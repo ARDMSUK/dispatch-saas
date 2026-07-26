@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { hash } from 'bcryptjs';
 import { sendEmail, getWelcomeEmail } from '@/lib/email';
 import { encrypt } from '@/lib/encryption';
+import { requireSuperAdmin } from "@/utils/rbac";
 
 // POST /api/admin/tenants
 export async function POST(req: Request) {
@@ -11,10 +12,7 @@ export async function POST(req: Request) {
         const session = await auth();
 
         // Strict Super Admin Check
-        if (session?.user?.role !== 'SUPER_ADMIN') {
-            return NextResponse.json({ error: "Forbidden: Super Admin only" }, { status: 403 });
-        }
-
+        const { error: rbacError } = await requireSuperAdmin();
         const body = await req.json();
         const {
             companyName, companySlug, companyEmail,

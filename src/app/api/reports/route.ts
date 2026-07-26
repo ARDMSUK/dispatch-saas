@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { format, startOfDay, endOfDay, parseISO, eachDayOfInterval, eachMonthOfInterval } from 'date-fns';
 
-import { requireRole } from '@/utils/rbac';
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from '@/utils/lockout';
 
 export const dynamic = 'force-dynamic';
@@ -13,13 +13,7 @@ export async function GET(req: Request) {
         const { session, error: lockoutError } = await requireActiveTenant('READ');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("DISPATCHER");
-        if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
+        const { error: rbacError } = await requireDispatcher();
         const tenantId = session.user.tenantId;
 
         // Parse query params

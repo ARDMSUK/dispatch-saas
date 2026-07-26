@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { BookingSchema } from '@/lib/types';
+import { requireB2BAccountScope } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,13 +11,7 @@ export async function GET() {
         const session = await auth();
 
         // Must be B2B Admin with a linked account
-        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !(session.user as any).accountId) {
-            return NextResponse.json({ error: 'Unauthorized B2B Access' }, { status: 401 });
-        }
-
-        const tenantId = session.user.tenantId;
-        const accountId = (session.user as any).accountId;
-
+        const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
         // Fetch bookings for this exact account
         const bookings = await prisma.job.findMany({
             where: {
@@ -46,13 +41,7 @@ export async function POST(req: Request) {
     try {
         const session = await auth();
 
-        if (!session?.user?.tenantId || session.user.role !== 'B2B_ADMIN' || !(session.user as any).accountId) {
-            return NextResponse.json({ error: 'Unauthorized B2B Access' }, { status: 401 });
-        }
-
-        const tenantId = session.user.tenantId;
-        const accountId = (session.user as any).accountId;
-
+        const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
         const tenant = await prisma.tenant.findUnique({
             where: { id: tenantId },
             select: { subscriptionStatus: true }
@@ -81,8 +70,8 @@ export async function POST(req: Request) {
         // 2. Fetch Account for customer reference
         const account = await prisma.account.findFirst({
             where: {
-                id: (session.user as any).accountId,
-                tenantId: session.user.tenantId
+                id: accountId,
+                tenantId: tenantId as string
             }
         });
 
@@ -93,7 +82,7 @@ export async function POST(req: Request) {
         const customer = await prisma.customer.upsert({
             where: {
                 tenantId_phone: {
-                    tenantId,
+                    tenantId: tenantId as string,
                     phone: data.passengerPhone
                 }
             },
@@ -104,7 +93,7 @@ export async function POST(req: Request) {
                 accountId: account.id
             },
             create: {
-                tenantId,
+                tenantId: tenantId as string,
                 phone: data.passengerPhone,
                 name: data.passengerName || "Corporate Staff",
                 isAccount: true,
@@ -131,7 +120,7 @@ export async function POST(req: Request) {
                 notes: data.notes || "Booked via Corporate Portal",
                 paymentType: "ACCOUNT",
                 paymentStatus: "UNPAID",
-                tenantId,
+                tenantId: tenantId as string,
                 accountId: account.id,
                 customerId,
                 // Default Pricing info (could be calculated via pricing engine)

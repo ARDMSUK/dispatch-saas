@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 // GET: Fetch all FAQs for the current tenant
 export async function GET(req: Request) {
@@ -9,6 +10,8 @@ export async function GET(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const faqs = await prisma.tenantFaq.findMany({
             where: { tenantId: session.user.tenantId },
@@ -29,6 +32,8 @@ export async function POST(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const body = await req.json();
         const { question, answer } = body;
@@ -62,6 +67,8 @@ export async function PATCH(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const body = await req.json();
         const { id, question, answer } = body;
@@ -95,6 +102,8 @@ export async function DELETE(req: Request) {
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const url = new URL(req.url);
         const id = url.searchParams.get('id');

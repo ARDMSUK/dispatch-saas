@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+    const { error: rbacError } = await requireTenantAdmin();
+    if (rbacError) return rbacError;
 
         const { id } = await params;
         const contract = await prisma.contract.findUnique({

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireRole } from "@/utils/rbac";
+import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
 import { requireActiveTenant } from "@/utils/lockout";
 
 export async function GET() {
@@ -8,13 +8,8 @@ export async function GET() {
         const { session, error } = await requireActiveTenant('READ');
         if (error) return error;
 
-        const { error: rbacError } = await requireRole("DISPATCHER");
+        const { error: rbacError } = await requireDispatcher();
         if (rbacError) return rbacError;
-
-        if (session.user.role === 'B2B_ADMIN') {
-             return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
-        }
-
         const drivers = await prisma.driver.findMany({
             where: { tenantId: session.user.tenantId },
             include: {
@@ -40,9 +35,8 @@ export async function POST(req: Request) {
         const { session, error: lockoutError } = await requireActiveTenant('WRITE');
         if (lockoutError) return lockoutError;
 
-        const { error: rbacError } = await requireRole("ADMIN");
+        const { error: rbacError } = await requireTenantAdmin();
         if (rbacError) return rbacError;
-
         const body = await req.json();
         const { name, callsign, phone, email, badgeNumber, licenseExpiry, pin, commissionRate } = body;
 
