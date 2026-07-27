@@ -142,17 +142,23 @@ export default function BookerPage() {
         setLoading(true);
         let distanceMiles = 0;
         try {
+            console.log("[handleGetQuote] Starting Google Maps directions");
             if (typeof window !== 'undefined' && window.google && window.google.maps) {
                 const directionsService = new google.maps.DirectionsService();
                 const origin = formData.pickupLat && formData.pickupLng ? { lat: formData.pickupLat, lng: formData.pickupLng } : formData.pickup;
                 const destination = formData.dropoffLat && formData.dropoffLng ? { lat: formData.dropoffLat, lng: formData.dropoffLng } : formData.dropoff;
 
+                const directionsPromise = directionsService.route({
+                    origin: origin,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.DRIVING
+                });
+                
+                // Prevent unhandled rejection if Google Maps fails after our timeout
+                directionsPromise.catch(e => console.warn("Google Maps Promise rejected:", e));
+
                 const result = await Promise.race([
-                    directionsService.route({
-                        origin: origin,
-                        destination: destination,
-                        travelMode: google.maps.TravelMode.DRIVING
-                    }),
+                    directionsPromise,
                     new Promise<any>((_, reject) => 
                         setTimeout(() => reject(new Error("Google Maps timeout")), 4000)
                     )
@@ -172,6 +178,13 @@ export default function BookerPage() {
         }
 
         try {
+            console.log("[handleGetQuote] Starting fetch to /api/booker");
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                console.warn("[handleGetQuote] Fetch timed out after 8s");
+                controller.abort();
+            }, 8000);
+
             const res = await fetch(`/api/booker/${slug}/quote`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -185,20 +198,39 @@ export default function BookerPage() {
                     pickupTime: new Date(formData.pickupTime).toISOString(),
                     vehicleType: formData.vehicleType,
                     distanceMiles: distanceMiles > 0 ? distanceMiles : undefined
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
+            console.log("[handleGetQuote] Fetch returned status:", res.status);
             const data = await res.json();
+            console.log("[handleGetQuote] Parsed JSON data:", data);
+
             if (res.ok) {
-                setQuote(data.price);
-                setPricingBreakdown(data.breakdown);
-                setStep(2); // Move to passenger details
+                if (data.price !== undefined) {
+                    setQuote(data.price);
+                    setPricingBreakdown(data.breakdown);
+                    setStep(2); // Move to passenger details
+                } else if (data.quotes && data.quotes.length > 0) {
+                    // Fallback just in case it returns the B2C array format for some reason
+                    setQuote(data.quotes[0].price);
+                    setStep(2);
+                } else {
+                    toast.error("Invalid quote response from server.");
+                }
             } else {
                 toast.error(data.error || "Failed to calculate quote");
             }
-        } catch (e) {
-            toast.error("An error occurred getting your quote");
+        } catch (e: any) {
+            console.error("[handleGetQuote] Fetch caught error:", e);
+            if (e.name === 'AbortError') {
+                toast.error("Request timed out. Please try again.");
+            } else {
+                toast.error("An error occurred getting your quote");
+            }
         } finally {
+            console.log("[handleGetQuote] Finally block, setting loading to false");
             setLoading(false);
         }
     };
