@@ -14,6 +14,7 @@ export async function GET(req: Request) {
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
 
         // Parse query params

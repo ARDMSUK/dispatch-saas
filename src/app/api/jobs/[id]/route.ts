@@ -50,6 +50,7 @@ export async function PATCH(
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
         const body = await request.json();
         const validation = UpdateJobSchema.safeParse(body);
 

@@ -10,6 +10,7 @@ export async function GET() {
         const session = await auth();
 
         const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
+        if (rbacError) return rbacError;
         const invoices = await prisma.invoice.findMany({
             where: {
                 tenantId,

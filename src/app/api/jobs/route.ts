@@ -20,6 +20,7 @@ export async function GET(req: Request) {
         if (error) return error;
 
         const { error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
 
         const { searchParams } = new URL(req.url);
@@ -191,6 +192,7 @@ export async function POST(request: Request) {
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
         const tenantId = session.user.tenantId;
         const body = await request.json();
 

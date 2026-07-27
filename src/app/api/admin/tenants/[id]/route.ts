@@ -10,6 +10,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const tenant = await prisma.tenant.findUnique({
             where: { id },
             include: {
@@ -44,6 +45,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const body = await req.json();
         const {
             name, email, phone, address,
@@ -85,6 +87,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         const { id } = await params;
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const tenant = await prisma.tenant.findUnique({
             where: { id }
         });

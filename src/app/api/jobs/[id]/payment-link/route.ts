@@ -16,6 +16,7 @@ export async function POST(
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
         const id = parseInt((await params).id);
         if (isNaN(id)) {
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400 });

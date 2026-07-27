@@ -36,6 +36,7 @@ export async function GET(request: Request, { params }: any) {
 export async function POST(request: Request, { params }: any) {
     try {
     const { session, error: rbacError } = await requireSuperAdmin();
+    if (rbacError) return rbacError;
     if (rbacError || !session?.user) return rbacError || new NextResponse("Unauthorized", { status: 401 });
         const body = await request.json();
         const { content } = body;

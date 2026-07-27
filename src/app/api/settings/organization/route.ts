@@ -64,6 +64,7 @@ export async function PATCH(req: Request) {
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireTenantAdmin();
+        if (rbacError) return rbacError;
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }

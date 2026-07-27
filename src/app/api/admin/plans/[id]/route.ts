@@ -8,6 +8,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         const { id } = await params;
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const body = await req.json();
 
         const updatedPlan = await prisma.saasPlan.update({
@@ -50,6 +51,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         const { id } = await params;
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const plan = await prisma.saasPlan.findUnique({
             where: { id },
             include: { tenants: true }

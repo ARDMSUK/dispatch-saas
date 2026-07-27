@@ -11,6 +11,7 @@ export async function GET(req: Request) {
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
         const user = session.user as any;
 
         const { searchParams } = new URL(req.url);

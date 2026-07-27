@@ -13,6 +13,7 @@ export async function POST(req: Request) {
 
         // Strict Super Admin Check
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const body = await req.json();
         const {
             companyName, companySlug, companyEmail,

@@ -7,6 +7,7 @@ export async function GET() {
     try {
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const plans = await prisma.saasPlan.findMany({
             orderBy: { priceMonthly: 'asc' }
         });
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
     try {
         const session = await auth();
         const { error: rbacError } = await requireSuperAdmin();
+        if (rbacError) return rbacError;
         const body = await req.json();
         
         const newPlan = await prisma.saasPlan.create({

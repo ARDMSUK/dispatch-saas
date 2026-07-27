@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Shield, Building2, LogOut, LayoutDashboard, CreditCard, Settings, TerminalSquare, BookOpen, LifeBuoy } from "lucide-react";
+import { Shield, Building2, LogOut, LayoutDashboard, CreditCard, Settings, TerminalSquare, BookOpen, LifeBuoy, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminLayout({
@@ -13,7 +13,18 @@ export default async function AdminLayout({
 
     // Strict Super Admin Check
     if (session?.user?.role !== "SUPER_ADMIN") {
-        redirect("/dashboard");
+        return (
+            <div className="flex flex-col items-center justify-center h-screen bg-slate-50 text-center space-y-4 p-8">
+                <AlertTriangle className="w-16 h-16 text-rose-500" />
+                <h2 className="text-3xl font-bold text-slate-900">Super Admin Access Denied (403)</h2>
+                <p className="text-slate-500 max-w-md">
+                    You do not have permission to access the Super Admin console.
+                </p>
+                <Link href="/dashboard">
+                    <Button className="mt-4">Return to Dashboard</Button>
+                </Link>
+            </div>
+        );
     }
 
     return (

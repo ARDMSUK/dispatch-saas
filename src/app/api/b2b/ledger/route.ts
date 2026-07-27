@@ -10,6 +10,7 @@ export async function GET() {
         const session = await auth();
 
         const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
+        if (rbacError) return rbacError;
         // Fetch historically completed or cancelled bookings for this exact account
         const ledger = await prisma.job.findMany({
             where: {

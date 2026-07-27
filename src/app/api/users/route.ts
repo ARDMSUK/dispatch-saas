@@ -13,6 +13,7 @@ export async function GET() {
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireTenantAdmin();
+        if (rbacError) return rbacError;
         const users = await prisma.user.findMany({
             where: { tenantId: session.user.tenantId },
             select: {
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
         if (lockoutError) return lockoutError;
 
         const { error: rbacError } = await requireTenantAdmin();
+        if (rbacError) return rbacError;
         const body = await req.json();
         const { name, email, password, role, permissions, sipExtension } = body;
 

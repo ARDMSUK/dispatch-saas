@@ -12,6 +12,7 @@ export async function GET() {
 
         // Must be B2B Admin with a linked account
         const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
+        if (rbacError) return rbacError;
         // Fetch bookings for this exact account
         const bookings = await prisma.job.findMany({
             where: {
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
         const session = await auth();
 
         const { error: rbacError, accountId, tenantId } = await requireB2BAccountScope();
+        if (rbacError) return rbacError;
         const tenant = await prisma.tenant.findUnique({
             where: { id: tenantId },
             select: { subscriptionStatus: true }
