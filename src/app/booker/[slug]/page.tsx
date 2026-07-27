@@ -147,15 +147,20 @@ export default function BookerPage() {
                 const origin = formData.pickupLat && formData.pickupLng ? { lat: formData.pickupLat, lng: formData.pickupLng } : formData.pickup;
                 const destination = formData.dropoffLat && formData.dropoffLng ? { lat: formData.dropoffLat, lng: formData.dropoffLng } : formData.dropoff;
 
-                const result = await directionsService.route({
-                    origin: origin,
-                    destination: destination,
-                    travelMode: google.maps.TravelMode.DRIVING
-                });
+                const result = await Promise.race([
+                    directionsService.route({
+                        origin: origin,
+                        destination: destination,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    }),
+                    new Promise<any>((_, reject) => 
+                        setTimeout(() => reject(new Error("Google Maps timeout")), 4000)
+                    )
+                ]);
 
-                if (result.routes[0] && result.routes[0].legs) {
+                if (result && result.routes && result.routes[0] && result.routes[0].legs) {
                     let totalMeters = 0;
-                    result.routes[0].legs.forEach(leg => {
+                    result.routes[0].legs.forEach((leg: any) => {
                         totalMeters += leg.distance?.value || 0;
                     });
                     distanceMiles = totalMeters / 1609.34;
