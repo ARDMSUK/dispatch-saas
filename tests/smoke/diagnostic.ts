@@ -49,21 +49,14 @@ async function runDiagnostic() {
 
             let detected = 'Unknown';
 
-            if (res.url.includes('vercel.com/sso-api') || res.url.includes('vercel.app/custom-login') || res.headers.has('x-vercel-id')) {
-                // If it redirected to a vercel SSO page, or returned 401 with Vercel protection headers
-                if (res.url.includes('vercel.com/sso-api')) {
-                    detected = 'Vercel SSO intercept';
-                    vercelInterceptDetected = true;
-                } else if (res.status === 401 && res.headers.get('x-vercel-id')) {
-                    detected = 'Vercel SSO intercept (401)';
-                    vercelInterceptDetected = true;
-                } else if (res.url === url && res.status === 200 && t.path === '/login') {
-                    detected = 'CabAI login page';
-                } else if (res.url === url && res.status === 400 && t.path === '/api/stripe/webhook') {
-                    detected = 'CabAI app (Missing Signature)';
-                } else {
-                    detected = `App reached (Status ${res.status})`;
-                }
+            if (res.url.includes('vercel.com/sso-api') || res.url.includes('vercel.app/custom-login')) {
+                // Redirected to Vercel SSO
+                detected = 'Vercel SSO intercept';
+                vercelInterceptDetected = true;
+            } else if (res.status === 401 && res.headers.get('server') === 'Vercel' && typeof res.headers.get('content-type') === 'string' && res.headers.get('content-type')!.includes('text/plain') && res.url === url) {
+                // Vercel intercepting an API request usually returns 401 text/plain or 302, not application/json
+                detected = 'Vercel SSO intercept (401)';
+                vercelInterceptDetected = true;
             } else {
                 if (res.url === url && res.status === 200 && t.path === '/login') {
                     detected = 'CabAI login page';
