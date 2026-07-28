@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "recovery": "tsx scripts/admin-recovery.ts"
+    "recovery": "tsx scripts/admin-recovery.ts",
+    "smoke:rbac": "playwright test tests/smoke/rbac-preview.spec.ts --reporter=./tests/smoke/reporter.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.39",
@@ -79,6 +80,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/google.maps": "^3.58.1",
