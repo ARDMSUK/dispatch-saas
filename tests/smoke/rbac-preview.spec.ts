@@ -197,25 +197,29 @@ test.describe('Automated RBAC Smoke Tests', () => {
     await expect(page.locator('body')).toContainText(/Platform Access Suspended/i);
   });
 
-  test('13. Locked tenant admin direct GET /api/jobs returns 403', async ({ page, request }) => {
+  test('13. Locked tenant admin direct GET /api/jobs returns 403', async ({ page }) => {
     test.skip(!LOCKED_TENANT_ADMIN_EMAIL || !LOCKED_TENANT_ADMIN_PASSWORD, 'Missing Locked Tenant credentials');
     await login(page, LOCKED_TENANT_ADMIN_EMAIL, LOCKED_TENANT_ADMIN_PASSWORD);
     
-    const response = await request.get('/api/jobs');
-    expect(response.status()).toBe(403);
-    
+    const response = await page.request.get('/api/jobs');
+    const status = response.status();
     const data = await response.json().catch(() => ({}));
+    const safeBody = JSON.stringify(data).substring(0, 200);
+    expect(status, `Endpoint: /api/jobs. Expected 403 but got ${status}. Body: ${safeBody}`).toBe(403);
+    
     expect(data.error).toMatch(/Tenant is locked/i);
   });
 
-  test('14. Locked tenant direct GET /api/dispatch/heatmap returns 403', async ({ page, request }) => {
+  test('14. Locked tenant direct GET /api/dispatch/heatmap returns 403', async ({ page }) => {
     test.skip(!LOCKED_TENANT_ADMIN_EMAIL || !LOCKED_TENANT_ADMIN_PASSWORD, 'Missing Locked Tenant credentials');
     await login(page, LOCKED_TENANT_ADMIN_EMAIL, LOCKED_TENANT_ADMIN_PASSWORD);
     
-    const response = await request.get('/api/dispatch/heatmap');
-    expect(response.status()).toBe(403);
-    
+    const response = await page.request.get('/api/dispatch/heatmap');
+    const status = response.status();
     const data = await response.json().catch(() => ({}));
+    const safeBody = JSON.stringify(data).substring(0, 200);
+    expect(status, `Endpoint: /api/dispatch/heatmap. Expected 403 but got ${status}. Body: ${safeBody}`).toBe(403);
+    
     expect(data.error).toMatch(/Tenant is locked/i);
   });
 
