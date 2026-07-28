@@ -2,10 +2,15 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.smoke' });
 
 const baseUrl = process.env.SMOKE_BASE_URL;
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
 if (!baseUrl) {
     console.error("SMOKE_BASE_URL is not set in .env.smoke");
     process.exit(1);
+}
+
+if (!bypassSecret && baseUrl.includes('vercel.app')) {
+    console.warn("⚠️  WARNING: SMOKE_BASE_URL is a vercel.app preview URL, but VERCEL_AUTOMATION_BYPASS_SECRET is missing. Vercel Preview Protection will likely block these requests.");
 }
 
 async function runDiagnostic() {
@@ -25,10 +30,15 @@ async function runDiagnostic() {
         console.log(`[CHECK] ${t.method} ${t.path}`);
         
         try {
+            const headers: HeadersInit = t.body ? { 'Content-Type': 'application/json' } : {};
+            if (bypassSecret) {
+                headers['x-vercel-protection-bypass'] = bypassSecret;
+            }
+
             const res = await fetch(url, {
                 method: t.method,
                 body: t.body ? t.body : undefined,
-                headers: t.body ? { 'Content-Type': 'application/json' } : undefined,
+                headers,
                 redirect: 'follow'
             });
 

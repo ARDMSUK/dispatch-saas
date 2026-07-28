@@ -13,11 +13,24 @@ const B2B_ADMIN_EMAIL = process.env.SMOKE_B2B_ADMIN_EMAIL;
 const B2B_ADMIN_PASSWORD = process.env.SMOKE_B2B_ADMIN_PASSWORD;
 const DRIVER_JWT = process.env.SMOKE_DRIVER_JWT;
 const TENANT_SLUG = process.env.SMOKE_TENANT_SLUG || 'bourneend';
+const VERCEL_AUTOMATION_BYPASS_SECRET = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+
+if (!BASE_URL) {
+  console.error('Missing SMOKE_BASE_URL. Playwright tests cannot run.');
+  process.exit(1);
+}
+
+if (!VERCEL_AUTOMATION_BYPASS_SECRET && BASE_URL.includes('vercel.app')) {
+  console.warn("⚠️  WARNING: SMOKE_BASE_URL is a vercel.app preview URL, but VERCEL_AUTOMATION_BYPASS_SECRET is missing. Vercel Preview Protection will likely block these requests.");
+}
 
 // Configure test behavior
 test.use({
   baseURL: BASE_URL,
   ignoreHTTPSErrors: true,
+  extraHTTPHeaders: VERCEL_AUTOMATION_BYPASS_SECRET ? {
+    'x-vercel-protection-bypass': VERCEL_AUTOMATION_BYPASS_SECRET
+  } : {}
 });
 
 test.beforeAll(() => {
