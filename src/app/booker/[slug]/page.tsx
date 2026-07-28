@@ -132,7 +132,6 @@ export default function BookerPage() {
         fetchTenantInfo();
     }, [slug]);
 
-    // Step 1: Get Quote
     const handleGetQuote = async () => {
         if (!formData.pickup || !formData.dropoff || !formData.pickupTime) {
             toast.error("Please fill in pickup, dropoff, and time.");
@@ -142,7 +141,6 @@ export default function BookerPage() {
         setLoading(true);
         let distanceMiles = 0;
         try {
-            console.log("[handleGetQuote] Starting Google Maps directions");
             if (typeof window !== 'undefined' && window.google && window.google.maps) {
                 const directionsService = new google.maps.DirectionsService();
                 const origin = formData.pickupLat && formData.pickupLng ? { lat: formData.pickupLat, lng: formData.pickupLng } : formData.pickup;
@@ -155,7 +153,9 @@ export default function BookerPage() {
                 });
                 
                 // Prevent unhandled rejection if Google Maps fails after our timeout
-                directionsPromise.catch(e => console.warn("Google Maps Promise rejected:", e));
+                directionsPromise.catch(e => {
+                    // Suppress error in console for timeout/invalid keys
+                });
 
                 const result = await Promise.race([
                     directionsPromise,
@@ -174,14 +174,12 @@ export default function BookerPage() {
                 }
             }
         } catch (error) {
-            console.warn("Google Maps Distance failed, falling back to server-side calculation.", error);
+            // Fall back to server-side calculation on failure
         }
 
         try {
-            console.log("[handleGetQuote] Starting fetch to /api/booker");
             const controller = new AbortController();
             const timeoutId = setTimeout(() => {
-                console.warn("[handleGetQuote] Fetch timed out after 8s");
                 controller.abort();
             }, 8000);
 
@@ -203,9 +201,7 @@ export default function BookerPage() {
             });
             clearTimeout(timeoutId);
 
-            console.log("[handleGetQuote] Fetch returned status:", res.status);
             const data = await res.json();
-            console.log("[handleGetQuote] Parsed JSON data:", data);
 
             if (res.ok) {
                 if (data.price !== undefined) {
@@ -223,14 +219,12 @@ export default function BookerPage() {
                 toast.error(data.error || "Failed to calculate quote");
             }
         } catch (e: any) {
-            console.error("[handleGetQuote] Fetch caught error:", e);
             if (e.name === 'AbortError') {
                 toast.error("Request timed out. Please try again.");
             } else {
                 toast.error("An error occurred getting your quote");
             }
         } finally {
-            console.log("[handleGetQuote] Finally block, setting loading to false");
             setLoading(false);
         }
     };
