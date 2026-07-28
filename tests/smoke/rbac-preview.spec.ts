@@ -12,6 +12,8 @@ const DISPATCHER_PASSWORD = process.env.SMOKE_DISPATCHER_PASSWORD;
 const B2B_ADMIN_EMAIL = process.env.SMOKE_B2B_ADMIN_EMAIL;
 const B2B_ADMIN_PASSWORD = process.env.SMOKE_B2B_ADMIN_PASSWORD;
 const DRIVER_JWT = process.env.SMOKE_DRIVER_JWT;
+const LOCKED_TENANT_ADMIN_EMAIL = process.env.SMOKE_LOCKED_TENANT_ADMIN_EMAIL;
+const LOCKED_TENANT_ADMIN_PASSWORD = process.env.SMOKE_LOCKED_TENANT_ADMIN_PASSWORD;
 const TENANT_SLUG = process.env.SMOKE_TENANT_SLUG || 'bourneend';
 const VERCEL_AUTOMATION_BYPASS_SECRET = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
@@ -181,6 +183,40 @@ test.describe('Automated RBAC Smoke Tests', () => {
       }
     });
     expect([401, 403]).toContain(response.status());
+  });
+
+  // --- LOCKED TENANT Tests ---
+  test('12. Locked tenant admin can log in and sees Platform Access Suspended overlay', async ({ page }) => {
+    test.skip(!LOCKED_TENANT_ADMIN_EMAIL || !LOCKED_TENANT_ADMIN_PASSWORD, 'Missing Locked Tenant credentials');
+    await login(page, LOCKED_TENANT_ADMIN_EMAIL, LOCKED_TENANT_ADMIN_PASSWORD);
+    
+    // They should be able to log in and land on the dashboard
+    expect(page.url()).toContain('/dashboard');
+    
+    // The overlay should be present
+    await expect(page.locator('body')).toContainText(/Platform Access Suspended/i);
+  });
+
+  test('13. Locked tenant admin direct GET /api/jobs returns 403', async ({ page, request }) => {
+    test.skip(!LOCKED_TENANT_ADMIN_EMAIL || !LOCKED_TENANT_ADMIN_PASSWORD, 'Missing Locked Tenant credentials');
+    await login(page, LOCKED_TENANT_ADMIN_EMAIL, LOCKED_TENANT_ADMIN_PASSWORD);
+    
+    const response = await request.get('/api/jobs');
+    expect(response.status()).toBe(403);
+    
+    const data = await response.json().catch(() => ({}));
+    expect(data.error).toMatch(/Tenant is locked/i);
+  });
+
+  test('14. Locked tenant direct GET /api/dispatch/heatmap returns 403', async ({ page, request }) => {
+    test.skip(!LOCKED_TENANT_ADMIN_EMAIL || !LOCKED_TENANT_ADMIN_PASSWORD, 'Missing Locked Tenant credentials');
+    await login(page, LOCKED_TENANT_ADMIN_EMAIL, LOCKED_TENANT_ADMIN_PASSWORD);
+    
+    const response = await request.get('/api/dispatch/heatmap');
+    expect(response.status()).toBe(403);
+    
+    const data = await response.json().catch(() => ({}));
+    expect(data.error).toMatch(/Tenant is locked/i);
   });
 
 });

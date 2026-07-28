@@ -28,10 +28,7 @@ export async function requireActiveTenant(operationType: 'READ' | 'WRITE' = 'WRI
     }
 
     if (tenant.subscriptionStatus !== 'ACTIVE' && tenant.subscriptionStatus !== 'TRIALING') {
-        // Read operations might be permitted for PAST_DUE or CANCELED, but writes are blocked if locked out
-        if (operationType === 'WRITE') {
-            return { error: NextResponse.json({ error: "Tenant is locked. Please update subscription." }, { status: 403 }) }
-        }
+        return { error: NextResponse.json({ error: "Tenant is locked. Please update subscription." }, { status: 403 }) }
     }
 
     return { session }
