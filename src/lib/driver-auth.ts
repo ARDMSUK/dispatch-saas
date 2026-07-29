@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { prisma } from '@/lib/prisma';
 
 const SECRET_KEY = process.env.AUTH_SECRET || 'dev-secret-key-change-me';
 const key = new TextEncoder().encode(SECRET_KEY);
@@ -21,7 +22,20 @@ export async function signDriverToken(payload: DriverTokenPayload): Promise<stri
 export async function verifyDriverToken(token: string): Promise<DriverTokenPayload | null> {
     try {
         const { payload } = await jwtVerify(token, key);
-        return payload as unknown as DriverTokenPayload;
+        const driverPayload = payload as unknown as DriverTokenPayload;
+        
+        if (!driverPayload.tenantId) return null;
+
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: driverPayload.tenantId },
+            select: { subscriptionStatus: true }
+        });
+
+        if (!tenant || (tenant.subscriptionStatus !== 'ACTIVE' && tenant.subscriptionStatus !== 'TRIALING')) {
+            return null; // Return null so the endpoint triggers a 401 Unauthorized
+        }
+
+        return driverPayload;
     } catch (error) {
         return null;
     }
