@@ -87,6 +87,13 @@ export async function PATCH(
             }
         }
 
+        if (paymentStatus && paymentStatus !== jobToCheck.paymentStatus) {
+            const isCashCompletion = status === 'COMPLETED' && jobToCheck.paymentType === 'CASH' && paymentStatus === 'PAID';
+            if (!isCashCompletion) {
+                return NextResponse.json({ error: 'Cannot arbitrarily modify paymentStatus.' }, { status: 400 });
+            }
+        }
+
         if (status === 'COMPLETED' && jobToCheck.paymentStatus === 'UNPAID') {
             if (jobToCheck.paymentType === 'CASH') {
                 if (paymentStatus !== 'PAID') {
@@ -101,6 +108,8 @@ export async function PATCH(
 
         const updateData: any = {
             ...(status && { status }),
+            ...(paymentStatus && { paymentStatus }),
+
             ...(driverId !== undefined && { driverId }), // Allow null
             ...(fare && { fare }),
             ...(validation.data.pickupAddress && { pickupAddress: validation.data.pickupAddress }),
