@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { BookingSchema } from '@/lib/types';
 import { requireB2BAccountScope } from "@/utils/rbac";
-
+import { geocodeAddress } from "@/lib/geocoding";
+import { calculatePrice } from "@/lib/pricing";
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -62,12 +63,31 @@ export async function POST(req: Request) {
 
         const data = validation.data;
 
-        // 1. Resolve coordinates (mocked for speed, normally you'd call Google Maps here)
-        // In a real scenario you'd geocode `pickupAddress` and `dropoffAddress`
-        const pickupLat = 51.5074;
-        const pickupLng = -0.1278;
-        const dropoffLat = 51.5200;
-        const dropoffLng = -0.1500;
+        // 1. Resolve coordinates using actual geocoding
+        const pickupGeocode = await geocodeAddress(data.pickupAddress);
+        const dropoffGeocode = await geocodeAddress(data.dropoffAddress);
+
+        if (!pickupGeocode || !dropoffGeocode) {
+            return NextResponse.json({ error: 'Could not resolve pickup or dropoff address coordinates.' }, { status: 400 });
+        }
+
+        const pickupLat = pickupGeocode.lat;
+        const pickupLng = pickupGeocode.lng;
+        const dropoffLat = dropoffGeocode.lat;
+        const dropoffLng = dropoffGeocode.lng;
+
+        const pricingResult = await calculatePrice({
+            pickup: data.pickupAddress,
+            dropoff: data.dropoffAddress,
+            pickupLat,
+            pickupLng,
+            dropoffLat,
+            dropoffLng,
+            pickupTime: data.pickupTime ? new Date(data.pickupTime) : new Date(),
+            vehicleType: "Saloon",
+            companyId: tenantId as string,
+        });
+
 
         // 2. Fetch Account for customer reference
         const account = await prisma.account.findFirst({
@@ -125,9 +145,9 @@ export async function POST(req: Request) {
                 tenantId: tenantId as string,
                 accountId: account.id,
                 customerId,
-                // Default Pricing info (could be calculated via pricing engine)
-                isFixedPrice: false,
-                fare: 0,
+                // Pricing info
+                isFixedPrice: pricingResult.breakdown.isFixed,
+                fare: pricingResult.price,
                 waitingTime: 0,
                 waitingCost: 0
             }

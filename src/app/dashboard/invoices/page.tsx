@@ -266,15 +266,45 @@ export default function InvoicesPage() {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-slate-500 hover:text-slate-900"
-                                                title="View PDF"
-                                                onClick={() => window.open(`/shared/invoice/${inv.id}`, '_blank')}
-                                            >
-                                                <ExternalLink className="w-4 h-4" />
-                                            </Button>
+                                            <div className="flex items-center gap-2 justify-end">
+                                                {inv.status !== 'PAID' && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                                                        onClick={async () => {
+                                                            if (!confirm('Mark this invoice as PAID?')) return;
+                                                            try {
+                                                                const res = await fetch(`/api/invoices/${inv.id}`, {
+                                                                    method: 'PATCH',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ status: 'PAID' })
+                                                                });
+                                                                if (res.ok) {
+                                                                    fetchData();
+                                                                } else {
+                                                                    const err = await res.json();
+                                                                    alert(err.error || 'Failed to update status');
+                                                                }
+                                                            } catch (e) {
+                                                                console.error(e);
+                                                                alert('Network error');
+                                                            }
+                                                        }}
+                                                    >
+                                                        Mark Paid
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-slate-500 hover:text-slate-900 shrink-0"
+                                                    title="View PDF"
+                                                    onClick={() => window.open(`/shared/invoice/${inv.id}`, '_blank')}
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))
