@@ -137,6 +137,25 @@ export const EmailService = {
         return this.sendEmail(to, subject, html, companyName === 'us' ? 'CABAI System' : companyName, replyTo);
     },
 
+    async sendInvoiceLink(invoice: any, account: any, orgSettings?: any) {
+        const companyName = orgSettings?.name || 'CABAI System';
+        const replyTo = orgSettings?.email;
+        
+        const invoiceNumber = invoice?.invoiceNumber || 'Pending';
+        const subject = `Invoice ${invoiceNumber} from ${companyName}`;
+        
+        const html = EmailTemplates.invoiceTemplate(invoice, account, orgSettings);
+
+        const to = account?.apEmail || account?.email;
+
+        if (!to) {
+            console.warn(`[EmailService] No email address found for invoice ${invoice.id} for account ${account.name}`);
+            return { success: false, error: 'No invoice email address found for account' };
+        }
+
+        return this.sendEmail(to, subject, html, companyName, replyTo);
+    },
+
     async sendEmail(to: string, subject: string, html: string, companyName: string = 'CABAI System', replyTo?: string) {
         if (RESEND_API_KEY) {
             // Real Sending Logic

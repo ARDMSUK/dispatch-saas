@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { FileText, Plus, ExternalLink, Calculator } from "lucide-react";
+import { FileText, Plus, ExternalLink, Calculator, Send } from "lucide-react";
 import { Account, Job } from "@/lib/types";
 import { useSession } from "next-auth/react";
 
@@ -37,6 +37,7 @@ export default function InvoicesPage() {
     const [unbilledJobs, setUnbilledJobs] = useState<Job[]>([]);
     const [selectedJobs, setSelectedJobs] = useState<number[]>([]);
     const [generating, setGenerating] = useState(false);
+    const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
     const fetchData = async () => {
         try {
@@ -297,6 +298,42 @@ export default function InvoicesPage() {
                                                         Mark Paid
                                                     </Button>
                                                 )}
+                                                
+                                                {session?.user?.role && ['SUPER_ADMIN', 'ADMIN', 'TENANT_ADMIN', 'OWNER'].includes(session.user.role) && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                                                        disabled={sendingInvoiceId === inv.id}
+                                                        onClick={async () => {
+                                                            if (!inv.account?.apEmail && !inv.account?.email) {
+                                                                alert('This account has no email or AP Email configured.');
+                                                                return;
+                                                            }
+                                                            if (!confirm(`Send invoice to ${inv.account?.apEmail || inv.account?.email}?`)) return;
+                                                            setSendingInvoiceId(inv.id);
+                                                            try {
+                                                                const res = await fetch(`/api/invoices/${inv.id}/send`, {
+                                                                    method: 'POST',
+                                                                });
+                                                                const data = await res.json();
+                                                                if (res.ok) {
+                                                                    alert(data.message || 'Invoice sent successfully');
+                                                                } else {
+                                                                    alert(`Failed to send invoice: ${data.error}`);
+                                                                }
+                                                            } catch (e) {
+                                                                console.error(e);
+                                                                alert('Network error while sending invoice');
+                                                            } finally {
+                                                                setSendingInvoiceId(null);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {sendingInvoiceId === inv.id ? 'Sending...' : <><Send className="w-3 h-3 mr-1" /> Send</>}
+                                                    </Button>
+                                                )}
+
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"

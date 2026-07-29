@@ -586,5 +586,57 @@ export const EmailTemplates = {
     `;
 
     return BaseEmailLayout(contentHtml, orgSettings, "Booking Cancelled");
+  },
+
+  invoiceTemplate: (invoice: any, account: any, orgSettings: any = {}) => {
+    const isLegacy = typeof orgSettings === 'string';
+    const brandColor = isLegacy ? '#10b981' : (orgSettings?.brandColor || '#f59e0b');
+    const safeBrandColor = brandColor.startsWith('#') ? brandColor : '#f59e0b';
+    const companyName = isLegacy ? orgSettings : (orgSettings?.name || 'Our Service');
+    const invoiceNumber = invoice?.invoiceNumber || 'Pending';
+    const totalAmount = formatPrice(invoice?.total);
+    const invoiceStatus = invoice?.status || 'ISSUED';
+    const accountName = account?.name || 'Account Customer';
+    
+    // Secure link. 
+    // Assumes the application routes this via /b2b/invoices/[id]/shared or similar
+    const invoiceLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/b2b/invoices/${invoice.id}/shared`;
+
+    const contentHtml = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="display: inline-block; background-color: #e0e7ff; color: #4338ca; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px;">📄 Invoice ${invoiceStatus}</span>
+        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px;">Invoice: ${invoiceNumber}</h2>
+        <p style="margin: 0; color: #666666; font-size: 16px;">Dear ${accountName}, please find your invoice from ${companyName} below.</p>
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 25px;">
+        <tr>
+          <td style="padding: 15px; background-color: #f9fafb; text-align: center;">
+            <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Total Due</strong><br/>
+            <span style="color: #333333; font-size: 28px; font-weight: bold;">${totalAmount}</span>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <a href="${invoiceLink}" style="background-color: ${safeBrandColor}; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">
+          View Invoice
+        </a>
+      </div>
+      
+      <div style="text-align: center; margin-bottom: 20px;">
+        <p style="margin: 0; color: #666666; font-size: 14px;">
+          Please review and process payment according to the agreed account terms.
+        </p>
+      </div>
+
+      <div style="text-align: center;">
+        <p style="margin: 0; color: #9ca3af; font-size: 14px; word-break: break-all;">
+          Or use this link: <a href="${invoiceLink}" style="color: ${safeBrandColor};">${invoiceLink}</a>
+        </p>
+      </div>
+    `;
+
+    return BaseEmailLayout(contentHtml, orgSettings, `Invoice ${invoiceNumber}`);
   }
 };
