@@ -69,7 +69,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     try {
         const session = await auth();
         
-        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'TENANT_ADMIN', 'OWNER', 'DISPATCHER'];
+        // Removed DISPATCHER to restrict invoice-paid actions to financial/admin roles
+        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'TENANT_ADMIN', 'OWNER'];
         if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized or insufficient privileges' }, { status: 403 });
         }

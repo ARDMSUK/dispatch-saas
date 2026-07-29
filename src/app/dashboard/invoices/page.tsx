@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { format } from "date-fns";
 import { FileText, Plus, ExternalLink, Calculator } from "lucide-react";
 import { Account, Job } from "@/lib/types";
+import { useSession } from "next-auth/react";
 
 // Extends types locally since the schema was just built
 interface Invoice {
@@ -25,6 +26,7 @@ interface Invoice {
 }
 
 export default function InvoicesPage() {
+    const { data: session } = useSession();
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
@@ -267,7 +269,7 @@ export default function InvoicesPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2 justify-end">
-                                                {inv.status !== 'PAID' && (
+                                                {inv.status !== 'PAID' && session?.user?.role !== 'DISPATCHER' && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
