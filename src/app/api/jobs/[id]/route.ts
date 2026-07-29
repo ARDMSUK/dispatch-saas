@@ -36,6 +36,7 @@ const UpdateJobSchema = z.object({
     flightNumber: z.string().optional().nullable(),
     preAssignedDriverId: z.string().optional().nullable(),
     paymentStatus: z.enum(["UNPAID", "AUTHORIZED", "PAID"]).optional(),
+    completeUnpaid: z.boolean().optional(),
 });
 
 import { requireSuperAdmin, requireTenantAdmin, requireDispatcher, requireB2BAccountScope } from "@/utils/rbac";
@@ -58,7 +59,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Invalid data', details: validation.error }, { status: 400 });
         }
 
-        const { status, driverId, fare } = validation.data;
+        const { status, driverId, fare, completeUnpaid, paymentStatus } = validation.data;
         const { id } = await params;
         const jobId = parseInt(id);
 
@@ -83,6 +84,18 @@ export async function PATCH(
             const driverToCheck = await prisma.driver.findUnique({ where: { id: driverId } });
             if (!driverToCheck || (driverToCheck.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
                 return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
+            }
+        }
+
+        if (status === 'COMPLETED' && jobToCheck.paymentStatus === 'UNPAID') {
+            if (jobToCheck.paymentType === 'CASH') {
+                if (paymentStatus !== 'PAID') {
+                    return NextResponse.json({ error: 'CASH jobs require confirmation that cash was collected (paymentStatus: PAID) before completion' }, { status: 400 });
+                }
+            } else if (jobToCheck.paymentType === 'CARD' || jobToCheck.paymentType === 'ACCOUNT') {
+                if (!completeUnpaid) {
+                    return NextResponse.json({ error: 'Explicit office authorisation (completeUnpaid) required to complete unpaid CARD/ACCOUNT jobs' }, { status: 400 });
+                }
             }
         }
 
