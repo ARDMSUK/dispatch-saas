@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { Account } from "@/lib/types";
-import { Printer } from "lucide-react";
+import { Printer, CreditCard, AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface InvoiceData {
     id: string;
@@ -26,8 +26,13 @@ interface InvoiceData {
 
 export default function InvoiceViewer() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const [invoice, setInvoice] = useState<InvoiceData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [paying, setPaying] = useState(false);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
+
+    const paymentStatus = searchParams?.get("payment");
 
     useEffect(() => {
         const fetchInvoice = async () => {
@@ -46,6 +51,28 @@ export default function InvoiceViewer() {
         fetchInvoice();
     }, [params?.token]);
 
+    const handlePayment = async () => {
+        if (!params?.token) return;
+        setPaying(true);
+        setPaymentError(null);
+        try {
+            const res = await fetch(`/api/public/invoices/${params.token}/payment-link`, {
+                method: "POST",
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.url) {
+                window.location.href = data.url;
+            } else {
+                setPaymentError(data.error || "Failed to generate payment link.");
+                setPaying(false);
+            }
+        } catch (e) {
+            setPaymentError("An unexpected error occurred. Please try again.");
+            setPaying(false);
+        }
+    };
+
     if (loading) {
         return <div className="p-20 text-center font-sans">Loading invoice document...</div>;
     }
@@ -55,15 +82,56 @@ export default function InvoiceViewer() {
     }
 
     const { tenant, account, jobs } = invoice;
+    const canPay = (invoice.status === 'ISSUED' || invoice.status === 'OVERDUE') && invoice.total > 0;
 
     return (
         <div className="min-h-screen bg-neutral-100 font-sans text-neutral-900 py-10 print:py-0 print:bg-white flex flex-col items-center">
 
+            {/* Notification Area */}
+            {paymentStatus === "success" && (
+                <div className="w-full max-w-4xl mb-6 px-4 print:hidden">
+                    <div className="bg-emerald-50 text-emerald-800 p-4 rounded-md border border-emerald-200 flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                        <p>Payment submitted. This invoice will update once payment confirmation is received.</p>
+                    </div>
+                </div>
+            )}
+            
+            {paymentStatus === "cancelled" && (
+                <div className="w-full max-w-4xl mb-6 px-4 print:hidden">
+                    <div className="bg-amber-50 text-amber-800 p-4 rounded-md border border-amber-200 flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                        <p>Payment was cancelled. You can try again when you are ready.</p>
+                    </div>
+                </div>
+            )}
+
+            {paymentError && (
+                <div className="w-full max-w-4xl mb-6 px-4 print:hidden">
+                    <div className="bg-red-50 text-red-800 p-4 rounded-md border border-red-200 flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-600" />
+                        <p>{paymentError}</p>
+                    </div>
+                </div>
+            )}
+
             {/* Control Bar (Hidden on Print) */}
-            <div className="w-full max-w-4xl flex justify-end mb-6 print:hidden px-4">
+            <div className="w-full max-w-4xl flex justify-between mb-6 print:hidden px-4">
+                <div>
+                    {canPay && (
+                        <button
+                            onClick={handlePayment}
+                            disabled={paying}
+                            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-md shadow transition disabled:opacity-50"
+                        >
+                            <CreditCard className="w-4 h-4" /> 
+                            {paying ? "Preparing..." : "Pay by Card"}
+                        </button>
+                    )}
+                </div>
                 <button
                     onClick={() => window.print()}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-slate-900 px-4 py-2 rounded-md shadow transition"
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-md shadow transition"
                 >
                     <Printer className="w-4 h-4" /> Print / Save PDF
                 </button>
@@ -73,7 +141,7 @@ export default function InvoiceViewer() {
             <div className="w-full max-w-4xl bg-white shadow-2xl print:shadow-none print:w-full sm:rounded-lg overflow-hidden border border-neutral-200">
 
                 {/* Header Banner */}
-                <div className="bg-neutral-900 text-slate-900 p-8 sm:p-12 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div className="bg-neutral-900 text-slate-100 p-8 sm:p-12 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <div>
                         <h1 className="text-3xl font-black mb-1 tracking-tight uppercase">INVOICE</h1>
                         <p className="text-neutral-400 font-mono text-sm">{invoice.invoiceNumber}</p>
