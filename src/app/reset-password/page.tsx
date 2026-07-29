@@ -8,7 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Car, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Car, AlertTriangle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -27,6 +27,8 @@ function ResetPasswordForm() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -87,23 +89,43 @@ function ResetPasswordForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
                 <label className="text-sm font-medium">New Password</label>
-                <Input
-                    type="password"
-                    {...register("password")}
-                    placeholder="••••••••"
-                    className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400"
-                />
+                <div className="relative">
+                    <Input
+                        type={showPassword ? "text" : "password"}
+                        {...register("password")}
+                        placeholder="••••••••"
+                        className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400 pr-10"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        tabIndex={-1}
+                    >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                </div>
                 {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
             </div>
 
             <div className="space-y-2">
                 <label className="text-sm font-medium">Confirm Password</label>
-                <Input
-                    type="password"
-                    {...register("confirmPassword")}
-                    placeholder="••••••••"
-                    className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400"
-                />
+                <div className="relative">
+                    <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        {...register("confirmPassword")}
+                        placeholder="••••••••"
+                        className="bg-slate-100 border-slate-200 text-slate-900 focus:ring-yellow-400 focus:border-yellow-400 pr-10"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        tabIndex={-1}
+                    >
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                </div>
                 {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
             </div>
 

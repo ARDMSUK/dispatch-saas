@@ -7,7 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { Car, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { Car, CheckCircle2, ShieldCheck, Zap, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -21,6 +21,7 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showTwoFactor, setShowTwoFactor] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -97,12 +98,22 @@ export default function LoginPage() {
                                         <label className="text-sm font-bold text-slate-700">Password</label>
                                         <Link href="/forgot-password" className="text-xs font-semibold text-blue-500 hover:text-indigo-600">Forgot password?</Link>
                                     </div>
-                                    <Input
-                                        type="password"
-                                        {...register("password")}
-                                        placeholder="••••••••"
-                                        className="h-12 bg-slate-50 border-slate-200 text-slate-900 focus:ring-slate-900 focus:border-slate-900"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            type={showPassword ? "text" : "password"}
+                                            {...register("password")}
+                                            placeholder="••••••••"
+                                            className="h-12 bg-slate-50 border-slate-200 text-slate-900 focus:ring-slate-900 focus:border-slate-900 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                            tabIndex={-1}
+                                        >
+                                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                        </button>
+                                    </div>
                                     {errors.password && <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>}
                                 </div>
                             </>
