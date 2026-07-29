@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { EmailService } from '@/lib/email-service';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             return NextResponse.json({ error: 'Invoice not found or does not belong to your tenant' }, { status: 404 });
         }
 
+        if (invoice.status === 'CANCELLED') {
+            return NextResponse.json({ error: 'Cannot send a cancelled invoice' }, { status: 400 });
+        }
+
         if (!invoice.account) {
             return NextResponse.json({ error: 'Invoice is not linked to an account' }, { status: 400 });
         }
@@ -41,21 +46,57 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             return NextResponse.json({ error: 'No Accounts Payable or primary email configured for this account' }, { status: 400 });
         }
 
+        // Generate token and expiry
+        const invoiceShareToken = crypto.randomBytes(32).toString('hex');
+        const invoiceShareTokenExpiresAt = new Date();
+        invoiceShareTokenExpiresAt.setDate(invoiceShareTokenExpiresAt.getDate() + 90); // 90 days expiry
+        const now = new Date();
+
+        // Determine new status
+        let newStatus = invoice.status;
+        if (invoice.status === 'DRAFT' || invoice.status === 'UNBILLED') { // Handle UNBILLED just in case it exists in the enum
+            newStatus = 'ISSUED';
+        }
+
+        // Update invoice
+        const updatedInvoice = await prisma.invoice.update({
+            where: { id: invoice.id },
+            data: {
+                status: newStatus as any,
+                invoiceShareToken,
+                invoiceShareTokenExpiresAt,
+                invoiceLastSentAt: now,
+                invoiceSentTo: targetEmail,
+            }
+        });
+
         // Email Service sending
         const orgSettings = {
             name: invoice.tenant.name,
             email: invoice.tenant.email,
         };
 
-        const emailResult = await EmailService.sendInvoiceLink(invoice, invoice.account, orgSettings);
+        const emailResult = await EmailService.sendInvoiceLink(updatedInvoice, invoice.account, orgSettings);
 
         if (!emailResult.success) {
             console.error('Email failed to send:', emailResult.error);
             return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
         }
 
-        // Add an audit log entry if applicable (assuming we have one in the future, currently we just log)
-        console.log(`[Audit] User ${session.user.id} (${session.user.role}) sent invoice ${invoice.invoiceNumber} to ${targetEmail}`);
+        // Audit Log
+        const { logAuditEvent } = await import('@/lib/audit-logger');
+        await logAuditEvent({
+            tenantId: invoice.tenantId,
+            userId: session.user.id,
+            action: 'INVOICE_SENT',
+            resource: 'INVOICE',
+            resourceId: invoice.id,
+            details: {
+                invoiceId: invoice.id,
+                invoiceNumber: invoice.invoiceNumber,
+                sentTo: targetEmail,
+            },
+        });
 
         return NextResponse.json({ 
             success: true, 

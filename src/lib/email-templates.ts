@@ -598,9 +598,9 @@ export const EmailTemplates = {
     const invoiceStatus = invoice?.status || 'ISSUED';
     const accountName = account?.name || 'Account Customer';
     
-    // Secure link. 
-    // Assumes the application routes this via /b2b/invoices/[id]/shared or similar
-    const invoiceLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/b2b/invoices/${invoice.id}/shared`;
+    // Secure tokenized link
+    const token = invoice?.invoiceShareToken || 'invalid-token';
+    const invoiceLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cabai.co.uk'}/invoice/${token}`;
 
     const contentHtml = `
       <div style="text-align: center; margin-bottom: 20px;">
@@ -626,7 +626,7 @@ export const EmailTemplates = {
       
       <div style="text-align: center; margin-bottom: 20px;">
         <p style="margin: 0; color: #666666; font-size: 14px;">
-          Please review and process payment according to the agreed account terms.
+          Please review this invoice using the secure link below.
         </p>
       </div>
 

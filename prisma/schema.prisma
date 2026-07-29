@@ -662,6 +662,12 @@ model Invoice {
   @@unique([tenantId, invoiceNumber])
   @@map("invoices")
   @@schema("public")
+
+  // Tokenized Links
+  invoiceShareToken          String?   @unique
+  invoiceShareTokenExpiresAt DateTime?
+  invoiceLastSentAt          DateTime?
+  invoiceSentTo              String?
 }
 
 model Ticket {
