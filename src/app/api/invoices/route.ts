@@ -10,8 +10,8 @@ export async function POST(req: Request) {
         const session = await auth();
     const { error: rbacError } = await requireDispatcher();
     if (rbacError) return rbacError;
-        // Route restricted to internal dispatchers only
-        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'];
+        // Route restricted to financial and administrative roles
+        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'TENANT_ADMIN', 'OWNER'];
         if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -106,7 +106,7 @@ export async function GET() {
         const session = await auth();
     const { error: rbacError } = await requireDispatcher();
     if (rbacError) return rbacError;
-        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'DISPATCHER'];
+        const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'TENANT_ADMIN', 'OWNER'];
         if (!session?.user?.tenantId || !allowedRoles.includes(session.user.role)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
