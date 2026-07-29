@@ -668,6 +668,15 @@ model Invoice {
   invoiceShareTokenExpiresAt DateTime?
   invoiceLastSentAt          DateTime?
   invoiceSentTo              String?
+
+  // Stripe Payment Tracking
+  paymentProvider         String?
+  paymentReferenceId      String?
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?
+  paymentLink             String?
+  paymentLinkExpiresAt    DateTime?
+  paidAt                  DateTime?
 }
 
 model Ticket {
