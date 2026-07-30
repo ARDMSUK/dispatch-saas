@@ -119,6 +119,77 @@ export async function POST(req: NextRequest) {
                     });
                     console.log(`✅ Activated subscription for Tenant ${session.metadata.tenantId} on ${billingInterval}ly cycle`);
                 } 
+                // 3. Invoice Payment Classification
+                else if (session.metadata?.paymentType === "invoice_payment") {
+                    try {
+                        const invoiceId = session.metadata.invoiceId;
+                        const tenantId = session.metadata.tenantId;
+                        const accountId = session.metadata.accountId;
+
+                        if (!invoiceId || !tenantId || !accountId) {
+                            console.warn(`[Webhook] Invoice payment invalid metadata. session: ${session.id}`);
+                            break;
+                        }
+
+                        const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
+                        if (!invoice) {
+                            console.warn(`[Webhook] Invoice ${invoiceId} not found.`);
+                            break;
+                        }
+
+                        if (invoice.tenantId !== tenantId || invoice.accountId !== accountId) {
+                            console.warn(`[Webhook] Invoice ${invoiceId} tenant/account mismatch.`);
+                            break;
+                        }
+
+                        if (invoice.status === 'CANCELLED') {
+                            console.warn(`[Webhook] Invoice ${invoiceId} is CANCELLED. Refusing to mark as PAID.`);
+                            break;
+                        }
+
+                        if (invoice.status === 'PAID') {
+                            console.log(`[Webhook] Invoice ${invoiceId} already paid. Skipping duplicate side effects.`);
+                            break;
+                        }
+
+                        const expectedAmount = Math.round((invoice.total || 0) * 100);
+                        if (session.amount_total !== expectedAmount) {
+                            console.warn(`[Webhook] Amount mismatch for Invoice ${invoice.id}. Expected ${expectedAmount}, got ${session.amount_total}.`);
+                            break;
+                        }
+
+                        await prisma.invoice.update({
+                            where: { id: invoice.id },
+                            data: {
+                                status: 'PAID',
+                                paidAt: new Date(),
+                                paymentProvider: 'STRIPE',
+                                paymentReferenceId: (session.payment_intent as string) || session.id,
+                                stripePaymentIntentId: (session.payment_intent as string) || undefined,
+                                stripeCheckoutSessionId: session.id
+                            }
+                        });
+
+                        await prisma.job.updateMany({
+                            where: { invoiceId: invoice.id },
+                            data: { paymentStatus: 'PAID' }
+                        });
+
+                        await prisma.auditLog.create({
+                            data: {
+                                tenantId: invoice.tenantId,
+                                action: 'INVOICE_PAID',
+                                resource: 'INVOICE',
+                                resourceId: invoice.id,
+                                details: { message: `Invoice marked PAID via Stripe webhook (Session ${session.id})` }
+                            }
+                        });
+
+                        console.log(`✅ [Webhook] Marked Invoice ${invoice.id} as PAID`);
+                    } catch (err: any) {
+                        console.error(`[Webhook] Error processing invoice payment ${session.id}:`, err);
+                    }
+                }
                 // 3. Ambiguous session
                 else if (session.metadata?.tenantId) {
                     console.warn(`[Webhook] Ambiguous session for tenant ${session.metadata.tenantId}. No jobId, and not a clear subscription checkout.`);
