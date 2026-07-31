@@ -26,6 +26,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const status = searchParams.get('status'); // Optional filter
         const search = searchParams.get('search'); // Search query
+        const includeContracts = searchParams.get('includeContracts') === 'true'; // Allow school jobs
 
         const cleanedSearch = search ? search.trim().replace(/^#/, '') : '';
         const numericSearch = Number(cleanedSearch);
@@ -42,7 +43,7 @@ export async function GET(req: Request) {
         const jobs = await prisma.job.findMany({
             where: {
                 tenantId,
-                contractRouteId: null, // Filter out school contract jobs
+                ...(includeContracts ? {} : { contractRouteId: null }), // Filter out school contract jobs by default
                 ...(status && !search ? { status: status.toUpperCase() } : {}),
                 ...(search ? {
                     OR: [
@@ -83,6 +84,7 @@ export async function GET(req: Request) {
                 paymentLink: true,
                 paymentProvider: true,
                 paymentReferenceId: true,
+                contractRouteId: true,
                 customer: {
                     select: {
                         name: true,

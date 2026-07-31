@@ -9,14 +9,15 @@ import { toast } from 'sonner';
 export default function BookingsPage() {
     const [jobs, setJobs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [includeContracts, setIncludeContracts] = useState(false);
 
     useEffect(() => {
         fetchJobs();
-    }, []);
+    }, [includeContracts]);
 
     const fetchJobs = async () => {
         try {
-            const res = await fetch('/api/jobs');
+            const res = await fetch(`/api/jobs${includeContracts ? '?includeContracts=true' : ''}`);
             if (res.ok) {
                 const data = await res.json();
                 setJobs(data);
@@ -59,9 +60,20 @@ export default function BookingsPage() {
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">All Bookings</h1>
                     <p className="text-slate-500 mt-1">Manage and view all recent system bookings.</p>
                 </div>
-                <Button variant="outline" onClick={fetchJobs} className="border-slate-200 text-slate-900 hover:bg-slate-200">
-                    Refresh List
-                </Button>
+                <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700">
+                        <input 
+                            type="checkbox" 
+                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 h-4 w-4"
+                            checked={includeContracts}
+                            onChange={(e) => setIncludeContracts(e.target.checked)}
+                        />
+                        Show School Jobs
+                    </label>
+                    <Button variant="outline" onClick={fetchJobs} className="border-slate-200 text-slate-900 hover:bg-slate-200">
+                        Refresh List
+                    </Button>
+                </div>
             </div>
 
             <div className="flex-1 overflow-auto rounded-xl border border-slate-200 bg-slate-100">
@@ -124,6 +136,11 @@ export default function BookingsPage() {
                                         {job.returnBooking && (
                                             <Badge variant="outline" className="mt-2 text-[10px] border-indigo-600/30 text-blue-500 bg-indigo-600/5 block w-fit">
                                                 Return Trip
+                                            </Badge>
+                                        )}
+                                        {job.contractRouteId && (
+                                            <Badge variant="outline" className="mt-2 text-[10px] border-emerald-600/30 text-emerald-600 bg-emerald-600/5 block w-fit">
+                                                School
                                             </Badge>
                                         )}
                                     </td>
