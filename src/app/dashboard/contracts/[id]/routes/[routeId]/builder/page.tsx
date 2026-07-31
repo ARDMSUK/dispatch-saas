@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Save, ArrowLeft, MapPin, Users, Settings2, PlusCircle, Trash2 } from "lucide-react";
+import { Save, ArrowLeft, MapPin, Users, Settings2, PlusCircle, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 export default function RouteBuilderPage() {
@@ -27,6 +27,11 @@ export default function RouteBuilderPage() {
     const [newStudentName, setNewStudentName] = useState("");
     const [newStudentNotes, setNewStudentNotes] = useState("");
     const [newStudentPhone, setNewStudentPhone] = useState("");
+
+    // Generation State
+    const [generationDate, setGenerationDate] = useState("");
+    const [generatingJob, setGeneratingJob] = useState(false);
+    const [generationMessage, setGenerationMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
 
     const fetchRoute = async () => {
         try {
@@ -168,6 +173,43 @@ export default function RouteBuilderPage() {
         }
     };
 
+    const handleGenerateJob = async () => {
+        if (!generationDate) {
+            setGenerationMessage({ type: "error", text: "Please select a date first." });
+            return;
+        }
+        
+        setGeneratingJob(true);
+        setGenerationMessage(null);
+        
+        try {
+            const res = await fetch('/api/internal/contracts/generate-single', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contractRouteId: route.id,
+                    targetDate: generationDate
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (res.status === 409) {
+                setGenerationMessage({ type: "error", text: "A job already exists for this route on this date." });
+            } else if (!res.ok) {
+                setGenerationMessage({ type: "error", text: data.error || "Failed to generate job." });
+            } else {
+                setGenerationMessage({ type: "success", text: `Job created successfully: #${data.id}. Open Dispatch and enable Show School Jobs to view it.` });
+                setGenerationDate("");
+            }
+        } catch (error) {
+            console.error(error);
+            setGenerationMessage({ type: "error", text: "An unexpected error occurred." });
+        } finally {
+            setGeneratingJob(false);
+        }
+    };
+
     if (loading) return <div className="p-10 text-slate-500">Loading Route Builder...</div>;
     if (!route) return <div className="p-10 text-red-500">Route not found</div>;
 
@@ -198,6 +240,9 @@ export default function RouteBuilderPage() {
                     </TabsTrigger>
                     <TabsTrigger value="settings" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none px-6 text-sm">
                         <Settings2 className="w-4 h-4 mr-2" /> Constraints & Config
+                    </TabsTrigger>
+                    <TabsTrigger value="dispatch" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none px-6 text-sm">
+                        <Calendar className="w-4 h-4 mr-2" /> Job Generation
                     </TabsTrigger>
                 </TabsList>
 
@@ -390,6 +435,46 @@ export default function RouteBuilderPage() {
                                     checked={route.requiresPa || false}
                                     onCheckedChange={checked => setRoute({ ...route, requiresPa: checked })}
                                 />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* DISPATCH / GENERATION TAB */}
+                <TabsContent value="dispatch" className="space-y-6">
+                    <Card className="border-slate-200 shadow-sm max-w-2xl">
+                        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                            <CardTitle className="text-lg">Single Job Generation</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                            <div className="space-y-2">
+                                <p className="text-sm text-slate-600">
+                                    Generate one dispatch job from this school route for the selected date.
+                                </p>
+                            </div>
+                            <div className="space-y-2 max-w-sm">
+                                <label className="text-sm font-semibold text-slate-600">Target Date</label>
+                                <Input 
+                                    type="date" 
+                                    value={generationDate} 
+                                    onChange={e => setGenerationDate(e.target.value)} 
+                                />
+                            </div>
+                            
+                            {generationMessage && (
+                                <div className={`p-4 rounded-md text-sm border ${generationMessage.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
+                                    {generationMessage.text}
+                                </div>
+                            )}
+
+                            <div className="pt-2 border-t border-slate-100">
+                                <Button 
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white" 
+                                    onClick={handleGenerateJob}
+                                    disabled={generatingJob || !generationDate}
+                                >
+                                    {generatingJob ? "Generating..." : "Generate Job"}
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
