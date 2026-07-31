@@ -82,7 +82,7 @@ export default function InvoiceViewer() {
     }
 
     const { tenant, account, jobs } = invoice;
-    const canPay = (invoice.status === 'ISSUED' || invoice.status === 'OVERDUE') && invoice.total > 0;
+    const canPay = false; // Temporarily disabled pending multi-tenant Stripe webhook architecture
 
     return (
         <div className="min-h-screen bg-neutral-100 font-sans text-neutral-900 py-10 print:py-0 print:bg-white flex flex-col items-center">
