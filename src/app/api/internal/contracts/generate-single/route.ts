@@ -56,6 +56,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Contract is missing linked accountId' }, { status: 400 });
         }
 
+        if (route.agreedPrice === null || route.agreedPrice === undefined) {
+            return NextResponse.json({ error: 'Route agreed price is required before generating a school job.' }, { status: 400 });
+        }
+
         // Duplicate Check
         const existingJob = await prisma.job.findFirst({
             where: {
@@ -137,7 +141,7 @@ export async function POST(req: Request) {
                 luggage: 0,
                 vehicleType: route.requiresWav ? 'WAV' : 'Saloon',
                 requiresWav: route.requiresWav,
-                fare: 0.00,
+                fare: route.agreedPrice,
                 isFixedPrice: true
             }
         });

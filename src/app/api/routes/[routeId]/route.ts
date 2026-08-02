@@ -43,7 +43,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ routeI
 
         const routeId = (await params).routeId;
         const body = await req.json();
-        const { name, routeNumber, requiresWav, requiresPa, requiredDriverGender, requiredPaGender, defaultDriverId, defaultPaId } = body;
+        const { name, routeNumber, requiresWav, requiresPa, requiredDriverGender, requiredPaGender, defaultDriverId, defaultPaId, agreedPrice } = body;
 
         // Verify route belongs to tenant
         const route = await prisma.contractRoute.findUnique({
@@ -66,6 +66,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ routeI
                 requiredPaGender: requiredPaGender !== undefined ? requiredPaGender : undefined,
                 defaultDriverId: defaultDriverId !== undefined ? defaultDriverId : undefined,
                 defaultPaId: defaultPaId !== undefined ? defaultPaId : undefined,
+                agreedPrice: agreedPrice !== undefined ? agreedPrice : undefined,
             }
         });
 

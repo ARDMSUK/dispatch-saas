@@ -22,6 +22,7 @@ export default function RouteBuilderPage() {
     const [newStopAddress, setNewStopAddress] = useState("");
     const [newStopType, setNewStopType] = useState("PICKUP");
     const [newStopTime, setNewStopTime] = useState("");
+    const [drivers, setDrivers] = useState<any[]>([]);
 
     // Student Manager State
     const [newStudentName, setNewStudentName] = useState("");
@@ -50,8 +51,21 @@ export default function RouteBuilderPage() {
         }
     };
 
+    const fetchDrivers = async () => {
+        try {
+            const res = await fetch('/api/drivers');
+            if (res.ok) {
+                const data = await res.json();
+                setDrivers(data);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchRoute();
+        fetchDrivers();
     }, [params?.id, params?.routeId]);
 
     const handleSaveRoute = async () => {
@@ -65,7 +79,9 @@ export default function RouteBuilderPage() {
                     name: route.name,
                     routeNumber: route.routeNumber,
                     requiresWav: route.requiresWav,
-                    requiresPa: route.requiresPa
+                    requiresPa: route.requiresPa,
+                    agreedPrice: route.agreedPrice !== '' && route.agreedPrice !== null && route.agreedPrice !== undefined ? parseFloat(route.agreedPrice) : null,
+                    defaultDriverId: route.defaultDriverId === 'none' ? null : (route.defaultDriverId || null)
                 })
             });
 
@@ -412,6 +428,30 @@ export default function RouteBuilderPage() {
                                         placeholder="e.g. RTE-100A"
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-600">Route Price (£)</label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={route.agreedPrice === null || route.agreedPrice === undefined ? "" : route.agreedPrice}
+                                        onChange={e => setRoute({ ...route, agreedPrice: e.target.value })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-600">Default Driver</label>
+                                    <select 
+                                        className="w-full flex h-10 items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                                        value={route.defaultDriverId || 'none'}
+                                        onChange={e => setRoute({ ...route, defaultDriverId: e.target.value })}
+                                    >
+                                        <option value="none">-- Unassigned --</option>
+                                        {drivers.map(d => (
+                                            <option key={d.id} value={d.id}>{d.firstName} {d.lastName} {d.callsign ? `(${d.callsign})` : ''}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
                             <hr className="border-slate-100" />
@@ -448,6 +488,11 @@ export default function RouteBuilderPage() {
                         </CardHeader>
                         <CardContent className="pt-6 space-y-6">
                             <div className="space-y-2">
+                                {(!route.agreedPrice || parseFloat(route.agreedPrice.toString()) <= 0) && (
+                                    <div className="bg-yellow-50 text-yellow-800 p-3 rounded border border-yellow-200 text-sm mb-4">
+                                        ⚠️ This route has no agreed price. Generated job will be £0.00.
+                                    </div>
+                                )}
                                 <p className="text-sm text-slate-600">
                                     Generate one dispatch job from this school route for the selected date.
                                 </p>

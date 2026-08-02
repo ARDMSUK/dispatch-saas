@@ -853,6 +853,8 @@ model ContractRoute {
   contractId String
   contract   Contract @relation(fields: [contractId], references: [id])
 
+  agreedPrice Float?
+
   // Requirements
   requiresWav          Boolean @default(false)
   requiresPa           Boolean @default(false)
