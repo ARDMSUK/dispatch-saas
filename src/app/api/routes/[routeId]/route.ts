@@ -1,29 +1,46 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { requireDispatcher, requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
-        const session = await auth();
+        const { session, error: rbacError } = await requireDispatcher();
+        if (rbacError) return rbacError;
+        
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const routeId = (await params).routeId;
+        const isDispatcher = session.user.role === 'DISPATCHER';
+
         const route = await prisma.contractRoute.findUnique({
             where: { id: routeId },
             include: {
                 stops: {
                     orderBy: { sequenceIndex: 'asc' }
                 },
-                students: true,
+                students: isDispatcher ? {
+                    select: {
+                        id: true,
+                        name: true,
+                        isSEN: true,
+                        passengerAssistantRequired: true,
+                        wheelchairRequired: true,
+                        pickupHandoverInstructions: true,
+                        dropoffHandoverInstructions: true,
+                        authorisedPickupPerson: true,
+                        authorisedDropoffPerson: true,
+                        driverSafeNotes: true,
+                    }
+                } : true,
                 contract: true
             }
         });
 
-        if (!route || route.contract.tenantId !== session.user.tenantId) {
+        if (!route || (route.contract.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Route not found or access denied' }, { status: 404 });
         }
 
@@ -36,7 +53,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ routeId:
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
-        const session = await auth();
+        const { session, error: rbacError } = await requireTenantAdmin();
+        if (rbacError) return rbacError;
+
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -51,7 +70,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ routeI
             include: { contract: true }
         });
 
-        if (!route || route.contract.tenantId !== session.user.tenantId) {
+        if (!route || (route.contract.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Route not found or access denied' }, { status: 403 });
         }
 

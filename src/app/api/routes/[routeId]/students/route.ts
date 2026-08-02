@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { requireTenantAdmin } from "@/utils/rbac";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
-        const session = await auth();
+        const { session, error: rbacError } = await requireTenantAdmin();
+        if (rbacError) return rbacError;
+
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -33,7 +35,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ routeId
             include: { contract: true }
         });
 
-        if (!route || route.contract.tenantId !== session.user.tenantId) {
+        if (!route || (route.contract.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Route not found or access denied' }, { status: 403 });
         }
 
@@ -71,7 +73,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ routeId
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ routeId: string }> }) {
     try {
-        const session = await auth();
+        const { session, error: rbacError } = await requireTenantAdmin();
+        if (rbacError) return rbacError;
+
         if (!session?.user?.tenantId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -90,7 +94,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ route
             include: { contract: true }
         });
 
-        if (!route || route.contract.tenantId !== session.user.tenantId) {
+        if (!route || (route.contract.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
             return NextResponse.json({ error: 'Route not found or access denied' }, { status: 403 });
         }
 
