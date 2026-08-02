@@ -30,7 +30,24 @@ export default function RouteBuilderPage() {
     // Student Manager State
     const [newStudentName, setNewStudentName] = useState("");
     const [newStudentNotes, setNewStudentNotes] = useState("");
+    const [newStudentGuardianName, setNewStudentGuardianName] = useState("");
     const [newStudentPhone, setNewStudentPhone] = useState("");
+
+    const [newStudentIsSEN, setNewStudentIsSEN] = useState(false);
+    const [newStudentPaRequired, setNewStudentPaRequired] = useState(false);
+    const [newStudentWavRequired, setNewStudentWavRequired] = useState(false);
+    
+    const [newStudentEmergencyName, setNewStudentEmergencyName] = useState("");
+    const [newStudentEmergencyPhone, setNewStudentEmergencyPhone] = useState("");
+    
+    const [newStudentPickupInstructions, setNewStudentPickupInstructions] = useState("");
+    const [newStudentDropoffInstructions, setNewStudentDropoffInstructions] = useState("");
+    const [newStudentAuthorisedPickup, setNewStudentAuthorisedPickup] = useState("");
+    const [newStudentAuthorisedDropoff, setNewStudentAuthorisedDropoff] = useState("");
+    
+    const [newStudentDriverSafeNotes, setNewStudentDriverSafeNotes] = useState("");
+    const [newStudentInternalNotes, setNewStudentInternalNotes] = useState("");
+    const [newStudentMedicalInfo, setNewStudentMedicalInfo] = useState("");
 
     // Generation State
     const [generationDate, setGenerationDate] = useState("");
@@ -160,7 +177,20 @@ export default function RouteBuilderPage() {
                 body: JSON.stringify({
                     name: newStudentName,
                     riskAssessmentNotes: newStudentNotes,
-                    parentContactPhone: newStudentPhone
+                    parentContactName: newStudentGuardianName,
+                    parentContactPhone: newStudentPhone,
+                    isSEN: newStudentIsSEN,
+                    passengerAssistantRequired: newStudentPaRequired,
+                    wheelchairRequired: newStudentWavRequired,
+                    emergencyContactName: newStudentEmergencyName,
+                    emergencyContactPhone: newStudentEmergencyPhone,
+                    pickupHandoverInstructions: newStudentPickupInstructions,
+                    dropoffHandoverInstructions: newStudentDropoffInstructions,
+                    authorisedPickupPerson: newStudentAuthorisedPickup,
+                    authorisedDropoffPerson: newStudentAuthorisedDropoff,
+                    driverSafeNotes: newStudentDriverSafeNotes,
+                    internalSafeguardingNotes: newStudentInternalNotes,
+                    medicalInfo: newStudentMedicalInfo
                 })
             });
 
@@ -168,7 +198,20 @@ export default function RouteBuilderPage() {
                 toast.success("Student added");
                 setNewStudentName("");
                 setNewStudentNotes("");
+                setNewStudentGuardianName("");
                 setNewStudentPhone("");
+                setNewStudentIsSEN(false);
+                setNewStudentPaRequired(false);
+                setNewStudentWavRequired(false);
+                setNewStudentEmergencyName("");
+                setNewStudentEmergencyPhone("");
+                setNewStudentPickupInstructions("");
+                setNewStudentDropoffInstructions("");
+                setNewStudentAuthorisedPickup("");
+                setNewStudentAuthorisedDropoff("");
+                setNewStudentDriverSafeNotes("");
+                setNewStudentInternalNotes("");
+                setNewStudentMedicalInfo("");
                 fetchRoute();
             } else {
                 toast.error("Failed to add student");
@@ -259,7 +302,7 @@ export default function RouteBuilderPage() {
                         <MapPin className="w-4 h-4 mr-2" /> Schedule & Stops
                     </TabsTrigger>
                     <TabsTrigger value="students" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none px-6 text-sm">
-                        <Users className="w-4 h-4 mr-2" /> SEN Students
+                        <Users className="w-4 h-4 mr-2" /> Passengers / Students
                     </TabsTrigger>
                     <TabsTrigger value="settings" className="data-[state=active]:border-b-2 data-[state=active]:border-indigo-600 rounded-none px-6 text-sm">
                         <Settings2 className="w-4 h-4 mr-2" /> Constraints & Config
@@ -392,21 +435,96 @@ export default function RouteBuilderPage() {
                             ) : (
                                 <div className="p-12 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
                                     <Users className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-                                    <p className="text-slate-500">No SEN students assigned to this route.</p>
+                                    <p className="text-slate-500">No passengers / students assigned to this route.</p>
                                 </div>
                             )}
                         </div>
 
                         <Card className="border-slate-200 shadow-sm h-fit">
                             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50">
-                                <CardTitle className="text-md">Assign Student</CardTitle>
+                                <CardTitle className="text-md">Assign Passenger / Student</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-4 space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Student Name</label>
+                                    <label className="text-xs font-semibold text-slate-500 uppercase">Passenger / Student Name</label>
                                     <Input value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="e.g. John Smith" />
                                 </div>
+
+                                <div className="flex gap-4 mb-2">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="sen" checked={newStudentIsSEN} onCheckedChange={setNewStudentIsSEN} />
+                                        <label htmlFor="sen" className="text-xs font-medium text-slate-700">SEN</label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="pa" checked={newStudentPaRequired} onCheckedChange={setNewStudentPaRequired} />
+                                        <label htmlFor="pa" className="text-xs font-medium text-slate-700">PA Required</label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="wav" checked={newStudentWavRequired} onCheckedChange={setNewStudentWavRequired} />
+                                        <label htmlFor="wav" className="text-xs font-medium text-slate-700">WAV Required</label>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Parent/Guardian Name</label>
+                                        <Input value={newStudentGuardianName} onChange={e => setNewStudentGuardianName(e.target.value)} placeholder="Name" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Parent Phone</label>
+                                        <Input value={newStudentPhone} onChange={e => setNewStudentPhone(e.target.value)} placeholder="Phone" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Emergency Contact Name</label>
+                                        <Input value={newStudentEmergencyName} onChange={e => setNewStudentEmergencyName(e.target.value)} placeholder="Name" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Emergency Phone</label>
+                                        <Input value={newStudentEmergencyPhone} onChange={e => setNewStudentEmergencyPhone(e.target.value)} placeholder="Phone" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Authorised Pickup</label>
+                                        <Input value={newStudentAuthorisedPickup} onChange={e => setNewStudentAuthorisedPickup(e.target.value)} placeholder="Name(s)" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Authorised Dropoff</label>
+                                        <Input value={newStudentAuthorisedDropoff} onChange={e => setNewStudentAuthorisedDropoff(e.target.value)} placeholder="Name(s)" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Pickup Handover</label>
+                                        <Input value={newStudentPickupInstructions} onChange={e => setNewStudentPickupInstructions(e.target.value)} placeholder="Instructions" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 uppercase">Dropoff Handover</label>
+                                        <Input value={newStudentDropoffInstructions} onChange={e => setNewStudentDropoffInstructions(e.target.value)} placeholder="Instructions" />
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-slate-500 uppercase">Driver Safe Notes (Visible to Driver)</label>
+                                    <Textarea value={newStudentDriverSafeNotes} onChange={e => setNewStudentDriverSafeNotes(e.target.value)} placeholder="E.g. sit at front" className="h-16 resize-none" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-red-500 uppercase">Internal Safeguarding Notes (Hidden)</label>
+                                    <Textarea value={newStudentInternalNotes} onChange={e => setNewStudentInternalNotes(e.target.value)} placeholder="Strictly office only" className="h-16 resize-none border-red-200" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-slate-500 uppercase">Medical Info</label>
+                                    <Input value={newStudentMedicalInfo} onChange={e => setNewStudentMedicalInfo(e.target.value)} placeholder="Conditions/Allergies" />
+                                </div>
+
+                                <div className="space-y-2 hidden">
                                     <label className="text-xs font-semibold text-slate-500 uppercase">Risk Assessment / Notes</label>
                                     <Textarea 
                                         value={newStudentNotes} 
@@ -414,10 +532,6 @@ export default function RouteBuilderPage() {
                                         placeholder="Specific SEN needs, seating requirements, behavioral notes..." 
                                         className="h-24 resize-none"
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase">Emergency Contact</label>
-                                    <Input value={newStudentPhone} onChange={e => setNewStudentPhone(e.target.value)} placeholder="Phone number" />
                                 </div>
                                 <Button className="w-full bg-slate-900 hover:bg-slate-800" onClick={handleAddStudent}>Add Student</Button>
                             </CardContent>

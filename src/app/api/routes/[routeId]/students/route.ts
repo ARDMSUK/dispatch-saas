@@ -13,7 +13,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ routeId
 
         const routeId = (await params).routeId;
         const body = await req.json();
-        const { name, dateOfBirth, specialNeeds, medicalInfo, riskAssessmentNotes, parentContactName, parentContactPhone } = body;
+        const { 
+            name, dateOfBirth, specialNeeds, medicalInfo, riskAssessmentNotes, 
+            parentContactName, parentContactPhone,
+            isSEN, passengerAssistantRequired, wheelchairRequired,
+            emergencyContactName, emergencyContactPhone,
+            pickupHandoverInstructions, dropoffHandoverInstructions,
+            authorisedPickupPerson, authorisedDropoffPerson,
+            driverSafeNotes, internalSafeguardingNotes
+        } = body;
 
         if (!name) {
             return NextResponse.json({ error: 'Student name is required' }, { status: 400 });
@@ -39,7 +47,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ routeId
                 medicalInfo: medicalInfo || null,
                 riskAssessmentNotes: riskAssessmentNotes || null,
                 parentContactName: parentContactName || null,
-                parentContactPhone: parentContactPhone || null
+                parentContactPhone: parentContactPhone || null,
+                isSEN: isSEN || false,
+                passengerAssistantRequired: passengerAssistantRequired || false,
+                wheelchairRequired: wheelchairRequired || false,
+                emergencyContactName: emergencyContactName || null,
+                emergencyContactPhone: emergencyContactPhone || null,
+                pickupHandoverInstructions: pickupHandoverInstructions || null,
+                dropoffHandoverInstructions: dropoffHandoverInstructions || null,
+                authorisedPickupPerson: authorisedPickupPerson || null,
+                authorisedDropoffPerson: authorisedDropoffPerson || null,
+                driverSafeNotes: driverSafeNotes || null,
+                internalSafeguardingNotes: internalSafeguardingNotes || null
             }
         });
 

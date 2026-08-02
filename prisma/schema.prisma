@@ -906,8 +906,23 @@ model Student {
   medicalInfo         String? @db.Text
   riskAssessmentNotes String? @db.Text
 
+  isSEN                      Boolean @default(false)
+  passengerAssistantRequired Boolean @default(false)
+  wheelchairRequired         Boolean @default(false)
+
   parentContactName  String?
   parentContactPhone String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  pickupHandoverInstructions  String? @db.Text
+  dropoffHandoverInstructions String? @db.Text
+
+  authorisedPickupPerson  String?
+  authorisedDropoffPerson String?
+
+  driverSafeNotes           String? @db.Text
+  internalSafeguardingNotes String? @db.Text
 
   contractRouteId String?
   contractRoute   ContractRoute? @relation(fields: [contractRouteId], references: [id])
