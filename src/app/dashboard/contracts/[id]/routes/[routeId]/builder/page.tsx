@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Save, ArrowLeft, MapPin, Users, Settings2, PlusCircle, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { LocationInput } from "@/components/dashboard/location-input";
 
 export default function RouteBuilderPage() {
     const params = useParams();
@@ -20,6 +21,8 @@ export default function RouteBuilderPage() {
 
     // Stop Manager State
     const [newStopAddress, setNewStopAddress] = useState("");
+    const [newStopLat, setNewStopLat] = useState<number | null>(null);
+    const [newStopLng, setNewStopLng] = useState<number | null>(null);
     const [newStopType, setNewStopType] = useState("PICKUP");
     const [newStopTime, setNewStopTime] = useState("");
     const [drivers, setDrivers] = useState<any[]>([]);
@@ -107,6 +110,8 @@ export default function RouteBuilderPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     address: newStopAddress,
+                    lat: newStopLat,
+                    lng: newStopLng,
                     type: newStopType,
                     scheduledTime: newStopTime,
                     sequenceIndex: route.stops ? route.stops.length : 0
@@ -116,6 +121,8 @@ export default function RouteBuilderPage() {
             if (res.ok) {
                 toast.success("Stop added");
                 setNewStopAddress("");
+                setNewStopLat(null);
+                setNewStopLng(null);
                 setNewStopTime("");
                 fetchRoute();
             } else {
@@ -307,7 +314,21 @@ export default function RouteBuilderPage() {
                         <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-12 gap-4">
                             <div className="md:col-span-6 space-y-2">
                                 <label className="text-xs font-semibold text-slate-500 uppercase">Address / Location</label>
-                                <Input value={newStopAddress} onChange={e => setNewStopAddress(e.target.value)} placeholder="e.g. 10 High Street, London" />
+                                <LocationInput 
+                                    value={newStopAddress} 
+                                    onChange={(val) => {
+                                        setNewStopAddress(val);
+                                        setNewStopLat(null);
+                                        setNewStopLng(null);
+                                    }} 
+                                    onLocationSelect={(loc) => {
+                                        setNewStopAddress(loc.address);
+                                        setNewStopLat(loc.lat);
+                                        setNewStopLng(loc.lng);
+                                    }}
+                                    placeholder="e.g. 10 High Street, London" 
+                                    className="w-full flex h-10 items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                                />
                             </div>
                             <div className="md:col-span-3 space-y-2">
                                 <label className="text-xs font-semibold text-slate-500 uppercase">Stop Type</label>
