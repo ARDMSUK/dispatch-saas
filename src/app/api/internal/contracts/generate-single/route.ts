@@ -40,7 +40,20 @@ export async function POST(req: Request) {
                 stops: {
                     orderBy: { sequenceIndex: 'asc' }
                 },
-                students: true
+                students: {
+                    select: {
+                        id: true,
+                        name: true,
+                        passengerAssistantRequired: true,
+                        wheelchairRequired: true,
+                        pickupHandoverInstructions: true,
+                        dropoffHandoverInstructions: true,
+                        authorisedPickupPerson: true,
+                        authorisedDropoffPerson: true,
+                        driverSafeNotes: true,
+                    },
+                    orderBy: { name: 'asc' }
+                }
             }
         });
 
@@ -100,9 +113,12 @@ export async function POST(req: Request) {
         // passengerPhone
         const passengerPhone = route.contract.account.phone || "";
 
-        // Notes = minimal non-sensitive data
-        const studentNames = route.students.map(s => s.name.split(' ')[0]).join(', ');
-        const notes = studentNames ? `Students: ${studentNames}` : `School contract route: ${route.name}`;
+        // Build deterministic driver-safe notes
+        const notes = buildSafeSchoolJobNotes(route.name, route.students);
+        
+        // Determine operational WAV requirement
+        const anyWheelchair = route.students.some(s => s.wheelchairRequired);
+        const jobRequiresWav = route.requiresWav || anyWheelchair;
 
         const job = await prisma.job.create({
             data: {
@@ -139,8 +155,8 @@ export async function POST(req: Request) {
                 // Fill mandatory defaults if not provided above
                 passengers: 1,
                 luggage: 0,
-                vehicleType: route.requiresWav ? 'WAV' : 'Saloon',
-                requiresWav: route.requiresWav,
+                vehicleType: jobRequiresWav ? 'WAV' : 'Saloon',
+                requiresWav: jobRequiresWav,
                 fare: route.agreedPrice,
                 isFixedPrice: true
             }
@@ -151,4 +167,57 @@ export async function POST(req: Request) {
         console.error('Error generating single contract job:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
+}
+
+function buildSafeSchoolJobNotes(routeName: string, students: any[]): string {
+    if (!students || students.length === 0) {
+        return `School contract route: ${routeName}`;
+    }
+
+    const firstNames = students.map(s => s.name.split(' ')[0]).join(', ');
+    let notes = `School Contract Run\nPassengers: ${firstNames}\n`;
+
+    for (const student of students) {
+        const firstName = student.name.split(' ')[0];
+        
+        let studentSection = `\n${firstName}:\n`;
+        let hasContent = false;
+
+        if (student.passengerAssistantRequired) {
+            studentSection += `PA required: Yes\n`;
+            hasContent = true;
+        }
+        if (student.wheelchairRequired) {
+            studentSection += `WAV required: Yes\n`;
+            hasContent = true;
+        }
+        if (student.pickupHandoverInstructions?.trim()) {
+            studentSection += `Pickup handover: ${student.pickupHandoverInstructions.trim()}\n`;
+            hasContent = true;
+        }
+        if (student.dropoffHandoverInstructions?.trim()) {
+            studentSection += `Dropoff handover: ${student.dropoffHandoverInstructions.trim()}\n`;
+            hasContent = true;
+        }
+        if (student.authorisedPickupPerson?.trim()) {
+            studentSection += `Authorised pickup: ${student.authorisedPickupPerson.trim()}\n`;
+            hasContent = true;
+        }
+        if (student.authorisedDropoffPerson?.trim()) {
+            studentSection += `Authorised dropoff: ${student.authorisedDropoffPerson.trim()}\n`;
+            hasContent = true;
+        }
+        if (student.driverSafeNotes?.trim()) {
+            studentSection += `Driver notes: ${student.driverSafeNotes.trim()}\n`;
+            hasContent = true;
+        }
+
+        if (hasContent) {
+            notes += studentSection;
+        }
+    }
+
+    notes += `\n\nOnly driver-safe information shown. Contact office for restricted safeguarding notes.`;
+
+    return notes.trim();
 }
