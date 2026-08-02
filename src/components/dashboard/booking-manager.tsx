@@ -54,6 +54,7 @@ interface Job {
     driverPayment?: number;
     driverPaymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
     emergencyActive?: boolean;
+    contractRouteId?: string | null;
     createdAt: string;
     updatedAt: string;
     paymentProvider?: string;
@@ -97,6 +98,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     // Search Box State
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+    const [showSchoolJobs, setShowSchoolJobs] = useState(false);
 
     // Future Filter State
     const [futureFilter, setFutureFilter] = useState('ALL');
@@ -175,7 +178,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
             clearInterval(interval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [refreshTrigger, debouncedSearchQuery]);
+    }, [refreshTrigger, debouncedSearchQuery, showSchoolJobs]);
 
     // Fetch Flight Data for active jobs with flight numbers
     useEffect(() => {
@@ -216,8 +219,12 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
     const fetchJobs = async (showLoading = true, searchVal = '') => {
         if (showLoading) setLoading(true);
         try {
-            const queryParam = searchVal ? `?search=${encodeURIComponent(searchVal)}` : '';
-            const res = await fetch(`/api/jobs${queryParam}`);
+            const params = new URLSearchParams();
+            if (searchVal) params.set('search', searchVal);
+            if (showSchoolJobs) params.set('includeContracts', 'true');
+            
+            const queryString = params.toString() ? `?${params.toString()}` : '';
+            const res = await fetch(`/api/jobs${queryString}`);
             if (res.ok) {
                 const data = await res.json();
                 setJobs(data);
@@ -521,7 +528,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                 }}
                 className={`
                     group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer mb-2
-                    ${job.emergencyActive ? 'bg-red-600 animate-pulse border-red-800 text-white' : selectedJobId === job.id ? 'bg-indigo-600/10 border-indigo-600/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
+                    ${job.emergencyActive ? 'bg-red-600 animate-pulse border-red-800 text-white' : selectedJobId === job.id ? 'bg-indigo-600/10 border-indigo-600/50' : job.contractRouteId ? 'border-l-4 border-l-amber-500 bg-white border-zinc-200 hover:bg-slate-50 hover:border-amber-500/50' : `${getVehicleStyle(job.vehicleType)} hover:border-white/20`}
                 `}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -530,6 +537,11 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             {job.status === 'UNASSIGNED' ? 'CONFIRMED' : job.status}
                         </Badge>
                         <span className="font-mono text-slate-300 font-bold text-sm">#{job.id}</span>
+                        {job.contractRouteId && (
+                            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-mono text-[10px] font-bold">
+                                SCHOOL CONTRACT
+                            </Badge>
+                        )}
                         {job.emergencyActive && (
                             <Badge variant="outline" className="bg-red-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1 flex items-center gap-1 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
                                 <AlertCircle className="w-4 h-4 animate-bounce" /> PANIC ALERT
@@ -1184,6 +1196,17 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                     ✕
                                 </button>
                             )}
+                        </div>
+                        <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-md px-3 h-9">
+                            <label className="text-xs font-bold text-slate-600 flex items-center gap-2 whitespace-nowrap cursor-pointer hover:text-slate-900" title="Includes school contract runs in this dispatch view.">
+                                <input 
+                                    type="checkbox" 
+                                    className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 h-3.5 w-3.5 cursor-pointer"
+                                    checked={showSchoolJobs} 
+                                    onChange={(e) => setShowSchoolJobs(e.target.checked)}
+                                />
+                                Show School Jobs
+                            </label>
                         </div>
                         <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 shrink-0" onClick={() => fetchJobs(true, searchQuery)}>
                             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />

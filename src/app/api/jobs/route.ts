@@ -151,6 +151,7 @@ export async function GET(req: Request) {
             paymentLink: j.paymentLink,
             paymentProvider: j.paymentProvider,
             paymentReferenceId: j.paymentReferenceId,
+            contractRouteId: j.contractRouteId,
             createdAt: j.bookedAt.toISOString(),
             updatedAt: j.updatedAt.toISOString(),
             driver: j.driver ? {
