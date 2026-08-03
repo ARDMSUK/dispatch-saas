@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Save, ArrowLeft, MapPin, Users, Settings2, PlusCircle, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { LocationInput } from "@/components/dashboard/location-input";
+import { BulkGenerateModal } from "./BulkGenerateModal";
 
 export default function RouteBuilderPage() {
     const params = useParams();
@@ -655,6 +656,22 @@ export default function RouteBuilderPage() {
                                 >
                                     {generatingJob ? "Generating..." : "Generate Job"}
                                 </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-slate-200 shadow-sm max-w-2xl mt-6">
+                        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                            <CardTitle className="text-lg">Bulk Term Generation</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                            <div className="space-y-2">
+                                <p className="text-sm text-slate-600">
+                                    Generate all dispatch jobs for this route across an entire school term or date range.
+                                </p>
+                            </div>
+                            <div className="pt-2">
+                                <BulkGenerateModal routeId={route.id} routeName={route.name} />
                             </div>
                         </CardContent>
                     </Card>
