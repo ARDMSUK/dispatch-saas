@@ -486,7 +486,11 @@ model Job {
   DriverMessage   DriverMessage[]
   calls           IncomingCall[]
 
+  // Idempotency
+  idempotencyKey String?
+
   @@index([tenantId, status, pickupTime])
+  @@unique([tenantId, idempotencyKey])
   @@map("bookings")
   @@schema("public")
 }

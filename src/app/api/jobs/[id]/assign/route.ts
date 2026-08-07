@@ -56,12 +56,8 @@ export async function PATCH(
             return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
         }
 
-        if (driver.status === 'BUSY') {
-            return NextResponse.json({ error: 'Driver is currently BUSY' }, { status: 400 });
-        }
-
-        if (driver.status === 'OFF_DUTY') {
-            return NextResponse.json({ error: 'Driver is currently OFFLINE/OFF_DUTY' }, { status: 400 });
+        if (driver.status !== 'FREE') {
+            return NextResponse.json({ error: `Driver is currently ${driver.status} and cannot be assigned.` }, { status: 409 });
         }
 
         // 2. Transaction: Update Job + Update Driver Status

@@ -199,6 +199,28 @@ export async function POST(request: Request) {
         const tenantId = session.user.tenantId;
         const body = await request.json();
 
+        // GATE 2 VALIDATION: Address and Pickup Time
+        if (!body.pickupAddress || body.pickupAddress.trim() === '') {
+            return NextResponse.json({ error: "Missing pickup address" }, { status: 400 });
+        }
+        if (!body.dropoffAddress || body.dropoffAddress.trim() === '') {
+            return NextResponse.json({ error: "Missing drop-off address" }, { status: 400 });
+        }
+        if (!body.pickupTime) {
+            return NextResponse.json({ error: "Missing pickup time" }, { status: 400 });
+        }
+        const finalPickupTime = new Date(body.pickupTime);
+        if (isNaN(finalPickupTime.getTime())) {
+            return NextResponse.json({ error: "Malformed pickup time" }, { status: 400 });
+        }
+        
+        // Past time validation (5 min tolerance)
+        const now = new Date();
+        const fiveMinsAgo = new Date(now.getTime() - 5 * 60000);
+        if (finalPickupTime < fiveMinsAgo) {
+            return NextResponse.json({ error: "Pickup time cannot be in the past" }, { status: 400 });
+        }
+
         if (body.paymentType === 'TERMINAL' || body.paymentProvider === 'SUMUP' || body.paymentProvider === 'ZETTLE') {
             return NextResponse.json({ error: "Hardware payment methods are temporarily disabled." }, { status: 400 });
         }
@@ -232,7 +254,6 @@ export async function POST(request: Request) {
 
         // 2. Pricing & Timing
         let fare = body.fare ? parseFloat(body.fare) : null;
-        let finalPickupTime = body.pickupTime ? new Date(body.pickupTime) : new Date();
 
         if ((!fare || fare === 0) && body.pickupAddress && body.dropoffAddress) {
             const pricingResult = await calculatePrice({
@@ -344,7 +365,7 @@ export async function POST(request: Request) {
         };
 
         // 5. Build Job Data List (Handle Recurrence)
-        const jobsToCreate = [];
+        const jobsToCreate: any[] = [];
         const recurrenceGroupId = body.isRecurring ? crypto.randomUUID() : null;
 
         if (body.isRecurring && body.recurrenceRule) {
@@ -419,7 +440,8 @@ export async function POST(request: Request) {
                         recurrenceEnd: body.recurrenceEnd ? new Date(body.recurrenceEnd) : null,
                         // Wait & Return Fields
                         waitingTime: body.isWaitAndReturn ? (body.waitingTime || 0) : 0,
-                        waitingCost: 0 // Calculated later or ignored for now
+                        waitingCost: 0, // Calculated later or ignored for now
+                        idempotencyKey: body.idempotencyKey ? `${body.idempotencyKey}:${jobsToCreate.length}` : null
                     });
                 }
 
@@ -439,64 +461,111 @@ export async function POST(request: Request) {
                 isReturn: false,
                 // Wait & Return Fields
                 waitingTime: body.isWaitAndReturn ? (body.waitingTime || 0) : 0,
-                waitingCost: 0
+                waitingCost: 0,
+                idempotencyKey: body.idempotencyKey ? `${body.idempotencyKey}:0` : null
             });
-        }
 
-        // 6. Execute Creations
-        let firstJob = null;
-        let createdCount = 0;
-
-
-        for (const jobData of jobsToCreate) {
-            // Apply verified payment ONLY to the primary (first) generated job
-            if (createdCount === 0) {
-                (jobData as any).paymentStatus = verifiedPaymentStatus;
-                (jobData as any).paymentProvider = verifiedPaymentProvider;
-                (jobData as any).paymentReferenceId = verifiedPaymentReferenceId;
-                (jobData as any).stripePaymentIntentId = verifiedStripePaymentIntentId;
-            }
-            const job = await prisma.job.create({ data: jobData as any });
-            if (!firstJob) firstJob = job;
-            createdCount++;
-        }
-
-        const newJob = firstJob; // For backward compatibility with return logic
-
-        // 7. Create Return Job if requested (Only for Single Job scenarios)
-        let returnJob = null;
-        if (!body.isRecurring && body.returnBooking && body.returnDate) {
-            // Calculate Return Fare
-            let returnFare = fare;
-
-            // Return Time
-            const returnTime = new Date(body.returnDate);
-
-            returnJob = await prisma.job.create({
-                data: {
+            // Return Job
+            if (body.returnBooking && body.returnDate) {
+                const returnTime = new Date(body.returnDate);
+                jobsToCreate.push({
                     ...commonJobData,
                     pickupAddress: body.dropoffAddress, // Swap
                     dropoffAddress: body.pickupAddress, // Swap
                     pickupTime: returnTime,
-                    fare: returnFare,
+                    fare: fare,
                     isReturn: true,
-                    parentJobId: newJob!.id,
                     // Return bookings must always be created unpaid initially 
                     // unless a separate payment intent is explicitly captured for them.
                     paymentStatus: 'UNPAID',
                     paymentProvider: null,
                     paymentReferenceId: null,
-                    stripePaymentIntentId: null
-                }
-            });
+                    stripePaymentIntentId: null,
+                    idempotencyKey: body.idempotencyKey ? `${body.idempotencyKey}:1` : null
+                });
+            }
         }
+
+        // Apply verified payment ONLY to the primary (first) generated job
+        if (jobsToCreate.length > 0) {
+            jobsToCreate[0].paymentStatus = verifiedPaymentStatus;
+            jobsToCreate[0].paymentProvider = verifiedPaymentProvider;
+            jobsToCreate[0].paymentReferenceId = verifiedPaymentReferenceId;
+            jobsToCreate[0].stripePaymentIntentId = verifiedStripePaymentIntentId;
+        }
+
+        // Generate full deterministic key list for idempotency validation
+        const expectedKeys = jobsToCreate.map(j => j.idempotencyKey).filter(Boolean);
+
+        // 6. Execute Creations Atomically
+        let createdJobs: any[] = [];
+        try {
+            createdJobs = await prisma.$transaction(async (tx) => {
+                const results = [];
+                let firstJobId = null;
+    
+                for (let i = 0; i < jobsToCreate.length; i++) {
+                    const jobData = { ...jobsToCreate[i] };
+                    if (jobData.isReturn && firstJobId) {
+                        jobData.parentJobId = firstJobId;
+                    }
+                    const job = await tx.job.create({ data: jobData });
+                    if (i === 0) firstJobId = job.id;
+                    results.push(job);
+                }
+                return results;
+            });
+        } catch (error: any) {
+            if (error.code === 'P2002' && expectedKeys.length > 0) {
+                // Idempotency Catch: A unique constraint was violated
+                // Fetch ALL existing jobs for the tenant with these exact keys
+                const existingJobs = await prisma.job.findMany({
+                    where: {
+                        tenantId: tenantId,
+                        idempotencyKey: { in: expectedKeys }
+                    }
+                });
+
+                // Order deterministically
+                const existingJobsMap = new Map(existingJobs.map(j => [j.idempotencyKey, j]));
+                
+                let allKeysMatch = true;
+                if (existingJobs.length !== expectedKeys.length) allKeysMatch = false;
+                
+                for (const k of expectedKeys) {
+                    if (!existingJobsMap.has(k)) {
+                        allKeysMatch = false;
+                    }
+                }
+
+                if (allKeysMatch) {
+                    // Full matched series - return original success
+                    console.log(`[API/jobs] Idempotent retry matched full series for key: ${body.idempotencyKey}`);
+                    // Return exactly the same response structure as normal
+                    const newJob = existingJobsMap.get(expectedKeys[0]);
+                    const returnJob = expectedKeys.length === 2 && !body.isRecurring ? existingJobsMap.get(expectedKeys[1]) : null;
+                    return NextResponse.json({ job: newJob, returnJob }, { status: 200 });
+                } else {
+                    // Partial failure / inconsistent state
+                    console.error(`[API/jobs] Idempotency conflict: Expected ${expectedKeys.length} jobs, found ${existingJobs.length} for key ${body.idempotencyKey}`);
+                    return NextResponse.json({ 
+                        error: "Conflict", 
+                        details: "A booking with this identifier already partially exists but does not match the requested batch size. Please refresh and try again." 
+                    }, { status: 409 });
+                }
+            }
+            throw error; // Re-throw other errors
+        }
+
+        const newJob = createdJobs[0];
+        const returnJob = (jobsToCreate.length === 2 && !body.isRecurring) ? createdJobs[1] : null;
 
         // Link recent call if exists
         if (newJob && body.passengerPhone) {
             await linkRecentCallToBooking(newJob.id, body.passengerPhone, tenantId);
         }
 
-        // 6. Send Confirmation Email (Async, don't block response)
+        // 7. Send Confirmation Email (Async, don't block response)
         const jobWithDetails = { ...newJob, passengerEmail: body.passengerEmail };
 
         const tenantSettings = await prisma.tenant.findUnique({ where: { id: tenantId } });
@@ -546,7 +615,7 @@ export async function POST(request: Request) {
         // Wait for all notifications (don't block response on failures)
         await Promise.allSettled(notificationPromises);
 
-        // 7. Trigger Auto-Dispatch (Async)
+        // 8. Trigger Auto-Dispatch (Async)
         DispatchEngine.runDispatchLoop(tenantId).catch(err => console.error("Post-creation dispatch failed", err));
 
         return NextResponse.json({ job: newJob, returnJob }, { status: 201 });

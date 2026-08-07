@@ -107,6 +107,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         return format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm");
     });
 
+    const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
+
     const timeInputRef = useRef<HTMLInputElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -591,7 +593,8 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 returnFlightNumber: isReturn ? returnFlightNumber : null,
                 returnPassengers: isReturn ? returnPassengers : null,
                 returnLuggage: isReturn ? returnLuggage : null,
-                returnNotes: isReturn ? returnNotes : null
+                returnNotes: isReturn ? returnNotes : null,
+                idempotencyKey
             };
 
 
@@ -646,6 +649,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         setReturnNotes('');
         setIsWaitAndReturn(false);
         setWaitingTime(0);
+        setIdempotencyKey(crypto.randomUUID());
         setIsRecurring(false);
         setRecurrenceRule('DAILY');
         setRecurrenceEnd('');
