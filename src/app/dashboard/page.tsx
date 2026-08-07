@@ -397,8 +397,8 @@ function DashboardContent() {
                                     (driver.status === 'ONLINE' || driver.status === 'FREE') 
                                         ? 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' 
                                         : driver.status === 'BUSY' 
-                                        ? 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' 
-                                        : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                                        ? 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' 
+                                        : 'data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2212%22%20fill%3D%22%2394a3b8%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E'
                                 }
                                 label={{
                                     text: driver.callsign || "",
