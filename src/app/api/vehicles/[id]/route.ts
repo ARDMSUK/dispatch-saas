@@ -38,6 +38,11 @@ export async function PATCH(
 
         const { reg, make, model, color, type, expiryDate, driverId } = validation.data;
 
+        let normalizedReg = reg;
+        if (reg) {
+            normalizedReg = reg.trim().toUpperCase().replace(/\\s+/g, '');
+        }
+
         // Ensure the vehicle belongs to the tenant
         const existingVehicle = await prisma.vehicle.findUnique({
             where: { id, tenantId: session.user.tenantId }
@@ -47,10 +52,17 @@ export async function PATCH(
             return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
         }
 
+        if (driverId) {
+            const driver = await prisma.driver.findUnique({ where: { id: driverId } });
+            if (!driver || driver.tenantId !== session.user.tenantId) {
+                return NextResponse.json({ error: "Driver not found or access denied" }, { status: 404 });
+            }
+        }
+
         const updatedVehicle = await prisma.vehicle.update({
             where: { id },
             data: {
-                reg,
+                reg: normalizedReg,
                 make,
                 model,
                 color,
@@ -61,7 +73,10 @@ export async function PATCH(
         });
 
         return NextResponse.json(updatedVehicle);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'P2002') {
+            return NextResponse.json({ error: "Vehicle with this registration already exists." }, { status: 409 });
+        }
         console.error('Error updating vehicle:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }

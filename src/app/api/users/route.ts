@@ -44,10 +44,24 @@ export async function POST(req: Request) {
         const { error: rbacError } = await requireTenantAdmin();
         if (rbacError) return rbacError;
         const body = await req.json();
-        const { name, email, password, role, permissions, sipExtension } = body;
+        let { name, email, role, permissions, sipExtension } = body;
 
-        if (!name || !email || !password || !role) {
+        if (!name || !email || !role) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        email = email.trim().toLowerCase();
+        if (!email.match(/^\\S+@\\S+\\.\\S+$/)) {
+            return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+        }
+
+        if (role === 'SUPER_ADMIN') {
+            return NextResponse.json({ error: "Forbidden: Cannot create SUPER_ADMIN" }, { status: 403 });
+        }
+
+        const ALLOWED_ROLES = ["ADMIN", "DISPATCHER", "DRIVER", "B2B_ADMIN"];
+        if (!ALLOWED_ROLES.includes(role)) {
+            return NextResponse.json({ error: "Invalid or unsupported role" }, { status: 400 });
         }
 
         // Check if user exists
@@ -59,17 +73,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User with this email already exists." }, { status: 409 });
         }
 
-        const hashedPassword = await hash(password, 12);
+        const { randomBytes } = await import('crypto');
+        const randomPass = randomBytes(32).toString('hex');
+        const hashedPassword = await hash(randomPass, 12);
+
+        const setupToken = randomBytes(32).toString('hex');
+        const expiry = new Date();
+        expiry.setHours(expiry.getHours() + 1);
 
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
-                role, // 'ADMIN' or 'DISPATCHER'
+                role,
                 permissions: Array.isArray(permissions) ? permissions : [],
                 sipExtension: sipExtension || null,
                 tenantId: session.user.tenantId,
+                resetToken: setupToken,
+                resetTokenExpiry: expiry,
             },
             select: {
                 id: true,
@@ -93,10 +115,12 @@ export async function POST(req: Request) {
         const host = req.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
         const loginUrl = `${protocol}://${host}/login`;
+        const setupLink = `${protocol}://${host}/reset-password?token=${setupToken}`;
+        
         await sendEmail({
             to: email,
             subject: `Welcome to ${tenantName}`,
-            html: getWelcomeEmail(name, loginUrl, email, password, tenantName, brandColor, logoUrl) // Note: Sending raw password (only on creation)
+            html: getWelcomeEmail(name, loginUrl, email, setupLink, tenantName, brandColor, logoUrl)
         });
 
         return NextResponse.json(user, { status: 201 });

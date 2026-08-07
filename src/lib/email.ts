@@ -9,12 +9,23 @@ interface EmailParams {
 }
 
 export async function sendEmail({ to, subject, html, apiKey }: EmailParams) {
+    if (process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') {
+        let type = 'unknown';
+        if (subject.toLowerCase().includes('welcome')) type = 'welcome';
+        else if (subject.toLowerCase().includes('reset')) type = 'reset-password';
+        else if (subject.toLowerCase().includes('receipt')) type = 'receipt';
+        else if (subject.toLowerCase().includes('support')) type = 'support';
+        
+        console.log(`[Mock Email Suppressed] type=${type} recipient=${to}`);
+        return { success: true, mock: true };
+    }
+
     // Priority: Passed API Key > Global Env
     const key = apiKey || process.env.RESEND_API_KEY;
 
     if (!key) {
         console.warn('RESEND_API_KEY is not set (and no tenant key provided). Email not sent.');
-        console.log(`[Mock Email] To: ${to}, Subject: ${subject}, Content: ${html.substring(0, 100)}...`);
+        console.log(`[Mock Email Suppressed] type=missing-key recipient=${to}`);
         return { success: true, mock: true };
     }
 
@@ -72,7 +83,7 @@ export const getWelcomeEmail = (
     name: string,
     loginUrl: string,
     email: string,
-    tempPass: string,
+    setupLink: string,
     tenantName: string = 'Cabai',
     brandColor: string = '#f59e0b',
     logoUrl: string = ''
@@ -114,9 +125,10 @@ export const getWelcomeEmail = (
                 </td>
               </tr>
               <tr>
-                <td style="padding: 10px 15px;">
-                  <strong style="color: #666666; font-size: 14px; text-transform: uppercase;">Temporary Password</strong><br/>
-                  <span style="display: inline-block; background-color: #f3f4f6; color: #111827; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 16px; margin-top: 5px;">${tempPass}</span>
+                <td style="padding: 20px 15px; text-align: center;">
+                  <a href="${setupLink}" style="background-color: ${safeBrandColor}; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px;">
+                    Set Up Your Password
+                  </a>
                 </td>
               </tr>
             </table>

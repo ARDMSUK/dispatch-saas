@@ -1,3 +1,6 @@
-ALTER TABLE "public"."bookings" ADD COLUMN "idempotencyKey" TEXT;
+-- CreateIndex
+CREATE UNIQUE INDEX "vehicles_tenantId_reg_key" ON "public"."vehicles"("tenantId", "reg");
 
-CREATE UNIQUE INDEX "bookings_tenantId_idempotencyKey_key" ON "public"."bookings"("tenantId", "idempotencyKey");
+-- RenameIndex
+ALTER INDEX "public"."bookings_tenantid_idempotencykey_key" RENAME TO "bookings_tenantId_idempotencyKey_key";
+
