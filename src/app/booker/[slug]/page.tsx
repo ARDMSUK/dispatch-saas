@@ -255,8 +255,22 @@ export default function BookerPage() {
                 if (data.fare !== undefined) {
                     setQuote(data.fare);
                 }
-                setBookingComplete(true);
-                toast.success("Booking Request Received");
+                
+                if (formData.paymentType === 'CARD') {
+                    if (data.clientSecret && data.publishableKey) {
+                        setClientSecret(data.clientSecret);
+                        setPublishableKey(data.publishableKey);
+                        setCreatedJobId(data.bookingId);
+                        setShowStripePay(true);
+                    } else {
+                        toast.error("Payment initialization failed. Please try again.");
+                        turnstileRef.current?.reset();
+                        setTurnstileToken(null);
+                    }
+                } else {
+                    setBookingComplete(true);
+                    toast.success("Booking Request Received");
+                }
             } else {
                 toast.error(data.error || "Failed to confirm booking.");
                 turnstileRef.current?.reset();

@@ -17,15 +17,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid amount (Minimum £0.50)" }, { status: 400 });
         }
 
-        let tenantId = null;
-
-        if (isAuthenticated) {
-            tenantId = session?.user?.tenantId;
-        } else if (bookingDetails?.tenantId) {
-            tenantId = bookingDetails.tenantId;
-        } else if (body.bookingId) {
-            // No direct tenant id mapping for slug alone here, fallback
+        if (!isAuthenticated) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+
+        let tenantId = session?.user?.tenantId;
 
         let tenant = null;
         if (tenantId) {

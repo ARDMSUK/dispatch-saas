@@ -4,6 +4,8 @@ import Stripe from 'stripe';
 import { EmailService } from '@/lib/email-service';
 import { SmsService } from '@/lib/sms-service';
 import { calculatePrice } from '@/lib/pricing';
+import { getStripe } from '@/lib/stripe';
+import { decrypt } from '@/lib/encryption';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -252,11 +254,40 @@ export async function POST(
             }
         });
 
-        const clientSecret = null;
-        const publishableKey = tenant.stripePublishableKey;
+        let clientSecret = null;
+        let publishableKey = tenant.stripePublishableKey;
 
-        // Send Request Received immediately for all bookings
-        if (!job.notes?.includes('[NO_NOTIFICATIONS]')) {
+        if (paymentType === 'CARD') {
+            const secret = tenant.stripeSecretKey ? (decrypt(tenant.stripeSecretKey) as string) : null;
+            if (!secret) {
+                return NextResponse.json({ error: 'Card payments are not configured for this operator.' }, { status: 400, headers: corsHeaders });
+            }
+            try {
+                const stripe = getStripe(secret);
+                const expectedAmount = Math.round(serverFare * 100);
+
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: expectedAmount,
+                    currency: 'gbp',
+                    automatic_payment_methods: {
+                        enabled: true,
+                    },
+                    metadata: {
+                        tenantId: tenant.id,
+                        jobId: job.id.toString(),
+                        customerEmail: passengerEmail || 'unknown',
+                        paymentPurpose: 'PUBLIC_BOOKING'
+                    }
+                });
+                clientSecret = paymentIntent.client_secret;
+            } catch (err: any) {
+                console.error("Stripe Intent Error:", err);
+                return NextResponse.json({ error: 'Failed to initialize payment.' }, { status: 500, headers: corsHeaders });
+            }
+        }
+
+        // Send Request Received immediately for all bookings EXCEPT CARD
+        if (paymentType !== 'CARD' && !job.notes?.includes('[NO_NOTIFICATIONS]')) {
             const jobWithCustomer = { ...job, customer: { email: job.passengerEmail } };
             const notificationPromises = [
                 EmailService.sendBookingRequestReceived(jobWithCustomer as any, tenant),
