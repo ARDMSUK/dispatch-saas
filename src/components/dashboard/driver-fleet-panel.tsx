@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Car, Phone } from 'lucide-react';
-import { AddDriverDialog, AddVehicleDialog } from '@/components/dashboard/fleet-dialogs';
+
 
 import { useSession } from 'next-auth/react';
 
@@ -27,16 +27,7 @@ export function DriverFleetPanel({ drivers, vehicles, onRefresh, onAssign, selec
     return (
         <div className="h-full flex flex-col bg-slate-50 border-t border-slate-200">
             <div className="px-4 py-3 border-b border-slate-200 flex justify-between items-center bg-white">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Fleet Management</span>
-                <div className="flex gap-1">
-                    {isAdmin && (
-                        activeTab === 'DRIVERS' ? (
-                            <AddDriverDialog onDriverAdded={onRefresh} />
-                        ) : (
-                            <AddVehicleDialog onVehicleAdded={onRefresh} />
-                        )
-                    )}
-                </div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Drivers</span>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
