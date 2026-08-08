@@ -608,7 +608,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                 throw new Error(errData.details || errData.error || "Failed to create job");
             }
 
-            toast.success(isReturn ? "Outbound & Return Jobs Dispatched" : "Job Dispatched Successfully", {
+            toast.success(isReturn ? "Outbound & Return Jobs Saved" : "Job Saved Successfully", {
                 description: `Booking for ${passengerName} created.`
             });
 

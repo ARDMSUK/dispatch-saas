@@ -413,7 +413,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            case 'PENDING': return 'bg-violet-100 text-violet-800 border-violet-300';
             case 'UNASSIGNED': return 'bg-indigo-600/10 text-indigo-600 border-indigo-600/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';

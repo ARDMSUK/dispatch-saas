@@ -430,7 +430,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            case 'PENDING': return 'bg-violet-100 text-violet-800 border-violet-300';
             case 'UNASSIGNED': return 'bg-indigo-600/10 text-indigo-600 border-indigo-600/20';
             case 'DISPATCHED': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
             case 'EN_ROUTE': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
@@ -1121,7 +1121,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                             </TabsList>
                         </div>
                         {/* Search Input Box */}
-                        <div className="relative w-48 md:w-64 shrink-0">
+                        <div className="relative w-32 md:w-40 shrink-0">
                             <input
                                 type="text"
                                 placeholder="Search name, phone, address, ID..."
