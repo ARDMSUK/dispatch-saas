@@ -263,12 +263,12 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
         }
     };
 
-    const handleStatusUpdate = async (jobId: number, newStatus: string) => {
+    const handleStatusUpdate = async (jobId: number, newStatus: string, payload: any = {}) => {
         try {
             const res = await fetch(`/api/jobs/${jobId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
+                body: JSON.stringify({ status: newStatus, ...payload })
             });
             if (res.ok) {
                 toast.success(`Job status updated to ${newStatus}`);
@@ -286,6 +286,28 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
         } catch (error) {
             console.error(error);
             toast.error("Error updating status");
+        }
+    };
+
+    const handleMarkCompleted = (job: Job) => {
+        if (job.paymentStatus === 'UNPAID') {
+            if (job.paymentType === 'CASH') {
+                if (window.confirm('Confirm cash was collected and mark this job completed?')) {
+                    handleStatusUpdate(job.id, 'COMPLETED', { paymentStatus: 'PAID' });
+                }
+            } else if (job.paymentType === 'CARD') {
+                if (window.confirm('This card job is unpaid. Complete as unpaid / office authorised?')) {
+                    handleStatusUpdate(job.id, 'COMPLETED', { completeUnpaid: true });
+                }
+            } else if (job.paymentType === 'ACCOUNT') {
+                if (window.confirm('Complete this account job for invoicing later?')) {
+                    handleStatusUpdate(job.id, 'COMPLETED', { completeUnpaid: true });
+                }
+            } else {
+                handleStatusUpdate(job.id, 'COMPLETED');
+            }
+        } else {
+            handleStatusUpdate(job.id, 'COMPLETED');
         }
     };
 
@@ -948,7 +970,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                 )}
 
                                 <div className="h-px bg-white/10 my-1" />
-                                <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(job.id, 'COMPLETED'); }}>
+                                <Button variant="ghost" className="w-full justify-start h-8 text-xs font-normal" onClick={(e) => { e.stopPropagation(); handleMarkCompleted(job as any); }}>
                                     <CheckCircle className="mr-2 h-3.5 w-3.5 text-emerald-500" /> Mark Completed
                                 </Button>
                                 
