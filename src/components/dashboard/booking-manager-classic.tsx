@@ -1121,7 +1121,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                             </TabsList>
                         </div>
                         {/* Search Input Box */}
-                        <div className="relative w-32 md:w-40 shrink-0 h-9">
+                        <div className="relative w-32 md:w-48 lg:w-56 shrink-0 h-9">
                             <input
                                 type="text"
                                 placeholder="Search name, phone, address, ID..."
