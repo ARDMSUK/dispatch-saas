@@ -196,11 +196,7 @@ export default function SettingsPage() {
                     stripePublishableKey,
                     stripeSecretKey,
                     paymentRouting,
-                    aviationStackApiKey,
-                    sumupClientId,
-                    sumupClientSecret,
-                    zettleClientId,
-                    zettleClientSecret
+                    aviationStackApiKey
                 })
             });
 
