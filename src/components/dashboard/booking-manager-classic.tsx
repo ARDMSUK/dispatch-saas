@@ -1094,38 +1094,38 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                     <div className="flex items-center gap-2 pb-2">
                         <div className="flex-1 overflow-x-auto scrollbar-none">
                             <TabsList className="inline-flex w-auto bg-slate-100 border border-slate-200 h-9 p-1 gap-1">
-                                <TabsTrigger value="PENDING_NOW" className="px-3 text-[10px] data-[state=active]:bg-indigo-600 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="PENDING_NOW" className="px-2 text-[10px] data-[state=active]:bg-indigo-600 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     Pending {filterJobs('PENDING_NOW').length > 0 && `(${filterJobs('PENDING_NOW').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="TODAY" className="px-3 text-[10px] data-[state=active]:bg-teal-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="TODAY" className="px-2 text-[10px] data-[state=active]:bg-teal-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     Today {filterJobs('TODAY').length > 0 && `(${filterJobs('TODAY').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="FUTURE" className="px-3 text-[10px] data-[state=active]:bg-zinc-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="FUTURE" className="px-2 text-[10px] data-[state=active]:bg-zinc-700 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     Future {filterJobs('FUTURE').length > 0 && `(${filterJobs('FUTURE').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="DISPATCHED" className="px-3 text-[10px] data-[state=active]:bg-blue-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="DISPATCHED" className="px-2 text-[10px] data-[state=active]:bg-blue-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     Dispatched {filterJobs('DISPATCHED').length > 0 && `(${filterJobs('DISPATCHED').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="POB" className="px-3 text-[10px] data-[state=active]:bg-pink-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="POB" className="px-2 text-[10px] data-[state=active]:bg-pink-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     POB {filterJobs('POB').length > 0 && `(${filterJobs('POB').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="COMPLETED" className="px-3 text-[10px] data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="COMPLETED" className="px-2 text-[10px] data-[state=active]:bg-emerald-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     Completed {filterJobs('COMPLETED').length > 0 && `(${filterJobs('COMPLETED').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="CANCELLED" className="px-3 text-[10px] data-[state=active]:bg-red-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="CANCELLED" className="px-2 text-[10px] data-[state=active]:bg-red-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     Cancelled {filterJobs('CANCELLED').length > 0 && `(${filterJobs('CANCELLED').length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="NO_SHOW" className="px-3 text-[10px] data-[state=active]:bg-zinc-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
+                                <TabsTrigger value="NO_SHOW" className="px-2 text-[10px] data-[state=active]:bg-zinc-500 data-[state=active]:text-white font-bold uppercase whitespace-nowrap">
                                     No Show {filterJobs('NO_SHOW').length > 0 && `(${filterJobs('NO_SHOW').length})`}
                                 </TabsTrigger>
                             </TabsList>
                         </div>
                         {/* Search Input Box */}
-                        <div className="relative w-32 md:w-40 shrink-0">
+                        <div className="relative w-32 md:w-40 shrink-0 h-9">
                             <input
                                 type="text"
                                 placeholder="Search name, phone, address, ID..."
-                                className="w-full bg-slate-100 border border-slate-200 rounded-md py-1.5 pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-blue-500/50"
+                                className="w-full h-full bg-slate-100 border border-slate-200 rounded-md pl-8 pr-8 text-xs text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -1147,7 +1147,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                     checked={showSchoolJobs} 
                                     onChange={(e) => setShowSchoolJobs(e.target.checked)}
                                 />
-                                Show School Jobs
+                                School Jobs
                             </label>
                         </div>
                         <Button variant="outline" size="icon" className="h-9 w-9 border-slate-200 bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 shrink-0" onClick={() => fetchJobs(true, searchQuery)}>
