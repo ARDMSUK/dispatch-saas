@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyPassengerToken } from '@/lib/passenger-auth';
 
 export async function POST(
     req: Request,
@@ -7,9 +8,14 @@ export async function POST(
 ) {
     try {
         const { slug } = await params;
+        const authPayload = await verifyPassengerToken(req);
+        if (!authPayload) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { phone, firstName, lastName, email } = await req.json();
 
-        if (!phone || !firstName || !lastName) {
+        if (!firstName || !lastName) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
@@ -22,17 +28,24 @@ export async function POST(
             return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
         }
 
+        if (tenant.id !== authPayload.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403 });
+        }
+
+        // Phone is allowed to be updated, but not used as authorization
+        const dataToUpdate: any = {
+            name: `${firstName} ${lastName}`.trim(),
+            email: email || null
+        };
+        if (phone) {
+            dataToUpdate.phone = phone;
+        }
+
         const customer = await prisma.customer.update({
             where: {
-                tenantId_phone: {
-                    tenantId: tenant.id,
-                    phone: phone
-                }
+                id: authPayload.customerId
             },
-            data: {
-                name: `${firstName} ${lastName}`.trim(),
-                email: email || null
-            }
+            data: dataToUpdate
         });
 
         return NextResponse.json({ 

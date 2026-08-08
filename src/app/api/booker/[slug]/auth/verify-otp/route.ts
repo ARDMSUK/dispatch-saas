@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import { signPassengerToken } from '@/lib/passenger-auth';
 
 export async function POST(
     req: Request,
@@ -60,6 +61,12 @@ export async function POST(
             });
         }
 
+        const token = await signPassengerToken({
+            customerId: customer.id,
+            tenantId: tenant.id,
+            role: 'PASSENGER'
+        });
+
         return NextResponse.json({ 
             success: true, 
             customer: {
@@ -68,7 +75,8 @@ export async function POST(
                 name: customer.name,
                 email: customer.email
             },
-            needsProfileSetup
+            needsProfileSetup,
+            token
         });
 
     } catch (error) {

@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 import { encrypt, decrypt } from '@/lib/encryption';
+import { verifyPassengerToken } from '@/lib/passenger-auth';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,OPTIONS",
-    "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+    "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
 };
 
 export async function OPTIONS() {
@@ -19,11 +20,10 @@ export async function GET(
 ) {
     try {
         const { slug } = await params;
-        const url = new URL(req.url);
-        const phone = url.searchParams.get('phone');
-
-        if (!phone) {
-            return NextResponse.json({ error: 'Missing phone number' }, { status: 400, headers: corsHeaders });
+        
+        const authPayload = await verifyPassengerToken(req);
+        if (!authPayload) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
         }
 
         const tenant = await prisma.tenant.findUnique({
@@ -33,13 +33,14 @@ export async function GET(
         if (!tenant || !(decrypt(tenant.stripeSecretKey) as string)) {
             return NextResponse.json({ error: 'Tenant or Stripe configuration not found' }, { status: 404, headers: corsHeaders });
         }
+        
+        if (tenant.id !== authPayload.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403, headers: corsHeaders });
+        }
 
         const customer = await prisma.customer.findUnique({
             where: {
-                tenantId_phone: {
-                    tenantId: tenant.id,
-                    phone: phone
-                }
+                id: authPayload.customerId
             }
         });
 

@@ -6,6 +6,7 @@ import { SmsService } from '@/lib/sms-service';
 import { calculatePrice } from '@/lib/pricing';
 import { getStripe } from '@/lib/stripe';
 import { decrypt } from '@/lib/encryption';
+import { verifyPassengerToken } from '@/lib/passenger-auth';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -96,6 +97,18 @@ export async function POST(
         }
 
         const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+
+        const authHeader = req.headers.get('authorization');
+        let authPayload = null;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            authPayload = await verifyPassengerToken(req);
+            if (!authPayload) {
+                return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
+            }
+            if (authPayload.tenantId !== tenant.id) {
+                return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403, headers: corsHeaders });
+            }
+        }
 
         // Turnstile Verification
         if (process.env.NODE_ENV === 'production' || turnstileToken !== '1x00000000000000000000AA') {
@@ -207,26 +220,41 @@ export async function POST(
         const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
 
         // 2. Identify or Create Customer
-        const customer = await prisma.customer.upsert({
-            where: {
-                tenantId_phone: {
+        let customer;
+        if (authPayload) {
+            customer = await prisma.customer.findUnique({
+                where: { id: authPayload.customerId }
+            });
+            if (!customer) {
+                return NextResponse.json({ error: 'Authenticated customer not found' }, { status: 404, headers: corsHeaders });
+            }
+            // Overwrite body inputs to match authenticated identity
+            // but we still let passengerPhone variable be used for the Job
+            // to support booking for others if that's a feature, OR force it?
+            // The prompt says: "do not allow phone/customerId/user identity in the request body to impersonate another customer"
+            // Wait, if it's their job, they might want to enter a different phone number for the passenger. But for now, we just attach to the authenticated customer.
+        } else {
+            customer = await prisma.customer.upsert({
+                where: {
+                    tenantId_phone: {
+                        tenantId: tenant.id,
+                        phone: passengerPhone,
+                    }
+                },
+                update: {
+                    name: passengerName,
+                    email: passengerEmail,
+                    expoPushToken: expoPushToken || undefined
+                },
+                create: {
                     tenantId: tenant.id,
                     phone: passengerPhone,
+                    name: passengerName,
+                    email: passengerEmail,
+                    expoPushToken: expoPushToken || undefined
                 }
-            },
-            update: {
-                name: passengerName,
-                email: passengerEmail,
-                expoPushToken: expoPushToken || undefined
-            },
-            create: {
-                tenantId: tenant.id,
-                phone: passengerPhone,
-                name: passengerName,
-                email: passengerEmail,
-                expoPushToken: expoPushToken || undefined
-            }
-        });
+            });
+        }
 
         const job = await prisma.job.create({
             data: {

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyPassengerToken } from '@/lib/passenger-auth';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,OPTIONS",
-    "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+    "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
 };
 
 export async function OPTIONS() {
@@ -24,6 +25,11 @@ export async function GET(
             return NextResponse.json({ error: 'Invalid Job ID' }, { status: 400, headers: corsHeaders });
         }
 
+        const authPayload = await verifyPassengerToken(request);
+        if (!authPayload) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
+        }
+
         const tenant = await prisma.tenant.findUnique({
             where: { slug: tenantSlug }
         });
@@ -32,10 +38,15 @@ export async function GET(
             return NextResponse.json({ error: 'Tenant not found' }, { status: 404, headers: corsHeaders });
         }
 
+        if (tenant.id !== authPayload.tenantId) {
+            return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403, headers: corsHeaders });
+        }
+
         const job = await prisma.job.findUnique({
             where: {
                 id: jobId,
-                tenantId: tenant.id
+                tenantId: authPayload.tenantId,
+                customerId: authPayload.customerId
             },
             include: {
                 driver: true
