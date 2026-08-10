@@ -110,8 +110,8 @@ export async function POST(
             }
         }
 
-        // Turnstile Verification
-        if (process.env.NODE_ENV === 'production' || turnstileToken !== '1x00000000000000000000AA') {
+        // Turnstile Verification (Skip for authenticated native apps, require for public web booker)
+        if (!authPayload && (process.env.NODE_ENV === 'production' || turnstileToken !== '1x00000000000000000000AA')) {
             if (!turnstileToken) {
                 return NextResponse.json({ error: 'Security token missing. Please refresh the page.' }, { status: 400, headers: corsHeaders });
             }
