@@ -519,6 +519,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
         const hasMeetGreet = job.notes?.includes('MEET & GREET');
         const hasReminder = job.notes?.includes('REMINDER:');
         const isWebRequest = job.notes?.includes('[WEB_BOOKER]') && job.status === 'PENDING';
+        const isPassengerAppRequest = job.notes?.includes('[PASSENGER_APP]') && job.status === 'PENDING';
+        const requiresExternalApproval = isWebRequest || isPassengerAppRequest;
 
         return (
             <div
@@ -552,7 +554,12 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                                 <AlertCircle className="w-4 h-4 animate-bounce" /> WEB REQUEST — ACTION REQUIRED
                             </Badge>
                         )}
-                        {isWebRequest && job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID' && (
+                        {isPassengerAppRequest && (
+                            <Badge variant="outline" className="bg-orange-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1 flex items-center gap-1 shadow-[0_0_15px_rgba(249,115,22,0.5)]">
+                                <AlertCircle className="w-4 h-4 animate-bounce" /> APP REQUEST — ACTION REQUIRED
+                            </Badge>
+                        )}
+                        {requiresExternalApproval && job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID' && (
                             <Badge variant="outline" className="bg-rose-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1">
                                 CARD PAYMENT REQUIRED
                             </Badge>
@@ -921,8 +928,8 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                     </div>
                 </div>
 
-                {/* Inline Action Buttons for Web Requests */}
-                {isWebRequest && (
+                {/* Inline Action Buttons for External Requests */}
+                {requiresExternalApproval && (
                     <div className="mt-3 flex gap-2">
                         <Button
                             size="sm"
