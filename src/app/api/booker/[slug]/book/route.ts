@@ -191,7 +191,11 @@ export async function POST(
         if (!sanitizedNotes) {
             sanitizedNotes = 'Booked via Web/App';
         }
-        sanitizedNotes += ' [WEB_BOOKER]';
+        if (authPayload) {
+            sanitizedNotes += ' [PASSENGER_APP]';
+        } else {
+            sanitizedNotes += ' [WEB_BOOKER]';
+        }
 
         const baseContext = {
             pickup,

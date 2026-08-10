@@ -311,7 +311,7 @@ export async function PATCH(
         // 0. Confirm public web bookings when accepted (UNASSIGNED or DISPATCHED)
         if (
             (status === 'UNASSIGNED' || status === 'DISPATCHED') &&
-            updatedJob.notes?.includes('[WEB_BOOKER]') && 
+            (updatedJob.notes?.includes('[WEB_BOOKER]') || updatedJob.notes?.includes('[PASSENGER_APP]')) && 
             !updatedJob.notes?.includes('[CONFIRMATION_SENT]') && 
             !muteNotifications
         ) {
@@ -331,7 +331,16 @@ export async function PATCH(
 
                 const atLeastOneSent = results.some(result => result.status === 'fulfilled');
 
-                if (atLeastOneSent) {
+                if (updatedJob.customer?.expoPushToken) {
+                    sendPushNotification({
+                        to: updatedJob.customer.expoPushToken,
+                        title: 'Booking Confirmed',
+                        body: 'Your booking has been accepted and confirmed.',
+                        data: { route: 'rides', id: jobId }
+                    });
+                }
+
+                if (atLeastOneSent || updatedJob.customer?.expoPushToken) {
                     const currentJob = await prisma.job.findUnique({ where: { id: jobId }, select: { notes: true } });
                     if (currentJob && !currentJob.notes?.includes('[CONFIRMATION_SENT]')) {
                         await prisma.job.update({

@@ -65,10 +65,6 @@ export const SmsService = {
                 : `${baseUrl}/track/${booking.id}`;
             
             message = `${company}: Booking #${booking.id} Confirmed.\nPickup: ${date}\nFrom: ${booking.pickupAddress || booking.pickup}\nTo: ${destination}`;
-            
-            if (orgSettings?.enableLiveTracking !== false) {
-                message += `\nTrack: ${trackingLink}`;
-            }
         }
 
         const config = orgSettings ? {
