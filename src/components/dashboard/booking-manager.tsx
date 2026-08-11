@@ -954,7 +954,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
 
                 {/* Quick Actions (Mobile Layout) */}
                 <div className="flex gap-2 mb-3">
-                    {job.status === 'PENDING' && job.preAssignedDriver && (
+                    {job.status === 'PENDING' && job.preAssignedDriver && !requiresExternalApproval && (
                         <Button 
                             size="sm" 
                             className="h-7 text-[11px] px-3 bg-purple-100 text-purple-700 hover:bg-purple-200 border-none w-full"
@@ -967,7 +967,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                             Dispatch
                         </Button>
                     )}
-                    {(job.status === 'PENDING' || job.status === 'UNASSIGNED') && !job.preAssignedDriver && (
+                    {(job.status === 'PENDING' || job.status === 'UNASSIGNED') && !job.preAssignedDriver && !requiresExternalApproval && (
                         <Button 
                             size="sm" 
                             variant="outline"
