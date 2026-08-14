@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculatePrice } from '@/lib/pricing';
+import { verifyPassengerToken } from '@/lib/passenger-auth';
+import { getAuthoritativeDistance } from '@/lib/geocoding';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -62,11 +64,37 @@ export async function POST(
             return NextResponse.json({ error: 'Pickup time cannot be in the past.' }, { status: 400, headers: corsHeaders });
         }
 
+        const authHeader = req.headers.get('authorization');
+        let authPayload = null;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            authPayload = await verifyPassengerToken(req);
+            if (!authPayload) {
+                return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: corsHeaders });
+            }
+            if (authPayload.tenantId !== tenant.id) {
+                return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403, headers: corsHeaders });
+            }
+        }
+
+        let authoritativeDistance = distanceMiles;
+        if (authPayload) {
+            try {
+                const distance = await getAuthoritativeDistance(pickupLat, pickupLng, dropoffLat, dropoffLng, vias);
+                if (distance !== undefined) {
+                    authoritativeDistance = distance;
+                } else {
+                    authoritativeDistance = undefined; // Force calculatePrice to fallback if no coords
+                }
+            } catch (e: any) {
+                return NextResponse.json({ error: e.message || 'Routing failed' }, { status: 400, headers: corsHeaders });
+            }
+        }
+
         const baseContext = {
             pickup,
             dropoff,
             vias,
-            distanceMiles,
+            distanceMiles: authoritativeDistance,
             pickupTime: requestedDate,
             companyId: tenant.id, // Auth-less injection
             isWaitAndReturn,

@@ -69,6 +69,78 @@ export async function getRouteDistance(start: LatLng, end: LatLng): Promise<{ di
     }
 }
 
+export async function getGoogleRouteDistance(start: LatLng, end: LatLng): Promise<{ distanceMiles: number, durationMins: number } | null> {
+    try {
+        const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
+        if (!apiKey) {
+            console.warn("[Geocoding] GOOGLE_MAPS_SERVER_API_KEY is missing. Cannot use Google Routes API.");
+            return null;
+        }
+
+        const url = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+        
+        const payload = {
+            origin: { location: { latLng: { latitude: start.lat, longitude: start.lng } } },
+            destination: { location: { latLng: { latitude: end.lat, longitude: end.lng } } },
+            travelMode: 'DRIVE'
+        };
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': apiKey,
+                'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            console.error(`[Geocoding] Google Routes API failed with status ${res.status}`);
+            return null;
+        }
+
+        const data = await res.json();
+        
+        if (data.routes && data.routes.length > 0) {
+            const route = data.routes[0];
+            const distanceMeters = route.distanceMeters || 0;
+            let durationSeconds = 0;
+            if (route.duration) {
+                durationSeconds = parseInt(route.duration.replace('s', ''), 10) || 0;
+            }
+
+            return {
+                distanceMiles: distanceMeters * 0.000621371,
+                durationMins: Math.ceil(durationSeconds / 60)
+            };
+        }
+
+        return null;
+    } catch (error) {
+        console.error("[Geocoding] Google Routes error:", error);
+        return null;
+    }
+}
+
+export async function getAuthoritativeDistance(pickupLat?: number, pickupLng?: number, dropoffLat?: number, dropoffLng?: number, vias?: any[]): Promise<number | undefined> {
+    if (pickupLat == null || pickupLng == null || dropoffLat == null || dropoffLng == null) {
+        return undefined;
+    }
+    if (vias && vias.length > 0) {
+        throw new Error('Route pricing with intermediary stops (vias) cannot currently be calculated by this endpoint.');
+    }
+    const googleRoute = await getGoogleRouteDistance({ lat: pickupLat, lng: pickupLng }, { lat: dropoffLat, lng: dropoffLng });
+    if (googleRoute && googleRoute.distanceMiles > 0) {
+        return googleRoute.distanceMiles;
+    }
+    const osrmRoute = await getRouteDistance({ lat: pickupLat, lng: pickupLng }, { lat: dropoffLat, lng: dropoffLng });
+    if (osrmRoute && osrmRoute.distanceMiles > 0) {
+        return osrmRoute.distanceMiles;
+    }
+    throw new Error('Unable to calculate road distance at the moment. Please try again.');
+}
+
 // Ray Casting Algorithm to check if point is in polygon
 export function isPointInZone(point: LatLng, polygon: LatLng[]): boolean {
     let inside = false;

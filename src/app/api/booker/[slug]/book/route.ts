@@ -7,6 +7,7 @@ import { calculatePrice } from '@/lib/pricing';
 import { getStripe } from '@/lib/stripe';
 import { decrypt } from '@/lib/encryption';
 import { verifyPassengerToken } from '@/lib/passenger-auth';
+import { getAuthoritativeDistance } from '@/lib/geocoding';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -197,11 +198,24 @@ export async function POST(
             sanitizedNotes += ' [WEB_BOOKER]';
         }
 
+        // SECURITY FIX: Never trust client-provided distance for the final booked fare.
+        let authoritativeDistance = distanceMiles;
+        try {
+            const distance = await getAuthoritativeDistance(pickupLat, pickupLng, dropoffLat, dropoffLng, vias);
+            if (distance !== undefined) {
+                authoritativeDistance = distance;
+            } else {
+                authoritativeDistance = undefined; // Force calculatePrice to fallback if no coords
+            }
+        } catch (e: any) {
+            return NextResponse.json({ error: e.message || 'Routing failed' }, { status: 400, headers: corsHeaders });
+        }
+
         const baseContext = {
             pickup,
             dropoff,
             vias,
-            distanceMiles,
+            distanceMiles: authoritativeDistance,
             pickupTime: requestedDate,
             companyId: tenant.id,
             isWaitAndReturn,
