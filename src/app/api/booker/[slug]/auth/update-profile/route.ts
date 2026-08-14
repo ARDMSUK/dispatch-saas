@@ -32,9 +32,15 @@ export async function POST(
             return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403 });
         }
 
+        let finalName = firstName.trim();
+        const lastTrimmed = lastName.trim();
+        if (lastTrimmed && !finalName.toLowerCase().includes(lastTrimmed.toLowerCase())) {
+            finalName = `${finalName} ${lastTrimmed}`;
+        }
+
         // Phone is allowed to be updated, but not used as authorization
         const dataToUpdate: any = {
-            name: `${firstName} ${lastName}`.trim(),
+            name: finalName,
             email: email || null
         };
         if (phone) {

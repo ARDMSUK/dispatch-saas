@@ -113,20 +113,22 @@ export function EditBookingDialog({ job, open, onOpenChange, onJobUpdated }: Edi
                     <div className="space-y-3">
                         <label className="text-xs font-bold text-slate-400 uppercase">Journey</label>
                         <div className="relative">
-                            <div className="absolute left-3 top-3 text-emerald-500"><Navigation className="h-4 w-4" /></div>
-                            <input
+                            <div className="absolute left-3 top-3 z-10 text-emerald-500"><Navigation className="h-4 w-4" /></div>
+                            <LocationInput
                                 className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={pickup}
-                                onChange={e => setPickup(e.target.value)}
+                                onChange={setPickup}
+                                onLocationSelect={(loc) => setPickup(loc.address)}
                                 placeholder="Pickup"
                             />
                         </div>
                         <div className="relative">
-                            <div className="absolute left-3 top-3 text-indigo-600"><MapPin className="h-4 w-4" /></div>
-                            <input
+                            <div className="absolute left-3 top-3 z-10 text-indigo-600"><MapPin className="h-4 w-4" /></div>
+                            <LocationInput
                                 className="w-full bg-slate-100 border border-slate-200 rounded-md py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:outline-none focus:border-blue-500/50"
                                 value={dropoff}
-                                onChange={e => setDropoff(e.target.value)}
+                                onChange={setDropoff}
+                                onLocationSelect={(loc) => setDropoff(loc.address)}
                                 placeholder="Dropoff"
                             />
                         </div>
