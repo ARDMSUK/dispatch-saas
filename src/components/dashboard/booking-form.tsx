@@ -106,6 +106,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const [pickupTime, setPickupTime] = useState(() => {
         return format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm");
     });
+    const [userModifiedTime, setUserModifiedTime] = useState(false);
 
     const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
 
@@ -119,11 +120,13 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value || format(new Date(), 'yyyy-MM-dd');
         setPickupTime(`${newDate}T${pickupTimeOnly}`);
+        setUserModifiedTime(true);
     };
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTime = e.target.value || '12:00';
         setPickupTime(`${pickupDate}T${newTime}`);
+        setUserModifiedTime(true);
     };
 
     const getPickupDayName = () => {
@@ -137,6 +140,19 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
             return '';
         }
     };
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && !userModifiedTime) {
+                setPickupTime(format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm"));
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [userModifiedTime]);
 
     useEffect(() => {
         if (timeInputRef.current) {
@@ -664,6 +680,7 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
         const now = new Date();
         now.setMinutes(now.getMinutes() + 10);
         setPickupTime(now.toISOString().slice(0, 16));
+        setUserModifiedTime(false);
 
         // Re-focus the hour segment of the time input
         setTimeout(() => {
@@ -877,7 +894,10 @@ export function BookingForm({ onJobCreated }: BookingFormProps) {
                         <Button
                             variant="outline"
                             className={`h-[42px] px-3 border-slate-200 transition-all ${pickupTime.includes('T') ? 'bg-black text-white border-black hover:bg-black/90' : 'bg-slate-100 text-black hover:bg-slate-200'}`}
-                            onClick={() => setPickupTime(format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm"))}
+                            onClick={() => {
+                                setPickupTime(format(addMinutes(new Date(), 10), "yyyy-MM-dd'T'HH:mm"));
+                                setUserModifiedTime(false);
+                            }}
                         >
                             ASAP
                         </Button>

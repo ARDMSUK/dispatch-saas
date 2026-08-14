@@ -90,6 +90,15 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
     // Search Box State
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+    const [searchLoading, setSearchLoading] = useState(false);
+
+    // Cancel Booking Dialog State
+    const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+    const [jobToCancel, setJobToCancel] = useState<Job | null>(null);
+
+    const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+    };
 
     const [showSchoolJobs, setShowSchoolJobs] = useState(false);
 
@@ -1009,31 +1018,10 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                                             <Button
                                                 variant="ghost"
                                                 className="w-full justify-start h-8 text-xs font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                onClick={async (e) => {
+                                                onClick={(e) => {
                                                     e.stopPropagation();
-                                                    const isPaid = job.paymentStatus === 'PAID' || job.paymentStatus === 'AUTHORIZED';
-                                                    const confirmMessage = isPaid 
-                                                        ? "Are you sure you want to cancel this booking? NOTE: Refund must be processed separately." 
-                                                        : "Are you sure you want to cancel this booking?";
-                                                        
-                                                    if (confirm(confirmMessage)) {
-                                                        try {
-                                                            const res = await fetch(`/api/jobs/${job.id}`, {
-                                                                method: 'PATCH',
-                                                                headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({ status: 'CANCELLED' })
-                                                            });
-                                                            if (res.ok) {
-                                                                toast.success("Booking cancelled successfully");
-                                                                fetchJobs();
-                                                            } else {
-                                                                toast.error("Failed to cancel booking");
-                                                            }
-                                                        } catch (err) {
-                                                            console.error(err);
-                                                            toast.error("Error cancelling booking");
-                                                        }
-                                                    }
+                                                    setJobToCancel(job);
+                                                    setCancelDialogOpen(true);
                                                 }}
                                             >
                                                 <Ban className="mr-2 h-3.5 w-3.5 text-red-500" /> 
@@ -1537,6 +1525,55 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                     )}
                 </DialogContent>
             </Dialog>
+            {jobToCancel && (
+                <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                    <DialogContent className="bg-white border-slate-200 text-slate-900 sm:max-w-[400px]">
+                        <DialogHeader>
+                            <DialogTitle className="text-rose-600 font-bold">Cancel Booking #{jobToCancel.id}</DialogTitle>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <p className="text-sm text-slate-600 mb-2">Are you sure you want to cancel this booking?</p>
+                            {(jobToCancel.paymentStatus === 'PAID' || jobToCancel.paymentStatus === 'AUTHORIZED') && (
+                                <p className="text-sm font-semibold text-rose-600">
+                                    NOTE: This booking has been paid/authorized. Refunds must be processed separately.
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex justify-end space-x-2 pt-2">
+                            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+                                Keep Booking
+                            </Button>
+                            <Button 
+                                variant="destructive" 
+                                className="bg-rose-600 hover:bg-rose-700 text-white"
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch(`/api/jobs/${jobToCancel.id}`, {
+                                            method: 'PATCH',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ status: 'CANCELLED' })
+                                        });
+                                        if (res.ok) {
+                                            toast.success("Booking cancelled successfully");
+                                            fetchJobs();
+                                        } else {
+                                            toast.error("Failed to cancel booking");
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        toast.error("Error cancelling booking");
+                                    } finally {
+                                        setCancelDialogOpen(false);
+                                        setJobToCancel(null);
+                                    }
+                                }}
+                            >
+                                Cancel Booking
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
