@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculatePrice } from '@/lib/pricing';
 import { verifyPassengerToken } from '@/lib/passenger-auth';
-import { getAuthoritativeDistance } from '@/lib/geocoding';
+import { getAuthoritativeDistanceAndPolyline } from '@/lib/geocoding';
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -77,14 +77,16 @@ export async function POST(
         }
 
         let authoritativeDistance = distanceMiles;
+        let routePolyline: string | undefined = undefined;
         if (authPayload) {
             try {
-                const distance = await getAuthoritativeDistance(pickupLat, pickupLng, dropoffLat, dropoffLng, vias);
-                if (distance !== undefined) {
-                    authoritativeDistance = distance;
+                const routeData = await getAuthoritativeDistanceAndPolyline(pickupLat, pickupLng, dropoffLat, dropoffLng, vias);
+                if (routeData.distanceMiles !== undefined) {
+                    authoritativeDistance = routeData.distanceMiles;
                 } else {
                     authoritativeDistance = undefined; // Force calculatePrice to fallback if no coords
                 }
+                routePolyline = routeData.polyline;
             } catch (e: any) {
                 return NextResponse.json({ error: e.message || 'Routing failed' }, { status: 400, headers: corsHeaders });
             }
@@ -111,7 +113,7 @@ export async function POST(
                 ...baseContext,
                 vehicleType
             });
-            return NextResponse.json(result, { headers: corsHeaders });
+            return NextResponse.json({ ...result, routePolyline }, { headers: corsHeaders });
         } else {
             // 3. Return multiple vehicle options for the Mobile Customer App
             const vehicleTypes = [
@@ -131,7 +133,7 @@ export async function POST(
                 };
             }));
 
-            return NextResponse.json({ quotes }, { headers: corsHeaders });
+            return NextResponse.json({ quotes, routePolyline }, { headers: corsHeaders });
         }
 
     } catch (error) {

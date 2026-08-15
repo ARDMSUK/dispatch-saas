@@ -48,15 +48,20 @@ export async function GET(
             orderBy: {
                 pickupTime: 'desc'
             },
-            include: {
+            select: {
+                id: true,
+                pickupTime: true,
+                status: true,
+                pickupAddress: true,
+                dropoffAddress: true,
+                fare: true,
+                driverId: true,
+                vehicleType: true,
                 driver: {
                     select: {
-                        id: true,
                         name: true,
-                        phone: true,
-                        callsign: true,
                         status: true,
-                        vehicles: true
+                        callsign: true
                     }
                 }
             }

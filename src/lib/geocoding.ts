@@ -69,7 +69,7 @@ export async function getRouteDistance(start: LatLng, end: LatLng): Promise<{ di
     }
 }
 
-export async function getGoogleRouteDistance(start: LatLng, end: LatLng): Promise<{ distanceMiles: number, durationMins: number } | null> {
+export async function getGoogleRouteDistance(start: LatLng, end: LatLng): Promise<{ distanceMiles: number, durationMins: number, polyline?: string } | null> {
     try {
         const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
         if (!apiKey) {
@@ -90,7 +90,7 @@ export async function getGoogleRouteDistance(start: LatLng, end: LatLng): Promis
             headers: {
                 'Content-Type': 'application/json',
                 'X-Goog-Api-Key': apiKey,
-                'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration'
+                'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline'
             },
             body: JSON.stringify(payload)
         });
@@ -112,7 +112,8 @@ export async function getGoogleRouteDistance(start: LatLng, end: LatLng): Promis
 
             return {
                 distanceMiles: distanceMeters * 0.000621371,
-                durationMins: Math.ceil(durationSeconds / 60)
+                durationMins: Math.ceil(durationSeconds / 60),
+                polyline: route.polyline?.encodedPolyline
             };
         }
 
@@ -137,6 +138,24 @@ export async function getAuthoritativeDistance(pickupLat?: number, pickupLng?: n
     const osrmRoute = await getRouteDistance({ lat: pickupLat, lng: pickupLng }, { lat: dropoffLat, lng: dropoffLng });
     if (osrmRoute && osrmRoute.distanceMiles > 0) {
         return osrmRoute.distanceMiles;
+    }
+    throw new Error('Unable to calculate road distance at the moment. Please try again.');
+}
+
+export async function getAuthoritativeDistanceAndPolyline(pickupLat?: number, pickupLng?: number, dropoffLat?: number, dropoffLng?: number, vias?: any[]): Promise<{ distanceMiles?: number, polyline?: string }> {
+    if (pickupLat == null || pickupLng == null || dropoffLat == null || dropoffLng == null) {
+        return {};
+    }
+    if (vias && vias.length > 0) {
+        throw new Error('Route pricing with intermediary stops (vias) cannot currently be calculated by this endpoint.');
+    }
+    const googleRoute = await getGoogleRouteDistance({ lat: pickupLat, lng: pickupLng }, { lat: dropoffLat, lng: dropoffLng });
+    if (googleRoute && googleRoute.distanceMiles > 0) {
+        return { distanceMiles: googleRoute.distanceMiles, polyline: googleRoute.polyline };
+    }
+    const osrmRoute = await getRouteDistance({ lat: pickupLat, lng: pickupLng }, { lat: dropoffLat, lng: dropoffLng });
+    if (osrmRoute && osrmRoute.distanceMiles > 0) {
+        return { distanceMiles: osrmRoute.distanceMiles };
     }
     throw new Error('Unable to calculate road distance at the moment. Please try again.');
 }
