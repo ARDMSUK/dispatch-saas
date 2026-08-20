@@ -538,6 +538,8 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
         const hasMeetGreet = job.notes?.includes('MEET & GREET');
         const hasReminder = job.notes?.includes('REMINDER:');
         const isWebRequest = job.notes?.includes('[WEB_BOOKER]') && job.status === 'PENDING';
+        const isPassengerAppRequest = job.notes?.includes('[PASSENGER_APP]') && job.status === 'PENDING';
+        const requiresExternalApproval = isWebRequest || isPassengerAppRequest;
 
         return (
             <div className="flex flex-col gap-0 shadow-sm rounded-lg relative overflow-hidden">
@@ -547,6 +549,17 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                         WEB REQUEST — ACTION REQUIRED
                     </div>
                 )}
+                {isPassengerAppRequest && (
+                    <div className="bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold px-3 py-1 flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        APP REQUEST — ACTION REQUIRED
+                    </div>
+                )}
+                {requiresExternalApproval && job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID' && (
+                    <div className="bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-1 flex items-center gap-2">
+                        CARD PAYMENT PENDING
+                    </div>
+                )}
                 <div
                     onClick={(e) => {
                         e.stopPropagation();
@@ -554,7 +567,7 @@ export function BookingManagerClassic({ onSelectJob, selectedJobId, refreshTrigg
                     }}
                     className={`
                         flex items-center gap-3 border p-2 hover:border-blue-400 cursor-pointer transition-all group 
-                        ${isWebRequest ? 'rounded-b-lg border-t-0' : 'rounded-lg'}
+                        ${requiresExternalApproval ? 'rounded-b-lg border-t-0' : 'rounded-lg'}
                         ${selectedJobId === job.id 
                             ? 'bg-blue-50 border-blue-400' 
                             : job.contractRouteId

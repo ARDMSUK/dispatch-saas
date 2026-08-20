@@ -55,6 +55,8 @@ export async function GET(
                 pickupAddress: true,
                 dropoffAddress: true,
                 fare: true,
+                paymentType: true,
+                paymentStatus: true,
                 driverId: true,
                 vehicleType: true,
                 driver: {

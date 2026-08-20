@@ -85,6 +85,12 @@ export async function PATCH(
             if (!driverToCheck || (driverToCheck.tenantId !== session.user.tenantId && session.user.role !== 'SUPER_ADMIN')) {
                 return NextResponse.json({ error: 'Driver not found' }, { status: 404 });
             }
+            
+            const resultingPaymentType = validation.data.paymentType || jobToCheck.paymentType;
+            const resultingPaymentStatus = validation.data.paymentStatus || jobToCheck.paymentStatus;
+            if (resultingPaymentType === 'CARD' && resultingPaymentStatus === 'UNPAID') {
+                return NextResponse.json({ error: 'Cannot dispatch an unpaid CARD booking. Wait for payment or change to CASH.' }, { status: 400 });
+            }
         }
 
         if (paymentStatus && paymentStatus !== jobToCheck.paymentStatus) {
@@ -131,10 +137,28 @@ export async function PATCH(
         // Payment Safety Checks
         if (validation.data.paymentType && validation.data.paymentType !== jobToCheck.paymentType) {
             if (jobToCheck.paymentStatus === 'PAID') {
+                return NextResponse.json({ error: 'Cannot change payment type of an already PAID job.' }, { status: 400 });
             }
 
             if (validation.data.paymentType !== 'CARD') {
                 if (jobToCheck.paymentLink || jobToCheck.stripeCheckoutSessionId || jobToCheck.stripePaymentIntentId) {
+                    if (jobToCheck.stripePaymentIntentId) {
+                        const tenantData = await prisma.tenant.findUnique({ where: { id: jobToCheck.tenantId } });
+                        if (!tenantData || !tenantData.stripeSecretKey) {
+                            return NextResponse.json({ error: 'Missing Stripe credentials. Cannot safely verify and cancel payment.' }, { status: 500 });
+                        }
+                        const { safelyCancelUnpaidPaymentIntent } = await import('@/lib/payment-reconciliation');
+                        const piState = await safelyCancelUnpaidPaymentIntent(jobId, jobToCheck.tenantId, jobToCheck.stripePaymentIntentId, tenantData.stripeSecretKey, 'OPERATOR_MUTATION');
+                        
+                        if (piState === 'SUCCEEDED') {
+                            return NextResponse.json({ error: 'Payment has already completed. Cannot change to CASH/ACCOUNT.' }, { status: 409 });
+                        } else if (piState === 'PROCESSING') {
+                            return NextResponse.json({ error: 'Payment is currently processing. Cannot change to CASH/ACCOUNT.' }, { status: 409 });
+                        } else if (piState === 'ERROR') {
+                            return NextResponse.json({ error: 'Failed to verify Stripe payment state. Cannot safely change payment type.' }, { status: 500 });
+                        }
+                    }
+
                     updateData.paymentLink = null;
                     updateData.stripeCheckoutSessionId = null;
                     updateData.stripePaymentIntentId = null;
@@ -152,6 +176,23 @@ export async function PATCH(
         if (validation.data.fare !== undefined && validation.data.fare !== jobToCheck.fare) {
             if (jobToCheck.paymentType === 'CARD' && jobToCheck.paymentStatus === 'UNPAID') {
                 if (jobToCheck.paymentLink || jobToCheck.stripeCheckoutSessionId || jobToCheck.stripePaymentIntentId) {
+                    if (jobToCheck.stripePaymentIntentId) {
+                        const tenantData = await prisma.tenant.findUnique({ where: { id: jobToCheck.tenantId } });
+                        if (!tenantData || !tenantData.stripeSecretKey) {
+                            return NextResponse.json({ error: 'Missing Stripe credentials. Cannot safely verify and cancel payment.' }, { status: 500 });
+                        }
+                        const { safelyCancelUnpaidPaymentIntent } = await import('@/lib/payment-reconciliation');
+                        const piState = await safelyCancelUnpaidPaymentIntent(jobId, jobToCheck.tenantId, jobToCheck.stripePaymentIntentId, tenantData.stripeSecretKey, 'OPERATOR_MUTATION');
+                        
+                        if (piState === 'SUCCEEDED') {
+                            return NextResponse.json({ error: 'Payment has already completed. Cannot change fare on a paid booking.' }, { status: 409 });
+                        } else if (piState === 'PROCESSING') {
+                            return NextResponse.json({ error: 'Payment is currently processing. Cannot change fare.' }, { status: 409 });
+                        } else if (piState === 'ERROR') {
+                            return NextResponse.json({ error: 'Failed to verify Stripe payment state. Cannot safely modify fare.' }, { status: 500 });
+                        }
+                    }
+                    
                     updateData.paymentLink = null;
                     updateData.stripeCheckoutSessionId = null;
                     updateData.stripePaymentIntentId = null;

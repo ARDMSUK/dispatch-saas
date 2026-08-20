@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { systemStripe } from "@/lib/stripe";
+import { systemStripe, getStripe } from "@/lib/stripe";
+import { reconcileLateSuccessPublicBooking } from "@/lib/payment-reconciliation";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { decrypt } from "@/lib/encryption";
 import { EmailService } from '@/lib/email-service';
 import { SmsService } from '@/lib/sms-service';
 import { DispatchEngine } from '@/lib/dispatch-engine';
@@ -248,49 +250,56 @@ export async function POST(req: NextRequest) {
                 const terminalJobStatuses = ['CANCELLED', 'COMPLETED', 'NO_SHOW'];
                 if (terminalJobStatuses.includes(job.status) || job.paymentStatus === 'REFUNDED') {
                     console.warn(`[Webhook] Job ${jobId} is in terminal state (${job.status} / ${job.paymentStatus}). Refusing to mark as PAID from payment_intent.succeeded.`);
+                    
+                    if (
+                        intent.metadata?.paymentPurpose === 'PUBLIC_BOOKING' &&
+                        job.status === 'CANCELLED' && 
+                        job.paymentStatus !== 'REFUNDED' &&
+                        job.stripePaymentIntentId === intent.id &&
+                        job.notes?.includes('[SYSTEM] Cancelled by Passenger via App.')
+                    ) {
+                        console.log(`[Webhook] Compensating late capture for passenger-cancelled Job ${jobId}...`);
+                        const tenantConfig = await prisma.tenant.findUnique({ where: { id: metaTenantId } });
+                        if (tenantConfig && tenantConfig.stripeSecretKey) {
+                            try {
+                                const stripe = getStripe(decrypt(tenantConfig.stripeSecretKey) as string);
+                                await stripe.refunds.create({
+                                    payment_intent: intent.id,
+                                    metadata: { reason: 'passenger_cancellation_late_sync', jobId: jobId.toString() }
+                                }, {
+                                    idempotencyKey: `passenger-cancel-refund-${metaTenantId}-${jobId}`
+                                });
+                                
+                                await prisma.job.update({
+                                    where: { id: jobId },
+                                    data: {
+                                        paymentStatus: 'REFUNDED',
+                                        paymentProblemStatus: null,
+                                        paymentProblemReason: null,
+                                        paymentProblemAt: null,
+                                        notes: `${job.notes || ''}\n[SYSTEM] Auto-refunded full amount due to passenger cancellation (late sync).`.trim()
+                                    }
+                                });
+                                console.log(`✅ [Webhook] Successfully issued late refund for passenger-cancelled Job ${jobId}`);
+                            } catch (compErr: any) {
+                                console.error(`[Webhook] Failed late refund for Job ${jobId}`, compErr);
+                                await prisma.job.update({
+                                    where: { id: jobId },
+                                    data: {
+                                        paymentProblemStatus: 'REFUND_FAILED',
+                                        paymentProblemReason: compErr.message || 'Late sync refund failed',
+                                        paymentProblemAt: new Date()
+                                    }
+                                });
+                            }
+                        }
+                    }
                     break;
                 }
 
                 if (intent.metadata?.paymentPurpose === 'PUBLIC_BOOKING') {
-                    const result = await prisma.job.updateMany({
-                        where: {
-                            id: jobId,
-                            tenantId: metaTenantId,
-                            paymentStatus: 'UNPAID'
-                        },
-                        data: {
-                            paymentStatus: 'PAID',
-                            paymentType: 'CARD',
-                            paymentProvider: 'STRIPE',
-                            paymentReferenceId: intent.id,
-                            stripePaymentIntentId: intent.id,
-                            stripeChargeId: intent.latest_charge as string | undefined,
-                            paymentProblemStatus: null,
-                            paymentProblemReason: null,
-                            paymentProblemAt: null
-                        }
-                    });
-
-                    if (result.count === 1) {
-                        console.log(`✅ [Webhook] Marked PUBLIC Job ${jobId} as PAID. Triggering side effects.`);
-                        const tenant = await prisma.tenant.findUnique({ where: { id: metaTenantId } });
-                        if (tenant) {
-                            const updatedJob = await prisma.job.findUnique({ where: { id: jobId } });
-                            if (updatedJob && !updatedJob.notes?.includes('[NO_NOTIFICATIONS]')) {
-                                const jobWithCustomer = { ...updatedJob, customer: { email: updatedJob.passengerEmail } };
-                                const notificationPromises = [
-                                    EmailService.sendBookingRequestReceived(jobWithCustomer as any, tenant),
-                                    SmsService.sendBookingRequestReceived(updatedJob, tenant),
-                                    EmailService.sendPaymentConfirmation(jobWithCustomer as any, tenant)
-                                ];
-                                Promise.allSettled(notificationPromises).catch(console.error);
-
-                                if (updatedJob.autoDispatch) {
-                                    DispatchEngine.runDispatchLoop(tenant.id).catch(e => console.error("Auto dispatch run failed", e));
-                                }
-                            }
-                        }
-                    } else {
+                    const reconciled = await reconcileLateSuccessPublicBooking(jobId, metaTenantId, intent, 'WEBHOOK');
+                    if (!reconciled) {
                         console.log(`[Webhook] PUBLIC Job ${jobId} already paid or duplicate webhook. No-op.`);
                     }
                 } else {

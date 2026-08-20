@@ -51,7 +51,11 @@ export class DispatchEngine {
                     gte: lookback,
                     lte: lookahead
                 },
-                driverId: null
+                driverId: null,
+                NOT: {
+                    paymentType: 'CARD',
+                    paymentStatus: 'UNPAID'
+                }
             },
             orderBy: {
                 pickupTime: 'asc'

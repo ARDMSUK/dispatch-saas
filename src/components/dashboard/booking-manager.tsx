@@ -566,7 +566,7 @@ export function BookingManager({ onSelectJob, selectedJobId, refreshTrigger }: B
                         )}
                         {requiresExternalApproval && job.paymentType === 'CARD' && job.paymentStatus === 'UNPAID' && (
                             <Badge variant="outline" className="bg-rose-500 text-white border-white/50 font-mono text-xs font-bold px-2 py-1">
-                                CARD PAYMENT REQUIRED
+                                CARD PAYMENT PENDING
                             </Badge>
                         )}
                         {/* M&G Badge */}

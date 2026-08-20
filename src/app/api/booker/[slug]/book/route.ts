@@ -86,7 +86,8 @@ export async function POST(
             pickupLng,
             dropoffLat,
             dropoffLng,
-            turnstileToken
+            turnstileToken,
+            stripeApiVersion
         } = body;
 
         if (!pickup || !dropoff || !passengerName || !passengerPhone) {
@@ -110,6 +111,8 @@ export async function POST(
                 return NextResponse.json({ error: 'Unauthorized for this tenant' }, { status: 403, headers: corsHeaders });
             }
         }
+
+
 
         // Turnstile Verification (Skip for authenticated native apps, require for public web booker)
         if (!authPayload && (process.env.NODE_ENV === 'production' || turnstileToken !== '1x00000000000000000000AA')) {
@@ -302,6 +305,8 @@ export async function POST(
 
         let clientSecret = null;
         let publishableKey = tenant.stripePublishableKey;
+        let ephemeralKeySecret = null;
+        let stripeCustomerId = null;
 
         if (paymentType === 'CARD') {
             const secret = tenant.stripeSecretKey ? (decrypt(tenant.stripeSecretKey) as string) : null;
@@ -312,12 +317,25 @@ export async function POST(
                 const stripe = getStripe(secret);
                 const expectedAmount = Math.round(serverFare * 100);
 
+                if (authPayload && customer && customer.stripeCustomerId) {
+                    if (!stripeApiVersion || typeof stripeApiVersion !== 'string' || !/^20[123]\d-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(stripeApiVersion)) {
+                        return NextResponse.json({ error: 'Missing or invalid Stripe API version required for saved-card checkout.' }, { status: 400, headers: corsHeaders });
+                    }
+                    stripeCustomerId = customer.stripeCustomerId;
+                    const ephemeralKey = await stripe.ephemeralKeys.create(
+                        { customer: stripeCustomerId },
+                        { apiVersion: stripeApiVersion }
+                    );
+                    ephemeralKeySecret = ephemeralKey.secret;
+                }
+
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: expectedAmount,
                     currency: 'gbp',
                     automatic_payment_methods: {
                         enabled: true,
                     },
+                    customer: stripeCustomerId || undefined,
                     metadata: {
                         tenantId: tenant.id,
                         jobId: job.id.toString(),
@@ -326,6 +344,12 @@ export async function POST(
                     }
                 });
                 clientSecret = paymentIntent.client_secret;
+
+                // Store PaymentIntent ID immediately for cancellation safety
+                await prisma.job.update({
+                    where: { id: job.id },
+                    data: { stripePaymentIntentId: paymentIntent.id }
+                });
             } catch (err: any) {
                 console.error("Stripe Intent Error:", err);
                 return NextResponse.json({ error: 'Failed to initialize payment.' }, { status: 500, headers: corsHeaders });
@@ -354,6 +378,8 @@ export async function POST(
             bookingId: job.id,
             clientSecret,
             publishableKey,
+            ephemeralKeySecret,
+            stripeCustomerId,
             fare: serverFare
         }, { headers: corsHeaders });
 
